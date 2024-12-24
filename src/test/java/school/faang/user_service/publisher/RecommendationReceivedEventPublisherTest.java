@@ -1,5 +1,6 @@
 package school.faang.user_service.publisher;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +13,6 @@ import school.faang.user_service.event.RecommendationReceivedEvent;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RecommendationReceivedEventPublisherTest {
@@ -20,21 +20,24 @@ class RecommendationReceivedEventPublisherTest {
     @Mock
     private RedisTemplate<String, Object> redisTemplate;
 
-    @Mock
     private RedisProperties redisProperties;
 
     @InjectMocks
     private RecommendationReceivedEventPublisher recommendationReceivedEventPublisher;
 
+    @BeforeEach
+    void setUp() {
+        redisProperties = TestRedisPropertiesFactory.createDefaultRedisProperties();
+        
+        recommendationReceivedEventPublisher =
+                new RecommendationReceivedEventPublisher(redisTemplate, null, redisProperties);
+    }
+
     @Test
     @DisplayName("Publish message in redis success")
     void testPublish_success() {
         RecommendationReceivedEvent event = new RecommendationReceivedEvent(1L, 2L, 3L);
-        String channelName = "recommendation_channel";
-        RedisProperties.Channel channel = new RedisProperties.Channel();
-        channel.setRecommendationChannel(channelName);
-
-        when(redisProperties.getChannel()).thenReturn(channel);
+        String channelName = redisProperties.channel().recommendationChannel();
 
         recommendationReceivedEventPublisher.publish(event);
 

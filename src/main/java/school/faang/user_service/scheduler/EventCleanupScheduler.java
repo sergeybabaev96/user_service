@@ -19,7 +19,7 @@ public class EventCleanupScheduler {
     private final EventService eventService;
 
     @Retryable(retryFor = Exception.class, backoff = @Backoff(delay = 5000, multiplier = 2))
-    @Scheduled(cron = "${cron.expressions.clearEvents}")
+    @Scheduled(cron = "${cron.expressions.clear-events}")
     public void clearEvents() {
         try {
             log.info("Scheduled task: Clear 'completed' and 'canceled' events started at {}", LocalDateTime.now());

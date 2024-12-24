@@ -1,22 +1,15 @@
 package school.faang.user_service.config.redis;
 
-import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
-@Data
-@Component
 @ConfigurationProperties(prefix = "spring.data.redis")
-public class RedisProperties {
-    private int port;
-    private String host;
-    private Channel channel;
+public record RedisProperties(String host, int port, Channel channel) {
 
-    @Data
-    public static class Channel {
-        private String recommendationRequestChannel;
-        private String mentorshipChannel;
-        private String followerChannel;
-        private String recommendationChannel;
+    public record Channel(String mentorshipChannel,
+                          String subscriptionChannel,
+                          String recommendationChannel,
+                          String userBanChannel,
+                          String mentorshipRequest,
+                          String recommendationRequestChannel) {
     }
 }

@@ -1,5 +1,6 @@
 package school.faang.user_service.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import school.faang.user_service.event.MentorshipRequestEvent;
 import school.faang.user_service.dto.RejectionDto;
 import school.faang.user_service.dto.mentorship_request.MentorshipRequestCreateDto;
 import school.faang.user_service.dto.mentorship_request.MentorshipRequestDto;
@@ -17,6 +19,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.filter.Filter;
 import school.faang.user_service.filter.mentorshipRequestFilter.DescriptionFilter;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
+import school.faang.user_service.publisher.MentorshipRequestedEventPublisher;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 import school.faang.user_service.validator.MentorshipRequestValidator;
 
@@ -41,14 +44,21 @@ class MentorshipRequestServiceTest {
 
     @Mock
     private UserService userService;
+
     @Mock
     private MentorshipRequestRepository requestRepository;
+
     @Mock
     private MentorshipRequestValidator requestValidator;
+
     @Mock
     private MentorshipRequestMapper requestMapper;
+
     @Mock
     private DescriptionFilter descriptionFilter;
+
+    @Mock
+    private MentorshipRequestedEventPublisher publisher;
 
     @InjectMocks
     private MentorshipRequestService requestService;
@@ -68,8 +78,8 @@ class MentorshipRequestServiceTest {
     void setUp() {
         descriptionFilter = mock(DescriptionFilter.class);
         filters = new ArrayList<>(List.of(descriptionFilter));
-        requestService = new MentorshipRequestService(
-                userService, requestRepository, requestValidator, requestMapper, filters);
+        requestService = new MentorshipRequestService(userService, requestRepository,
+                requestValidator, requestMapper, filters, publisher);
 
         requester = User.builder().id(1L).build();
         receiver = User.builder().id(2L).build();
@@ -113,7 +123,7 @@ class MentorshipRequestServiceTest {
     }
 
     @Test
-    void testServiceRequestMentorshipShouldCreateRequest() {
+    void testServiceRequestMentorshipShouldCreateRequest() throws JsonProcessingException {
         when(userService.findUserById(requestCreateDto.getRequesterId())).thenReturn(requester);
         when(userService.findUserById(requestCreateDto.getReceiverId())).thenReturn(receiver);
         when(requestRepository.save(any(MentorshipRequest.class))).thenReturn(firstRequest);
@@ -122,6 +132,7 @@ class MentorshipRequestServiceTest {
         MentorshipRequestDto result = requestService.requestMentorship(requestCreateDto);
 
         verify(requestRepository, times(1)).save(any(MentorshipRequest.class));
+        verify(publisher, times(1)).publish(any(MentorshipRequestEvent.class));
         assertThat(result).isEqualTo(firstRequestDto);
     }
 

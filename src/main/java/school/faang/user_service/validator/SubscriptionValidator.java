@@ -11,21 +11,26 @@ public class SubscriptionValidator {
 
     private final SubscriptionRepository subscriptionRepository;
 
-    public void validateFollowUser(long followerId, long followeeId) {
+    public void validateSubscriptionCreation(long followerId, long followeeId) {
         if (subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
-            throw new DataValidationException("Subscription already exists.");
+            throw new DataValidationException(
+                    String.format("User %d is already subscribed to user %d.",
+                            followerId, followeeId));
         }
     }
 
-    public void validateUnfollowUser(long followerId, long followeeId) {
+    public void validateSubscriptionRemoval(long followerId, long followeeId) {
         if (!subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
-            throw new DataValidationException("Subscription does not exist.");
+            throw new DataValidationException(
+                    String.format("User %d is not subscribed to user %d.",
+                            followerId, followeeId));
         }
     }
 
-    public void validateUserExists(long userId) {
-        if (!subscriptionRepository.existsById(userId)) {
-            throw new DataValidationException("User does not exist.");
+    public void validateNoSelfSubscription(long followerId, long followeeId) {
+        if (followerId == followeeId) {
+            throw new DataValidationException(
+                    String.format("User %d cannot subscribe to their own account.", followerId));
         }
     }
 }

@@ -8,7 +8,7 @@ import school.faang.user_service.dto.GoalDto;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateGoalRequest {
+public class GoalRequest {
     private Long userId;
     private GoalDto goal;
 }

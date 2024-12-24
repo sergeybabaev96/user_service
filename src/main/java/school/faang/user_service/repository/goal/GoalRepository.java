@@ -2,11 +2,12 @@ package school.faang.user_service.repository.goal;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Repository
@@ -43,10 +44,7 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
             """)
     Stream<Goal> findByParent(long goalId);
 
-    @Query(nativeQuery = true, value = """
-            SELECT u.* FROM users u
-            JOIN user_goal ug ON u.id = ug.user_id
-            WHERE ug.goal_id = :goalId
-            """)
-    List<User> findUsersByGoalId(long goalId);
+    @Query("SELECT g FROM Goal g JOIN g.users u WHERE u.id = :userId AND g.id = :goalId")
+    Optional<Goal> findByUserIdAndGoalId(@Param("userId") long userId, @Param("goalId") long goalId);
+
 }

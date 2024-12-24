@@ -1,19 +1,26 @@
 package school.faang.user_service.service.goal;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.GoalDto;
 import school.faang.user_service.dto.GoalFilterDto;
+import school.faang.user_service.event.OutboxEvent;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
+import school.faang.user_service.event.GoalCompletedEvent;
 import school.faang.user_service.mapper.GoalMapper;
 import school.faang.user_service.repository.goal.GoalRepository;
+import school.faang.user_service.outbox.OutboxEventProcessor;
 import school.faang.user_service.service.SkillService;
 import school.faang.user_service.service.UserService;
+import school.faang.user_service.utils.Helper;
 import school.faang.user_service.validator.GoalValidator;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -21,29 +28,23 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GoalService {
+    private static final String AGGREGATE_TYPE = "Goal";
     private final GoalRepository goalRepository;
     private final UserService userService;
     private final SkillService skillService;
     private final List<GoalFilter> goalFilters;
     private final GoalMapper goalMapper;
     private final GoalValidator goalValidation;
+    private final OutboxEventProcessor outboxEventProcessor;
+    private final Helper helper;
 
     public Goal findGoalById(Long id) {
-        return goalRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(String.format("Goal not found by id: %s", id)));
+        return goalRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Goal not found by id: %s", id)));
     }
 
-    /**
-     * Creates a new goal with the given details for the given user ID.
-     *
-     * @param userId the ID of the user to create the goal for
-     * @param goal the goal details
-     * @return the newly created goal
-     *
-     * The validation of the goal request will fail if the request is invalid or
-     * if the user does not exist. The goal will be created with the given details
-     * and saved in the database.
-     */
     public GoalDto createGoal(Long userId, GoalDto goal) {
         goalValidation.validateGoalRequest(userId, goal, true);
 
@@ -68,65 +69,46 @@ public class GoalService {
         return goalMapper.toDto(entity);
     }
 
-    /**
-     * Updates an existing goal with the given details for the given user ID.
-     *
-     * @param userId the ID of the user to update the goal for
-     * @param goal the goal details
-     * @return the updated goal
-     *
-     * The validation of the goal request will fail if the request is invalid or
-     * if the user does not exist. The goal will be updated with the given details
-     * and saved in the database.
-     */
-    public GoalDto updateGoal(Long userId, GoalDto goal) {
-        goalValidation.validateGoalRequest(userId, goal, false);
+    public GoalDto updateGoal(Long userId, GoalDto goalDto) {
+        goalValidation.validateGoalRequest(userId, goalDto, false);
 
-        Optional<Goal> optionalEntity = goalRepository.findById(goal.getId());
+        Optional<Goal> optionalEntity = goalRepository.findById(goalDto.getId());
 
         if (optionalEntity.isEmpty()) {
-            throw new EntityNotFoundException("Goal with id " + goal.getId() + " does not exist");
+            throw new EntityNotFoundException("Goal with id " + goalDto.getId() + " does not exist");
         }
 
-        Goal entity = optionalEntity.get();
+        Goal goal = optionalEntity.get();
 
-        entity.setTitle(goal.getTitle());
-        entity.setDescription(goal.getDescription());
-        entity.setStatus(goal.getStatus());
-        entity.setDeadline(goal.getDeadline());
+        goal.setTitle(goalDto.getTitle());
+        goal.setDescription(goalDto.getDescription());
+        goal.setStatus(goalDto.getStatus());
+        goal.setDeadline(goalDto.getDeadline());
 
-        if (goal.getMentorId() != null) {
-            Optional<User> mentor = userService.getUserById(goal.getMentorId());
-            mentor.ifPresent(entity::setMentor);
+        if (goalDto.getMentorId() != null) {
+            Optional<User> mentor = userService.getUserById(goalDto.getMentorId());
+            mentor.ifPresent(goal::setMentor);
         }
 
-        if (goal.getParentGoalId() != null) {
-            entity.setParent(goalRepository.findById(goal.getParentGoalId()).get());
+        if (goalDto.getParentGoalId() != null) {
+            long parentGoalId = goalDto.getParentGoalId();
+            Goal parentGoal = goalRepository.findById(parentGoalId).orElseThrow(() -> {
+                log.info("Parent goal with id {} does not exist", goalDto.getParentGoalId());
+                return new EntityNotFoundException(
+                        "Parent goal with id " + goalDto.getParentGoalId() + " does not exist");
+            });
+            goal.setParent(parentGoal);
         }
 
-        goalRepository.save(entity);
+        goalRepository.save(goal);
 
-        return goalMapper.toDto(entity);
+        return goalMapper.toDto(goal);
     }
 
-    /**
-     * Deletes a goal by its ID.
-     *
-     * @param goalId the ID of the goal to be deleted
-     *
-     * The deletion will fail if the goal does not exist.
-     */
     public void deleteGoal(long goalId) {
         goalRepository.deleteById(goalId);
     }
 
-    /**
-     * Retrieves a list of goals for a given user ID, filtered by the provided goal filter.
-     *
-     * @param userId the ID of the user whose goals are to be retrieved
-     * @param filters the goal filter to apply on the retrieved goals
-     * @return a list of goals for the given user ID, filtered by the provided goal filter
-     */
     public List<GoalDto> getGoalsByUser(long userId, GoalFilterDto filters) {
         Stream<Goal> goals = goalRepository.findGoalsByUserId(userId).stream();
 
@@ -139,5 +121,41 @@ public class GoalService {
                 );
 
         return filteredGoals.map(goalMapper::toDto).toList();
+    }
+
+    @Transactional
+    public GoalDto completeTheGoal(long userId, long goalId) {
+        Goal goalToComplete = getGoalToComplete(userId, goalId);
+        if (isGoalStatusCompleted(goalToComplete)) {
+            log.warn("User with id {} has already completed the goal with id {}", userId, goalId);
+            return goalMapper.toDto(goalToComplete);
+        } else {
+            goalToComplete.setStatus(GoalStatus.COMPLETED);
+            goalRepository.save(goalToComplete);
+            GoalCompletedEvent goalCompletedEvent = new GoalCompletedEvent(userId, goalId, LocalDateTime.now());
+
+            OutboxEvent outboxEvent = OutboxEvent.builder()
+                    .aggregateId(goalId)
+                    .aggregateType(AGGREGATE_TYPE)
+                    .eventType(GoalCompletedEvent.class.getSimpleName())
+                    .payload(helper.serializeToJson(goalCompletedEvent))
+                    .createdAt(goalCompletedEvent.completedAt())
+                    .processed(false)
+                    .build();
+
+            outboxEventProcessor.saveOutboxEvent(outboxEvent);
+        }
+        return goalMapper.toDto(goalToComplete);
+    }
+
+    private Goal getGoalToComplete(long userId, long goalId) {
+        return goalRepository.findByUserIdAndGoalId(userId, goalId).orElseThrow(() -> {
+            log.error("User with id {} does not have a goal with id {}", userId, goalId);
+            return new EntityNotFoundException("User with id " + userId + " does not have a goal with id " + goalId);
+        });
+    }
+
+    private boolean isGoalStatusCompleted(Goal goal) {
+        return goal.getStatus() == GoalStatus.COMPLETED;
     }
 }

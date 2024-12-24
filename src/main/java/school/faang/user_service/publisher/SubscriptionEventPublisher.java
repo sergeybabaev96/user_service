@@ -8,12 +8,12 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.config.RetryProperties;
 import school.faang.user_service.config.redis.RedisProperties;
-import school.faang.user_service.event.RecommendationReceivedEvent;
+import school.faang.user_service.event.SubscriptionEvent;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RecommendationReceivedEventPublisher implements EventPublisher<RecommendationReceivedEvent> {
+public class SubscriptionEventPublisher implements EventPublisher<SubscriptionEvent> {
     private final RedisTemplate<String, Object> redisTemplate;
     private final RetryProperties retryProperties;
     private final RedisProperties redisProperties;
@@ -27,13 +27,13 @@ public class RecommendationReceivedEventPublisher implements EventPublisher<Reco
                     maxDelayExpression = "#{@retryProperties.maxDelay}"
             )
     )
-    public void publish(RecommendationReceivedEvent event) {
-        redisTemplate.convertAndSend(redisProperties.channel().recommendationChannel(), event);
-        log.info("New recommendation event sent to channel id: {}", redisProperties.channel().recommendationChannel());
+    public void publish(SubscriptionEvent message) {
+        redisTemplate.convertAndSend(redisProperties.channel().subscriptionChannel(), message);
+        log.info("New Subscription event sent to channel id: {}", redisProperties.channel().subscriptionChannel());
     }
 
     @Override
-    public Class<RecommendationReceivedEvent> getEventClass() {
-        return RecommendationReceivedEvent.class;
+    public Class<SubscriptionEvent> getEventClass() {
+        return SubscriptionEvent.class;
     }
 }

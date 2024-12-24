@@ -13,12 +13,16 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @ConfigurationProperties(prefix = "spring.retry")
 public class RetryProperties {
+
     @Min(3)
     private int maxAttempts;
+
     @Min(1000)
     private long initialDelay;
+
     @Min(1)
     private int multiplier;
+
     @Min(1000)
     private long maxDelay;
 }

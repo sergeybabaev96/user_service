@@ -185,10 +185,10 @@ class UserServiceTest {
                 .build();
 
         String testCsv = IOUtils.toString(ClassLoader.getSystemClassLoader()
-                .getSystemResourceAsStream("students.csv"));
+                .getSystemResourceAsStream("students4.csv"));
         inputStream = new ByteArrayInputStream(testCsv.getBytes());
-        mockPerson = createMockPerson("John", "Doe", "john.doe@example.com");
-        mockUser = createMockUser("JohnDoe", "john.doe@example.com");
+        mockPerson = createMockPerson("Michael", "Johnson", "michaeljohnson@example.com");
+        mockUser = createMockUser("MichaelJohnson", "michaeljohnson@example.com");
         people = List.of(mockPerson);
     }
 
@@ -921,7 +921,7 @@ class UserServiceTest {
 
     private Person createMockPerson(String firstName, String lastName, String email) {
         Address address = new Address("123 Street", "New York", "NY", "Country1", "10001");
-        ContactInfo contactInfo = new ContactInfo(email, "123456789", address);
+        ContactInfo contactInfo = new ContactInfo(email, "111222333", address);
         Education education = new Education("CS", 4, "SE", 3.8);
 
         return Person.builder()
@@ -938,7 +938,7 @@ class UserServiceTest {
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword("randomPassword");
-        user.setPhone("123456789");
+        user.setPhone("111222333");
         return user;
     }
 }

@@ -44,7 +44,8 @@ class SubscriptionControllerTest {
         long followerId = 1L;
         long followeeId = 2L;
 
-        mockMvc.perform(post("/users/{followerId}/follow/{followeeId}", followerId, followeeId))
+        mockMvc.perform(post("/users/{followerId}/followees", followerId)
+                        .param("followeeId", String.valueOf(followeeId)))
                 .andExpect(status().isCreated());
 
         verify(subscriptionService, times(1)).followUser(followerId, followeeId);

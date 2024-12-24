@@ -21,11 +21,12 @@ spring:
       port: 6379
       host: localhost
       channel:
-        mentorship-channel: mentorship_channel
-        follower-channel: follower_event
+        subscription-channel: subscription_channel
         recommendation-channel: recommendation_channel
+        goal-completed: goal_completed_channel
         user-ban-channel: user_ban_channel
         recommendation-request-channel: recommendation_request_channel
+        mentorship-request: mentorship_request_channel
 
   retry:
     maxAttempts: 3
@@ -70,7 +71,9 @@ payment-service:
 
 cron:
   expressions:
-    clearEvents: "0 0 0 * * *"
+    clear-events: "0 0 0 * * *"
+    clean-outbox: "0 0 0 * * *" # every day at midnight
+    trigger-outbox-processing: "0 */1 * * * *" # every 60 seconds
 
 batch:
   size:
