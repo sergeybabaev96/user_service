@@ -19,9 +19,13 @@ public class UserService {
 
     public Stream<User> getPremiumUsers(UserFilterDto presetFilterDto) {
         Stream<User> users = userRepository.findPremiumUsers();
-        return filters.stream()
-                .filter(f -> f.isApplicable(presetFilterDto))
-                .flatMap(f -> f.apply(users, presetFilterDto))
-                .distinct();
+        if (presetFilterDto == null) {
+            return users;
+        } else {
+            return filters.stream()
+                    .filter(f -> f.isApplicable(presetFilterDto))
+                    .flatMap(f -> f.apply(users, presetFilterDto))
+                    .distinct();
+        }
     }
 }
