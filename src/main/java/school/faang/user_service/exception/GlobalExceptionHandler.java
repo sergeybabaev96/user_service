@@ -10,6 +10,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataValidationException.class)
     public ResponseEntity<String> handleValidationException(DataValidationException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(DiceBearException.class)
+    public ResponseEntity<String> handleDiceBearException(DiceBearException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error generating avatar: " + ex.getMessage());
+    }
+
+    @ExceptionHandler(S3Exception.class)
+    public ResponseEntity<String> handleS3Exception(S3Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error with S3 service: " + ex.getMessage());
     }
 }

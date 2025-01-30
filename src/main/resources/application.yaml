@@ -46,3 +46,18 @@ payment-service:
 
 goal:
   max-active-goals-per-user: 3
+
+minio:
+  s3:
+    endpoint: http://localhost:9000
+    region: us-east-1
+    accessKey: user
+    secretKey: password
+
+dicebear:
+  apiUrl: https://api.dicebear.com/9.x
+  connectionTimeoutSeconds: 10
+  readTimeoutSeconds: 10
+
+avatar:
+  bucketName: user-avatars
