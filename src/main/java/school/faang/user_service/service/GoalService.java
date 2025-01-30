@@ -16,6 +16,6 @@ public class GoalService {
     }
 
     public Goal getGoalById(Long id){
-        return goalRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Goal not found"));
+        return goalRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Не найден объект"));
     }
 }

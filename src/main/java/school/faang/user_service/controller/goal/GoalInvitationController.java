@@ -1,6 +1,6 @@
 package school.faang.user_service.controller.goal;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.goal.GoalInvitationDto;
 import school.faang.user_service.dto.goal.InvitationFilterDto;
@@ -9,21 +9,16 @@ import school.faang.user_service.service.GoalInvitationService;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class GoalInvitationController {
-
 
     private final GoalInvitationService goalInvitationService;
 
-    @Autowired
-    public GoalInvitationController(GoalInvitationService goalInvitationService) {
-        this.goalInvitationService = goalInvitationService;
+    public GoalInvitationDto createInvitation(GoalInvitationDto dto){
+        return goalInvitationService.createInvitation(dto);
     }
 
-    public void createInvitation(GoalInvitationDto dto){
-        goalInvitationService.createInvitation(dto);
-    }
-
-    public void acceptGoalInvitation(long id){
+    public void acceptGoalInvitation(Long id){
         goalInvitationService.acceptGoalInvitation(id);
     }
 
@@ -34,5 +29,4 @@ public class GoalInvitationController {
     public List<GoalInvitationDto> getInvitations(InvitationFilterDto filters){
         return goalInvitationService.getInvitations(filters);
     }
-
 }

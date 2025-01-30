@@ -2,16 +2,16 @@ package school.faang.user_service.filter.goal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import school.faang.user_service.dto.goal.GoalInvitationDto;
 import school.faang.user_service.dto.goal.InvitationFilterDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.entity.goal.GoalInvitation;
 import school.faang.user_service.filter.Filter;
 import school.faang.user_service.service.UserService;
 
 import java.util.stream.Stream;
 
 @Component
-public class InvitedNamePatternFilter implements Filter<GoalInvitationDto, InvitationFilterDto> {
+public class InvitedNamePatternFilter implements Filter<GoalInvitation, InvitationFilterDto> {
 
     private final UserService userService;
 
@@ -26,10 +26,10 @@ public class InvitedNamePatternFilter implements Filter<GoalInvitationDto, Invit
     }
 
     @Override
-    public void apply(Stream<GoalInvitationDto> goalInvitationDto, InvitationFilterDto filter) {
-        goalInvitationDto.filter(invitation -> invitation.getInvitedUserId().equals(
+    public void apply(Stream<GoalInvitation> goalInvitation, InvitationFilterDto filter) {
+        goalInvitation.filter(invitation -> invitation.getInvited().getUsername().contains(
                 userService.allUsersStream()
-                        .filter(user -> user.getUsername().equals(filter.getInvitedNamePattern()))
-                        .map(User::getId)));
+                        .map(User::getUsername)
+                        .filter(username -> username.equals(filter.getInvitedNamePattern())).toString()));
     }
 }

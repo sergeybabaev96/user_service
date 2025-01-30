@@ -1,11 +1,10 @@
 package school.faang.user_service.dto.goal;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Data;
 import school.faang.user_service.entity.RequestStatus;
 
-@Getter
-@Setter
+@Data
 public class GoalInvitationDto {
     private Long id;
     private Long inviterId;
