@@ -2,6 +2,8 @@ package school.faang.user_service.controller.user;
 
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -46,6 +48,11 @@ public class UserController {
         userList = userService.getUsersByIds(userList);
         List<UserDto> userDtoList = userMapper.toUserDtoList(userList);
         return ResponseEntity.ok(userDtoList);
+    }
+
+    @PostMapping("/page")
+    public Page<UserDto> getUsersByIds(@RequestParam("ids") List<Long> ids, Pageable pageable) {
+        return userService.getUsersByIds(ids, pageable);
     }
 
     @DeleteMapping("/deactivate")

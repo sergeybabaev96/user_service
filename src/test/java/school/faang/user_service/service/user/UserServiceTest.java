@@ -5,7 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import school.faang.user_service.dto.UserDto;
 import org.springframework.data.util.Pair;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.config.context.UserContext;
@@ -14,6 +19,7 @@ import school.faang.user_service.entity.UserProfilePic;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.event.EventStatus;
 import school.faang.user_service.entity.goal.Goal;
+import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
@@ -29,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -49,6 +56,9 @@ public class UserServiceTest {
 
     @Mock
     private static GoalRepository goalRepository;
+
+    @Spy
+    private UserMapperImpl userMapperIml;
 
     @Mock
     private UserContext userContext;
@@ -236,5 +246,41 @@ public class UserServiceTest {
         verify(avatarS3Service).deleteAvatar("small-key");
         verify(userRepository).save(user);
         assertThat(user.getUserProfilePic()).isNull();
+    }
+
+    @Test
+    void testGetUsersByIds() {
+        List<Long> userIds = List.of(userId);
+        List<User> users = List.of(user);
+        UserDto userDto = userMapperIml.toDto(user);
+        List<UserDto> userDtos = List.of(userDto);
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(userRepository.findByIdIn(anyList(), any(Pageable.class))).thenReturn(users);
+        when(userMapperIml.toDto(any(User.class))).thenReturn(userDto);
+        when(userRepository.countByIdIn(anyList())).thenReturn(1L);
+
+        Page<UserDto> result = userService.getUsersByIds(userIds, pageable);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(userDtos, result.getContent());
+    }
+
+    @Test
+    void testGetUsersByIds_EmptyList() {
+        List<Long> userIds = Collections.emptyList();
+        List<User> users = Collections.emptyList();
+        List<UserDto> userDtos = Collections.emptyList();
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(userRepository.findByIdIn(anyList(), any(Pageable.class))).thenReturn(users);
+        when(userRepository.countByIdIn(anyList())).thenReturn(0L);
+
+        Page<UserDto> result = userService.getUsersByIds(userIds, pageable);
+
+        assertEquals(0, result.getTotalElements());
+        assertEquals(userDtos, result.getContent());
     }
 }
