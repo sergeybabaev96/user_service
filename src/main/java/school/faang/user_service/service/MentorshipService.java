@@ -2,6 +2,7 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRepository;
@@ -10,8 +11,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.StreamSupport;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -37,7 +38,7 @@ public class MentorshipService {
         userRepository.save(mentee);
     }
 
-    private void removeMentorFromGoals(User mentee,Long userId) {
+    private void removeMentorFromGoals(User mentee, Long userId) {
         mentee.setGoals(mentee.getGoals().stream()
                 .filter(goal -> Objects.equals(goal.getMentor().getId(), userId))
                 .peek(goal -> goal.setMentor(mentee))
@@ -45,40 +46,51 @@ public class MentorshipService {
         userRepository.save(mentee);
     }
 
+    @Transactional(readOnly = true)
     public List<Long> getMentees(Long userId) {
-
-        User user = mentorshipRepository.findById(userId).orElse(null);
-
-        return user != null ? StreamSupport.stream(mentorshipRepository.
-                        findAllById(user.getMentees().stream().map(User::getId).toList()).spliterator(), false).
-                map(User::getId).toList() : Collections.emptyList();
+        return getIdsFromUser(userId, User::getMentees);
     }
 
+    @Transactional(readOnly = true)
     public List<Long> getMentors(Long userId) {
-
-        User user = mentorshipRepository.findById(userId).orElse(null);
-
-        return user != null ? StreamSupport.stream(mentorshipRepository.
-                        findAllById(user.getMentors().stream().map(User::getId).toList()).spliterator(), false).
-                map(User::getId).toList() : Collections.emptyList();
+        return getIdsFromUser(userId, User::getMentors);
     }
 
+    @Transactional
     public void deleteMentee(Long mentorId, Long menteeId) {
-        User user = mentorshipRepository.findById(mentorId).
-                orElseThrow(() -> new NoSuchElementException("Mentor not found"));
-
-        mentorshipRepository.delete(user.getMentees().stream().
-                filter(m -> Objects.equals(m.getId(), menteeId)).findAny().
-                orElseThrow(() -> new NoSuchElementException("Mentee not found")));
+        deleteUserFromList(mentorId, menteeId, User::getMentees, "Mentee not found");
     }
 
+    @Transactional
     public void deleteMentor(Long mentorId, Long menteeId) {
-        User user = mentorshipRepository.findById(menteeId).
-                orElseThrow(() -> new NoSuchElementException("Mentee not found"));
-
-        mentorshipRepository.delete(user.getMentors().stream().
-                filter(m -> Objects.equals(m.getId(), mentorId)).findAny().
-                orElseThrow(() -> new NoSuchElementException("Mentor not found")));
+        deleteUserFromList(menteeId, mentorId, User::getMentors, "Mentor not found");
     }
 
+    private List<Long> getIdsFromUser(Long userId, UserListExtractor extractor) {
+        return mentorshipRepository.findById(userId)
+                .map(user -> extractor.extract(user).stream()
+                        .map(User::getId)
+                        .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
+    }
+
+    private void deleteUserFromList(Long userId,
+                                    Long targetId,
+                                    Function<User, List<User>> listExtractor,
+                                    String errorMessage) {
+        User user = mentorshipRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+
+        User userToDelete = listExtractor.apply(user).stream()
+                .filter(u -> Objects.equals(u.getId(), targetId))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException(errorMessage));
+
+        mentorshipRepository.delete(userToDelete);
+    }
+
+    @FunctionalInterface
+    private interface UserListExtractor {
+        List<User> extract(User user);
+    }
 }
