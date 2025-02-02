@@ -2,6 +2,7 @@ package school.faang.user_service.service.user;
 
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,25 +26,19 @@ public class UserServiceImpl implements UserService {
 
         List<Person> persons;
         CsvMapper mapper = new CsvMapper();
-        //mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+
+        CsvSchema schema = CsvSchema.emptySchema().withHeader();
+
         try {
-            MappingIterator<Person> personIterator = mapper
-                    .readerWithSchemaFor(Person.class)
+            MappingIterator<Person> personIterator = mapper.readerFor(Person.class)
+                    .with(schema)
                     .readValues(fileInputStream);
             persons = personIterator.readAll();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-/*
-        try {
-            MappingIterator<Object[]> it = mapper
-                    .reader(Object[].class)
-                    .readValues(fileInputStream);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-*/      int size = persons.size();
+        int size = persons.size();
 
         return new FileUploadResponseDto();
     }
