@@ -3,6 +3,8 @@ package school.faang.user_service.aop;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
@@ -20,7 +22,7 @@ import java.util.List;
 public class RatingAspect {
 
     private final RatingService ratingService;
-
+//TODO:Переделать
     @Around(value = "RatingPointcuts.followUser()")
     public UserRating followUser(ProceedingJoinPoint joinPoint) {
         try {

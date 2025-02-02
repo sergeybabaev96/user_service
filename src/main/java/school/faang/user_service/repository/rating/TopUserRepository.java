@@ -13,10 +13,11 @@ import java.util.stream.Collectors;
 @Repository
 public class TopUserRepository {
     private static final String REDIS_KEY_TOP_USERS = "topusers";
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, Long> redisTemplate;
 
     public boolean save(Long userId, Double score) {
-        return Boolean.TRUE.equals(redisTemplate.opsForZSet().add(REDIS_KEY_TOP_USERS, userId.longValue(), score));
+        //TODO
+        return redisTemplate.opsForZSet().add(REDIS_KEY_TOP_USERS, userId, score);
     }
 
     public Map<Long, Double> getTopUsersWithScores() {

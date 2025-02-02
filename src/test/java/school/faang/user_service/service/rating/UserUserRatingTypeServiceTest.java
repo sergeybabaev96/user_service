@@ -13,6 +13,7 @@ import school.faang.user_service.repository.rating.UserRatingTypeRepository;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,6 +45,26 @@ class UserUserRatingTypeServiceTest {
         when(userRatingTypeRepository.findAll()).thenReturn(userRatingTypes);
         Assertions.assertEquals(userRatingTypes, ratingTypeService.findAll());
         verify(userRatingTypeRepository, times(1)).findAll();
+    }
+
+    @Test
+    void findByName() {
+        UserRatingType userRatingType = UserRatingType.builder()
+                .id(1L)
+                .name("Skill rating")
+                .isActivity(true)
+                .cost(10)
+                .build();
+        when(userRatingTypeRepository.findByName(anyString())).thenReturn(userRatingType);
+        Assertions.assertEquals(userRatingType, ratingTypeService.findByName("Skill rating"));
+        verify(userRatingTypeRepository, times(1)).findByName(anyString());
+    }
+
+    @Test
+    void findByNameNotFound() {
+        when(userRatingTypeRepository.findByName(anyString())).thenReturn(null);
+        Assertions.assertThrows(DataValidationException.class, () -> ratingTypeService.findByName(""));
+        verify(userRatingTypeRepository, times(1)).findByName(anyString());
     }
 
     @Test

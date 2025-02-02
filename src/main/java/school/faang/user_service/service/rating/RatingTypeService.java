@@ -26,7 +26,7 @@ public class RatingTypeService {
         if (userRatingType == null) {
             throw new DataValidationException("User rating type by name: %s - not found".formatted(name));
         }
-        return userRatingTypeRepository.findByName(name);
+        return userRatingType;
     }
 
     public UserRatingType add(UserRatingType userRatingType) {
