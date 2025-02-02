@@ -11,6 +11,7 @@ import school.faang.user_service.entity.UserProfilePic;
 import school.faang.user_service.service.external.DiceBearService;
 import school.faang.user_service.service.external.S3Service;
 
+import java.net.URL;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,28 +26,28 @@ public class UserAvatarService {
     @Value("${avatar.bucketName}")
     private String bucketName;
 
-    public User generateRandomAvatar(@NotNull User user, AvatarType type) {
+    public void generateAvatarForNewUser(@NotNull User user, @NotNull AvatarType type) {
         String randomName = UUID.randomUUID().toString();
         byte[] avatarData = diceBearService.generateAvatar(randomName, type);
-        String avatarNameAndExtension = randomName + type.getExtension();
+        String avatarFileName = randomName + type.getExtension();
 
-        s3Service.uploadToBucket(avatarNameAndExtension, avatarData, type.getContentType());
-        return setUploadedAvatar(user, avatarNameAndExtension);
+        s3Service.uploadToBucket(avatarFileName, avatarData, type.getContentType());
+
+        URL avatarUrl = s3Service.getUnexpiredUrl(bucketName, avatarFileName);
+
+        UserProfilePic profilePic = new UserProfilePic();
+        profilePic.setFileId(avatarFileName);
+        user.setUserProfilePic(profilePic);
+
+        user.setAboutMe(avatarUrl.toString());
     }
 
-    public String getUserAvatar(@NotNull User user) {
+    public URL getUserAvatar(@NotNull User user) {
         String fileId = Optional.ofNullable(user.getUserProfilePic())
                 .map(UserProfilePic::getFileId)
                 .filter(id -> !id.isBlank())
                 .orElseThrow(() -> new NoSuchElementException("No avatar for user " + user.getId()));
 
-        return s3Service.getUnexpiredUrl(bucketName);
-    }
-
-    private User setUploadedAvatar(User user, String fileId) {
-        UserProfilePic newPic = new UserProfilePic();
-        newPic.setFileId(fileId);
-        user.setUserProfilePic(newPic);
-        return user;
+        return s3Service.getUnexpiredUrl(bucketName, fileId);
     }
 }

@@ -43,14 +43,14 @@ public class S3Service {
         }
     }
 
-    public String getUnexpiredUrl(String fileId) {
+    public URL getUnexpiredUrl(String bucketName, String fileId) {
         log.info("Generating presigned URL for file: {}, bucket: {}", fileId, bucketName);
 
         try {
             GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, fileId);
             URL url = amazonS3Client.generatePresignedUrl(request);
             log.info("Presigned URL generated successfully for file: {}", fileId);
-            return url.toString();
+            return url;
         } catch (SdkClientException e) {
             log.error("Failed to generate presigned URL for file: {}, bucket: {}", fileId, bucketName, e);
             throw new S3Exception("Error generating presigned URL", e);

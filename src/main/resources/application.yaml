@@ -58,6 +58,7 @@ dicebear:
   apiUrl: https://api.dicebear.com/9.x
   connectionTimeoutSeconds: 10
   readTimeoutSeconds: 10
+  token: YOUR_API_KEY
 
 avatar:
   bucketName: user-avatars
