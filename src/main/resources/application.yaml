@@ -42,4 +42,3 @@ config:
   value:
     min.skill.offers: 3
 
-

@@ -49,10 +49,20 @@
                   "type": "string"
                 }
               },
-              "required": ["street", "city", "state", "country", "postalCode"]
+              "required": [
+                "street",
+                "city",
+                "state",
+                "country",
+                "postalCode"
+              ]
             }
           },
-          "required": ["email", "phone", "address"]
+          "required": [
+            "email",
+            "phone",
+            "address"
+          ]
         },
         "education": {
           "type": "object",
@@ -70,7 +80,12 @@
               "type": "number"
             }
           },
-          "required": ["faculty", "yearOfStudy", "major", "GPA"]
+          "required": [
+            "faculty",
+            "yearOfStudy",
+            "major",
+            "GPA"
+          ]
         },
         "status": {
           "type": "string"
@@ -98,7 +113,11 @@
                 "type": "integer"
               }
             },
-            "required": ["degree", "institution", "completionYear"]
+            "required": [
+              "degree",
+              "institution",
+              "completionYear"
+            ]
           }
         },
         "scholarship": {
@@ -125,5 +144,50 @@
       ]
     }
   },
-  "required": ["person"]
+  "required": [
+    "person"
+  ],
+  "const":,
+  "minLength": 0,
+  "pattern": "",
+  "description": "",
+  "title": "",
+  "exclusiveMaximum": 0,
+  "patternProperties": {},
+  "allOf": [],
+  "oneOf": [],
+  "default":,
+  "not":,
+  "else":,
+  "additionalItems":,
+  "contentEncoding": "",
+  "maxProperties": 0,
+  "exclusiveMinimum": 0,
+  "definitions": {},
+  "if":,
+  "multipleOf": 0,
+  "maxItems": 0,
+  "x-intellij-enum-metadata": {},
+  "contentMediaType": "",
+  "x-intellij-case-insensitive": false,
+  "deprecationMessage": "",
+  "x-intellij-language-injection":,
+  "format": "",
+  "anyOf": [],
+  "readOnly": false,
+  "x-intellij-html-description": "",
+  "then":,
+  "enum": [],
+  "minProperties": 0,
+  "dependencies": {},
+  "minItems": 0,
+  "contains":,
+  "examples": [],
+  "propertyNames":,
+  "uniqueItems": false,
+  "maximum": 0,
+  "additionalProperties":,
+  "items": true,
+  "minimum": 0,
+  "maxLength": 0
 }
