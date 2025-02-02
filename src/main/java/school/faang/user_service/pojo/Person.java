@@ -2,13 +2,11 @@ package school.faang.user_service.pojo;
 
 import lombok.Data;
 
-import java.time.LocalDate;
-
 @Data
 public class Person {
     String firstName;
     String lastName;
-    Integer yearOfBirth;
+    String yearOfBirth;
     String group;
     String studentID;
     String email;
@@ -19,15 +17,15 @@ public class Person {
     String country;
     String postalCode;
     String faculty;
-    Integer yearOfStudy;
+    String yearOfStudy;
     String major;
     String GPA;
     String status;
-    LocalDate admissionDate;
+    String admissionDate;
     String graduationDate;
     String degree;
     String institution;
-    Integer completionYear;
+    String completionYear;
     String scholarship;
     String employer;
 }

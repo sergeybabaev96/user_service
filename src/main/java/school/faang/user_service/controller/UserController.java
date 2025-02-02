@@ -22,13 +22,14 @@ public class UserController {
                                            @RequestBody MultipartFile file) {
         log.info("Uploading file {} to site", file.getName());
 
+        InputStream fileInputStream;
         try {
-            InputStream fileInputStream = file.getInputStream();
+            fileInputStream = file.getInputStream();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        userService.parceCsv(file);
+        userService.parseCsv(fileInputStream);
 
     }
 }
