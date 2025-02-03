@@ -127,7 +127,10 @@ kotlin {
 spotless {
     java {
         target("src/**/*.java")
-        googleJavaFormat()
+        googleJavaFormat().aosp()
+        indentWithSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
     }
 }
 /**
