@@ -1,41 +1,47 @@
 package school.faang.user_service.controller;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.skill.ResponseSkillDto;
 import school.faang.user_service.dto.skill.SkillCandidateDto;
 import school.faang.user_service.dto.skill.CreateSkillDto;
-import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.SkillService;
 
 import java.util.List;
 
+@RestController
 @AllArgsConstructor
 public class SkillController {
     private final SkillService skillService;
 
-    public ResponseSkillDto create(CreateSkillDto skill) {
-        validateSkill(skill);
+    @PostMapping("/skill")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseSkillDto create(@Valid @RequestBody CreateSkillDto skill) {
         return skillService.create(skill);
     }
 
-    public List<ResponseSkillDto> getUserSkills(long userId) {
+    @GetMapping("/user/{userId}/skills")
+    public List<ResponseSkillDto> getUserSkills(@PathVariable Long userId) {
 
         return skillService.getUserSkills(userId);
     }
 
-    public List<SkillCandidateDto> getOfferedSkills(long userId) {
+    @GetMapping("/user/{userId}/offers")
+    public List<SkillCandidateDto> getOfferedSkills(@PathVariable Long userId) {
 
         return skillService.getOfferedSkills(userId);
     }
 
-    public ResponseSkillDto acquireSkillFromOffers(long skillId, long userId) {
-        return skillService.acquireSkillFromOffers(skillId, userId);
-    }
 
-    private void validateSkill(CreateSkillDto skill) {
-        if (StringUtils.isBlank(skill.title())) {
-            throw new DataValidationException("Title can't be empty or null!");
-        }
+    @PostMapping("/user/{userId}/offer/{skillId}")
+    public ResponseSkillDto acquireSkillFromOffers(@PathVariable Long skillId, @PathVariable Long userId) {
+        return skillService.acquireSkillFromOffers(skillId, userId);
     }
 }
