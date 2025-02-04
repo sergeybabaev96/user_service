@@ -123,11 +123,6 @@ tasks.jacocoTestReport {
         html.required.set(true)
         html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
     }
-    doLast {
-        val reportDir = layout.buildDirectory.dir("jacocoHtml")
-        val reportUrl = "file:///${reportDir.get()}/index.html".replace("\\", "/")
-        println("Отчет по покрытию кода доступен по ссылке: $reportUrl")
-    }
 }
 
 tasks.jacocoTestCoverageVerification {

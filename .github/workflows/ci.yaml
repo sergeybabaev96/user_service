@@ -35,10 +35,24 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle-
 
       - name: Build and Test with Jacoco
-        run : ./gradlew build jacocoTestReport
+        run : ./gradlew build jacocoTestReport --no-daemon --continue
 
       - name: Check Jacoco Coverage
-        run: ./gradlew build jacocoCoverageVerification
+        run: ./gradlew build jacocoCoverageVerification --no-daemon --continue
+
+      - name: Upload Jacoco HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-html-report
+          path: build/reports/tests/test
+
+      - name: Upload Jacoco Coverage Verification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-html-report
+          path: build/jacocoHtml/
 
       - name: Comment on Pull Request if build failed
         if: failure()
