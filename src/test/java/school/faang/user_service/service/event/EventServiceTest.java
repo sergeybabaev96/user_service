@@ -1,5 +1,6 @@
 package school.faang.user_service.service.event;
 
+import jakarta.persistence.EntityNotFoundException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -97,8 +98,10 @@ class EventServiceTest {
 
     when(skillRepository.findById(999L)).thenReturn(Optional.empty());
 
-    DataValidationException exception =
-        assertThrows(DataValidationException.class, () -> eventService.createEvent(createRequest));
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> eventService.createEvent(createRequest)
+        );
 
     assertEquals("Skill not found with ID: 999", exception.getMessage());
     verify(skillRepository, times(1)).findById(999L);

@@ -1,5 +1,6 @@
 package school.faang.user_service.service.goal;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,8 +22,7 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
-import school.faang.user_service.exception.BadRequestException;
-import school.faang.user_service.exception.ResourceNotFoundException;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filters.goal.GoalFilter;
 import school.faang.user_service.mapper.GoalMapper;
 import school.faang.user_service.repository.adapter.GoalRepositoryAdapter;
@@ -213,26 +213,23 @@ public class GoalServiceTest {
         .thenReturn(true);
     Mockito.when(goalRepositoryAdapter.getById(1L)).thenReturn(goal);
 
-    Assertions.assertThrows(BadRequestException.class, () -> goalService.updateGoal(1L, goalDTO));
-  }
+        Assertions.assertThrows(DataValidationException.class, () -> goalService.updateGoal(1L, goalDTO));
+    }
 
-  @Test
-  public void testCreateWithSkillsNotExists() {
-    Mockito.when(skillRepositoryAdapter.skillsExist(goalDTO.getSkillToAchieveIds()))
-        .thenReturn(false);
-    Assertions.assertThrows(
-        ResourceNotFoundException.class, () -> goalService.createGoal(1L, goalDTO));
-  }
 
-  @Test
-  public void testCreateUserHaveMoreActiveGoalsThanIsAllowed() {
-    long userId = 1L;
-    Mockito.when(skillRepositoryAdapter.skillsExist(goalDTO.getSkillToAchieveIds()))
-        .thenReturn(true);
-    Mockito.when(goalRepository.countActiveGoalsPerUser(userId)).thenReturn(4);
-    Assertions.assertThrows(
-        BadRequestException.class, () -> goalService.createGoal(userId, goalDTO));
-  }
+    @Test
+    public void testCreateWithSkillsNotExists() {
+        Mockito.when(skillRepositoryAdapter.skillsExist(goalDTO.getSkillToAchieveIds())).thenReturn(false);
+        Assertions.assertThrows(EntityNotFoundException.class, () -> goalService.createGoal(1L, goalDTO));
+    }
+
+    @Test
+    public void testCreateUserHaveMoreActiveGoalsThanIsAllowed() {
+        long userId = 1L;
+        Mockito.when(skillRepositoryAdapter.skillsExist(goalDTO.getSkillToAchieveIds())).thenReturn(true);
+        Mockito.when(goalRepository.countActiveGoalsPerUser(userId)).thenReturn(4);
+        Assertions.assertThrows(DataValidationException.class, () -> goalService.createGoal(userId, goalDTO));
+    }
 
   @Test
   public void testCreate() {

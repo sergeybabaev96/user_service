@@ -15,7 +15,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalInvitation;
 import school.faang.user_service.entity.goal.GoalStatus;
-import school.faang.user_service.exception.BadRequestException;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.GoalInvitationMapper;
 import school.faang.user_service.repository.adapter.UserRepositoryAdapter;
 import school.faang.user_service.repository.goal.GoalInvitationRepository;
@@ -54,30 +54,26 @@ public class GoalInvitationService {
     return goalInvitationMapper.toDto(entity);
   }
 
-  @Transactional
-  public void acceptGoalInvitation(Long id) {
-    GoalInvitation goalInvitation =
-        goalInvitationRepository
-            .findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("invitation not found by id: " + id));
-    Goal goal = goalInvitation.getGoal();
-    User invited = goalInvitation.getInvited();
-    long userActiveGoals =
-        invited.getGoals().stream().filter(g -> g.getStatus() == GoalStatus.ACTIVE).count();
-    if (userActiveGoals >= activeGoals) {
-      throw new BadRequestException("already have " + activeGoals + " active goals");
+    @Transactional
+    public void acceptGoalInvitation(Long id) {
+        GoalInvitation goalInvitation = goalInvitationRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("invitation not found by id: " + id));
+        Goal goal = goalInvitation.getGoal();
+        User invited = goalInvitation.getInvited();
+        long userActiveGoals = invited.getGoals().stream()
+                .filter(g -> g.getStatus() == GoalStatus.ACTIVE)
+                .count();
+        if (userActiveGoals >= activeGoals) {
+            throw new DataValidationException("already have " + activeGoals + " active goals");
+        }
+        invited.getGoals().forEach(g -> {
+            if (g.getId().equals(goal.getId())) {
+                throw new DataValidationException("already have this goal");
+            }
+        });
+        goalInvitation.setStatus(RequestStatus.ACCEPTED);
+        goal.addUser(invited);
     }
-    invited
-        .getGoals()
-        .forEach(
-            g -> {
-              if (g.getId().equals(goal.getId())) {
-                throw new BadRequestException("already have this goal");
-              }
-            });
-    goalInvitation.setStatus(RequestStatus.ACCEPTED);
-    goal.addUser(invited);
-  }
 
   @Transactional
   public void rejectGoalInvitation(Long id) {

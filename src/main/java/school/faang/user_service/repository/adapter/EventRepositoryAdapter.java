@@ -1,5 +1,6 @@
 package school.faang.user_service.repository.adapter;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
@@ -14,11 +15,10 @@ public class EventRepositoryAdapter {
 
   private final EventRepository eventRepository;
 
-  public Event getEventById(Long eventId) throws DataValidationException {
-    return eventRepository
-        .findById(eventId)
-        .orElseThrow(() -> new DataValidationException("Event not found with ID: " + eventId));
-  }
+    public Event getEventById(Long eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Event not found with ID: " + eventId));
+    }
 
   public Event save(Event event) {
     return eventRepository.save(event);
