@@ -13,6 +13,8 @@ import java.util.List;
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface UserMapper {
 
+    User toEntity(UserDto dto);
+
     UserDto toDto(User user);
     List<UserDto> toDto(List<User> users);
 
