@@ -51,5 +51,19 @@ domain:
 redis:
   ttl-minutes: 2
 
+minio:
+  accessKey: user
+  secretKey: password
+  endpoint: http://localhost:9000
+
+avatar:
+  bucket: avatars
+  default-avatar: default-avatar.png
+  size: 64
+  small-size: 32
+
+dicebear:
+  endpoint: https://api.dicebear.com
+
 service:
   name: user-service
