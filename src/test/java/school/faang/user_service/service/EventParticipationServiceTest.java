@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
-import school.faang.user_service.dto.user.UserDto;
+import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.repository.event.EventParticipationRepository;
@@ -100,7 +100,7 @@ class EventParticipationServiceTest {
                 times(1)
         ).findAllParticipantsByEventId(MOCKED_EVENT_ID);
         assertEquals(users.size(), 1);
-        assertEquals(users.get(0).id(), MOCKED_USER_ID);
+        assertEquals(users.get(0).getId(), MOCKED_USER_ID);
 
     }
 
