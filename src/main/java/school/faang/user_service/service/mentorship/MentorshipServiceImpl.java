@@ -58,4 +58,8 @@ public class MentorshipServiceImpl implements MentorshipService {
         ));
     }
 
+    @Override
+    public void deactivateMentorship(long userId) {
+        mentorshipRepository.deactivateMentorship(userId);
+    }
 }

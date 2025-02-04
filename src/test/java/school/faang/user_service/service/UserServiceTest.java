@@ -51,9 +51,9 @@ class UserServiceTest {
                 Optional.of(mockedUser)
         );
 
-        User user = userService.deactivateUser(userId);
+        UserDto userDto = userService.deactivateUser(userId);
         verify(userRepository, times(1)).save(mockedUser);
-        assertFalse(user.isActive());
+        assertFalse(userDto.getActive());
     }
 
     @Test

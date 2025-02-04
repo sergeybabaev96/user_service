@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.event.EventStatus;
 import school.faang.user_service.repository.event.EventRepository;
+import school.faang.user_service.service.impl.EventServiceImpl;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class EventServiceTest {
     private EventRepository eventRepository;
 
     @InjectMocks
-    private EventService eventService;
+    private EventServiceImpl eventService;
 
     @Test
     public void testDeletingEventWithPlannedStatus() {
@@ -30,7 +31,8 @@ public class EventServiceTest {
                 .thenReturn(List.of(Event.builder().id(eventId).status(EventStatus.PLANNED).build()));
 
         eventService.deactivateEventsByUserId(userId);
-        verify(eventRepository, times(1)).deleteAllById(List.of(eventId));
+
+        verify(eventRepository).deleteAllById(List.of(eventId));
     }
 
     @Test
@@ -41,6 +43,7 @@ public class EventServiceTest {
                 .thenReturn(List.of(Event.builder().id(eventId).status(EventStatus.IN_PROGRESS).build()));
 
         eventService.deactivateEventsByUserId(userId);
-        verify(eventRepository, times(1)).deleteAllById(List.of());
+
+        verify(eventRepository, never()).deleteAllById(List.of());
     }
 }

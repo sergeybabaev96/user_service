@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -8,6 +8,7 @@ import org.springframework.web.server.ResponseStatusException;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.event.EventParticipationRepository;
+import school.faang.user_service.service.EventParticipationService;
 
 import java.util.List;
 
