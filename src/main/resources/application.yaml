@@ -64,3 +64,6 @@ avatar:
 
 dicebear:
   endpoint: https://api.dicebear.com
+
+service:
+  name: user-service
