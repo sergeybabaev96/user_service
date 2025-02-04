@@ -48,7 +48,7 @@ spring:
       max-request-size: 10MB
 
 server:
-  port: 8085
+  port: 8080
 
 services:
   s3:
