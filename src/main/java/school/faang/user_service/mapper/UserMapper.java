@@ -18,7 +18,7 @@ import school.faang.user_service.entity.goal.Goal;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = ContactMapper.class)
 public interface UserMapper {
 
     @Mapping(source = "country.id", target = "countryId")
@@ -46,7 +46,6 @@ public interface UserMapper {
     @Mapping(target = "skills", ignore = true)
     @Mapping(target = "mentors", ignore = true)
     @Mapping(target = "ownedEvents", ignore = true)
-
     @Mapping(target = "participatedEvents", ignore = true)
     @Mapping(target = "country", ignore = true)
     User deactivatedUserDtoToEntity(DeactivatedUserDto deactivatedUserDto);
@@ -66,6 +65,7 @@ public interface UserMapper {
                 .map(Goal::getId)
                 .toList();
     }
+
     User toEntity(UserDto userDto);
 
     @Mapping(target = "country", ignore = true)
@@ -73,6 +73,7 @@ public interface UserMapper {
     User toEntity(UserRegistrationDto userRegistrationDto);
 
     List<UserDto> toDtos(List<User> users);
+
     @Named("mapSkillsToListId")
     default List<Long> mapSkillsToListId(List<Skill> skills) {
         if (skills == null) {

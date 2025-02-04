@@ -101,4 +101,9 @@ public class UserV1Controller {
     public UserSubResponseDto registerUser(@RequestBody @Valid UserRegistrationDto userDto) {
          return userService.registerUser(userDto);
     }
+
+    @GetMapping("/phone/{phone}")
+    public UserForNotificationDto getUserByPhone(@PathVariable String phone) {
+        return userService.getUserByPhone(phone);
+    }
 }

@@ -218,4 +218,10 @@ public class UserService {
     private double bytesToMegabytes(long bytes) {
         return bytes / (Math.pow(1024, 2));
     }
+
+    public UserForNotificationDto getUserByPhone(String phone) {
+        User user = userRepository.findByPhone(phone)
+                .orElseThrow(() -> new EntityNotFoundException("User do not found by " + phone));
+        return userMapper.toUserForNotificationDto(user);
+    }
 }
