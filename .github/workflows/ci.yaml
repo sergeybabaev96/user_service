@@ -34,25 +34,14 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle.properties', '**/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-gradle-
 
+      - name: Build with Gradle
+        run: ./gradlew build testClasses -x test -x check -x jacocoTestReport -x jacocoTestCoverageVerification --no-daemon
+
       - name: Build and Test with Jacoco
-        run : ./gradlew build jacocoTestReport --no-daemon --continue
+        run : ./gradlew build test --no-daemon --continue
 
       - name: Check Jacoco Coverage
         run: ./gradlew build jacocoCoverageVerification --no-daemon --continue
-
-      - name: Upload Jacoco HTML Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-html-report
-          path: build/reports/tests/test
-
-      - name: Upload Jacoco Coverage Verification
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-html-report
-          path: build/jacocoHtml/
 
       - name: Comment on Pull Request if build failed
         if: failure()
