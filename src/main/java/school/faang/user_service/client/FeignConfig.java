@@ -1,6 +1,7 @@
 package school.faang.user_service.client;
 
 
+import feign.Retryer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import school.faang.user_service.config.context.UserContext;
@@ -11,5 +12,10 @@ public class FeignConfig {
     @Bean
     public FeignUserInterceptor feignUserInterceptor(UserContext userContext) {
         return new FeignUserInterceptor(userContext);
+    }
+
+    @Bean
+    public Retryer feignRetryer() {
+        return Retryer.NEVER_RETRY;
     }
 }

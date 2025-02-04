@@ -28,6 +28,14 @@ logging:
   level:
     root: info
 
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 10000
+        readTimeout: 15000
+        loggerLevel: BASIC
+
 project-service:
   host: localhost
   port: 8082
@@ -35,6 +43,9 @@ project-service:
 payment-service:
   host: localhost
   port: 9080
+  url: localhost:9080/api
 
 user-service:
-  api-v1: v1
+  api-version: /api/v1
+  recommendation-request:
+    min-month: 6
