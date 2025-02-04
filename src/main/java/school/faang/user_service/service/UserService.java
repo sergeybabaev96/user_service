@@ -1,7 +1,8 @@
 package school.faang.user_service.service;
 
-import school.faang.user_service.dto.user.UserDto;
+import org.springframework.http.ResponseEntity;
+import school.faang.user_service.dto.UserDto;
 
 public interface UserService {
-    UserDto getUser(long userId);
+    ResponseEntity<UserDto> getUser(long userId);
 }
