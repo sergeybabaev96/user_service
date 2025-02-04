@@ -2,16 +2,19 @@ package school.faang.user_service.service.user;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.dto.UserProfilePicDto;
 import school.faang.user_service.dto.UserRegistrationDto;
 import school.faang.user_service.dto.UserSubResponseDto;
+import school.faang.user_service.dto.user.UserForNewsFeedDto;
 import school.faang.user_service.dto.user.UserForNotificationDto;
 import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
@@ -63,6 +66,13 @@ public class UserService {
         usersToBan.forEach(User::ban);
     }
 
+    public UserDto getUser(long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("User under id %d does not exist", userId)
+                ));
+        return userMapper.toDto(user);
+    }
 
     public User getUserById(Long id) {
         return userRepository.findById(id)
@@ -86,10 +96,15 @@ public class UserService {
                 EntityNotFoundException("User do not found by " + userId));
     }
 
-
     public UserForNotificationDto getUserByIdForNotification(long userId) {
         User user = getUserById(userId);
         return userMapper.toUserForNotificationDto(user);
+    }
+
+    public UserForNewsFeedDto getUserByIdForNewsFeed(@Positive long userId) {
+        log.info("Trying to find user by id {}", userId);
+        User user = userRepository.getUserByIdJoinFetchFollowers(userId);
+        return userMapper.toUserForNewsFeedDto(user);
     }
 
     public UserSubResponseDto registerUser(UserRegistrationDto userRegistrationDto) {

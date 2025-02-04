@@ -9,6 +9,7 @@ import school.faang.user_service.dto.UserRegistrationDto;
 import school.faang.user_service.dto.UserSubResponseDto;
 import school.faang.user_service.dto.user.DeactivatedUserDto;
 import school.faang.user_service.dto.user.MenteeResponseDto;
+import school.faang.user_service.dto.user.UserForNewsFeedDto;
 import school.faang.user_service.dto.user.UserForNotificationDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
@@ -56,6 +57,19 @@ public interface UserMapper {
     @Mapping(target = "preference", source = "contactPreference.preference")
     UserForNotificationDto toUserForNotificationDto(User user);
 
+    User toEntity(UserDto userDto);
+
+    @Mapping(target = "country", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    User toEntity(UserRegistrationDto userRegistrationDto);
+
+    List<UserDto> toDtos(List<User> users);
+
+    List<User> toEntities(List<UserDto> userDtos);
+
+    @Mapping(target = "followerIds", source = "followers", qualifiedByName = "mapFollowersToIds")
+    @Mapping(target = "followeeIds", source = "followees", qualifiedByName = "mapFollowersToIds")
+    UserForNewsFeedDto toUserForNewsFeedDto(User user);
 
     @Named("mapGoalsToListId")
     default List<Long> mapGoalsToListId(List<Goal> goals) {
@@ -66,13 +80,7 @@ public interface UserMapper {
                 .map(Goal::getId)
                 .toList();
     }
-    User toEntity(UserDto userDto);
 
-    @Mapping(target = "country", ignore = true)
-    @Mapping(target = "password", ignore = true)
-    User toEntity(UserRegistrationDto userRegistrationDto);
-
-    List<UserDto> toDtos(List<User> users);
     @Named("mapSkillsToListId")
     default List<Long> mapSkillsToListId(List<Skill> skills) {
         if (skills == null) {
@@ -82,8 +90,6 @@ public interface UserMapper {
                 .map(Skill::getId)
                 .toList();
     }
-
-    List<User> toEntities(List<UserDto> userDtos);
 
     @Named("mapMentorsToListId")
     default List<Long> mapMentorsToListId(List<User> mentors) {
@@ -102,6 +108,13 @@ public interface UserMapper {
         }
         return ownedEvents.stream()
                 .map(Event::getId)
+                .toList();
+    }
+
+    @Named("mapFollowersToIds")
+    default List<Long> mapFollowersToIds(List<User> followers) {
+        return followers.stream()
+                .map(User::getId)
                 .toList();
     }
 }

@@ -2,6 +2,7 @@ package school.faang.user_service.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import school.faang.user_service.entity.User;
 
@@ -32,4 +33,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             WHERE email = ?1
             """)
     boolean existsByEmail(String email);
+
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.followers WHERE u.id = :userId")
+    User getUserByIdJoinFetchFollowers(@Param("userId") long userId);
 }
