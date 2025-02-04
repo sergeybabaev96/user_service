@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
-import school.faang.user_service.config.properties.RedisProperties;
+import school.faang.user_service.properties.RedisProperties;
 
 import java.time.Duration;
 
