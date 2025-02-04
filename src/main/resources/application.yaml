@@ -46,3 +46,8 @@ payment-service:
 
 goal:
   max-active-goals-per-user: 3
+
+premium:
+  removal:
+    cron: "0 0 0 * * MON"  # Запуск каждый понедельник в 00:00
+    batch-size: 100  # Удаляем по 100 подписок за раз

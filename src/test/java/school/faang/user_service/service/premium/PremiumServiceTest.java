@@ -11,6 +11,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import school.faang.user_service.client.PaymentServiceClient;
+import school.faang.user_service.config.PremiumConfig;
 import school.faang.user_service.dto.payment.Currency;
 import school.faang.user_service.dto.payment.PaymentRequest;
 import school.faang.user_service.dto.payment.PaymentResponse;
@@ -23,11 +24,18 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.premium.PremiumRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,6 +54,9 @@ public class PremiumServiceTest {
 
     @Mock
     private PaymentServiceClient paymentServiceClient;
+
+    @Mock
+    private PremiumConfig premiumConfig;
 
     @Captor
     private ArgumentCaptor<Premium> premiumArgumentCaptor;
@@ -114,6 +125,30 @@ public class PremiumServiceTest {
 
         verify(premiumRepository, times(1))
                 .save(premiumArgumentCaptor.capture());
+    }
+
+    @Test
+    public void testRemoveExpiredPremiums_NoExpiredSubscriptions() {
+        when(premiumRepository.findAllByEndDateBefore(any(LocalDateTime.class))).thenReturn(Collections.emptyList());
+
+        premiumService.removeExpiredPremiums();
+
+        verify(premiumRepository, never()).deleteAll(anyList());
+    }
+
+    @Test
+    public void testRemoveExpiredPremiums_WithExpiredSubscriptions() {
+        Premium premium1 = new Premium();
+        Premium premium2 = new Premium();
+        List<Premium> expiredPremiums = List.of(premium1, premium2);
+
+        when(premiumRepository.findAllByEndDateBefore(any(LocalDateTime.class))).thenReturn(expiredPremiums);
+        when(premiumConfig.getBatchSize()).thenReturn(1);
+
+        premiumService.removeExpiredPremiums();
+
+        await().atMost(2, TimeUnit.SECONDS).untilAsserted(() ->
+                verify(premiumRepository, times(2)).deleteAll(anyList()));
     }
 
     private Pair<PaymentRequest, ResponseEntity<PaymentResponse>> setUpPaymentRequestAndResponse(boolean isSuccessResponse) {
