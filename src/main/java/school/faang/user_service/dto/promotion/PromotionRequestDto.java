@@ -18,22 +18,23 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class PromotionRequestDto {
 
-    @NotNull
+    @NotNull(message = "User id can't be null")
+    @Min(value = 0, message = "User id should be positive")
     private Long userId;
 
     private Long eventId;
 
-    @NotNull
+    @NotNull(message = "Tariff can't be null")
     private PromotionTariff tariff;
 
-    @NotNull
+    @NotNull(message = "Plan type can't be null")
     private PromotionPlanType planType;
 
-    @NotNull
-    @Min(1)
+    @NotNull(message = "Amount can't be null")
+    @Min(value = 1, message = "Amount should be more than 0")
     private BigDecimal amount;
 
-    @NotNull
+    @NotNull(message = "Currency can't be null")
     private Currency currency;
 
 }

@@ -13,14 +13,14 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class UserRegisterDto {
 
-    @NotNull
+    @NotNull(message = "Username can't be null")
     protected String username;
 
-    @NotNull
+    @NotNull(message = "Password can't be null")
     protected String password;
 
     @Email
-    @NotNull
+    @NotNull(message = "Email can't be null")
     protected String email;
 
     protected String phone;
