@@ -14,6 +14,11 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
+    @GetMapping("/{id}")
+    public UserDto getUser(@PathVariable Long id) {
+        return userService.findUserById(id);
+    }
+
     @GetMapping("/premium")
     public List<UserDto> getPremiumUsers(@RequestBody UserFilterDto userFilterDto) {
         return userService.getPremiumUsers(userFilterDto);
