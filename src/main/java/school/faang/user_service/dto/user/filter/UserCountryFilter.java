@@ -1,22 +1,23 @@
 package school.faang.user_service.dto.user.filter;
 
 import org.springframework.stereotype.Component;
+import school.faang.user_service.dto.Filter;
 import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.entity.User;
 
 import java.util.List;
 
 @Component
-public class UserCountryFilter implements UserFilter {
+public class UserCountryFilter implements Filter<User, UserFilterDto> {
     @Override
     public boolean isApplicable(UserFilterDto dto) {
-        return dto.getCountryId() != null;
+        return dto.countryId() != null;
     }
 
     @Override
     public List<User> apply(List<User> users, UserFilterDto filters) {
         return users.stream()
-                .filter(u -> filters.getCountryId().equals(u.getCountry().getId()))
+                .filter(u -> filters.countryId().equals(u.getCountry().getId()))
                 .toList();
     }
 }

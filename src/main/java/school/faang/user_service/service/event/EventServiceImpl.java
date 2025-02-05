@@ -4,8 +4,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.Filter;
 import school.faang.user_service.dto.event.EventDto;
-import school.faang.user_service.dto.event.EventFilter;
 import school.faang.user_service.dto.event.EventFilterDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
@@ -25,7 +25,7 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final SkillRepository skillRepository;
     private final EventMapper eventMapper;
-    private final List<EventFilter> filters;
+    private final List<Filter<Event, EventFilterDto>> filters;
 
     @Transactional
     @Override
@@ -107,7 +107,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private List<Event> getFilteredEvents(EventFilterDto filter, List<Event> events) {
-        for (EventFilter eventFilter : filters) {
+        for (Filter<Event, EventFilterDto> eventFilter : filters) {
             if (eventFilter.isApplicable(filter)) {
                 events = eventFilter.apply(events, filter);
             }

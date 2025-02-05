@@ -7,11 +7,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import school.faang.user_service.dto.Filter;
 import school.faang.user_service.dto.event.EventDto;
-import school.faang.user_service.dto.event.EventFilter;
+import school.faang.user_service.dto.event.EventFilterDto;
 import school.faang.user_service.dto.event.EventLocationFilter;
 import school.faang.user_service.dto.event.EventOwnerIdFilter;
 import school.faang.user_service.entity.Skill;
+import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidateException;
 import school.faang.user_service.mapper.event.EventMapperImpl;
 import school.faang.user_service.repository.SkillRepository;
@@ -53,7 +55,7 @@ class EventServiceImplTest {
     @Spy
     private EventMapperImpl eventMapper;
 
-    private final List<EventFilter> eventFilters = new ArrayList<>();
+    private final List<Filter<Event, EventFilterDto>> eventFilters = new ArrayList<>();
 
     private EventServiceImpl eventServiceImpl;
 
