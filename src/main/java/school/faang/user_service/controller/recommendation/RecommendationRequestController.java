@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/v1/recommendation-request")
+@RequestMapping("/recommendation-request")
 public class RecommendationRequestController {
     private final RecommendationRequestService recommendationRequestService;
 

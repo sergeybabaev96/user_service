@@ -24,7 +24,7 @@ import java.util.Objects;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/mentorship/requests")
+@RequestMapping("/mentorship/requests")
 public class MentorshipRequestController {
     private final MentorshipRequestServiceImpl service;
 

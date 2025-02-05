@@ -20,7 +20,7 @@ import static java.lang.System.lineSeparator;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/subscription")
+@RequestMapping("/subscription")
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
