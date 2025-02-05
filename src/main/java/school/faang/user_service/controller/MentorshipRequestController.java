@@ -1,5 +1,8 @@
 package school.faang.user_service.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,14 +24,29 @@ import java.util.Objects;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/mentorship/requests")
+@RequestMapping("/mentorship/requests")
 public class MentorshipRequestController {
     private final MentorshipRequestServiceImpl service;
 
     @PostMapping
+    @Operation(
+            summary = "Method for creating a new mentoring request",
+            description = """
+                    The method verifies that:
+                                        
+                        - the user who requests mentoring and the user who is being requested exist in the database;
+                        - takes into account that a request for mentoring can be made only once every 3 months;
+                        - the user cannot send a request to himself;
+                    In case of successful verification, the mentoring request is saved in the database.
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Mentorship request was successfully saved to the DB"),
+            @ApiResponse(responseCode = "400", description = "The request parameters were not validated")
+    })
     public MentorshipResponseDto requestMentorship(@RequestBody MentorshipRequestDto mentorshipRequestDto) {
         log.info("#requestMentorship: mentorship request has been received from user with id: {}",
-                mentorshipRequestDto.receiver().getUserId());
+                mentorshipRequestDto.requester().getUserId());
         if (Objects.isNull(mentorshipRequestDto.description()) || mentorshipRequestDto.description().isBlank()) {
             throw new IllegalArgumentException(String.format("""
                     Request from user with id: %d does not contain a description.

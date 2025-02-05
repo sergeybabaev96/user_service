@@ -1,5 +1,6 @@
 package school.faang.user_service.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,12 +14,16 @@ import school.faang.user_service.dto.SubscriptionUserFilterDto;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.impl.SubscriptionServiceImpl;
 
+import static org.mockito.Mockito.when;
+
 
 @ExtendWith(MockitoExtension.class)
 class SubscriptionControllerTest {
 
     @Mock
     private SubscriptionServiceImpl subscriptionService;
+    @Mock
+    private HttpServletRequest request;
     @InjectMocks
     private SubscriptionController subscriptionController;
     private SubscriptionUserFilterDto subscriptionUserEmptyFilterDto;
@@ -36,7 +41,8 @@ class SubscriptionControllerTest {
     @Test
     @DisplayName("Follow To Another User")
     void testFollowUserToAnotherUser() {
-        subscriptionController.followUser(followerId, followeeId);
+        when(request.getRequestURL()).thenReturn(new StringBuffer().append("/api/v1/subscription/some_endpoint"));
+        subscriptionController.followUser(followerId, followeeId, request);
         Mockito.verify(subscriptionService, Mockito.times(1))
                 .followUser(followerId, followeeId);
     }
@@ -44,14 +50,16 @@ class SubscriptionControllerTest {
     @Test
     @DisplayName("Follow To Himself")
     void testFollowUserByHimself() {
+        when(request.getRequestURL()).thenReturn(new StringBuffer().append("/api/v1/subscription/some_endpoint"));
         Assert.assertThrows(DataValidationException.class,
-                () -> subscriptionController.followUser(followerId, followerId));
+                () -> subscriptionController.followUser(followerId, followerId, request));
     }
 
     @Test
     @DisplayName("Unfollow Another User")
     void testUnfollowUserFromAnotherUser() {
-        subscriptionController.unfollowUser(followerId, followeeId);
+        when(request.getRequestURL()).thenReturn(new StringBuffer().append("/api/v1/subscription/some_endpoint"));
+        subscriptionController.unfollowUser(followerId, followeeId, request);
         Mockito.verify(subscriptionService, Mockito.times(1))
                 .unfollowUser(followerId, followeeId);
     }
@@ -59,8 +67,9 @@ class SubscriptionControllerTest {
     @Test
     @DisplayName("Unfollow User Himself")
     void testUnfollowUserByHimself() {
+        when(request.getRequestURL()).thenReturn(new StringBuffer().append("/api/v1/subscription/some_endpoint"));
         Assert.assertThrows(DataValidationException.class,
-                () -> subscriptionController.unfollowUser(followerId, followerId));
+                () -> subscriptionController.unfollowUser(followerId, followerId, request));
     }
 
     @Test
