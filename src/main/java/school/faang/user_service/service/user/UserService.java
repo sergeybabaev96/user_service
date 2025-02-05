@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static school.faang.user_service.service.user.UserErrorMessage.USERS_NOT_FOUND;
-import static school.faang.user_service.service.user.UserErrorMessage.USER_NOT_FOUND;
+import static school.faang.user_service.utils.UserErrorMessage.USERS_NOT_FOUND;
+import static school.faang.user_service.utils.UserErrorMessage.USER_NOT_FOUND;
 
 @RequiredArgsConstructor
 @Service

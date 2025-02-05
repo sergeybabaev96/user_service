@@ -1,4 +1,4 @@
-package school.faang.user_service.service.skill;
+package school.faang.user_service.utils;
 
 public final class SkillErrorMessage {
     public static final String SKILL_ALREADY_EXISTS = "A skill with this title already exists";
