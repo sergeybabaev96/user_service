@@ -3,6 +3,7 @@ package school.faang.user_service.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapper;
@@ -27,6 +28,7 @@ public class UserServiceImpl implements UserService {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Transactional
     @Override
     public UserDto deactivateUser(long userId) {
         Optional<User> optionalUser = userRepository.findById(userId);

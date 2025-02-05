@@ -28,7 +28,6 @@ public class UserController {
 
 
     @PostMapping("/deactivate")
-    @Transactional
     public UserDto deactivateUser(@RequestParam("user_id") long userId) {
 
         goalService.deactivateGoalsByUserId(userId);
