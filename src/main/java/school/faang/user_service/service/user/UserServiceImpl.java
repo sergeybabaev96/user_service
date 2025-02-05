@@ -19,7 +19,6 @@ import school.faang.user_service.mapper.user.UserMapper;
 import school.faang.user_service.repository.CountryRepository;
 import school.faang.user_service.repository.user.UserRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -45,29 +44,27 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getAllUsersByFilters(int pageNumber, int pageSize, UserFilterDto filters) {
-        List<User> result = new ArrayList<>();
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         List<User> users = userRepository.findAll(pageable).toList();
         for (Filter<User, UserFilterDto> filter : userFilters) {
             if (filter.isApplicable(filters)) {
-                result.addAll(filter.apply(users, filters));
+                users = filter.apply(users, filters);
             }
         }
-        return result.stream()
+        return users.stream()
                 .map(userMapper::toDto)
                 .toList();
     }
 
     @Override
     public List<UserDto> getPremiumUsersByFilters(UserFilterDto filters) {
-        List<User> result = new ArrayList<>();
         List<User> users = userRepository.findPremiumUsers();
         for (Filter<User, UserFilterDto> filter : userFilters) {
             if (filter.isApplicable(filters)) {
-                result.addAll(filter.apply(users, filters));
+                users = filter.apply(users, filters);
             }
         }
-        return result.stream()
+        return users.stream()
                 .map(userMapper::toDto)
                 .toList();
     }
