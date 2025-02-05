@@ -70,6 +70,11 @@ public class UserService {
         mentorshipService.stopUserMentorship(userId);
     }
 
+    @Transactional
+    public void setBannedField(boolean banned, List<Long> userIds) {
+        userRepository.setBannedField(banned, userIds);
+    }
+
     private void deactivateUserDependencies(Long userId) {
         removeUserFromGoals(userId);
         removeUserEvents(userId);
