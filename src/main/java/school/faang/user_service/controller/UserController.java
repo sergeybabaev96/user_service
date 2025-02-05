@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import school.faang.user_service.dto.file.FileUploadResponseDto;
 import school.faang.user_service.service.UserService;
 
 import java.io.IOException;
@@ -18,18 +19,18 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/")
-    public void addResource(@RequestHeader(value = "X-User-Id", required = false) Long userId,
-                                           @RequestBody MultipartFile file) {
-        log.info("Uploading file {} to site", file.getName());
-
+    public FileUploadResponseDto addResource(@RequestHeader(value = "X-User-Id", required = false) Long userId,
+                                             @RequestBody MultipartFile file) {
+        log.info("Start uploading file {}", file.getOriginalFilename());
         InputStream fileInputStream;
         try {
             fileInputStream = file.getInputStream();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        userService.parseCsv(fileInputStream);
+        FileUploadResponseDto resultDto = userService.parseCsv(fileInputStream);
+        log.info("Finish uploading file {}", file.getOriginalFilename());
+        return resultDto;
 
     }
 }
