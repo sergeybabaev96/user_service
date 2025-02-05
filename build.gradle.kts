@@ -102,6 +102,9 @@ jacoco {
 }
 
 tasks.test {
+    useJUnitPlatform {
+        excludeTags("integration")
+    }
     finalizedBy(tasks.jacocoTestReport)
 }
 
