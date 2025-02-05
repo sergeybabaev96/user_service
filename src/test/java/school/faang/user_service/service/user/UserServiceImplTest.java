@@ -12,7 +12,7 @@ import school.faang.user_service.dto.user.UserResponseRegisterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.user.UserMapperImpl;
 import school.faang.user_service.repository.CountryRepository;
-import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.repository.user.UserRepository;
 
 import java.util.Optional;
 

@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.promotion.PromotionResponseDto;
 import school.faang.user_service.mapper.promotion.PromotionMapperImpl;
 import school.faang.user_service.mapper.promotion.PromotionPaymentMapper;
-import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.repository.user.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.repository.promotion.PromotionRepository;
 

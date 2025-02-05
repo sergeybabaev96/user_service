@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EventFilterDto {
+
     private Long ownerId;
+
     private String location;
 }

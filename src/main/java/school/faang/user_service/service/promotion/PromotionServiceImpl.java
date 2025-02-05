@@ -19,7 +19,7 @@ import school.faang.user_service.enums.promotion.PromotionStatus;
 import school.faang.user_service.enums.promotion.PromotionTariff;
 import school.faang.user_service.mapper.promotion.PromotionMapper;
 import school.faang.user_service.mapper.promotion.PromotionPaymentMapper;
-import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.repository.user.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.repository.promotion.PromotionPlanRepository;
 import school.faang.user_service.repository.promotion.PromotionRepository;

@@ -8,7 +8,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.mapper.event.EventMapperImpl;
 import school.faang.user_service.mapper.user.UserMapperImpl;
-import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.repository.user.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.repository.promotion.PromotionPlanRepository;
 import school.faang.user_service.repository.promotion.PromotionRepository;

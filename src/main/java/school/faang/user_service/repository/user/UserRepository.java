@@ -1,11 +1,10 @@
-package school.faang.user_service.repository;
+package school.faang.user_service.repository.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import school.faang.user_service.entity.User;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -22,7 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             JOIN user_premium up ON up.user_id = u.id
             WHERE up.end_date > NOW()
             """)
-    Stream<User> findPremiumUsers();
+    List<User> findPremiumUsers();
 
     List<User> findByUsernameLike(String username);
 }
