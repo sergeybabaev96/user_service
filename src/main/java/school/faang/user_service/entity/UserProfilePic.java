@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 @Embeddable
-@NoArgsConstructor
-@AllArgsConstructor
 public class UserProfilePic {
     private String fileId;
     private String smallFileId;
