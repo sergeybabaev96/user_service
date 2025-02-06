@@ -9,6 +9,8 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.filter.user.UserFilter;
 import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.event.EventService;
+import school.faang.user_service.service.goal.GoalService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,10 +24,13 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
-    UserRepository userRepository;
-    List<UserFilter> userFilters;
-    UserMapperImpl userMapper;
-    UserService userService;
+    private UserRepository userRepository;
+    private List<UserFilter> userFilters;
+    private UserMapperImpl userMapper;
+    private UserService userService;
+    private GoalService goalService;
+    private EventService eventService;
+    private MentorshipService mentorshipService;
 
     @BeforeEach
     void init() {
@@ -34,7 +39,11 @@ class UserServiceTest {
         userFilters.add(mock(UserFilter.class));
         userFilters.add(mock(UserFilter.class));
         userMapper = spy(UserMapperImpl.class);
-        userService = new UserService(userRepository, userFilters, userMapper);
+        goalService = mock(GoalService.class);
+        eventService = mock(EventService.class);
+        mentorshipService = mock(MentorshipService.class);
+        userService = new UserService(userRepository, userFilters,
+                goalService, eventService, userMapper, mentorshipService);
     }
 
     @Test

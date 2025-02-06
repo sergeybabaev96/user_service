@@ -9,6 +9,7 @@ import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.event.EventFilterDto;
 import school.faang.user_service.dto.event.UpdateEventDto;
 import school.faang.user_service.entity.event.Event;
+import school.faang.user_service.entity.event.EventStatus;
 import school.faang.user_service.filter.event.EventFilter;
 import school.faang.user_service.mapper.event.EventMapper;
 import school.faang.user_service.repository.event.EventRepository;
@@ -82,6 +83,19 @@ public class EventService {
                 .stream()
                 .map(eventMapper::toDto)
                 .toList();
+    }
+
+    @Transactional
+    public void cancelEventsByUser(long userId) {
+        List<Event> events = eventRepository.findAllByUserId(userId);
+
+        events.forEach(event -> {
+            if (event.getStatus() == EventStatus.PLANNED) {
+                event.setStatus(EventStatus.CANCELED);
+                eventRepository.save(event);
+            }
+        });
+
     }
 }
 

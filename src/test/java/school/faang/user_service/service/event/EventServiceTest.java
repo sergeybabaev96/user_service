@@ -15,15 +15,19 @@ import school.faang.user_service.dto.event.CreateEventDto;
 import school.faang.user_service.dto.event.EventFilterDto;
 import school.faang.user_service.dto.event.UpdateEventDto;
 import school.faang.user_service.entity.event.Event;
+import school.faang.user_service.entity.event.EventStatus;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.event.EventFilter;
 import school.faang.user_service.mapper.event.EventMapperImpl;
 import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.validator.EventValidator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class EventServiceTest {
@@ -44,7 +48,7 @@ public class EventServiceTest {
         prepareValidationThrows();
 
         Assertions.assertThrows(DataValidationException.class, () -> eventService.createEvent(new CreateEventDto()));
-        Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
+        verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
     }
 
     @Test
@@ -52,7 +56,7 @@ public class EventServiceTest {
         CreateEventDto preparedEvent = new CreateEventDto();
 
         Assertions.assertDoesNotThrow(() -> eventService.createEvent(preparedEvent));
-        Mockito.verify(eventRepository, Mockito.times(1))
+        verify(eventRepository, times(1))
                 .save(Mockito.any(Event.class));
     }
 
@@ -80,14 +84,14 @@ public class EventServiceTest {
         Event wrongEvent = new Event();
         var eventList = List.of(correctEvent1, correctEvent2, wrongEvent);
 
-        Mockito.when(eventRepository.findAll()).thenReturn(eventList);
-        Mockito.when(filter2.isApplicable(Mockito.any()))
+        when(eventRepository.findAll()).thenReturn(eventList);
+        when(filter2.isApplicable(Mockito.any()))
                 .thenReturn(true);
-        Mockito.when(filter1.isApplicable(Mockito.any()))
+        when(filter1.isApplicable(Mockito.any()))
                 .thenReturn(true);
-        Mockito.when(filter1.apply(Mockito.any(), Mockito.any()))
+        when(filter1.apply(Mockito.any(), Mockito.any()))
                 .thenReturn(Stream.of(correctEvent1, correctEvent2, wrongEvent));
-        Mockito.when(filter2.apply(Mockito.any(), Mockito.any()))
+        when(filter2.apply(Mockito.any(), Mockito.any()))
                 .thenReturn(Stream.of(correctEvent1, correctEvent2));
 
         var filterDto = new EventFilterDto();
@@ -104,7 +108,7 @@ public class EventServiceTest {
         prepareValidationThrows();
 
         Assertions.assertThrows(DataValidationException.class, () -> eventService.updateEvent(new UpdateEventDto()));
-        Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
+        verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
     }
 
     @Test
@@ -113,20 +117,20 @@ public class EventServiceTest {
 
         Assertions.assertThrows(EntityNotFoundException.class,
                 () -> eventService.updateEvent(new UpdateEventDto()));
-        Mockito.verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
+        verify(eventRepository, Mockito.never()).save(Mockito.any(Event.class));
     }
 
     @Test
     void updateEvent_ShouldSaveUpdatedEvent() {
         Event event = prepareFindingEvent(true).get();
-        Mockito.when(eventRepository.save(eventCaptor.capture()))
+        when(eventRepository.save(eventCaptor.capture()))
                 .thenAnswer(invocation -> eventCaptor.getValue());
         UpdateEventDto updateEventDto = new UpdateEventDto();
         updateEventDto.setTitle("some new title");
         updateEventDto.setId(event.getId());
         event.setTitle(updateEventDto.getTitle());
         Assertions.assertEquals(eventMapper.toDto(event), eventService.updateEvent(updateEventDto));
-        Mockito.verify(eventRepository, Mockito.times(1)).save(Mockito.any(Event.class));
+        verify(eventRepository, times(1)).save(Mockito.any(Event.class));
     }
 
     @Test
@@ -136,11 +140,25 @@ public class EventServiceTest {
         event1.setId(1L);
         event2.setId(2L);
 
-        Mockito.when(eventRepository.findParticipatedEventsByUserId(Mockito.anyLong()))
+        when(eventRepository.findParticipatedEventsByUserId(Mockito.anyLong()))
                 .thenReturn(List.of(event1, event2));
 
         Assertions.assertEquals(List.of(eventMapper.toDto(event1), eventMapper.toDto(event2)),
                 eventService.getParticipatedEvents(1L));
+    }
+
+    @Test
+    void completeEventsByUser_Success() {
+        Event event1 = Event.builder().status(EventStatus.COMPLETED).build();
+        Event event2 = Event.builder().status(EventStatus.PLANNED).build();
+        Event event3 = Event.builder().status(EventStatus.PLANNED).build();
+        List<Event> events = new ArrayList<>(List.of(event1, event2, event3));
+
+        when(eventRepository.findAllByUserId(1L)).thenReturn(events);
+
+        eventService.cancelEventsByUser(1L);
+
+        verify(eventRepository, times(2)).save(any(Event.class));
     }
 
     private void prepareValidationThrows() {
@@ -154,11 +172,11 @@ public class EventServiceTest {
             event.setId(1L);
             event.setTitle("title");
             var optional = Optional.of(event);
-            Mockito.when(eventRepository.findById(Mockito.anyLong()))
+            when(eventRepository.findById(Mockito.anyLong()))
                     .thenReturn(optional);
             return optional;
         } else {
-            Mockito.when(eventRepository.findById(Mockito.anyLong()))
+            when(eventRepository.findById(Mockito.anyLong()))
                     .thenReturn(Optional.empty());
             return Optional.empty();
         }

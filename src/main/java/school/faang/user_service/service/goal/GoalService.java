@@ -1,8 +1,8 @@
 package school.faang.user_service.service.goal;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.goal.CreateGoalRequestDto;
 import school.faang.user_service.dto.goal.CreateGoalResponse;
 import school.faang.user_service.dto.goal.GoalDto;
@@ -95,5 +95,19 @@ public class GoalService {
     private Goal getGoalById(Long goalId) {
         return goalRepository.findById(goalId)
                 .orElseThrow(() -> new DataValidationException("Goal not found with id: " + goalId));
+    }
+
+    @Transactional
+    public List<Goal> stopGoalsByUser(Long userId) {
+        List<Goal> goals = goalRepository.findGoalsByUserId(userId).toList();
+        goals.forEach(goal -> {
+            if (goal.getUsers().size() <= 1) {
+                goalRepository.delete(goal);
+            } else {
+                goal.getUsers().removeIf(user -> user.getId().equals(userId));
+            }
+        });
+
+        return goals;
     }
 }
