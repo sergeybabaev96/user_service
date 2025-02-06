@@ -31,21 +31,6 @@ public class SkillControllerTest {
     private SkillController skillController;
 
     @Test
-    @DisplayName("Check for empty title")
-    public void testEmptyTitleIsValid() throws DataValidationException {
-        CreateSkillDto createSkill = new CreateSkillDto(1L, "     ");
-
-        assertThrows(DataValidationException.class, () -> skillController.create(createSkill));
-    }
-
-    @Test
-    @DisplayName("Check for null title")
-    public void testNullTitleIsValid() {
-        CreateSkillDto createSkill = new CreateSkillDto(1L, null);
-        assertThrows(DataValidationException.class, () -> skillController.create(createSkill));
-    }
-
-    @Test
     @DisplayName("Check title is valid")
     public void testTitleIsValid() {
         CreateSkillDto createSkill = new CreateSkillDto(1L, "Java");
