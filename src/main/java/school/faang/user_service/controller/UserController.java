@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.*;
 import school.faang.user_service.dto.BooleanResponse;
+import school.faang.user_service.dto.user.UserCreateDto;
 import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.service.UserService;
@@ -57,7 +58,10 @@ public class UserController {
     }
 
     @PostMapping(value = "/registration", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public UserDto createUser(@Valid @ModelAttribute UserCreateDto userCreateDto) {
+    @Operation(summary = "Создать пользователя", description = "Создаёт нового пользователя на основе переданных данных")
+    public UserDto createUser(
+            @Parameter(description = "Данные для создания пользователя", required = true)
+            @Valid @ModelAttribute UserCreateDto userCreateDto) {
         return userService.createUser(userCreateDto);
     }
 
