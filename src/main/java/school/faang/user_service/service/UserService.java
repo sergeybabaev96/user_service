@@ -29,7 +29,7 @@ public class UserService {
 
     public UserDto findUserById(Long id) {
         return userMapper.toDto(userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User with id not found")));
+                .orElseThrow(() -> new EntityNotFoundException("User with id not found: " + id)));
     }
 
     public List<UserDto> getPremiumUsers(UserFilterDto userFilterDto) {
