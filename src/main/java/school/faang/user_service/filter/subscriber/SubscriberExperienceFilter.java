@@ -5,7 +5,7 @@ import school.faang.user_service.entity.User;
 
 import java.util.stream.Stream;
 
-public class UserExperienceFilter implements SubscriberFilter {
+public class SubscriberExperienceFilter implements SubscriberFilter {
     @Override
     public boolean isApplicable(SubscriberFilterDto filters) {
         return filters.getExperienceMin() > 0 || filters.getExperienceMax() > 0;

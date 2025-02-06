@@ -5,15 +5,15 @@ import school.faang.user_service.entity.User;
 
 import java.util.stream.Stream;
 
-public class UserEmailFilter implements SubscriberFilter {
+public class SubscriberNameFilter implements SubscriberFilter {
     @Override
     public boolean isApplicable(SubscriberFilterDto filters) {
-        return filters.getEmailPattern() != null;
+        return filters.getNamePattern() != null;
     }
 
     @Override
     public Stream<User> apply(Stream<User> users, SubscriberFilterDto filters) {
-        return users.filter(user -> user.getEmail() != null
-                && user.getEmail().contains(filters.getEmailPattern()));
+        return users.filter(user -> user.getUsername() != null
+                && user.getUsername().contains(filters.getNamePattern()));
     }
 }
