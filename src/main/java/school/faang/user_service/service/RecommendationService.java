@@ -13,12 +13,14 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.entity.recommendation.Recommendation;
+import school.faang.user_service.exception.EntityNotFoundException;
 import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.UserSkillGuaranteeRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
+import school.faang.user_service.validator.RecommendationValidation;
 
 import java.util.List;
 
@@ -36,26 +38,32 @@ public class RecommendationService {
     private final UserRepository userRepository;
     private final RecommendationMapper recommendationMapper;
 
-    public RecommendationDto create(RecommendationDto recommendation) {
-        recommendationValidation.checkRecommendationInterval(recommendation);
-        recommendationValidation.checkingSkills(recommendation);
-        Long recommendationId = recommendationRepository.create(recommendation.getId(),
-                recommendation.getReceiverId(),
-                recommendation.getContent());
-        addSkillOffers(recommendation);
-        List<Long> listGuaranteedSkills = guaranteedSkills(recommendation);
-        saveMismatchedSkill(listGuaranteedSkills, recommendation);
-        recommendation.setId(recommendationId);
-        return recommendation;
+    public RecommendationDto create(RecommendationDto recommendationDto) {
+        try {
+            recommendationValidation.textAvailability(recommendationDto);
+            recommendationValidation.checkRecommendationInterval(recommendationDto);
+            recommendationValidation.checkingSkills(recommendationDto);
+            Long recommendationId = recommendationRepository.create(recommendationDto.getAuthorId(),
+                    recommendationDto.getReceiverId(),
+                    recommendationDto.getContent());
+            addSkillOffers(recommendationDto);
+            List<Long> listGuaranteedSkills = getGuaranteedSkillIds(recommendationDto);
+            saveMismatchedSkill(listGuaranteedSkills, recommendationDto);
+            recommendationDto.setId(recommendationId);
+            return recommendationDto;
+        } catch (Exception e) {
+            throw new DataValidationException("Ошибка при создании рекомендации", e);
+        }
     }
 
-    public RecommendationDto update(RecommendationDto recommendation) {
-        recommendationValidation.checkRecommendationInterval(recommendation);
-        recommendationValidation.checkingSkills(recommendation);
-        recommendationRepository.update(recommendation.getAuthorId(),
-                recommendation.getReceiverId(), recommendation.getContent());
-        clearingSkills(recommendation);
-        return recommendation;
+    public RecommendationDto update(RecommendationDto recommendationDto) {
+        recommendationValidation.textAvailability(recommendationDto);
+        recommendationValidation.checkRecommendationInterval(recommendationDto);
+        recommendationValidation.checkingSkills(recommendationDto);
+        recommendationRepository.update(recommendationDto.getAuthorId(),
+                recommendationDto.getReceiverId(), recommendationDto.getContent());
+        clearingSkills(recommendationDto);
+        return recommendationDto;
     }
 
     public void delete(long id) {
@@ -86,7 +94,7 @@ public class RecommendationService {
                 .orElseThrow(() -> new DataValidationException("Получатель рекомендации отсутствует"));
         User guarantor = userRepository.findById(recommendationDto.getAuthorId())
                 .orElseThrow(() -> new DataValidationException("Гарантер рекомендации отсутствует"));
-        for (Long id : skillForSave) {//другой метод (параметры -
+        for (Long id : skillForSave) {
             Skill skill = skillRepository.findById(id)
                     .orElseThrow(() -> new DataValidationException("Скилл отсутствует"));
             UserSkillGuarantee newUserSkillGuarantee = UserSkillGuarantee.builder().user(receiver)
@@ -101,12 +109,12 @@ public class RecommendationService {
         }
     }
 
-    private List<Long> guaranteedSkills(RecommendationDto recommendationDto) {
+    private List<Long> getGuaranteedSkillIds(RecommendationDto recommendationDto) {
         Long guarantorId = recommendationDto.getAuthorId();
         User receiver = userRepository.findById(recommendationDto.getReceiverId())
-                .orElseThrow(() -> new DataValidationException("Получатель рекомендации отсутствует"));
+                .orElseThrow(() -> new EntityNotFoundException("Получатель рекомендации отсутствует"));
         User guarantor = userRepository.findById(guarantorId)
-                .orElseThrow(() -> new DataValidationException("Гарантер рекомендации отсутствует"));
+                .orElseThrow(() -> new EntityNotFoundException("Гарантер рекомендации отсутствует"));
 
         List<Skill> allSkill = skillRepository.findAllByUserId(receiver.getId());
         List<Long> existingSkill = recommendationDto.getSkillOffers().stream().map(SkillOfferDto::getSkillId).toList();
@@ -137,6 +145,6 @@ public class RecommendationService {
         for (SkillOfferDto skillOffers : recommendation.getSkillOffers()) {
             skillOfferRepository.create(skillOffers.getSkillId(), recommendation.getId());
         }
-        guaranteedSkills(recommendation);
+        getGuaranteedSkillIds(recommendation);
     }
 }

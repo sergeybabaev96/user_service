@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.validator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RecommendationValidation {
 
-    private final Duration MIN_RECOMMENDATION_INTERVAL = Duration.ofDays(181);
+    private static final Duration MIN_RECOMMENDATION_INTERVAL = Duration.ofDays(181);
     private final RecommendationRepository recommendationRepository;
     private final SkillRepository skillRepository;
 
