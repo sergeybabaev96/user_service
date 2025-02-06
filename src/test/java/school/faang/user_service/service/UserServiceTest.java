@@ -3,8 +3,6 @@ package school.faang.user_service.service;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import school.faang.user_service.dto.user.UserCreateDto;
 import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.entity.Country;
@@ -30,7 +28,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class UserServiceTest {
-
     private UserRepository userRepository;
 
     private GoalService goalService;
@@ -83,8 +80,7 @@ public class UserServiceTest {
                 countryService
         );
 
-
-    user = User.builder()
+        user = User.builder()
                 .id(1L)
                 .username("Mark")
                 .city("Moscow")

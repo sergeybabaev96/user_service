@@ -17,6 +17,7 @@ import school.faang.user_service.service.profilePicture.UserProfilePicService;
 import school.faang.user_service.service.validator.UserValidator;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service

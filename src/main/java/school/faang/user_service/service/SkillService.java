@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.skill.SkillCandidateDto;
 import school.faang.user_service.dto.skill.SkillCreateDto;
 import school.faang.user_service.dto.skill.SkillReadDto;
@@ -12,6 +13,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.exception.BusinessException;
+import school.faang.user_service.mapper.EventMapper;
 import school.faang.user_service.mapper.SkillMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
@@ -31,6 +33,7 @@ public class SkillService {
     private final SkillOfferRepository skillOfferRepository;
     private final UserRepository userRepository;
     private final SkillMapper skillMapper;
+    private final EventMapper eventMapper;
 
     public SkillReadDto create(SkillCreateDto skillCreateDto) {
         if (skillRepository.existsByTitle(skillCreateDto.getTitle())) {
@@ -107,4 +110,13 @@ public class SkillService {
                 .orElseThrow(() -> new NoSuchElementException(String.format("Пользователь с ID %d не найден", userId)));
     }
 
+    public List<Skill> getAllSkills(List<Long> relatedSkills) {
+        return skillRepository.findAllById(relatedSkills);
+    }
+
+    public List<Long> getSkillsIds(List<Skill> skills) {
+        return skills.stream()
+                .map(Skill::getId)
+                .toList();
+    }
 }

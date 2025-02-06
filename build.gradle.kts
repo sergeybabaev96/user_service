@@ -30,6 +30,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
@@ -74,6 +75,10 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.mockito:mockito-core:3.11.2")
+    testImplementation("org.powermock:powermock-api-mockito2:2.0.9")
+    testImplementation("org.powermock:powermock-module-junit4:2.0.9")
+
 }
 
 jsonSchema2Pojo {
@@ -88,23 +93,16 @@ tasks.test {
     finalizedBy(tasks.jacocoTestReport)
 }
 
-val includes = arrayOf(
-    "school/faang/user_service/controller/**",
-    "school/faang/user_service/filters/**",
-    "school/faang/user_service/mapper/**",
-    "school/faang/user_service/service/**"
-)
+val includedDirectories = fileTree("build/classes/java/main") {
+    include("school/faang/user_service/controller/**")
+    include("school/faang/user_service/service/**")
+}
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
 
-    classDirectories.setFrom(
-        files(classDirectories.files.map {
-            fileTree(it) {
-                include(includes)
-            }
-        })
-    )
+    classDirectories.setFrom(includedDirectories)
+
 }
 
 tasks.jacocoTestCoverageVerification {
@@ -115,13 +113,7 @@ tasks.jacocoTestCoverageVerification {
             }
         }
     }
-    classDirectories.setFrom(
-        files(classDirectories.files.map {
-            fileTree(it) {
-                include(includes)
-            }
-        })
-    )
+    classDirectories.setFrom(includedDirectories)
 }
 
 tasks.named("check") {

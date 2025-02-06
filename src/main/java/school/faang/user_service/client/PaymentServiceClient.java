@@ -11,9 +11,9 @@ import school.faang.user_service.dto.payment.OrderDto;
 @FeignClient(name = "paymentService")
 public interface PaymentServiceClient {
 
-    @PostMapping("order")
+    @PostMapping("/v1/order")
     OrderDto createOrder(@RequestBody CreateOrderDto dto);
 
-    @GetMapping("order/{orderId}")
+    @GetMapping("/v1/order/{orderId}")
     OrderDto getOrder(@PathVariable Long orderId);
 }
