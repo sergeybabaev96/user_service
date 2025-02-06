@@ -36,10 +36,18 @@ logging:
   level:
     root: info
 
-project-service:
-  host: localhost
-  port: 8082
+services:
+  s3:
+    endpoint: http://localhost:9000
+    accessKey: user
+    secretKey: password
+    bucketName: corpbucket
 
-payment-service:
-  host: localhost
-  port: 9080
+
+  project-service:
+    host: localhost
+    port: 8082
+
+  payment-service:
+    host: localhost
+    port: 9080

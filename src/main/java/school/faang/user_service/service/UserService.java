@@ -1,15 +1,20 @@
 package school.faang.user_service.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.dto.user.UserCreateDto;
 import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.filters.user.UserFilter;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.profilePicture.UserProfilePicService;
+import school.faang.user_service.service.validator.UserValidator;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +29,10 @@ public class UserService {
     private final MentorshipService mentorshipService;
     private final List<UserFilter> userFilters;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final UserValidator userValidator;
+    private final UserProfilePicService userProfilePicService;
+    private final CountryService countryService;
 
     @Transactional
     public void deactivateUser(Long userId) {
@@ -63,4 +72,19 @@ public class UserService {
                 .toList();
     }
 
+    @Transactional
+    public UserDto createUser(@Valid UserCreateDto userCreateDto) {
+        userValidator.validateNewUser(userCreateDto);
+
+        String encodedPassword = passwordEncoder.encode(userCreateDto.getPassword());
+
+        User user = userMapper.toEntity(userCreateDto);
+        user.setCountry(countryService.getCountryById(userCreateDto.getCountryId()));
+        user.setPassword(encodedPassword);
+        user.setActive(true);
+        user.setUserProfilePic(userProfilePicService.createProfilePicture(userCreateDto));
+
+        userRepository.save(user);
+        return userMapper.toDto(user);
+    }
 }

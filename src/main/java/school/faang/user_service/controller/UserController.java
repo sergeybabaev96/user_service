@@ -1,5 +1,6 @@
 package school.faang.user_service.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,7 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 import school.faang.user_service.dto.BooleanResponse;
+import school.faang.user_service.dto.user.UserCreateDto;
 import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.service.UserService;
@@ -39,6 +43,11 @@ public class UserController {
         return userService.getPremiumUsers(userFilterDto);
     }
 
+    @PostMapping(value = "/registration", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public UserDto createUser(@Valid @ModelAttribute UserCreateDto userCreateDto) {
+        return userService.createUser(userCreateDto);
+    }
+
     @GetMapping("/{userId}")
     public UserDto getUser(@PathVariable long userId) {
         return userService.getUser(userId);
@@ -48,5 +57,4 @@ public class UserController {
     public List<UserDto> getUsersByIds(@RequestParam List<Long> ids) {
         return userService.getUsersByIds(ids);
     }
-
 }
