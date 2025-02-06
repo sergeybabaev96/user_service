@@ -130,8 +130,8 @@ public class EventService {
 
     public void clearPastEvents() {
         List<Long> events = eventRepository.findAll().stream()
-                .filter(event -> event.getStatus() == EventStatus.COMPLETED
-                        || event.getStatus() == EventStatus.CANCELED)
+                .filter(event -> event.getStatus().equals(EventStatus.COMPLETED)
+                        || event.getStatus().equals(EventStatus.CANCELED))
                 .map(Event::getId)
                 .toList();
         ListUtils.partition(events, BATCH_SIZE).forEach(this::deletePastEventsBatch);
