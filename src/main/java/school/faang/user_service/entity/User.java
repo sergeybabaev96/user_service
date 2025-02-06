@@ -161,6 +161,4 @@ public class User {
 
     @OneToOne(mappedBy = "user")
     private Premium premium;
-
-    private boolean banned;
 }
