@@ -17,6 +17,7 @@ import school.faang.user_service.mapper.TariffMapperImpl;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.properties.UserServiceProperties;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.impl.UserServiceImpl;
 import school.faang.user_service.service.tariff.TariffService;
 
 import java.util.List;
@@ -37,14 +38,14 @@ public class UserServiceTest {
     @Spy
     private UserServiceProperties userServiceProperties;
 
+    @Spy
+    private TariffMapperImpl tariffMapper;
+
     @Mock
     private TariffService tariffService;
 
     @Mock
     private UserRepository userRepository;
-
-    @Spy
-    private TariffMapperImpl tariffMapper;
 
     @Mock
     private UserMapper userMapper;
@@ -56,9 +57,9 @@ public class UserServiceTest {
     public void setUp() {
         reset(tariffService);
         reset(userRepository);
-        reset(tariffMapper);
         reset(userMapper);
         reset(userServiceProperties);
+        reset(tariffMapper);
     }
 
     @Test

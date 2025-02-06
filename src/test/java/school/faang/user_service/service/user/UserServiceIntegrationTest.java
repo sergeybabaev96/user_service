@@ -8,13 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import school.faang.user_service.BaseTest;
+import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.user.GetUserRequest;
-import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.entity.Tariff;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.TariffMapper;
 import school.faang.user_service.repository.TariffRepository;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.UserService;
 import school.faang.user_service.service.tariff.TariffService;
 
 import java.util.List;

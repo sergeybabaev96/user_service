@@ -30,7 +30,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Event findEventById(Long id) {
-        return eventRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Event with id " + id + " not found"));
+        return eventRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(String.format("Event with id %s not found", id)));
     }
 
     @Override

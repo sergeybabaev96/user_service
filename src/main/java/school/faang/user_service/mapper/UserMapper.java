@@ -6,7 +6,6 @@ import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.UserDto;
-import school.faang.user_service.entity.Identifiable;
 import school.faang.user_service.entity.User;
 
 import java.util.List;
@@ -19,16 +18,7 @@ public interface UserMapper {
 
     User toEntity(UserDto dto);
 
-
     UserDto toDto(User user);
+
     List<UserDto> toDto(List<User> users);
-
-    default Long toId(Identifiable identifiable) {
-        if (identifiable == null) {
-            return null;
-        }
-        return identifiable.getId();
-    }
-
-
 }

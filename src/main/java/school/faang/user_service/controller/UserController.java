@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.TariffDto;
 import school.faang.user_service.dto.user.GetUserRequest;
 import school.faang.user_service.dto.UserDto;
-import school.faang.user_service.service.user.UserService;
+import school.faang.user_service.service.UserService;
 
 import java.util.List;
 
