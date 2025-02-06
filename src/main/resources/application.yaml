@@ -65,5 +65,13 @@ avatar:
 dicebear:
   endpoint: https://api.dicebear.com
 
+author:
+  banner:
+    cron: "0 0 0 * * *" # every day at midnight
+
+user:
+  ban:
+    channel: user_ban
+
 service:
   name: user-service
