@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.avatar.AvatarType;
 import school.faang.user_service.dto.user.UserRegistrationDto;
@@ -19,6 +20,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.service.user.UserAvatarService;
 import school.faang.user_service.service.user.UserService;
+import school.faang.user_service.validation.image.ValidImage;
 
 import java.util.List;
 
@@ -82,5 +84,25 @@ public class UserController {
         User user = userService.getUser(userId);
         String avatarUrl = userAvatarService.getUserAvatar(user).toString();
         return ResponseEntity.ok(avatarUrl);
+    }
+
+    @PostMapping("/avatar")
+    public ResponseEntity<String> uploadAvatar(
+            @ValidImage @RequestParam("file") MultipartFile file,
+            @RequestParam(defaultValue = "small") String size) {
+        String avatarUrl = userService.uploadAvatar(file, size);
+        return ResponseEntity.ok(avatarUrl);
+    }
+
+    @GetMapping("/avatar")
+    public ResponseEntity<String> downloadAvatar(@RequestParam(defaultValue = "small") String size) {
+        String avatarUrl = userService.downloadAvatar(size);
+        return ResponseEntity.ok(avatarUrl);
+    }
+
+    @DeleteMapping("/avatar")
+    public ResponseEntity<Void> deleteAvatar() {
+        userService.deleteAvatar();
+        return ResponseEntity.noContent().build();
     }
 }

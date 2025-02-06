@@ -13,7 +13,7 @@ import school.faang.user_service.dto.SubscriptionUserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.service.subscription.SubscriptionService;
-import school.faang.user_service.validator.DtoValidator;
+import school.faang.user_service.validation.DtoValidator;
 
 import java.util.List;
 

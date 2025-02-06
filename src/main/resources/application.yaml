@@ -20,6 +20,10 @@ spring:
       port: 6379
       host: localhost
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+
 swagger:
   api-docs:
     path: /v1/api-docs
@@ -36,6 +40,13 @@ logging:
   level:
     root: info
 
+s3:
+  endpoint: http://localhost:9000
+  download-path: /api/v1/buckets/corpbucket/objects/download?preview=true&prefix=
+  accessKey: user
+  secretKey: password
+  bucketName: corpbucket
+
 project-service:
   host: localhost
   port: 8082
@@ -46,6 +57,13 @@ payment-service:
 
 goal:
   max-active-goals-per-user: 3
+
+image:
+  avatar:
+    folder-name: users_avatars
+    sizes:
+      large: 1080
+      small: 170
 
 minio:
   s3:

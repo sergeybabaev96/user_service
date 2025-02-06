@@ -5,10 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@Embeddable
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
+@Embeddable
 public class UserProfilePic {
     private String fileId;
     private String smallFileId;

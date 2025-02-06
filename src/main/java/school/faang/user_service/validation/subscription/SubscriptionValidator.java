@@ -1,4 +1,4 @@
-package school.faang.user_service.validator;
+package school.faang.user_service.validation.subscription;
 
 import org.springframework.stereotype.Component;
 import school.faang.user_service.exception.DataValidationException;
