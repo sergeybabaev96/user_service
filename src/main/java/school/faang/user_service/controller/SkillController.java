@@ -21,7 +21,7 @@ import java.util.List;
 public class SkillController {
     private final SkillService skillService;
 
-    @PostMapping("/skill")
+    @PostMapping("/skills")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseSkillDto create(@Valid @RequestBody CreateSkillDto skill) {
         return skillService.create(skill);
