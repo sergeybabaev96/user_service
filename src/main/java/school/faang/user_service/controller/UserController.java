@@ -43,7 +43,6 @@ public class UserController {
         return userService.getPremiumUsers(userFilterDto);
     }
 
-
     @PostMapping(value = "/registration", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public UserDto createUser(@Valid @ModelAttribute UserCreateDto userCreateDto) {
         return userService.createUser(userCreateDto);
@@ -58,5 +57,4 @@ public class UserController {
     public List<UserDto> getUsersByIds(@RequestParam List<Long> ids) {
         return userService.getUsersByIds(ids);
     }
-
 }
