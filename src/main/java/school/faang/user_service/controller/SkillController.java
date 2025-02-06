@@ -27,20 +27,20 @@ public class SkillController {
         return skillService.create(skill);
     }
 
-    @GetMapping("/user/{userId}/skills")
+    @GetMapping("/users/{userId}/skills")
     public List<ResponseSkillDto> getUserSkills(@PathVariable Long userId) {
 
         return skillService.getUserSkills(userId);
     }
 
-    @GetMapping("/user/{userId}/offers")
+    @GetMapping("/users/{userId}/offers")
     public List<SkillCandidateDto> getOfferedSkills(@PathVariable Long userId) {
 
         return skillService.getOfferedSkills(userId);
     }
 
 
-    @PostMapping("/user/{userId}/offer/{skillId}")
+    @PostMapping("/users/{userId}/offers/{skillId}")
     public ResponseSkillDto acquireSkillFromOffers(@PathVariable Long skillId, @PathVariable Long userId) {
         return skillService.acquireSkillFromOffers(skillId, userId);
     }

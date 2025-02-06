@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Validated
 public class SkillServiceImpl implements SkillService {
     @Value("${config.value.min.skill.offers}")
     private int minSkillOffers;
