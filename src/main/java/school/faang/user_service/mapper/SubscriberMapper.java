@@ -1,4 +1,4 @@
-package school.faang.user_service.mapper.subscriber;
+package school.faang.user_service.mapper;
 
 import org.mapstruct.Mapper;
 import school.faang.user_service.dto.subscriber.SubscriberReadDto;
