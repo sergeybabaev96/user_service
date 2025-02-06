@@ -1,7 +1,6 @@
 package school.faang.user_service.service.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,17 +11,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.util.Pair;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.entity.UserProfilePic;
-import school.faang.user_service.exception.FileException;
 import school.faang.user_service.utils.image.ImageProcessor;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class S3ServiceTest {
+
     @Mock
     private AmazonS3 s3Client;
 
@@ -45,10 +44,12 @@ public class S3ServiceTest {
     @InjectMocks
     private S3Service s3Service;
 
-    private String testBucket = "test-bucket";
-    private String avatarFolder = "avatars";
-    private int largeSize = 1024;
-    private int smallSize = 256;
+    private final String testBucket = "test-bucket";
+    private final String avatarFolder = "avatars";
+    private final int largeSize = 1024;
+    private final int smallSize = 256;
+    private final String s3Endpoint = "http://localhost:9001";
+    private final String downloadPath = "/api/v1/buckets/test-bucket/objects/download?prefix=";
 
     @Test
     void uploadAvatarSuccess() throws Exception {
@@ -56,6 +57,8 @@ public class S3ServiceTest {
         setField(s3Service, "smallAvatarMaxSize", smallSize);
         setField(s3Service, "bucketName", testBucket);
         setField(s3Service, "avatarFolderName", avatarFolder);
+        setField(s3Service, "s3Endpoint", s3Endpoint);
+        setField(s3Service, "downloadPath", downloadPath);
 
         ImageProcessor.ImageData largeImageData = mockImageData();
         ImageProcessor.ImageData smallImageData = mockImageData();
@@ -63,31 +66,33 @@ public class S3ServiceTest {
         when(imageProcessor.resizeImage(any(), eq(largeSize))).thenReturn(largeImageData);
         when(imageProcessor.resizeImage(any(), eq(smallSize))).thenReturn(smallImageData);
 
-        Pair<UserProfilePic, InputStream> result = s3Service.uploadAvatar(multipartFile, "large");
+        Pair<UserProfilePic, String> result = s3Service.uploadAvatar(multipartFile, "large");
 
         ArgumentCaptor<PutObjectRequest> putRequestCaptor = ArgumentCaptor.forClass(PutObjectRequest.class);
         verify(s3Client, times(2)).putObject(putRequestCaptor.capture());
-
         List<PutObjectRequest> requests = putRequestCaptor.getAllValues();
+
         assertEquals(testBucket, requests.get(0).getBucketName());
         assertEquals(testBucket, requests.get(1).getBucketName());
         assertTrue(requests.get(0).getKey().startsWith(avatarFolder + "/"));
 
         assertNotNull(result.getFirst().getFileId());
         assertNotNull(result.getFirst().getSmallFileId());
-        assertSame(largeImageData.getInputStream(), result.getSecond());
+
+        String largeImageKey = requests.get(0).getKey();
+        String expectedUrl = s3Endpoint + downloadPath + URLEncoder.encode(largeImageKey, StandardCharsets.UTF_8);
+        assertEquals(expectedUrl, result.getSecond());
     }
 
     @Test
-    void downloadAvatarNotFound() {
-        setField(s3Service, "bucketName", testBucket);
+    void downloadAvatarSuccess() {
+        setField(s3Service, "s3Endpoint", s3Endpoint);
+        setField(s3Service, "downloadPath", downloadPath);
 
-        when(s3Client.getObject(testBucket, "invalid-key"))
-                .thenThrow(new AmazonS3Exception("Object not found"));
-
-        assertThrows(FileException.class, () -> {
-            s3Service.downloadAvatar("invalid-key");
-        });
+        String testKey = "avatars/5a595799-c86f-4996-8e27-7258a367e0c4";
+        String expectedUrl = s3Endpoint + downloadPath + URLEncoder.encode(testKey, StandardCharsets.UTF_8);
+        String actualUrl = s3Service.downloadAvatar(testKey);
+        assertEquals(expectedUrl, actualUrl);
     }
 
     @Test
@@ -110,11 +115,24 @@ public class S3ServiceTest {
 
     private void setField(Object target, String fieldName, Object value) {
         try {
-            Field field = target.getClass().getDeclaredField(fieldName);
+            Field field = getField(target.getClass(), fieldName);
             field.setAccessible(true);
             field.set(target, value);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private Field getField(Class<?> clazz, String fieldName) throws NoSuchFieldException {
+        try {
+            return clazz.getDeclaredField(fieldName);
+        } catch (NoSuchFieldException e) {
+            Class<?> superClass = clazz.getSuperclass();
+            if (superClass != null) {
+                return getField(superClass, fieldName);
+            } else {
+                throw e;
+            }
         }
     }
 }

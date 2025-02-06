@@ -15,6 +15,8 @@ import school.faang.user_service.exception.FileException;
 import school.faang.user_service.utils.image.ImageProcessor;
 
 import java.io.InputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -40,7 +42,10 @@ public class S3Service {
     @Value("${s3.endpoint}")
     private String s3Endpoint;
 
-    public Pair<UserProfilePic, InputStream> uploadAvatar(MultipartFile file, String size) {
+    @Value("${s3.download-path}")
+    private String downloadPath;
+
+    public Pair<UserProfilePic, String> uploadAvatar(MultipartFile file, String size) {
         try {
             ImageProcessor.ImageData largeImageData = imageProcessor.resizeImage(file, largeAvatarMaxSize);
             ImageProcessor.ImageData smallImageData = imageProcessor.resizeImage(file, smallAvatarMaxSize);
@@ -62,26 +67,20 @@ public class S3Service {
 
             UserProfilePic userProfilePic = new UserProfilePic(largeImageKey, smallImageKey);
 
-            InputStream avatarInputStream = smallImageData.getInputStream();
+            String avatarUrl = s3Endpoint + downloadPath + URLEncoder.encode(smallImageKey, StandardCharsets.UTF_8);
             if (size.equalsIgnoreCase("large")) {
-                avatarInputStream = largeImageData.getInputStream();
+                avatarUrl = s3Endpoint + downloadPath + URLEncoder.encode(largeImageKey, StandardCharsets.UTF_8);
             }
 
-            return Pair.of(userProfilePic, avatarInputStream);
+            return Pair.of(userProfilePic, avatarUrl);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new FileException(e.getMessage());
         }
     }
 
-    public InputStream downloadAvatar(String imageKey) {
-        try {
-            S3Object s3Object = s3Client.getObject(bucketName, imageKey);
-            return s3Object.getObjectContent();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new FileException(e.getMessage());
-        }
+    public String downloadAvatar(String imageKey) {
+        return s3Endpoint + downloadPath + URLEncoder.encode(imageKey, StandardCharsets.UTF_8);
     }
 
     public void deleteAvatar(String imageKey) {

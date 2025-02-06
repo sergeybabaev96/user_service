@@ -42,6 +42,7 @@ logging:
 
 s3:
   endpoint: http://localhost:9000
+  download-path: /api/v1/buckets/corpbucket/objects/download?preview=true&prefix=
   accessKey: user
   secretKey: password
   bucketName: corpbucket

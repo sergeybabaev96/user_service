@@ -79,17 +79,18 @@ public class UserService {
     }
 
     @Transactional
-    public InputStream uploadAvatar(MultipartFile file, String size) {
+    public String uploadAvatar(MultipartFile file, String size) {
         long userId = userContext.getUserId();
         User currentUser = getUser(userId);
 
-        Pair<UserProfilePic, InputStream> uploadResult = s3Service.uploadAvatar(file, size);
+        Pair<UserProfilePic, String> uploadResult = s3Service.uploadAvatar(file, size);
 
-        String largeImageKey = currentUser.getUserProfilePic().getFileId();
-        String smallImageKey = currentUser.getUserProfilePic().getSmallFileId();
-
-        s3Service.deleteAvatar(largeImageKey);
-        s3Service.deleteAvatar(smallImageKey);
+        if (currentUser.getUserProfilePic() != null) {
+            String largeImageKey = currentUser.getUserProfilePic().getFileId();
+            String smallImageKey = currentUser.getUserProfilePic().getSmallFileId();
+            s3Service.deleteAvatar(largeImageKey);
+            s3Service.deleteAvatar(smallImageKey);
+        }
 
         currentUser.setUserProfilePic(uploadResult.getFirst());
 
@@ -99,7 +100,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public InputStream downloadAvatar(String size) {
+    public String downloadAvatar(String size) {
         long userId = userContext.getUserId();
         User currentUser = getUser(userId);
 
@@ -121,6 +122,9 @@ public class UserService {
 
         s3Service.deleteAvatar(largeImageKey);
         s3Service.deleteAvatar(smallImageKey);
+
+        currentUser.setUserProfilePic(null);
+        userRepository.save(currentUser);
     }
 
     private void deactivateUserDependencies(Long userId) {

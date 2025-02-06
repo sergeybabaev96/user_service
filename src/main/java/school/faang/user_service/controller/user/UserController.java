@@ -2,8 +2,6 @@ package school.faang.user_service.controller.user;
 
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,7 +19,6 @@ import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.validation.image.ValidImage;
 
-import java.io.InputStream;
 import java.util.List;
 
 @Validated
@@ -53,19 +50,17 @@ public class UserController {
     }
 
     @PostMapping("/avatar")
-    public ResponseEntity<Resource> uploadAvatar(
+    public ResponseEntity<String> uploadAvatar(
             @ValidImage @RequestParam("file") MultipartFile file,
             @RequestParam(defaultValue = "small") String size) {
-        InputStream avatarInputStream = userService.uploadAvatar(file, size);
-        Resource resource = new InputStreamResource(avatarInputStream);
-        return ResponseEntity.ok(resource);
+        String avatarUrl = userService.uploadAvatar(file, size);
+        return ResponseEntity.ok(avatarUrl);
     }
 
     @GetMapping("/avatar")
-    public ResponseEntity<Resource> downloadAvatar(@RequestParam(defaultValue = "small") String size) {
-        InputStream avatarInputStream = userService.downloadAvatar(size);
-        Resource resource = new InputStreamResource(avatarInputStream);
-        return ResponseEntity.ok(resource);
+    public ResponseEntity<String> downloadAvatar(@RequestParam(defaultValue = "small") String size) {
+        String avatarUrl = userService.downloadAvatar(size);
+        return ResponseEntity.ok(avatarUrl);
     }
 
     @DeleteMapping("/avatar")

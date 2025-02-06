@@ -185,23 +185,23 @@ public class UserServiceTest {
         UserProfilePic oldProfile = new UserProfilePic("old-large", "old-small");
         user.setUserProfilePic(oldProfile);
 
-        MultipartFile file = mock(MultipartFile.class);
+        MultipartFile file = org.mockito.Mockito.mock(MultipartFile.class);
         String size = "large";
         UserProfilePic newProfile = new UserProfilePic("new-large", "new-small");
-        InputStream expectedStream = new ByteArrayInputStream(new byte[0]);
-        Pair<UserProfilePic, InputStream> uploadResult = Pair.of(newProfile, expectedStream);
+        String expectedUrl = "new-url";
+        Pair<UserProfilePic, String> uploadResult = Pair.of(newProfile, expectedUrl);
 
         when(userContext.getUserId()).thenReturn(userId);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(s3Service.uploadAvatar(file, size)).thenReturn(uploadResult);
 
-        InputStream result = userService.uploadAvatar(file, size);
+        String result = userService.uploadAvatar(file, size);
 
         verify(s3Service).deleteAvatar("old-large");
         verify(s3Service).deleteAvatar("old-small");
         verify(userRepository).save(user);
         assertThat(user.getUserProfilePic()).isEqualTo(newProfile);
-        assertThat(result).isSameAs(expectedStream);
+        assertThat(result).isEqualTo(expectedUrl);
     }
 
     @Test
@@ -210,16 +210,16 @@ public class UserServiceTest {
         User user = new User();
         UserProfilePic profile = new UserProfilePic("large-key", "small-key");
         user.setUserProfilePic(profile);
-        InputStream expectedStream = new ByteArrayInputStream(new byte[0]);
+        String expectedUrl = "expected-url";
 
         when(userContext.getUserId()).thenReturn(userId);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(s3Service.downloadAvatar("small-key")).thenReturn(expectedStream);
+        when(s3Service.downloadAvatar("small-key")).thenReturn(expectedUrl);
 
-        InputStream result = userService.downloadAvatar("large");
+        String result = userService.downloadAvatar("large");
 
         verify(s3Service).downloadAvatar("small-key");
-        assertThat(result).isSameAs(expectedStream);
+        assertThat(result).isEqualTo(expectedUrl);
     }
 
     @Test
@@ -236,5 +236,7 @@ public class UserServiceTest {
 
         verify(s3Service).deleteAvatar("large-key");
         verify(s3Service).deleteAvatar("small-key");
+        verify(userRepository).save(user);
+        assertThat(user.getUserProfilePic()).isNull();
     }
 }
