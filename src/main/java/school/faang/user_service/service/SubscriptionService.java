@@ -2,12 +2,12 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.user.UserReadDto;
-import school.faang.user_service.dto.user.UserFilterDto;
+import school.faang.user_service.dto.subscriber.SubscriberReadDto;
+import school.faang.user_service.dto.subscriber.SubscriberFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.subscriber.SubscriberFilter;
-import school.faang.user_service.mapper.user.UserMapper;
+import school.faang.user_service.mapper.subscriber.SubscriberMapper;
 import school.faang.user_service.repository.SubscriptionRepository;
 
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 public class SubscriptionService {
     private final SubscriptionRepository repository;
     private final List<SubscriberFilter> userFilters;
-    private final UserMapper userMapper;
+    private final SubscriberMapper subscriberMapper;
 
     public void followUser(long followerId, long followeeId) {
         checkingActionsOnYourself(followerId, followeeId, "Нельзя подписаться на свой аккаунт.");
@@ -48,13 +48,13 @@ public class SubscriptionService {
         }
     }
 
-    public List<UserReadDto> getFollowers(long followeeId, UserFilterDto filters) {
+    public List<SubscriberReadDto> getFollowers(long followeeId, SubscriberFilterDto filters) {
         Stream<User> followers = repository.findByFolloweeId(followeeId);
 
         return userFilters.stream()
                 .filter(userFilter -> userFilter.isApplicable(filters))
                 .flatMap(userFilter -> userFilter.apply(followers, filters))
-                .map(userMapper::toDto)
+                .map(subscriberMapper::toDto)
                 .toList();
     }
 
@@ -62,13 +62,13 @@ public class SubscriptionService {
         return repository.findFollowersAmountByFolloweeId(followeeId);
     }
 
-    public List<UserReadDto> getFollowing(long followeeId, UserFilterDto filters) {
+    public List<SubscriberReadDto> getFollowing(long followeeId, SubscriberFilterDto filters) {
         Stream<User> following = repository.findByFolloweeId(followeeId);
 
         return userFilters.stream()
                 .filter(userFilter -> userFilter.isApplicable(filters))
                 .flatMap(userFilter -> userFilter.apply(following, filters))
-                .map(userMapper::toDto)
+                .map(subscriberMapper::toDto)
                 .toList();
     }
 
