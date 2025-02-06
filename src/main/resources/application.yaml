@@ -43,3 +43,6 @@ project-service:
 payment-service:
   host: localhost
   port: 9080
+
+schedule:
+  cron: "0 0 6 * * MON"
