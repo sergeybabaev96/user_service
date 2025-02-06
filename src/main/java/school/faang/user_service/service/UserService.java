@@ -1,7 +1,11 @@
 package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.UserDto;
 import jakarta.persistence.EntityNotFoundException;
 import school.faang.user_service.dto.UserFilterDto;
@@ -14,6 +18,7 @@ import school.faang.user_service.repository.UserRepository;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -32,6 +37,17 @@ public class UserService {
         return filterUsers(userFilterDto, users)
                 .map(userMapper::toDto)
                 .toList();
+    }
+
+    @KafkaListener(topics = "${user.ban.kafka_topic}",
+            groupId = "${spring.kafka.consumer.group-id}",
+            containerFactory = "kafkaListenerContainerFactory")
+    @Transactional
+    public void banRequestListener(List<Long> usersIds, Acknowledgment ack) {
+        log.info("Ban request listener called. with ids {}", usersIds);
+        userRepository.banUsersByIds(usersIds);
+        log.info("Ban request completed");
+        ack.acknowledge();
     }
 
     private Stream<User> filterUsers(UserFilterDto filters, Stream<User> userStream) {
