@@ -19,10 +19,12 @@ public class SkillRequestServiceImpl implements SkillRequestService {
 
     @Override
     public List<SkillRequestDto> createAllSkillRequest(List<Long> skillIds, RecommendationRequest recommendationRequest) {
-        List<SkillRequest> skillRequests = skillIds.stream().map(skillId -> SkillRequest.builder()
-                .request(recommendationRequest)
-                .skill(skillService.getSkillById(skillId))
-                .build())
+        List<SkillRequest> skillRequests = skillIds.stream().map(skillId -> {
+                    SkillRequest.SkillRequestBuilder builder = SkillRequest.builder();
+                    return builder.request(recommendationRequest)
+                    .skill(skillService.getSkillById(skillId))
+                    .build();
+                })
                 .toList();
         List<SkillRequest> saved = (List<SkillRequest>) skillRequestRepository.saveAll(skillRequests);
         return saved.stream().map(skillRequestMapper::toDto).toList();

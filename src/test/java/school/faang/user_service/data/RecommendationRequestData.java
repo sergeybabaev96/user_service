@@ -73,7 +73,7 @@ public enum RecommendationRequestData {
     public school.faang.user_service.entity.recommendation.RecommendationRequest toRecommendationRequest() {
         return school.faang.user_service.entity.recommendation.RecommendationRequest.builder()
                 .id(this.id)
-                .skills(this.skillsRequested.stream()
+                .skills((List<SkillRequest>) this.skillsRequested.stream()
                         .map(skillData -> SkillRequest.builder()
                                 .skill(skillData.toSkill())
                                 .build())

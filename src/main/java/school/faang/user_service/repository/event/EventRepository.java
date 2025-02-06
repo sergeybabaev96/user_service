@@ -20,4 +20,14 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             WHERE ue.user_id = :userId
             """)
     List<Event> findParticipatedEventsByUserId(long userId);
+
+    @Query(nativeQuery = true, value = """
+            SELECT e.*
+            FROM event e
+                LEFT JOIN tariff t ON t.event_id = e.id
+            ORDER BY
+                CASE WHEN t.active = true THEN t.priority END
+            LIMIT ?1 OFFSET ?2
+    """)
+    List<Event> findAllOrderByTariffAndLimit(Integer limit, Integer offset);
 }

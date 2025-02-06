@@ -1,4 +1,4 @@
-package school.faang.user_service.dto;
+package school.faang.user_service.client.payment;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 
 @Builder
 public record PaymentRequest(
-        @NotNull
         long paymentNumber,
 
         @Min(1)

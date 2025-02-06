@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import school.faang.user_service.BaseTest;
+import school.faang.user_service.controller.RecommendationRequestController;
 import school.faang.user_service.data.RecommendationRequestData;
 import school.faang.user_service.data.SkillData;
 import school.faang.user_service.dto.recommendation.request.RecommendationRequestDto;
@@ -126,11 +127,11 @@ public class RecommendationRequestControllerTest extends BaseTest {
         mockFindLatestPendingRequest(false);
         mockSkillsFindById(data);
         when(recommendationRequestRepository.save(any())).thenReturn(data.toRecommendationRequest());
-        when(skillRequestRepository.saveAll(any())).thenReturn(data.getSkillsRequested().stream().map(skillData ->
+        when(skillRequestRepository.saveAll(any())).thenReturn((Iterable<SkillRequest>) data.getSkillsRequested().stream().map(skillData ->
                 SkillRequest.builder()
                         .skill(skillData.toSkill())
                         .request(data.toRecommendationRequest())
-                        .id(1)
+                        .id(1L)
                         .build()
                 ).toList()
         );

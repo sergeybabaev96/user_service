@@ -1,6 +1,7 @@
 package school.faang.user_service.repository.goal;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
@@ -17,6 +18,7 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
             """)
     Stream<Goal> findGoalsByUserId(long userId);
 
+    @Modifying
     @Query(nativeQuery = true, value = """
             INSERT INTO goal (title, description, parent_goal_id, status, created_at, updated_at)
             VALUES (?1, ?2, ?3, 0, NOW(), NOW()) returning *
