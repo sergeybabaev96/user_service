@@ -38,16 +38,18 @@ public class GoalController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping("/{goalId}")
+    @PutMapping
     public ResponseEntity<UpdateGoalResponse> updateGoal(
-            @Valid @RequestBody UpdateGoalRequestDto request
+            @Valid @RequestBody UpdateGoalRequestDto updateGoalRequest
     ) {
-        UpdateGoalResponse response = goalService.updateGoal(request);
+        UpdateGoalResponse response = goalService.updateGoal(updateGoalRequest);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{goalId}")
-    public ResponseEntity<Void> deleteGoal(@PathVariable long goalId) {
+    public ResponseEntity<Void> deleteGoal(
+            @PathVariable long goalId
+    ) {
         goalService.deleteGoal(goalId);
         return ResponseEntity.noContent().build();
     }
