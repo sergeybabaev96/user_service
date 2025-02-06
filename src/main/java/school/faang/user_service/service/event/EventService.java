@@ -12,6 +12,7 @@ import school.faang.user_service.dto.promotion.EventPromotionRequest;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
+import school.faang.user_service.entity.event.EventStatus;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.EventMapper;
 import school.faang.user_service.service.event.filter.EventFilter;
@@ -139,6 +140,16 @@ public class EventService {
                     return eventMapper.toEventResponse(eventRepository.findById(event).get());
                 })
                 .toList();
+    }
+
+    public void removeAllPastEvents() {
+        List<Event> pastEvents = eventRepository.findAll()
+                .stream()
+                .filter(event -> event.getStatus().equals(EventStatus.COMPLETED))
+                .toList();
+        pastEvents.forEach(event -> {
+            eventRepository.deleteById(event.getId());
+        });
     }
 
     private void validateEvent(Long eventId) {
