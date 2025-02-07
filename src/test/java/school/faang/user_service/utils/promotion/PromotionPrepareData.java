@@ -193,10 +193,7 @@ public class PromotionPrepareData {
     }
 
     public static UserDto getUserDto() {
-        return UserDto.builder()
-                .id(1L)
-                .username("user")
-                .build();
+        return new UserDto(1L, "user", "email", "phone");
     }
 
     public static Event getEvent() {
