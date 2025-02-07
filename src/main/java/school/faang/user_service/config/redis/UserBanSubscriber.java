@@ -22,7 +22,7 @@ public class UserBanSubscriber implements RedisSubscriber {
             log.info("UserBanSubscriber received the message: {}", userIdsForBan);
             userService.setBannedField(true, userIdsForBan);
         } catch (ClassCastException e) {
-            log.error("{}", e);
+            log.error("Message", e);
             log.error("Expected List<Long> but received redis message like: {}", message);
             throw new RedisMessageNotCorrectTypeException("Not correct type for redis message, expected List<Long>");
         }

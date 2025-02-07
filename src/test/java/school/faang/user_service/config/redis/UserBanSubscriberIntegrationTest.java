@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.CountryRepository;
@@ -61,7 +62,9 @@ public class UserBanSubscriberIntegrationTest {
     @Test
     public void whenMessagePublished_thenUserBannedFieldUpdated() throws InterruptedException {
         redisTemplate.convertAndSend(banChannelName, Arrays.asList(testUser.getId()));
-        TimeUnit.SECONDS.sleep(1);
+        Awaitility.await()
+                .atMost(5, TimeUnit.SECONDS)
+                .until(() -> userRepository.findById(testUser.getId()).map(User::getBanned).orElse(false));
 
         Optional<User> updatedUserOpt = userRepository.findById(testUser.getId());
         assertThat(updatedUserOpt).isPresent();

@@ -2,6 +2,7 @@ package school.faang.user_service.service.user;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
@@ -19,6 +20,7 @@ import java.util.Objects;
 import static school.faang.user_service.utils.UserErrorMessage.USERS_NOT_FOUND;
 import static school.faang.user_service.utils.UserErrorMessage.USER_NOT_FOUND;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserService {
@@ -72,6 +74,10 @@ public class UserService {
 
     @Transactional
     public void setBannedField(boolean banned, List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            log.warn("Attempt to ban users with empty user list.");
+            return;
+        }
         userRepository.setBannedField(banned, userIds);
     }
 
