@@ -1,28 +1,27 @@
-package school.faang.user_service.filter.goal;
+package school.faang.user_service.filter.goal.invitation;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import school.faang.user_service.dto.goal.InvitationFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.GoalInvitation;
-import school.faang.user_service.filter.goal.data.InviterIdFilter;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class InviterIdFilterTest extends InvitationFilterTest {
+class InviterNameFilterTest extends InvitationFilterTest {
 
     @BeforeEach
     void setUp() {
-        invitationFilter = new InviterIdFilter();
+        invitationFilter = new InviterNameFilter();
         filters = new InvitationFilterDto();
     }
 
     @Test
-    void isApplicable_ShouldReturnTrueWhenIdIsNotNull() {
-        filters.setInviterId(1L);
+    void isApplicable_ShouldReturnTrueWhenNameIsNotNull() {
+        filters.setInviterNamePattern("Jane Smith");
 
         boolean result = invitationFilter.isApplicable(filters);
 
@@ -30,52 +29,52 @@ class InviterIdFilterTest extends InvitationFilterTest {
     }
 
     @Test
-    void isApplicable_ShouldReturnFalseWhenIdIsNull() {
+    void isApplicable_ShouldReturnFalseWhenNameIsNull() {
         boolean result = invitationFilter.isApplicable(filters);
 
         assertFalse(result);
     }
 
     @Test
-    void apply_ShouldFilterInvitationsByMatchingId() {
-        filters.setInviterId(1L);
+    void apply_ShouldFilterInvitationsByMatchingName() {
+        filters.setInviterNamePattern("Jane Smith");
 
         invitation1 = new GoalInvitation();
-        User inviter1 = new User();
-        inviter1.setId(1L);
-        invitation1.setInviter(inviter1);
+        invitation1.setInviter(new User());
+        invitation1.getInviter().setId(1L);
+        invitation1.getInviter().setUsername("Jane Smith");
 
         invitation2 = new GoalInvitation();
-        User inviter2 = new User();
-        inviter2.setId(2L);
-        invitation2.setInviter(inviter2);
+        invitation2.setInviter(new User());
+        invitation2.getInviter().setId(2L);
+        invitation2.getInviter().setUsername("John Smith");
 
         invitation3 = new GoalInvitation();
-        User inviter3 = new User();
-        inviter3.setId(1L);
-        invitation3.setInviter(inviter3);
+        invitation3.setInviter(new User());
+        invitation3.getInviter().setId(3L);
+        invitation3.getInviter().setUsername("Jane Smith");
 
         Stream<GoalInvitation> input = Stream.of(invitation1, invitation2, invitation3);
-        Stream<GoalInvitation> expected = Stream.of(invitation1, invitation3);
+        List<GoalInvitation> expected = List.of(invitation1, invitation3);
 
         List<GoalInvitation> result = invitationFilter.apply(input, filters).toList();
 
-        assertEquals(expected.toList(), result);
+        assertEquals(expected, result);
     }
 
     @Test
     void apply_ShouldReturnEmptyStreamWhenNoInvitationsMatch() {
-        filters.setInviterId(3L);
+        filters.setInviterNamePattern("Jane Doe");
 
         invitation1 = new GoalInvitation();
-        User inviter1 = new User();
-        inviter1.setId(1L);
-        invitation1.setInviter(inviter1);
+        invitation1.setInviter(new User());
+        invitation1.getInviter().setId(1L);
+        invitation1.getInviter().setUsername("Jane Smith");
 
         invitation2 = new GoalInvitation();
-        User inviter2 = new User();
-        inviter2.setId(2L);
-        invitation2.setInviter(inviter2);
+        invitation2.setInviter(new User());
+        invitation2.getInviter().setId(2L);
+        invitation2.getInviter().setUsername("John Smith");
 
         Stream<GoalInvitation> input = Stream.of(invitation1, invitation2);
 

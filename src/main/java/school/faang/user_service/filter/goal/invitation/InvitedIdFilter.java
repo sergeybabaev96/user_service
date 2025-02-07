@@ -1,24 +1,22 @@
-package school.faang.user_service.filter.goal.data;
+package school.faang.user_service.filter.goal.invitation;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import school.faang.user_service.entity.goal.GoalInvitation;
 import school.faang.user_service.dto.goal.InvitationFilterDto;
+import school.faang.user_service.entity.goal.GoalInvitation;
 
 import java.util.stream.Stream;
 
 @Component
-@RequiredArgsConstructor
-public class InvitedNameFilter implements InvitationFilter {
+public class InvitedIdFilter implements InvitationFilter {
 
     @Override
     public boolean isApplicable(InvitationFilterDto filter) {
-        return filter.getInvitedNamePattern() != null;
+        return filter.getInvitedId() != null;
     }
 
     @Override
     public Stream<GoalInvitation> apply(Stream<GoalInvitation> invitations, InvitationFilterDto filter) {
         return invitations.filter(invitation ->
-                invitation.getInvited().getUsername().contains(filter.getInvitedNamePattern()));
+                invitation.getInvited().getId().equals(filter.getInvitedId()));
     }
 }

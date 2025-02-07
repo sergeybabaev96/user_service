@@ -8,7 +8,7 @@ import school.faang.user_service.dto.goal.InvitationFilterDto;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.goal.GoalInvitation;
 import school.faang.user_service.exception.InvalidInvitationException;
-import school.faang.user_service.filter.goal.data.InvitationFilter;
+import school.faang.user_service.filter.goal.invitation.InvitationFilter;
 import school.faang.user_service.mapper.goal.GoalInvitationMapper;
 import school.faang.user_service.repository.goal.GoalInvitationRepository;
 import school.faang.user_service.service.goal.operations.GoalInvitationValidator;
