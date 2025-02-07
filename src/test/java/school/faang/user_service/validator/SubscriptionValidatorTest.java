@@ -2,6 +2,7 @@ package school.faang.user_service.validator;
 
 import org.junit.jupiter.api.Test;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.validation.subscription.SubscriptionValidator;
 
 import static org.junit.Assert.assertThrows;
 

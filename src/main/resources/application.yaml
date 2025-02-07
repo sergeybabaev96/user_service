@@ -23,6 +23,10 @@ spring:
         ban-channel:
           name: user_ban
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+
 swagger:
   api-docs:
     path: /v1/api-docs
@@ -39,6 +43,13 @@ logging:
   level:
     root: info
 
+s3:
+  endpoint: http://localhost:9000
+  download-path: /api/v1/buckets/corpbucket/objects/download?preview=true&prefix=
+  accessKey: user
+  secretKey: password
+  bucketName: corpbucket
+
 project-service:
   host: localhost
   port: 8082
@@ -49,3 +60,26 @@ payment-service:
 
 goal:
   max-active-goals-per-user: 3
+
+image:
+  avatar:
+    folder-name: users_avatars
+    sizes:
+      large: 1080
+      small: 170
+
+minio:
+  s3:
+    endpoint: http://localhost:9000
+    region: us-east-1
+    accessKey: user
+    secretKey: password
+
+dicebear:
+  apiUrl: https://api.dicebear.com/9.x
+  connectionTimeoutSeconds: 10
+  readTimeoutSeconds: 10
+  token: YOUR_API_KEY
+
+avatar:
+  bucketName: user-avatars

@@ -6,7 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.util.Pair;
+import org.springframework.web.multipart.MultipartFile;
+import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.entity.UserProfilePic;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.event.EventStatus;
 import school.faang.user_service.entity.goal.Goal;
@@ -14,17 +18,22 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.MentorshipService;
+import school.faang.user_service.service.s3.S3Service;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,6 +51,12 @@ public class UserServiceTest {
 
     @Mock
     private static GoalRepository goalRepository;
+
+    @Mock
+    private UserContext userContext;
+
+    @Mock
+    private S3Service s3Service;
 
     @InjectMocks
     private UserService userService;
@@ -161,5 +176,67 @@ public class UserServiceTest {
 
         verify(eventRepository).save(event);
         verify(eventRepository, times(2)).save(event);
+    }
+
+    @Test
+    void uploadAvatar_ShouldUpdateProfileAndDeleteOldAvatars() {
+        Long userId = 1L;
+        User user = new User();
+        UserProfilePic oldProfile = new UserProfilePic("old-large", "old-small");
+        user.setUserProfilePic(oldProfile);
+
+        MultipartFile file = org.mockito.Mockito.mock(MultipartFile.class);
+        String size = "large";
+        UserProfilePic newProfile = new UserProfilePic("new-large", "new-small");
+        String expectedUrl = "new-url";
+        Pair<UserProfilePic, String> uploadResult = Pair.of(newProfile, expectedUrl);
+
+        when(userContext.getUserId()).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(s3Service.uploadAvatar(file, size)).thenReturn(uploadResult);
+
+        String result = userService.uploadAvatar(file, size);
+
+        verify(s3Service).deleteAvatar("old-large");
+        verify(s3Service).deleteAvatar("old-small");
+        verify(userRepository).save(user);
+        assertThat(user.getUserProfilePic()).isEqualTo(newProfile);
+        assertThat(result).isEqualTo(expectedUrl);
+    }
+
+    @Test
+    void downloadAvatar_WhenSizeIsLarge_ShouldUseSmallFileId() {
+        Long userId = 1L;
+        User user = new User();
+        UserProfilePic profile = new UserProfilePic("large-key", "small-key");
+        user.setUserProfilePic(profile);
+        String expectedUrl = "expected-url";
+
+        when(userContext.getUserId()).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(s3Service.downloadAvatar("small-key")).thenReturn(expectedUrl);
+
+        String result = userService.downloadAvatar("large");
+
+        verify(s3Service).downloadAvatar("small-key");
+        assertThat(result).isEqualTo(expectedUrl);
+    }
+
+    @Test
+    void deleteAvatar_ShouldDeleteBothImageVersions() {
+        Long userId = 1L;
+        User user = new User();
+        UserProfilePic profile = new UserProfilePic("large-key", "small-key");
+        user.setUserProfilePic(profile);
+
+        when(userContext.getUserId()).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        userService.deleteAvatar();
+
+        verify(s3Service).deleteAvatar("large-key");
+        verify(s3Service).deleteAvatar("small-key");
+        verify(userRepository).save(user);
+        assertThat(user.getUserProfilePic()).isNull();
     }
 }
