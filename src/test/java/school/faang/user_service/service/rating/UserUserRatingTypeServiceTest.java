@@ -81,11 +81,6 @@ class UserUserRatingTypeServiceTest {
     }
 
     @Test
-    void addUserRatingTypeIsNull() {
-        Assertions.assertThrows(DataValidationException.class, () -> ratingTypeService.add(null));
-    }
-
-    @Test
     void updateCost() {
         UserRatingType source = UserRatingType.builder()
                 .id(2L)

@@ -46,12 +46,9 @@ public class RatingService {
         UserRatingType ratingType = ratingTypeService.findByName(ratingTypeName);
 
         if (userRating == null) {
-            User user = userService.getUser(userId);
-            userRating = UserRating.builder()
-                    .user(user)
-                    .type(ratingType)
-                    .score(0)
-                    .build();
+            log.warn("Rating with userId %s and type %s not found".formatted(userId,
+                    ratingTypeName));
+            userRating = getEmptyUserRating(userId, ratingType);
         }
 
         userRating.setScore(userRating.getScore() + ratingType.getCost());
@@ -67,12 +64,7 @@ public class RatingService {
         if (userRating == null) {
             log.warn("Rating with userId %s and type %s not found".formatted(userId,
                     ratingTypeName));
-            User user = userService.getUser(userId);
-            userRating = UserRating.builder()
-                    .user(user)
-                    .type(ratingType)
-                    .score(0)
-                    .build();
+            userRating = getEmptyUserRating(userId, ratingType);
         }
 
         userRating.setScore(userRating.getScore() - ratingType.getCost());
@@ -97,6 +89,17 @@ public class RatingService {
                 .sorted(Comparator.comparingDouble(longDoubleEntry -> -longDoubleEntry.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
+    }
+
+    private UserRating getEmptyUserRating(Long userId, UserRatingType ratingType) {
+        UserRating userRating;
+        User user = userService.getUser(userId);
+        userRating = UserRating.builder()
+                .user(user)
+                .type(ratingType)
+                .score(0)
+                .build();
+        return userRating;
     }
 
     private void updateFullRating(Map<Long, Integer> scoreMap) {
@@ -136,9 +139,9 @@ public class RatingService {
 
     }
 
-    private boolean updateFullScore(@Validated Long userId, int changeScore) {
+    private void updateFullScore(@Validated Long userId, int changeScore) {
         int score = (int) topUserRepository.getTopUserScore(userId);
         score += changeScore;
-        return topUserRepository.save(userId, (double) score);
+        topUserRepository.save(userId, (double) score);
     }
 }

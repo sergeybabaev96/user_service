@@ -1,7 +1,10 @@
 package school.faang.user_service.service.rating;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
@@ -15,40 +18,43 @@ import school.faang.user_service.service.rating.user_rating.UserRank;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RatingServiceTest {
-    UserRatingRepository userRatingRepository = mock(UserRatingRepository.class);
-    RatingTypeService ratingTypeService = mock(RatingTypeService.class);
-    UserService userService = mock(UserService.class);
-    TopUserRepository topUserRepository = mock(TopUserRepository.class);
-    UserRank userRank = mock(UserRank.class);
-    List<UserRank> userRanks = List.of(userRank);
-    RatingService ratingService = new RatingService(userRatingRepository, ratingTypeService, userService,
-            topUserRepository, userRanks);
+    @Mock
+    private UserRatingRepository userRatingRepository;
+    @Mock
+    private RatingTypeService ratingTypeService;
+    @Mock
+    private UserService userService;
+    @Mock
+    private TopUserRepository topUserRepository;
+    @Mock
+    private UserRank userRank;
+    @Mock
+    private List<UserRank> userRanks;
+    @InjectMocks
+    private RatingService ratingService;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(userRanks.stream()).thenReturn(Stream.of(userRank));
+    }
 
     @Test
     void addRating() {
-        UserRating sourceRating = UserRating.builder()
-                .user(User.builder()
-                        .id(1L)
-                        .build())
-                .build();
-        UserRating targetRating = UserRating.builder()
-                .id(1L)
-                .user(User.builder()
-                        .id(1L)
-                        .build())
-                .build();
+        UserRating sourceRating = getUserRating();
+        UserRating targetRating = getUserRating();
         when(userRatingRepository.save(sourceRating)).thenReturn(targetRating);
         UserRating actual = ratingService.addRating(sourceRating);
 
@@ -58,12 +64,7 @@ class RatingServiceTest {
 
     @Test
     void deleteRating() {
-        UserRating userRating = UserRating.builder()
-                .id(1L)
-                .user(User.builder()
-                        .id(1L)
-                        .build())
-                .build();
+        UserRating userRating = getUserRating();
         doNothing().when(userRatingRepository).delete(userRating);
         assertDoesNotThrow(() -> ratingService.deleteRating(userRating));
         verify(userRatingRepository, times(1)).delete(userRating);
@@ -269,4 +270,13 @@ class RatingServiceTest {
         verify(topUserRepository, times(2)).getTopUsersWithScores();
     }
 
+
+    private UserRating getUserRating() {
+        return UserRating.builder()
+                .id(1L)
+                .user(User.builder()
+                        .id(1L)
+                        .build())
+                .build();
+    }
 }
