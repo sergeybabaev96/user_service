@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -22,12 +25,13 @@ import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.exception.MinioSaveException;
 import school.faang.user_service.exception.ResourceNotFoundException;
 import school.faang.user_service.exception.UserAlreadyExistsException;
-import school.faang.user_service.filters.interfaces.UserFilter;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.model.Person;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.event.EventService;
 import school.faang.user_service.service.external.AvatarService;
 import school.faang.user_service.service.external.MinioStorageService;
+import school.faang.user_service.service.filter.UserFilter;
 import school.faang.user_service.service.goal.GoalService;
 import school.faang.user_service.util.ConverterUtil;
 
@@ -40,9 +44,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static school.faang.user_service.config.KafkaConstants.PAYMENT_PROMOTION_TOPIC;
 import static school.faang.user_service.config.KafkaConstants.USER_KEY;
+
 
 @Service
 @RequiredArgsConstructor
@@ -78,7 +84,7 @@ public class UserService {
         user.getOwnedEvents().forEach(event -> {
             if (event.getStartDate().isAfter(currentTime)) { //Если ивент ещё не начался - удаляем
                 neededToRemove.add(event);
-                eventService.removeEvent(event.getId()); //Удаление ивентов из БД
+                eventService.deleteEvent(event.getId()); //Удаление ивентов из БД
             }
         });
         user.setOwnedEvents(user.getOwnedEvents().stream()
@@ -151,6 +157,24 @@ public class UserService {
         } catch (Exception e) {
             throw new MinioSaveException("Minio error save file" + e.getMessage());
         }
+    }
+
+    public User getUserById(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> ResourceNotFoundException.userNotFoundException(userId));
+    }
+
+    public UserDto getUser(@Positive @NotNull Long userId) {
+        return userRepository.findById(userId)
+                .map(userMapper::toDto)
+                .orElseThrow(() -> ResourceNotFoundException.userNotFoundException(userId));
+    }
+
+    public List<UserDto> getUsersByIds(@NotEmpty List<@Positive Long> ids) {
+        return userRepository.findAllById(ids)
+                .stream()
+                .map(userMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional

@@ -18,4 +18,16 @@ public class AppConfig {
 
     @Value("${app.config.dicebear_url}")
     private String dicebearUrl;
+
+    @Value("${app.config.avatar_file_size}")
+    private int avatarFileSize;
+
+    @Value("${app.config.avatar_bucket_name}")
+    private String avatarBucketName;
+
+    @Value("${app.config.avatar_large_file_size}")
+    private int avatarLargeFileSize;
+
+    @Value("${app.config.avatar_small_file_size}")
+    private int avatarSmallFileSize;
 }

@@ -1,22 +1,32 @@
 package school.faang.user_service.service.event;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.client.PromotionServiceClient;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.event.EventFilterDto;
+import school.faang.user_service.dto.event.EventResponse;
+import school.faang.user_service.dto.promotion.EventPromotionRequest;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.mapper.EventMapper;
 import school.faang.user_service.service.event.filter.EventFilter;
-import school.faang.user_service.mapper.event.EventMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
+import school.faang.user_service.util.ConverterUtil;
+import school.faang.user_service.validator.UserValidator;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static school.faang.user_service.config.KafkaConstants.EVENT_KEY;
+import static school.faang.user_service.config.KafkaConstants.PAYMENT_PROMOTION_TOPIC;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +36,10 @@ public class EventService {
     private final UserRepository userRepository;
     private final EventMapper eventMapper;
     private final List<EventFilter> filters;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ConverterUtil converterUtil;
+    private final PromotionServiceClient promotionServiceClient;
+    private final UserValidator userValidator;
 
     public EventDto create(EventDto eventDto) {
         validateEventDto(eventDto);
@@ -107,6 +121,30 @@ public class EventService {
         return participatedEvents.stream()
                 .map(eventMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    public void eventPromotion(EventPromotionRequest request) {
+        validateEvent(request.eventId());
+        userValidator.validateUser(request.userId());
+
+        String message = converterUtil.convertToJson(request);
+        kafkaTemplate.send(PAYMENT_PROMOTION_TOPIC, EVENT_KEY, message);
+    }
+
+    public List<EventResponse> getPromotionEvents() {
+        List<Long> eventIds = promotionServiceClient.getPromotionEvents();
+        return eventIds.stream()
+                .map(event -> {
+                    validateEvent(event);
+                    return eventMapper.toEventResponse(eventRepository.findById(event).get());
+                })
+                .toList();
+    }
+
+    private void validateEvent(Long eventId) {
+        if (!eventRepository.existsById(eventId)) {
+            throw new EntityNotFoundException("Event with id " + eventId + " does not exist");
+        }
     }
 
     private void validateEventDto(EventDto eventDto) {

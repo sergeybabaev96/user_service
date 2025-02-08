@@ -4,11 +4,19 @@ app:
     active_transaction: 5
     passive_transaction: 2
     dicebear_url: "${DICEBEAR_URL: https://api.dicebear.com/9.x/adventurer/svg?seed={seed}}"
+    avatar_file_size: 5242880
+    avatar_bucket_name: user-avatars
+    avatar_large_file_size: 1080
+    avatar_small_file_size: 170
 
 spring:
   mvc:
     servlet:
       path: /api/v1
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
 
   datasource:
     driver-class-name: org.postgresql.Driver

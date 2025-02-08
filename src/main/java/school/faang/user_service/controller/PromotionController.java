@@ -12,8 +12,8 @@ import school.faang.user_service.dto.event.EventResponse;
 import school.faang.user_service.dto.promotion.EventPromotionRequest;
 import school.faang.user_service.dto.promotion.UserPromotionRequest;
 import school.faang.user_service.dto.UserDto;
-import school.faang.user_service.service.EventService;
 import school.faang.user_service.service.UserService;
+import school.faang.user_service.service.event.EventService;
 
 import java.util.List;
 

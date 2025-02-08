@@ -14,10 +14,12 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.premium.Premium;
-import school.faang.user_service.filters.interfaces.UserFilter;
-import school.faang.user_service.filters.subscription.CityFilter;
+import school.faang.user_service.exception.ResourceNotFoundException;
 import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.event.EventService;
+import school.faang.user_service.service.filter.UserFilter;
+import school.faang.user_service.service.filter.realisation.CityFilter;
 import school.faang.user_service.service.goal.GoalService;
 
 import java.time.LocalDateTime;
@@ -26,6 +28,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,6 +52,7 @@ public class UserServiceTest {
     private UserService service;
 
     private User user;
+    private UserDto userDto;
 
     private User premiumUser1;
     private User premiumUser2;
@@ -62,6 +66,7 @@ public class UserServiceTest {
                 .id(1L)
                 .username("Bob")
                 .active(true)
+                .email("bob@example.com")
                 .goals(List.of(
                         Goal.builder().id(1L).build(),
                         Goal.builder().id(2L).build(),
@@ -102,6 +107,8 @@ public class UserServiceTest {
                 .city("Tashkent")
                 .premium(premium2)
                 .build();
+
+        userDto = new UserDto(1L, "Bob", "bob@example.com");
     }
 
     @Test
@@ -129,5 +136,32 @@ public class UserServiceTest {
 
         assertEquals(2, result.size());
         assertEquals(premiumUser1.getUsername(), result.get(0).username());
+    }
+
+    @Test
+    public void getUser_Success() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        UserDto result = service.getUser(1L);
+        assertEquals(userDto, result);
+    }
+
+    @Test
+    public void getUser_NotFound() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(ResourceNotFoundException.class, () -> service.getUser(1L));
+        assertEquals("User with id 1 not found", exception.getMessage());
+    }
+
+    @Test
+    public void getUsersByIds_Success() {
+        List<Long> ids = List.of(1L, 2L);
+        User user2 = User.builder().id(2L).username("Bob").build();
+
+        when(userRepository.findAllById(ids)).thenReturn(List.of(user, user2));
+
+        List<UserDto> result = service.getUsersByIds(ids);
+        assertEquals(2, result.size());
     }
 }

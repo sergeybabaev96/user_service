@@ -25,4 +25,8 @@ public class ResourceNotFoundException extends RuntimeException {
     public static ResourceNotFoundException userAvatarNotFoundException(long userId) {
         return new ResourceNotFoundException("UserAvatar with userId %s not found".formatted(userId));
     }
+
+    public static ResourceNotFoundException premiumPeriodNotFoundException(long days) {
+        return new ResourceNotFoundException("No PremiumPeriod found for days: %s".formatted(days));
+    }
 }
