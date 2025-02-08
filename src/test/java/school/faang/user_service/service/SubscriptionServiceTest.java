@@ -1,75 +1,128 @@
 package school.faang.user_service.service;
-/*
-import org.jetbrains.annotations.NotNull;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import school.faang.user_service.dto.subscriber.SubscriberFilterDto;
+import school.faang.user_service.dto.subscriber.SubscriberReadDto;
+import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.mapper.SubscriberMapperImpl;
 import school.faang.user_service.repository.SubscriptionRepository;
 
+import java.util.List;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class) */
+@ExtendWith(MockitoExtension.class)
 public class SubscriptionServiceTest {
-    /*
-    @InjectMocks
-    private SubscriptionService service;
+    private final long FOLLOWER_ID = 1L;
+    private final long FOLLOWEE_ID = 2L;
 
     @Mock
     private SubscriptionRepository repository;
 
-    @Test
-    void testSubscriptionForYourself() {
-        long followerId = 1L;
-        long followeeId = 1L;
-        assertThrows(DataValidationException.class, () -> service.followUser(followerId, followeeId));
+    @Spy
+    private SubscriberMapperImpl mapper;
+
+    @InjectMocks
+    private SubscriptionService service;
+
+    private SubscriberFilterDto filtersDto;
+
+    @BeforeEach
+    void setUp() {
+        service = new SubscriptionService(repository, List.of(), mapper);
+        filtersDto = new SubscriberFilterDto();
     }
 
     @Test
-    void testRepeatSubscriptionForAnotherUser() {
-        InitialData data = getData(true);
-        assertThrows(DataValidationException.class, () -> service.followUser(data.followerId(), data.followeeId()));
+    public void testSubscriptionForYourself() {
+        assertThrows(DataValidationException.class, () -> service.followUser(FOLLOWER_ID, FOLLOWER_ID));
     }
 
     @Test
-    void testSubscriptionForAnotherUser() {
-        InitialData data = getData(false);
-        service.followUser(data.followerId(), data.followeeId());
-        verify(repository, times(1)).followUser(data.followerId(), data.followeeId());
+    public void testRepeatSubscriptionForAnotherUser() {
+        when(repository.existsByFollowerIdAndFolloweeId(FOLLOWER_ID, FOLLOWEE_ID)).thenReturn(true);
+        assertThrows(DataValidationException.class, () -> service.followUser(FOLLOWER_ID, FOLLOWEE_ID));
     }
 
     @Test
-    void testUnsubscribingFromYourself() {
-        long followerId = 1L;
-        long followeeId = 1L;
-        assertThrows(DataValidationException.class, () -> service.unfollowUser(followerId, followeeId));
+    public void testSubscriptionForAnotherUser() {
+        when(repository.existsByFollowerIdAndFolloweeId(FOLLOWER_ID, FOLLOWEE_ID)).thenReturn(false);
+        service.followUser(FOLLOWER_ID, FOLLOWEE_ID);
+        verify(repository, times(1)).followUser(FOLLOWER_ID, FOLLOWEE_ID);
     }
 
     @Test
-    void testNonExistingUnsubscriptionFromAnotherUser() {
-        InitialData data = getData(false);
-        assertThrows(DataValidationException.class, () -> service.unfollowUser(data.followerId(), data.followeeId()));
+    public void testUnsubscribingFromYourself() {
+        assertThrows(DataValidationException.class, () -> service.unfollowUser(FOLLOWER_ID, FOLLOWER_ID));
     }
 
     @Test
-    void testUnsubscriptionFromAnotherUser() {
-        InitialData data = getData(true);
-        service.unfollowUser(data.followerId(), data.followeeId());
-        verify(repository, times(1)).unfollowUser(data.followerId(), data.followeeId());
+    public void testUnsubscribingFromAnUnsignedUser() {
+        when(repository.existsByFollowerIdAndFolloweeId(FOLLOWER_ID, FOLLOWEE_ID)).thenReturn(false);
+        assertThrows(DataValidationException.class, () -> service.unfollowUser(FOLLOWER_ID, FOLLOWEE_ID));
     }
 
-    private @NotNull InitialData getData(boolean isThereSub) {
-        long followerId = 1L;
-        long followeeId = 2L;
-        when(repository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).thenReturn(isThereSub);
-        return new InitialData(followerId, followeeId);
+    @Test
+    public void testUnsubscriptionFromAnotherUser() {
+        when(repository.existsByFollowerIdAndFolloweeId(FOLLOWER_ID, FOLLOWEE_ID)).thenReturn(true);
+        service.unfollowUser(FOLLOWER_ID, FOLLOWEE_ID);
+        verify(repository, times(1)).unfollowUser(FOLLOWER_ID, FOLLOWEE_ID);
     }
 
-    private record InitialData(long followerId, long followeeId) {
-    } */
+    @Test
+    public void testGettingFollowers() {
+        Stream<User> followers = Stream.of(new User());
+        when(repository.findByFolloweeId(FOLLOWEE_ID)).thenReturn(followers);
+
+        List<SubscriberReadDto> result = service.getFollowers(FOLLOWEE_ID, filtersDto);
+
+        assertNotNull(result);
+        verify(repository, times(1)).findByFolloweeId(FOLLOWEE_ID);
+    }
+
+    @Test
+    public void testGettingFollowersCount() {
+        int followersCount = 8;
+        when(repository.findFollowersAmountByFolloweeId(FOLLOWEE_ID)).thenReturn(followersCount);
+
+        int followersCountResult = service.getFollowersCount(FOLLOWEE_ID);
+
+        assertEquals(followersCount, followersCountResult);
+        verify(repository, times(1)).findFollowersAmountByFolloweeId(FOLLOWEE_ID);
+    }
+
+    @Test
+    public void testGettingFollowing() {
+        Stream<User> following = Stream.of(new User());
+        when(repository.findByFollowerId(FOLLOWER_ID)).thenReturn(following);
+
+        List<SubscriberReadDto> result = service.getFollowing(FOLLOWER_ID, filtersDto);
+
+        assertNotNull(result);
+        verify(repository, times(1)).findByFollowerId(FOLLOWER_ID);
+    }
+
+    @Test
+    public void testGettingFollowingCount() {
+        int followingCount = 7;
+        when(repository.findFolloweesAmountByFollowerId(FOLLOWER_ID)).thenReturn(followingCount);
+
+        int followingCountResult = service.getFollowingCount(FOLLOWER_ID);
+
+        assertEquals(followingCount, followingCountResult);
+        verify(repository, times(1)).findFolloweesAmountByFollowerId(FOLLOWER_ID);
+    }
 }

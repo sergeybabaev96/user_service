@@ -17,8 +17,8 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class SubscriptionService {
     private final SubscriptionRepository repository;
-    private final List<SubscriberFilter> userFilters;
-    private final SubscriberMapper subscriberMapper;
+    private final List<SubscriberFilter> subscriberFilters;
+    private final SubscriberMapper mapper;
 
     public void followUser(long followerId, long followeeId) {
         checkingActionsOnYourself(followerId, followeeId, "Нельзя подписаться на свой аккаунт.");
@@ -51,10 +51,10 @@ public class SubscriptionService {
     public List<SubscriberReadDto> getFollowers(long followeeId, SubscriberFilterDto filters) {
         Stream<User> followers = repository.findByFolloweeId(followeeId);
 
-        return userFilters.stream()
-                .filter(userFilter -> userFilter.isApplicable(filters))
-                .flatMap(userFilter -> userFilter.apply(followers, filters))
-                .map(subscriberMapper::toDto)
+        return subscriberFilters.stream()
+                .filter(subscriberFilter -> subscriberFilter.isApplicable(filters))
+                .flatMap(subscriberFilter -> subscriberFilter.apply(followers, filters))
+                .map(mapper::toDto)
                 .toList();
     }
 
@@ -62,13 +62,13 @@ public class SubscriptionService {
         return repository.findFollowersAmountByFolloweeId(followeeId);
     }
 
-    public List<SubscriberReadDto> getFollowing(long followeeId, SubscriberFilterDto filters) {
-        Stream<User> following = repository.findByFolloweeId(followeeId);
+    public List<SubscriberReadDto> getFollowing(long followerId, SubscriberFilterDto filters) {
+        Stream<User> following = repository.findByFollowerId(followerId);
 
-        return userFilters.stream()
-                .filter(userFilter -> userFilter.isApplicable(filters))
-                .flatMap(userFilter -> userFilter.apply(following, filters))
-                .map(subscriberMapper::toDto)
+        return subscriberFilters.stream()
+                .filter(subscriberFilter -> subscriberFilter.isApplicable(filters))
+                .flatMap(subscriberFilter -> subscriberFilter.apply(following, filters))
+                .map(mapper::toDto)
                 .toList();
     }
 
