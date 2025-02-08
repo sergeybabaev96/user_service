@@ -33,6 +33,7 @@ import school.faang.user_service.util.ConverterUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -168,7 +169,7 @@ public class UserService {
             }
             CompletableFuture.allOf(future.toArray(new CompletableFuture[0])).join();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException("Ошибка при чтении CSV файла", e);
         }
     }
 
