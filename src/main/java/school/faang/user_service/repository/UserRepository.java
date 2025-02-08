@@ -26,5 +26,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByUsernameLike(String username);
 
-    List<User> findFollowersByUserId(long id);
 }

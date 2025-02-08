@@ -5,5 +5,4 @@ public record UserDto(
         String username,
         String email,
         String phone) {
-
 }
