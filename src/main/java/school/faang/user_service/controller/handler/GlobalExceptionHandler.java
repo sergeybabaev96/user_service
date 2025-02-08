@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import school.faang.user_service.dto.error.ErrorModel;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.exception.RemoveExpiredPremiumException;
 import school.faang.user_service.exception.ResourceNotFoundException;
 
 @Slf4j
@@ -45,6 +46,13 @@ public class GlobalExceptionHandler {
     public ErrorModel handleFeignException(FeignException ex) {
         log.error("Feign exception", ex);
         return createError(ex.getMessage(), HttpStatus.BAD_GATEWAY.value());
+    }
+
+    @ExceptionHandler(RemoveExpiredPremiumException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorModel handleRemoveExpiredPremiumException(RemoveExpiredPremiumException ex) {
+        log.error("Failed to remove batch expired premium exception", ex);
+        return createError(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
     }
 
     @ExceptionHandler(Exception.class)

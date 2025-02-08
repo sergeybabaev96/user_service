@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.premium.Premium;
+import school.faang.user_service.exception.RemoveExpiredPremiumException;
 import school.faang.user_service.properties.PremiumSchedulerProperties;
 import school.faang.user_service.repository.premium.PremiumRepository;
 
@@ -30,8 +31,8 @@ public class PremiumServiceImpl implements PremiumService {
         List<CompletableFuture<Void>> futures = batches.stream()
                 .map(batch -> removeExpiredPremiumBatchAsync(batch)
                         .exceptionally(ex -> {
-                                log.error("Error deleting batch: ", ex);
-                                return null;
+                            log.error("Error deleting batch: ", ex);
+                            throw new RemoveExpiredPremiumException("Failed to delete batch expired premium");
                         }))
                 .toList();
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
