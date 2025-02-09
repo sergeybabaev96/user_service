@@ -1,5 +1,6 @@
 package school.faang.user_service.service.premium;
 
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,19 +34,25 @@ import static org.mockito.Mockito.when;
 class PremiumServiceTest {
     private static final Long USER_ID = 1L;
     private static final PremiumPeriod PREMIUM_PERIOD = PremiumPeriod.THREE_MONTHS;
+
     @Mock
     private PremiumRepository premiumRepository;
+
     @Mock
     private PaymentService paymentService;
+
     @Mock
     private UserService userService;
+
     @InjectMocks
     PremiumService premiumService;
+
     private int premiumPeriodDays;
     private final LocalDateTime currentTime = LocalDateTime.now();
     private LocalDateTime futureTime;
     private User testUser;
     Premium testPremium;
+    List<Premium> testBatch = List.of(new Premium());
 
     @BeforeEach
     void setUp() {
@@ -117,4 +124,19 @@ class PremiumServiceTest {
         verify(paymentService, times(1)).sendPaymentRequest(any());
         verify(userService, times(1)).getUser(USER_ID);
     }
+
+    @Test
+    public void testDefineExpiredPremiumIsSuccessful() {
+        premiumService.defineExpirePremium();
+
+        verify(premiumRepository, times(1)).findAllByEndDateBefore(any(LocalDateTime.class));
+    }
+
+    @Test
+    public void testRemovePremiumIsSuccessful() {
+        premiumService.removePremium(testBatch);
+
+        verify(premiumRepository, times(1)).deleteAll(testBatch);
+    }
+
 }
