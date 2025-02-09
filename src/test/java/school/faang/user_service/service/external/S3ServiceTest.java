@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import school.faang.user_service.exception.S3Exception;
+import school.faang.user_service.exception.CustomS3Exception;
 
 import java.net.URL;
 import java.util.Date;
@@ -45,7 +45,7 @@ class S3ServiceTest {
     void testUploadToBucketThrowsS3Exception() {
         when(amazonS3Client.doesBucketExistV2(any())).thenReturn(false);
         when(amazonS3Client.putObject(any(), any(), any(), any())).thenThrow(new SdkClientException("Ex"));
-        S3Exception exception = assertThrows(S3Exception.class,
+        CustomS3Exception exception = assertThrows(CustomS3Exception.class,
                 () -> s3Service.uploadToBucket(bucketName, fileName, data, contentType));
 
         assertEquals("Error working with S3", exception.getMessage());
