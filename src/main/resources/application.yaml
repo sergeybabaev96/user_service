@@ -49,5 +49,6 @@ goal:
 
 premium:
   removal:
-    cron: "0 0 0 * * MON"  # Запуск каждый понедельник в 00:00
-    batch-size: 100  # Удаляем по 100 подписок за раз
+    cron: "0 0 3 * * ?"  # Запуск каждый день в 03:00 (Quartz формат)
+    batch-size: 100  # Размер батча
+    thread-pool-size: 4

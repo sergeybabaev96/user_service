@@ -1,4 +1,4 @@
-package school.faang.user_service.config;
+package school.faang.user_service.config.premium;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,4 +12,5 @@ import org.springframework.context.annotation.Configuration;
 public class PremiumConfig {
     private String cron;
     private int batchSize;
+    private int threadPoolSize;
 }

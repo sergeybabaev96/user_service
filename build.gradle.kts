@@ -35,6 +35,10 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
+     * Quartz Scheduler
+     */
+    implementation("org.quartz-scheduler:quartz:2.3.2")
+    /**
      * Database
      */
     implementation("org.liquibase:liquibase-core")

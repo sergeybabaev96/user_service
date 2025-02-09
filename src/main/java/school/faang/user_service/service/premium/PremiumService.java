@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.client.PaymentServiceClient;
-import school.faang.user_service.config.PremiumConfig;
 import school.faang.user_service.dto.payment.Currency;
 import school.faang.user_service.dto.payment.PaymentRequest;
 import school.faang.user_service.dto.payment.PaymentResponse;
@@ -23,8 +22,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -33,26 +30,20 @@ public class PremiumService {
     private final PremiumRepository premiumRepository;
     private final UserRepository userRepository;
     private final PaymentServiceClient paymentServiceClient;
-    private final PremiumConfig premiumConfig;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(4);
 
     @Transactional
     public Premium buyPremium(long userId, PremiumPeriod premiumPeriod) {
-
         User user = userRepository.findById(userId).orElseThrow();
         if (premiumRepository.existsByUserId(user.getId())) {
-            throw new IllegalStateException("The user with id " + userId + " already has a premium subscription.");
+            throw new IllegalStateException("User with id " + userId + " already has a premium subscription.");
         }
 
         makePayment(premiumPeriod);
 
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        LocalDateTime premiumEndDate = currentDateTime.plusDays(premiumPeriod.getDays());
-
         Premium premium = Premium.builder()
                 .user(user)
-                .startDate(currentDateTime)
-                .endDate(premiumEndDate)
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now().plusDays(premiumPeriod.getDays()))
                 .build();
 
         return premiumRepository.save(premium);
@@ -60,45 +51,20 @@ public class PremiumService {
 
     @Transactional(readOnly = true)
     public List<Long> getPremiumUsers() {
-        return premiumRepository.findAllPremiumUsers();
-    }
-
-    public void removeExpiredPremiums() {
-        LocalDateTime now = LocalDateTime.now();
-        List<Premium> expiredPremiums = premiumRepository.findAllByEndDateBefore(now);
-
-        if (expiredPremiums.isEmpty()) {
-            log.info("No expired subscriptions to delete");
-            return;
-        }
-
-        int batchSize = premiumConfig.getBatchSize();
-        log.info("Found {} expired subscriptions. Deleting in batches of {} records…", expiredPremiums.size(), batchSize);
-
-        for (int i = 0; i < expiredPremiums.size(); i += batchSize) {
-            int end = Math.min(i + batchSize, expiredPremiums.size());
-            List<Premium> batch = expiredPremiums.subList(i, end);
-
-            executorService.submit(() -> deleteBatch(batch));
-        }
+        return premiumRepository.findByEndDateAfter(LocalDateTime.now())
+                .stream()
+                .map(premium -> premium.getUser().getId())
+                .toList();
     }
 
     private void makePayment(PremiumPeriod premiumPeriod) {
-        long paymentNumber = UUID.randomUUID().getLeastSignificantBits();
-        BigDecimal amount = BigDecimal.valueOf(premiumPeriod.getPrice());
-        PaymentRequest paymentRequest = new PaymentRequest(paymentNumber, amount, Currency.USD);
+        PaymentRequest request = new PaymentRequest(UUID.randomUUID().getLeastSignificantBits(),
+                BigDecimal.valueOf(premiumPeriod.getPrice()), Currency.USD);
 
-        ResponseEntity<PaymentResponse> paymentResponse = paymentServiceClient.sendPayment(paymentRequest);
+        ResponseEntity<PaymentResponse> response = paymentServiceClient.sendPayment(request);
 
-        if (paymentResponse.getStatusCode() != HttpStatus.OK) {
-            String message = Objects.requireNonNull(paymentResponse.getBody()).message();
-            throw new PaymentFailedException(message);
+        if (response.getStatusCode() != HttpStatus.OK) {
+            throw new PaymentFailedException(Objects.requireNonNull(response.getBody()).message());
         }
-    }
-
-    @Transactional
-    private void deleteBatch(List<Premium> batch) {
-        premiumRepository.deleteAll(batch);
-        log.info("{} subscriptions deleted", batch.size());
     }
 }

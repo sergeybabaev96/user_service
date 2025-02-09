@@ -1,15 +1,16 @@
 package school.faang.user_service.controller.premium;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.premium.PremiumDto;
-import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.premium.Premium;
 import school.faang.user_service.entity.premium.PremiumPeriod;
 import school.faang.user_service.mapper.premium.PremiumMapper;
@@ -26,6 +27,7 @@ public class PremiumController {
     private final PremiumMapper premiumMapper;
 
     @PostMapping("/buy/{days}")
+    @ResponseStatus(HttpStatus.CREATED)
     public PremiumDto buyPremium(@PathVariable int days, @RequestHeader("x-user-id") long userId) {
         PremiumPeriod premiumPeriod = PremiumPeriod.fromDays(days);
         Premium premium = premiumService.buyPremium(userId, premiumPeriod);
@@ -34,7 +36,6 @@ public class PremiumController {
 
     @GetMapping
     public ResponseEntity<List<Long>> getPremiumUsers() {
-        List<Long> premiumUsers = premiumService.getPremiumUsers();
-        return ResponseEntity.ok(premiumUsers);
+        return ResponseEntity.ok(premiumService.getPremiumUsers());
     }
 }
