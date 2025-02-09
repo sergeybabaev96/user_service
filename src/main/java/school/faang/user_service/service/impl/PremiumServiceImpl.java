@@ -2,13 +2,13 @@ package school.faang.user_service.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.client.PaymentServiceClient;
+import school.faang.user_service.client.payment.PaymentRequest;
+import school.faang.user_service.client.payment.PaymentResponse;
+import school.faang.user_service.client.payment.PaymentServiceFeignClient;
 import school.faang.user_service.common.PaymentStatus;
 import school.faang.user_service.common.PremiumPeriod;
 import school.faang.user_service.config.context.UserContext;
-import school.faang.user_service.dto.PaymentRequest;
 import school.faang.user_service.dto.PremiumDto;
-import school.faang.user_service.dto.response.PaymentResponse;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.premium.Premium;
 import school.faang.user_service.exception.PremiumInvalidDataException;
@@ -27,7 +27,7 @@ public class PremiumServiceImpl implements PremiumService {
     private final PremiumRepository premiumRepository;
     private final PremiumMapper premiumMapper;
     private final UserRepository userRepository;
-    private final PaymentServiceClient paymentServiceClient;
+    private final PaymentServiceFeignClient paymentServiceClient;
     private final UserContext userContext;
 
     @Override

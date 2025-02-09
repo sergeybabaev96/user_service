@@ -1,4 +1,4 @@
-package school.faang.user_service.controller.recommendation;
+package school.faang.user_service.controller;
 
 import com.amazonaws.util.StringUtils;
 import lombok.RequiredArgsConstructor;
