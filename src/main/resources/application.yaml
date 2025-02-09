@@ -46,6 +46,10 @@ dicebear:
 
 avatar:
   bucketName: user-avatars
+  customAvatars: custom-user-avatars
+  maxImageSizeInMb: 5 * 1024 * 1024
+  maxLargeImageSideSize: 1080
+  maxSmallImageSideSize: 170
 
 server:
   port: 8080
