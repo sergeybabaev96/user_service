@@ -1,4 +1,4 @@
-package school.faang.user_service.service.user;
+package school.faang.user_service.utils.user;
 
 public final class UserErrorMessage {
     public static final String USER_NOT_FOUND = "User with this id not found: %s";

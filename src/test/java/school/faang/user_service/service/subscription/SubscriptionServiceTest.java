@@ -10,7 +10,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.filter.user.UserFilter;
-import school.faang.user_service.validator.SubscriptionValidator;
+import school.faang.user_service.validation.subscription.SubscriptionValidator;
 
 import java.util.List;
 
