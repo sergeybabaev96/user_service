@@ -21,8 +21,10 @@ public class PremiumRemovalJob implements Job {
 
     private final PremiumRepository premiumRepository;
     private final PremiumConfig premiumConfig;
+    private final PremiumRemovalHelper removalHelper;
 
     @Override
+    @Transactional
     public void execute(JobExecutionContext context) {
         List<Premium> expiredPremiums = premiumRepository.findAllByEndDateBefore(LocalDateTime.now());
 
@@ -35,13 +37,6 @@ public class PremiumRemovalJob implements Job {
                 expiredPremiums.size(), premiumConfig.getBatchSize());
 
         ListUtils.partition(expiredPremiums, premiumConfig.getBatchSize())
-                .forEach(this::deleteBatch);
-    }
-
-    @Transactional
-    private void deleteBatch(List<Premium> batch) {
-        premiumRepository.deleteAll(batch);
-        log.info("Deleted {} subscriptions. Users: {}", batch.size(),
-                batch.stream().map(p -> p.getUser().getId()).toList());
+                .forEach(removalHelper::deleteBatch);
     }
 }
