@@ -5,7 +5,6 @@ import school.faang.user_service.exception.DataValidationException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Collection;
 
 public abstract class AbstractDataValidator<T> {
 

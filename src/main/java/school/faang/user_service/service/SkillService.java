@@ -50,6 +50,10 @@ public class SkillService {
         skillRepository.delete(skill);
     }
 
+    public List<Skill> findAllByUserId(long userId){
+        return skillRepository.findAllByUserId(userId);
+    }
+
     public List<Skill> getSkills(List<Long> ids) {
         log.info("Getting Skills with ids {}", ids);
         if (ids.isEmpty()) {
