@@ -3,6 +3,8 @@ package school.faang.user_service.service.event;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,10 +26,10 @@ import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.util.ConverterUtil;
 import school.faang.user_service.validator.UserValidator;
 
+import java.awt.print.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -149,17 +151,17 @@ public class EventService {
 
     @Transactional
     public void removeAllPastEvents() {
-        List<Event> pastEvents = eventRepository.findAll()
-                .stream()
-                .filter(event -> event.getStatus().equals(EventStatus.COMPLETED))
-                .toList();
-        divideEventsIntoGroups(pastEvents, appConfig.getMaxDataGroupSize()).forEach(group -> {
+        Page<Event> currentPage;
+        int currentPageNumber = 1;
+        do {
+            currentPage = eventRepository.findAll(PageRequest.of(currentPageNumber, appConfig.getMaxDataGroupSize()));
+            Page<Event> finalCurrentPage = currentPage;
             appConfig.getThreadPool().submit(() -> {
-                group.forEach(event -> {
-                    eventRepository.deleteById(event.getId());
-                });
+                List<Event> pastEventsPage = finalCurrentPage.stream().filter(event -> event.getStatus().equals(EventStatus.COMPLETED)).toList();
+               pastEventsPage.forEach(event -> deleteEvent(event.getId()));
             });
-        });
+            currentPageNumber++;
+        } while (currentPage.hasNext());
     }
 
     private void validateEvent(Long eventId) {
@@ -195,21 +197,5 @@ public class EventService {
         }
 
         return owner;
-    }
-
-    private List<List<Event>> divideEventsIntoGroups(List<Event> events, int groupSize) {
-        List<List<Event>> groups = new ArrayList<>();
-        List<Event> currentGroup = new ArrayList<>();
-        for (Event event : events) {
-            currentGroup.add(event);
-            if (currentGroup.size() >= groupSize) {
-                groups.add(currentGroup);
-                currentGroup = new ArrayList<>();
-            }
-        }
-        if (!currentGroup.isEmpty()) {
-            groups.add(currentGroup);
-        }
-        return groups;
     }
 }

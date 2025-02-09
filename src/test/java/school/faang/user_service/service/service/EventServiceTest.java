@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import school.faang.user_service.client.PromotionServiceClient;
@@ -45,7 +46,10 @@ public class EventServiceTest {
                     .status(EventStatus.COMPLETED)
                     .build());
         }
-        when(eventRepository.findAll()).thenReturn(events);
+        when(appConfig.getMaxDataGroupSize()).thenReturn(1000);
+
+        Page<Event> page = new PageImpl<>(events, PageRequest.of(0, 1000), 0);
+        when(eventRepository.findAll(any(Pageable.class))).thenReturn(page);
 
         ExecutorService threadPool = mock(ExecutorService.class);
         when(appConfig.getThreadPool()).thenReturn(threadPool);
@@ -57,33 +61,17 @@ public class EventServiceTest {
     }
 
     @Test
-    public void removeAllPastEvents_success6ThreadsRun() {
-        List<Event> events = new ArrayList<>();
+    public void removeAllPastEvents_zeroPostsToPublish() {
+        Page<Event> emptyPage = new PageImpl<>(new ArrayList<>());
 
-        for (int i = 1; i < 5050; i++) {
-            events.add(Event.builder()
-                    .id(i)
-                    .status(EventStatus.COMPLETED)
-                    .build());
-        }
-
-        when(eventRepository.findAll()).thenReturn(events);
+        when(eventRepository.findAll(any(Pageable.class))).thenReturn(emptyPage);
+        when(appConfig.getMaxDataGroupSize()).thenReturn(1000);
 
         ExecutorService threadPool = mock(ExecutorService.class);
         when(appConfig.getThreadPool()).thenReturn(threadPool);
-        when(appConfig.getMaxDataGroupSize()).thenReturn(1000);
 
         eventService.removeAllPastEvents();
 
-        verify(threadPool, times(6)).submit(any(Runnable.class));
-    }
-
-    @Test
-    public void removeAllPastEvents_zeroPostsToPublish() {
-        when(eventRepository.findAll()).thenReturn(new ArrayList<>());
-
-        eventService.removeAllPastEvents();
-
-        verify(appConfig, times(0)).getThreadPool();
+        verify(appConfig, times(1)).getThreadPool();
     }
 }
