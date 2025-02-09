@@ -7,9 +7,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.Filter;
+import school.faang.user_service.filter.Filter;
 import school.faang.user_service.dto.user.UserDto;
-import school.faang.user_service.dto.user.UserFilterDto;
+import school.faang.user_service.filter.user.UserFilterDto;
 import school.faang.user_service.dto.user.UserRegisterDto;
 import school.faang.user_service.dto.user.UserResponseRegisterDto;
 import school.faang.user_service.entity.Country;
@@ -57,8 +57,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getPremiumUsersByFilters(UserFilterDto filters) {
-        List<User> users = userRepository.findPremiumUsers();
+    public List<UserDto> getPremiumUsersByFilters(int pageNumber, int pageSize, UserFilterDto filters) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        List<User> users = userRepository.findPremiumUsers(pageable).toList();
         for (Filter<User, UserFilterDto> filter : userFilters) {
             if (filter.isApplicable(filters)) {
                 users = filter.apply(users, filters);

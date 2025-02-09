@@ -11,13 +11,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import school.faang.user_service.dto.Filter;
+import school.faang.user_service.filter.Filter;
 import school.faang.user_service.dto.user.UserDto;
-import school.faang.user_service.dto.user.UserFilterDto;
+import school.faang.user_service.filter.user.UserFilterDto;
 import school.faang.user_service.dto.user.UserRegisterDto;
 import school.faang.user_service.dto.user.UserResponseRegisterDto;
-import school.faang.user_service.dto.user.filter.UserCountryFilter;
-import school.faang.user_service.dto.user.filter.UserIsActiveFilter;
+import school.faang.user_service.filter.user.UserCountryFilter;
+import school.faang.user_service.filter.user.UserIsActiveFilter;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.user.UserMapperImpl;
 import school.faang.user_service.repository.CountryRepository;
@@ -92,12 +92,16 @@ class UserServiceImplTest {
 
     @Test
     public void testGetPremiumUsersByFilters() {
-        when(userRepository.findPremiumUsers()).thenReturn(List.of(getUser()));
+        int pageNumber = 0;
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<User> userPage = new PageImpl<>(List.of(getUser()));
+        when(userRepository.findPremiumUsers(pageable)).thenReturn(userPage);
 
         UserFilterDto filters = new UserFilterDto(1L, null);
-        List<UserDto> premiumUsers = userService.getPremiumUsersByFilters(filters);
+        List<UserDto> premiumUsers = userService.getPremiumUsersByFilters(pageNumber, pageSize, filters);
 
-        verify(userRepository).findPremiumUsers();
+        verify(userRepository).findPremiumUsers(pageable);
         assertEquals(1, premiumUsers.size());
     }
 }

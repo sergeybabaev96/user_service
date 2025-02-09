@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import school.faang.user_service.dto.user.UserDto;
-import school.faang.user_service.dto.user.UserFilterDto;
+import school.faang.user_service.filter.user.UserFilterDto;
 import school.faang.user_service.dto.user.UserRegisterDto;
 import school.faang.user_service.dto.user.UserResponseRegisterDto;
 import school.faang.user_service.service.user.UserService;
@@ -76,9 +76,9 @@ class UserControllerTest {
     public void testGetPremiumUsersByFilter() throws Exception {
         UserFilterDto filters = new UserFilterDto(1L, true);
         UserDto user = UserDto.builder().id(1L).build();
-        when(userService.getPremiumUsersByFilters(eq(filters))).thenReturn(List.of(user));
+        when(userService.getPremiumUsersByFilters(eq(1), eq(5), eq(filters))).thenReturn(List.of(user));
 
-        mockMvc.perform(get(BASE_URL + "/premium")
+        mockMvc.perform(get(BASE_URL + "/page/{pageNumber}/size/{pageSize}/premium", 1, 5)
                         .param("countryId", "1")
                         .param("active", "true"))
                 .andExpect(status().isOk());

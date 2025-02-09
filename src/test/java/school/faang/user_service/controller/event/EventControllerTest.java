@@ -6,7 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.event.EventDto;
-import school.faang.user_service.dto.event.EventFilterDto;
+import school.faang.user_service.filter.event.EventFilterDto;
 import school.faang.user_service.service.event.EventService;
 
 import java.util.List;
