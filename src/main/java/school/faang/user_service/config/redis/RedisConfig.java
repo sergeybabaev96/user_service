@@ -13,10 +13,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-    private final String USER_BAN_TOPIC;
+    private final String userBanTopic;
 
     public RedisConfig(@Value("${spring.data.redis.topic.user-ban}") String userBanTopic) {
-        USER_BAN_TOPIC = userBanTopic;
+        this.userBanTopic = userBanTopic;
     }
 
     @Bean
@@ -37,7 +37,7 @@ public class RedisConfig {
 
     @Bean
     public ChannelTopic userBanTopic() {
-        return new ChannelTopic(USER_BAN_TOPIC);
+        return new ChannelTopic(userBanTopic);
     }
 
     @Bean
