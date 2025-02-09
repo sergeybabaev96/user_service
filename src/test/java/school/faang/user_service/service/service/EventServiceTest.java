@@ -55,6 +55,7 @@ public class EventServiceTest {
 
         verify(threadPool, times(1)).submit(any(Runnable.class));
     }
+
     @Test
     public void removeAllPastEvents_success6ThreadsRun() {
         List<Event> events = new ArrayList<>();
@@ -76,6 +77,7 @@ public class EventServiceTest {
 
         verify(threadPool, times(6)).submit(any(Runnable.class));
     }
+
     @Test
     public void removeAllPastEvents_zeroPostsToPublish() {
         when(eventRepository.findAll()).thenReturn(new ArrayList<>());
