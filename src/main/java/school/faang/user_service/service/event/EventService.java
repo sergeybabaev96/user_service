@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.client.PromotionServiceClient;
 import school.faang.user_service.config.AppConfig;
 import school.faang.user_service.dto.event.EventDto;
@@ -146,6 +147,7 @@ public class EventService {
                 .toList();
     }
 
+    @Transactional
     public void removeAllPastEvents() {
         List<Event> pastEvents = eventRepository.findAll()
                 .stream()
