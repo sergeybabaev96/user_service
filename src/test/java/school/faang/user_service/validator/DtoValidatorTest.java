@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.SubscriptionUserDto;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.validation.DtoValidator;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

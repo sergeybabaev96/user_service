@@ -16,9 +16,9 @@ import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import java.util.List;
 import java.util.Optional;
 
-import static school.faang.user_service.service.skill.SkillErrorMessage.NOT_ENOUGH_SKILL_OFFERS;
-import static school.faang.user_service.service.skill.SkillErrorMessage.SKILL_ALREADY_EXISTS;
-import static school.faang.user_service.service.skill.SkillErrorMessage.USER_ALREADY_HAS_SKILL;
+import static school.faang.user_service.utils.skill.SkillErrorMessage.NOT_ENOUGH_SKILL_OFFERS;
+import static school.faang.user_service.utils.skill.SkillErrorMessage.SKILL_ALREADY_EXISTS;
+import static school.faang.user_service.utils.skill.SkillErrorMessage.USER_ALREADY_HAS_SKILL;
 
 @RequiredArgsConstructor
 @Service

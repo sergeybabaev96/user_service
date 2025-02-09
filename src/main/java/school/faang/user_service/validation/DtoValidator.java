@@ -1,4 +1,4 @@
-package school.faang.user_service.validator;
+package school.faang.user_service.validation;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
