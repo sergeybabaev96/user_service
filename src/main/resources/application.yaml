@@ -67,7 +67,8 @@ dicebear:
 
 user:
   ban:
-    channel: user_ban
+    redis:
+      channel: user_ban
 
 service:
   name: user-service

@@ -1,4 +1,4 @@
-package school.faang.user_service.service.listener;
+package school.faang.user_service.listener;
 
 import org.springframework.data.redis.connection.MessageListener;
 

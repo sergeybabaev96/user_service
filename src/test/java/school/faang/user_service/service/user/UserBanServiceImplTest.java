@@ -24,11 +24,11 @@ class UserBanServiceImplTest {
     private UserBanServiceImpl userBanService;
 
     @Test
-    public void testBanUsers() {
+    public void testBanUser() {
         when(userRepository.findById(eq(1L))).thenReturn(Optional.ofNullable(getUser()));
         when(userRepository.save(eq(getBannedUser()))).thenReturn(getBannedUser());
 
-        userBanService.banUsers(String.valueOf(1L));
+        userBanService.banUser(String.valueOf(1L));
 
         verify(userRepository).findById(eq(1L));
         verify(userRepository).save(eq(getBannedUser()));
