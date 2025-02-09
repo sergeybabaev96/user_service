@@ -52,7 +52,7 @@ class PremiumRemovalJobIT {
         Premium premium = Premium.builder()
                 .user(testUser)
                 .startDate(LocalDateTime.now().minusMonths(2))
-                .endDate(LocalDateTime.now().minusDays(10)) // Уже истекла
+                .endDate(LocalDateTime.now().minusDays(10))
                 .build();
         premiumRepository.save(premium);
     }
