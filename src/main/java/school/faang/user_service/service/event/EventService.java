@@ -2,9 +2,11 @@ package school.faang.user_service.service.event;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.client.PromotionServiceClient;
+import school.faang.user_service.config.AppConfig;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.event.EventFilterDto;
 import school.faang.user_service.dto.event.EventResponse;
@@ -21,8 +23,10 @@ import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.util.ConverterUtil;
 import school.faang.user_service.validator.UserValidator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,7 +36,6 @@ import static school.faang.user_service.config.KafkaConstants.PAYMENT_PROMOTION_
 @Service
 @RequiredArgsConstructor
 public class EventService {
-
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final EventMapper eventMapper;
@@ -41,6 +44,7 @@ public class EventService {
     private final ConverterUtil converterUtil;
     private final PromotionServiceClient promotionServiceClient;
     private final UserValidator userValidator;
+    private final AppConfig appConfig;
 
     public EventDto create(EventDto eventDto) {
         validateEventDto(eventDto);
@@ -147,8 +151,12 @@ public class EventService {
                 .stream()
                 .filter(event -> event.getStatus().equals(EventStatus.COMPLETED))
                 .toList();
-        pastEvents.forEach(event -> {
-            eventRepository.deleteById(event.getId());
+        divideEventsIntoGroups(pastEvents, appConfig.getMaxDataGroupSize()).forEach(group -> {
+            appConfig.getThreadPool().submit(() -> {
+                group.forEach(event -> {
+                    eventRepository.deleteById(event.getId());
+                });
+            });
         });
     }
 
@@ -185,5 +193,21 @@ public class EventService {
         }
 
         return owner;
+    }
+
+    private List<List<Event>> divideEventsIntoGroups(List<Event> events, int groupSize) {
+        List<List<Event>> groups = new ArrayList<>();
+        List<Event> currentGroup = new ArrayList<>();
+        for (Event event : events) {
+            currentGroup.add(event);
+            if (currentGroup.size() >= groupSize) {
+                groups.add(currentGroup);
+                currentGroup = new ArrayList<>();
+            }
+        }
+        if (!currentGroup.isEmpty()) {
+            groups.add(currentGroup);
+        }
+        return groups;
     }
 }
