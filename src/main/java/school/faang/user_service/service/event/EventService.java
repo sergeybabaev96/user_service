@@ -149,7 +149,6 @@ public class EventService {
                 .toList();
     }
 
-    @Transactional
     public void removeAllPastEvents() {
         Page<Event> currentPage;
         int currentPageNumber = 1;
@@ -158,7 +157,7 @@ public class EventService {
             Page<Event> finalCurrentPage = currentPage;
             appConfig.getThreadPool().submit(() -> {
                 List<Event> pastEventsPage = finalCurrentPage.stream().filter(event -> event.getStatus().equals(EventStatus.COMPLETED)).toList();
-               pastEventsPage.forEach(event -> deleteEvent(event.getId()));
+                pastEventsPage.forEach(event -> deleteEvent(event.getId()));
             });
             currentPageNumber++;
         } while (currentPage.hasNext());
