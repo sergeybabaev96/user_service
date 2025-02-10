@@ -18,10 +18,8 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.MentorshipService;
-import school.faang.user_service.service.s3.S3Service;
+import school.faang.user_service.service.s3.AvatarS3Service;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -56,7 +54,7 @@ public class UserServiceTest {
     private UserContext userContext;
 
     @Mock
-    private S3Service s3Service;
+    private AvatarS3Service avatarS3Service;
 
     @InjectMocks
     private UserService userService;
@@ -193,12 +191,12 @@ public class UserServiceTest {
 
         when(userContext.getUserId()).thenReturn(userId);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(s3Service.uploadAvatar(file, size)).thenReturn(uploadResult);
+        when(avatarS3Service.uploadAvatar(file, size)).thenReturn(uploadResult);
 
         String result = userService.uploadAvatar(file, size);
 
-        verify(s3Service).deleteAvatar("old-large");
-        verify(s3Service).deleteAvatar("old-small");
+        verify(avatarS3Service).deleteAvatar("old-large");
+        verify(avatarS3Service).deleteAvatar("old-small");
         verify(userRepository).save(user);
         assertThat(user.getUserProfilePic()).isEqualTo(newProfile);
         assertThat(result).isEqualTo(expectedUrl);
@@ -214,11 +212,11 @@ public class UserServiceTest {
 
         when(userContext.getUserId()).thenReturn(userId);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(s3Service.downloadAvatar("small-key")).thenReturn(expectedUrl);
+        when(avatarS3Service.downloadAvatar("small-key")).thenReturn(expectedUrl);
 
         String result = userService.downloadAvatar("large");
 
-        verify(s3Service).downloadAvatar("small-key");
+        verify(avatarS3Service).downloadAvatar("small-key");
         assertThat(result).isEqualTo(expectedUrl);
     }
 
@@ -234,8 +232,8 @@ public class UserServiceTest {
 
         userService.deleteAvatar();
 
-        verify(s3Service).deleteAvatar("large-key");
-        verify(s3Service).deleteAvatar("small-key");
+        verify(avatarS3Service).deleteAvatar("large-key");
+        verify(avatarS3Service).deleteAvatar("small-key");
         verify(userRepository).save(user);
         assertThat(user.getUserProfilePic()).isNull();
     }
