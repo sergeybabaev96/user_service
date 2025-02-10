@@ -51,3 +51,16 @@ services:
   payment-service:
     host: localhost
     port: 9080
+
+premium:
+  schedule:
+    removal-cron: "0 0 0 * * SUN"
+  batch:
+    size: 1000
+
+task:
+    execution:
+      pool:
+        core-size: 4
+        max-size: 8
+        keep-alive: 60s
