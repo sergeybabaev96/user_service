@@ -19,3 +19,5 @@ databaseChangeLog:
       file: db/changelog/changeset/user_V009__promotion_payment.sql
   - include:
       file: db/changelog/changeset/user_V010__promotion.sql
+  - include:
+      file: db/changelog/changeset/user_V011__shedlock.sql
