@@ -6,7 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.event.EventDto;
-import school.faang.user_service.dto.event.EventFilterDto;
+import school.faang.user_service.filter.event.EventFilterDto;
 import school.faang.user_service.service.event.EventService;
 
 import java.util.List;
@@ -19,6 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static school.faang.user_service.utils.event.EventPrepareData.getEventDto;
 import static school.faang.user_service.utils.event.EventPrepareData.getFilterLocationDto;
+
 
 @ExtendWith(MockitoExtension.class)
 class EventControllerTest {
