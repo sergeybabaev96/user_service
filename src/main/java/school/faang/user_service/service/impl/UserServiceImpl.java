@@ -48,7 +48,6 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("User already has active tariff");
         }
 
-        tariffDto.setUserId(userId);
         Tariff tariff = tariffService.buyTariff(tariffDto, userId);
         user.setTariff(tariff);
         userRepository.save(user);

@@ -2,8 +2,6 @@ package school.faang.user_service.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -12,7 +10,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import school.faang.user_service.entity.event.Event;
 
 import java.time.LocalDateTime;
 
@@ -43,12 +40,4 @@ public class Tariff extends Identifiable {
 
     @Column(name = "payment_id")
     private Long paymentId;
-
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @OneToOne
-    @JoinColumn(name = "event_id")
-    private Event event;
 }

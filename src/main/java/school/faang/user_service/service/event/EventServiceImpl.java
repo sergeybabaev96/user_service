@@ -38,7 +38,6 @@ public class EventServiceImpl implements EventService {
         log.info("Start buy event tariff, eventId: {}", eventId);
         Event event = findEventById(eventId);
 
-        tariffDto.setEventId(eventId);
         Tariff tariff = tariffService.buyTariff(tariffDto, event.getOwner().getId());
         event.setTariff(tariff);
         eventRepository.save(event);
