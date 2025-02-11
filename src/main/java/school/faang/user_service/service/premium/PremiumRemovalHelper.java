@@ -9,8 +9,8 @@ import school.faang.user_service.repository.premium.PremiumRepository;
 
 import java.util.List;
 
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class PremiumRemovalHelper {
 
