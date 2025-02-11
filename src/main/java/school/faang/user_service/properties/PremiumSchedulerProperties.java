@@ -9,7 +9,5 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class PremiumSchedulerProperties {
 
-    private String remove;
-
     private int batch;
 }

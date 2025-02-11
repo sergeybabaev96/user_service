@@ -11,19 +11,19 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class PremiumRemoverTest {
+class PremiumRemoverSchedulerTest {
 
     @Mock
     private PremiumService premiumService;
 
     @InjectMocks
-    private PremiumRemover premiumRemover;
+    private PremiumRemoverScheduler premiumRemoverScheduler;
 
     @Test
     public void testRemoveExpiredPremium() {
         doNothing().when(premiumService).removeAllExpiredPremiumAccess();
 
-        premiumRemover.removePremium();
+        premiumRemoverScheduler.removePremium();
 
         verify(premiumService).removeAllExpiredPremiumAccess();
     }

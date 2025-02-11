@@ -11,6 +11,6 @@ public class AsyncConfig {
 
     @Bean
     public ExecutorService cachedExecutorService() {
-        return Executors.newCachedThreadPool();
+        return Executors.newFixedThreadPool(5);
     }
 }

@@ -2,6 +2,7 @@ package school.faang.user_service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -15,6 +16,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableFeignClients("school.faang.user_service.client")
 @EnableCaching
 @EnableScheduling
+@EnableSchedulerLock(defaultLockAtMostFor = "30s")
 @EnableAsync
 @PropertySource("classpath:.env")
 public class UserServiceApplication {
