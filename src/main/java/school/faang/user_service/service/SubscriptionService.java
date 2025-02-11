@@ -21,7 +21,7 @@ public class SubscriptionService {
     private final SubscriberMapper mapper;
 
     public void followUser(long followerId, long followeeId) {
-        checkingActionsOnYourself(followerId, followeeId, "Нельзя подписаться на свой аккаунт.");
+        checkActionOnYourself(followerId, followeeId, "Нельзя подписаться на свой аккаунт.");
 
         boolean isThereSub = repository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
         if (isThereSub) {
@@ -32,7 +32,7 @@ public class SubscriptionService {
     }
 
     public void unfollowUser(long followerId, long followeeId) {
-        checkingActionsOnYourself(followerId, followeeId, "Нельзя отписаться от самого себя.");
+        checkActionOnYourself(followerId, followeeId, "Нельзя отписаться от самого себя.");
 
         boolean isThereSub = repository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
         if (!isThereSub) {
@@ -42,7 +42,7 @@ public class SubscriptionService {
         repository.unfollowUser(followerId, followeeId);
     }
 
-    private void checkingActionsOnYourself(long followerId, long followeeId, String errorMessage) {
+    private void checkActionOnYourself(long followerId, long followeeId, String errorMessage) {
         if (followerId == followeeId) {
             throw new DataValidationException(errorMessage);
         }
