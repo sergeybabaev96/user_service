@@ -56,11 +56,11 @@ premium:
   schedule:
     removal-cron: "0 0 0 * * SUN"
   batch:
-    size: 1000
+    size: 10
 
 task:
     execution:
       pool:
         core-size: 4
         max-size: 8
-        keep-alive: 60s
+        keep-alive: 60

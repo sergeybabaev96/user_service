@@ -7,7 +7,7 @@ import school.faang.user_service.service.PremiumService;
 
 @Component
 @RequiredArgsConstructor
-public class PremiumRemover {
+public class PremiumRemovalScheduler {
     private final PremiumService premiumService;
 
     @Scheduled(cron = "${premium.schedule.removal-cron}")

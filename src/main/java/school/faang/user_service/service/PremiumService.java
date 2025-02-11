@@ -14,7 +14,7 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.EntityNotFoundException;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.premium.PremiumRepository;
-import school.faang.user_service.schedulers.PremiumRemovalProcessor;
+import school.faang.user_service.schedulers.PremiumExpirationManager;
 
 import java.time.LocalDateTime;
 
@@ -25,10 +25,10 @@ public class PremiumService {
     private final PremiumRepository premiumRepository;
     private final PaymentServiceClient paymentServiceClient;
     private final UserContext userContext;
-    private final PremiumRemovalProcessor premiumRemovalProcessor;
+    private final PremiumExpirationManager premiumExpirationManager;
 
     public void deleteExpiredPremiums() {
-        premiumRemovalProcessor.deleteExpiredPremiums();
+        premiumExpirationManager.deleteExpiredPremiums();
     }
 
     public OrderDto buyPremium(long user_id, PremiumPlan plan, String paymentMethod) {
