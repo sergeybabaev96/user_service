@@ -19,7 +19,6 @@ public class PremiumRemovalHelper {
     @Transactional
     public void deleteBatch(List<Premium> batch) {
         premiumRepository.deleteAll(batch);
-        log.info("Deleted {} subscriptions. Users: {}", batch.size(),
-                batch.stream().map(p -> p.getUser().getId()).toList());
+        log.info("Deleted {} subscriptions.", batch.size());
     }
 }
