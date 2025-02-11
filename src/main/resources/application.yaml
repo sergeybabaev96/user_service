@@ -15,6 +15,22 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: user-service-group-ban
+      security:
+        protocol: PLAINTEXT
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+      properties:
+        retries: 3
+        max.poll.records: 1000
+        max.poll.interval.ms: 600000
+        fetch.max.wait.ms: 5000
+
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
@@ -38,3 +54,7 @@ project-service:
 payment-service:
   host: localhost
   port: 9080
+
+user:
+  ban:
+    kafka_topic: "user_ban"
