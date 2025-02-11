@@ -83,7 +83,6 @@ public class MentorshipServiceTest {
     @Test
     void testGetMentees() {
         when(mentorshipRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(mentorshipRepository.findAllById(List.of(mentee.getId()))).thenReturn(List.of(mentee));
 
         List<Long> result = mentorshipService.getMentees(user.getId());
 
@@ -102,7 +101,6 @@ public class MentorshipServiceTest {
     @Test
     void testGetMentors() {
         when(mentorshipRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(mentorshipRepository.findAllById(List.of(mentor.getId()))).thenReturn(List.of(mentor));
 
         List<Long> result = mentorshipService.getMentors(user.getId());
 
