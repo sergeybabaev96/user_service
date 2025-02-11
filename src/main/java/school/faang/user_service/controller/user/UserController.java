@@ -78,7 +78,7 @@ public class UserController {
         return ResponseEntity.ok("Avatar generated successfully.");
     }
 
-    @GetMapping("/avatar")
+    @GetMapping("/avatar/url")
     public ResponseEntity<String> getUserAvatar() {
         long userId = userService.getCurrentUserId();
         User user = userService.getUser(userId);

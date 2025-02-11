@@ -18,9 +18,8 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.MentorshipService;
-import school.faang.user_service.service.s3.S3Service;
+import school.faang.user_service.service.s3.AvatarS3Service;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -36,7 +35,7 @@ public class UserService {
     private final CountryRepository countryRepository;
     private final EventRepository eventRepository;
     private final GoalRepository goalRepository;
-    private final S3Service s3Service;
+    private final AvatarS3Service avatarS3Service;
     private final UserAvatarService userAvatarService;
     private final UserContext userContext;
 
@@ -110,13 +109,13 @@ public class UserService {
         long userId = userContext.getUserId();
         User currentUser = getUser(userId);
 
-        Pair<UserProfilePic, String> uploadResult = s3Service.uploadAvatar(file, size);
+        Pair<UserProfilePic, String> uploadResult = avatarS3Service.uploadAvatar(file, size);
 
         if (currentUser.getUserProfilePic() != null) {
             String largeImageKey = currentUser.getUserProfilePic().getFileId();
             String smallImageKey = currentUser.getUserProfilePic().getSmallFileId();
-            s3Service.deleteAvatar(largeImageKey);
-            s3Service.deleteAvatar(smallImageKey);
+            avatarS3Service.deleteAvatar(largeImageKey);
+            avatarS3Service.deleteAvatar(smallImageKey);
         }
 
         currentUser.setUserProfilePic(uploadResult.getFirst());
@@ -136,7 +135,7 @@ public class UserService {
             imageKey = currentUser.getUserProfilePic().getSmallFileId();
         }
 
-        return s3Service.downloadAvatar(imageKey);
+        return avatarS3Service.downloadAvatar(imageKey);
     }
 
     @Transactional
@@ -147,8 +146,8 @@ public class UserService {
         String largeImageKey = currentUser.getUserProfilePic().getFileId();
         String smallImageKey = currentUser.getUserProfilePic().getSmallFileId();
 
-        s3Service.deleteAvatar(largeImageKey);
-        s3Service.deleteAvatar(smallImageKey);
+        avatarS3Service.deleteAvatar(largeImageKey);
+        avatarS3Service.deleteAvatar(smallImageKey);
 
         currentUser.setUserProfilePic(null);
         userRepository.save(currentUser);

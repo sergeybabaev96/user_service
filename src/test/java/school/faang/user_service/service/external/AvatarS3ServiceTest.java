@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class S3ServiceTest {
+class AvatarS3ServiceTest {
 
     @Mock
     private AmazonS3 amazonS3Client;

@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class S3ServiceTest {
+public class AvatarS3ServiceTest {
 
     @Mock
     private AmazonS3 s3Client;
@@ -42,7 +42,7 @@ public class S3ServiceTest {
     private MultipartFile multipartFile;
 
     @InjectMocks
-    private S3Service s3Service;
+    private AvatarS3Service avatarS3Service;
 
     private final String testBucket = "test-bucket";
     private final String avatarFolder = "avatars";
@@ -53,12 +53,12 @@ public class S3ServiceTest {
 
     @Test
     void uploadAvatarSuccess() throws Exception {
-        setField(s3Service, "largeAvatarMaxSize", largeSize);
-        setField(s3Service, "smallAvatarMaxSize", smallSize);
-        setField(s3Service, "bucketName", testBucket);
-        setField(s3Service, "avatarFolderName", avatarFolder);
-        setField(s3Service, "s3Endpoint", s3Endpoint);
-        setField(s3Service, "downloadPath", downloadPath);
+        setField(avatarS3Service, "largeAvatarMaxSize", largeSize);
+        setField(avatarS3Service, "smallAvatarMaxSize", smallSize);
+        setField(avatarS3Service, "bucketName", testBucket);
+        setField(avatarS3Service, "avatarFolderName", avatarFolder);
+        setField(avatarS3Service, "s3Endpoint", s3Endpoint);
+        setField(avatarS3Service, "downloadPath", downloadPath);
 
         ImageProcessor.ImageData largeImageData = mockImageData();
         ImageProcessor.ImageData smallImageData = mockImageData();
@@ -66,7 +66,7 @@ public class S3ServiceTest {
         when(imageProcessor.resizeImage(any(), eq(largeSize))).thenReturn(largeImageData);
         when(imageProcessor.resizeImage(any(), eq(smallSize))).thenReturn(smallImageData);
 
-        Pair<UserProfilePic, String> result = s3Service.uploadAvatar(multipartFile, "large");
+        Pair<UserProfilePic, String> result = avatarS3Service.uploadAvatar(multipartFile, "large");
 
         ArgumentCaptor<PutObjectRequest> putRequestCaptor = ArgumentCaptor.forClass(PutObjectRequest.class);
         verify(s3Client, times(2)).putObject(putRequestCaptor.capture());
@@ -86,21 +86,21 @@ public class S3ServiceTest {
 
     @Test
     void downloadAvatarSuccess() {
-        setField(s3Service, "s3Endpoint", s3Endpoint);
-        setField(s3Service, "downloadPath", downloadPath);
+        setField(avatarS3Service, "s3Endpoint", s3Endpoint);
+        setField(avatarS3Service, "downloadPath", downloadPath);
 
         String testKey = "avatars/5a595799-c86f-4996-8e27-7258a367e0c4";
         String expectedUrl = s3Endpoint + downloadPath + URLEncoder.encode(testKey, StandardCharsets.UTF_8);
-        String actualUrl = s3Service.downloadAvatar(testKey);
+        String actualUrl = avatarS3Service.downloadAvatar(testKey);
         assertEquals(expectedUrl, actualUrl);
     }
 
     @Test
     void deleteAvatarSuccess() {
-        setField(s3Service, "bucketName", testBucket);
+        setField(avatarS3Service, "bucketName", testBucket);
         String testKey = "avatars/test-image.jpg";
 
-        s3Service.deleteAvatar(testKey);
+        avatarS3Service.deleteAvatar(testKey);
 
         verify(s3Client).deleteObject(testBucket, testKey);
     }
