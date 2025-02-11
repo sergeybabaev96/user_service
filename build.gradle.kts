@@ -140,3 +140,9 @@ tasks.jacocoTestCoverageVerification {
 tasks.check {
     dependsOn(tasks.jacocoTestCoverageVerification)
 }
+
+tasks.test {
+    useJUnitPlatform {
+        excludeTags("integration")
+    }
+} //Это Альфир мне сказал так сделать. Стёпа.
