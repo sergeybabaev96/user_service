@@ -140,6 +140,16 @@ class RecommendationRequestServiceTest {
         Exception exception = assertThrows(IllegalStateException.class,
                 () -> recommendationRequestService.rejectRequest(1L, "Not needed"));
 
-        assertEquals("Cannot reject a non-pending request", exception.getMessage());
+        assertEquals("Cannot reject a request with status ACCEPTED", exception.getMessage());
+
+        recommendationRequest.setStatus(RequestStatus.REJECTED);
+        when(recommendationRequestRepository.findById(1L)).thenReturn(Optional.of(recommendationRequest));
+
+        exception = assertThrows(IllegalStateException.class,
+                () -> recommendationRequestService.rejectRequest(1L, "Not needed"));
+
+        assertNotNull(exception);
+        assertEquals("Cannot reject a request with status REJECTED", exception.getMessage());
+
     }
 }
