@@ -7,5 +7,5 @@ public interface TariffService {
 
     Tariff buyTariff(TariffDto tariffDto, Long userId);
 
-    void decrementShows(Tariff tariff);
+    void decrementShows(Long tariffId);
 }

@@ -4,7 +4,9 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.client.payment.PaymentRequest;
 import school.faang.user_service.client.payment.PaymentResponse;
@@ -54,22 +56,29 @@ public class TariffServiceImpl implements TariffService {
     }
 
     @Override
-    public void decrementShows(Tariff tariff) {
-        if (tariff == null || !tariffRepository.existsById(tariff.getId())) {
+    @Async("tariffThreadPool")
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void decrementShows(Long tariffId) {
+        Tariff tariff = tariffRepository.findById(tariffId).orElse(null);
+        if (tariff == null) {
             return;
         }
+        log.info("Start decrementShows, id = {}", tariff.getId());
 
         if (tariff.getShows() != null
                 && tariff.getShows() > 0
                 && tariff.getPriority() != null) {
             tariff.setShows(tariff.getShows() - 1);
+            log.info("DecrementShows, id = {}, shows = {}", tariff.getId(), tariff.getShows());
 
             if (tariff.getShows() == 0) {
                 tariff.setIsActive(false);
+                log.info("Tariff set not active, id = {}", tariff.getId());
             }
         }
 
         tariffRepository.save(tariff);
+        log.info("End decrementShows, id = {}", tariff.getId());
     }
 
     private void sendPayment(@NonNull TariffDto tariffDto, BigDecimal amount, Currency currency, Long userId) {

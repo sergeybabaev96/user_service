@@ -55,8 +55,11 @@ public class EventServiceImpl implements EventService {
             }
         }
 
+        events.stream()
+                .filter(event -> event.getTariff() != null)
+                .forEach(event -> tariffService.decrementShows(event.getTariff().getId()));
+
         return events.stream()
-                .peek(event -> tariffService.decrementShows(event.getTariff()))
                 .map(eventMapper::toDto)
                 .toList();
     }

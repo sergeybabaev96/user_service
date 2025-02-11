@@ -67,7 +67,7 @@ public class UserServiceIntegrationTest extends BaseTest {
 
         userService.findUsersByFilter(request);
 
-        verify(tariffService).decrementShows(tariff);
+        verify(tariffService).decrementShows(tariff.getId());
         verify(tariffRepository).save(Tariff.builder()
                 .isActive(false)
                 .id(1L)
