@@ -6,7 +6,7 @@ import school.faang.user_service.entity.event.Event;
 import java.util.List;
 
 @Component
-public class EventTitleFilter implements EventFilter{
+public class EventTitleFilter implements EventFilter {
     @Override
     public boolean isApplicable(EventDto event) {
         return event != null && event.getTitle() != null && !event.getTitle().isEmpty();

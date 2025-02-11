@@ -17,17 +17,14 @@ import school.faang.user_service.mapper.TariffMapperImpl;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.properties.UserServiceProperties;
 import school.faang.user_service.repository.UserRepository;
-import school.faang.user_service.service.impl.UserServiceImpl;
 import school.faang.user_service.service.tariff.TariffService;
+import school.faang.user_service.service.user.impl.UserServiceImpl;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {

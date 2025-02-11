@@ -15,14 +15,11 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.TariffMapper;
 import school.faang.user_service.repository.TariffRepository;
 import school.faang.user_service.repository.UserRepository;
-import school.faang.user_service.service.UserService;
 import school.faang.user_service.service.tariff.TariffService;
 
 import java.util.List;
 
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceIntegrationTest extends BaseTest {
@@ -60,8 +57,8 @@ public class UserServiceIntegrationTest extends BaseTest {
                 .build();
         when(userRepository.findAllOrderByTariffAndLimit(1, 0))
                 .thenReturn(List.of(User.builder()
-                                .id(1L)
-                                .tariff(tariff)
+                        .id(1L)
+                        .tariff(tariff)
                         .build()));
         when(tariffRepository.existsById(1L)).thenReturn(true);
 

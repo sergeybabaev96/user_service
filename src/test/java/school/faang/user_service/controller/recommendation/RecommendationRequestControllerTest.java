@@ -2,7 +2,6 @@ package school.faang.user_service.controller.recommendation;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -10,7 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import school.faang.user_service.BaseTest;
-import school.faang.user_service.controller.RecommendationRequestController;
 import school.faang.user_service.data.RecommendationRequestData;
 import school.faang.user_service.data.SkillData;
 import school.faang.user_service.dto.recommendation.request.RecommendationRequestDto;
@@ -101,7 +99,7 @@ public class RecommendationRequestControllerTest extends BaseTest {
             assertEquals("Message must not be null", e.getMessage());
         }
     }
-    @Disabled
+
     @Test
     void getRecommendationRequests() {
         RecommendationRequestData data = RecommendationRequestData.DATA1;
@@ -111,7 +109,6 @@ public class RecommendationRequestControllerTest extends BaseTest {
         assertEquals(1, response.size());
     }
 
-    @Disabled
     @Test
     void getRecommendationRequest() {
         RecommendationRequestData data = RecommendationRequestData.DATA1;
@@ -128,11 +125,11 @@ public class RecommendationRequestControllerTest extends BaseTest {
         mockSkillsFindById(data);
         when(recommendationRequestRepository.save(any())).thenReturn(data.toRecommendationRequest());
         when(skillRequestRepository.saveAll(any())).thenReturn((Iterable<SkillRequest>) data.getSkillsRequested().stream().map(skillData ->
-                SkillRequest.builder()
-                        .skill(skillData.toSkill())
-                        .request(data.toRecommendationRequest())
-                        .id(1L)
-                        .build()
+                        SkillRequest.builder()
+                                .skill(skillData.toSkill())
+                                .request(data.toRecommendationRequest())
+                                .id(1L)
+                                .build()
                 ).toList()
         );
     }
