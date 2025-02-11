@@ -2,7 +2,6 @@ package school.faang.user_service.service.premium;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -17,7 +16,6 @@ import school.faang.user_service.repository.premium.PremiumRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
