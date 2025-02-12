@@ -42,7 +42,7 @@ public class EventServiceTest {
         when(appConfig.getMaxDataGroupSize()).thenReturn(1000);
 
         Page<Event> page = new PageImpl<>(events, PageRequest.of(0, 1000), 0);
-        when(eventRepository.findAll(any(Pageable.class))).thenReturn(page);
+        when(eventRepository.findAllByStatusIs(any(EventStatus.class), any(Pageable.class))).thenReturn(page);
 
         ExecutorService threadPool = mock(ExecutorService.class);
         when(appConfig.getThreadPool()).thenReturn(threadPool);
@@ -57,7 +57,7 @@ public class EventServiceTest {
     public void removeAllPastEvents_zeroPostsToPublish() {
         Page<Event> emptyPage = new PageImpl<>(new ArrayList<>());
 
-        when(eventRepository.findAll(any(Pageable.class))).thenReturn(emptyPage);
+        when(eventRepository.findAllByStatusIs(any(EventStatus.class), any(Pageable.class))).thenReturn(emptyPage);
         when(appConfig.getMaxDataGroupSize()).thenReturn(1000);
 
         ExecutorService threadPool = mock(ExecutorService.class);

@@ -12,7 +12,7 @@ import school.faang.user_service.service.event.EventService;
 public class Scheduler {
     private final EventService eventService;
 
-    @Scheduled(cron = "0 0 * * 1") //every week
+    @Scheduled(cron = "${app.config.clear_events_sheduled_cron}") //every week
     public void clearEvents() {
         eventService.removeAllPastEvents();
         log.info("Removing all past events");

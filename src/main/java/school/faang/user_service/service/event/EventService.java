@@ -2,12 +2,10 @@ package school.faang.user_service.service.event;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.client.PromotionServiceClient;
 import school.faang.user_service.config.AppConfig;
 import school.faang.user_service.dto.event.EventDto;
@@ -26,8 +24,6 @@ import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.util.ConverterUtil;
 import school.faang.user_service.validator.UserValidator;
 
-import java.awt.print.Pageable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -153,11 +149,13 @@ public class EventService {
         Page<Event> currentPage;
         int currentPageNumber = 1;
         do {
-            currentPage = eventRepository.findAll(PageRequest.of(currentPageNumber, appConfig.getMaxDataGroupSize()));
+            currentPage = eventRepository.findAllByStatusIs(
+                    EventStatus.COMPLETED,
+                    PageRequest.of(currentPageNumber, appConfig.getMaxDataGroupSize()));
+
             Page<Event> finalCurrentPage = currentPage;
             appConfig.getThreadPool().submit(() -> {
-                List<Event> pastEventsPage = finalCurrentPage.stream().filter(event -> event.getStatus().equals(EventStatus.COMPLETED)).toList();
-                pastEventsPage.forEach(event -> deleteEvent(event.getId()));
+                finalCurrentPage.forEach(event -> deleteEvent(event.getId()));
             });
             currentPageNumber++;
         } while (currentPage.hasNext());
