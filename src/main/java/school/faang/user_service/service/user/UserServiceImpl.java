@@ -5,7 +5,9 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.dto.file.FileUploadResponseDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapper;
@@ -16,9 +18,11 @@ import school.faang.user_service.service.UserService;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Service
@@ -30,13 +34,13 @@ public class UserServiceImpl implements UserService {
     private final CountryService countryService;
 
     @Override
-    public FileUploadResponseDto parseCsv(InputStream fileInputStream) {
-        try {
+    public FileUploadResponseDto processPersonsFromFile(MultipartFile file) {
+        try (InputStream fileInputStream = file.getInputStream()) {
             log.info("Begin parsing file");
             List<Person> persons = parsePersonsFromInputStream(fileInputStream);
             log.info("End parsing file. Read {} records", persons.size());
+            log.info("Begin transforming records to entities");
 
-            log.info("Begin convertation records to entities");
             List<CompletableFuture<User>> futureUsers = persons.stream()
                     .map(person -> CompletableFuture.supplyAsync(() -> {
                         User user = userMapper.toUserEntity(person);
@@ -45,23 +49,32 @@ public class UserServiceImpl implements UserService {
                         return user;
                     })).toList();
 
-            List<User> users = futureUsers.stream()
-                    .map(CompletableFuture::join)
-                    .toList();
-            log.info("End convertation records to entities");
+            CompletableFuture<Void> allFuturesResult =
+                    CompletableFuture.allOf(futureUsers.toArray(new CompletableFuture[futureUsers.size()]));
+
+            CompletableFuture<List<User>> cf_users= allFuturesResult.thenApply(v ->
+                    futureUsers.stream().
+                            map(CompletableFuture::join)
+                            .toList()
+            ).exceptionally(err -> {
+                log.error("Error processing file {}", file.getOriginalFilename());
+                return new ArrayList<>();
+            });
+
+            List<User> users = cf_users.get();
+
+            log.info("End transforming records to entities");
 
             userRepository.saveAll(users);
             log.info("Entities saved into DB");
-
-        }catch(Exception e)
-        {
+        } catch (IOException | ExecutionException | InterruptedException e) {
             return FileUploadResponseDto.builder()
-                    .status("Error")
+                    .status(String.valueOf(HttpStatus.UNPROCESSABLE_ENTITY))
                     .error(e.toString())
                     .build();
         }
         return FileUploadResponseDto.builder()
-                .status("OK")
+                .status(String.valueOf(HttpStatus.OK))
                 .build();
     }
 
