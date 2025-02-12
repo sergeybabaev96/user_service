@@ -11,10 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import school.faang.user_service.dto.UserDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import school.faang.user_service.dto.UserDto;
 import org.springframework.data.util.Pair;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.config.context.UserContext;
@@ -60,9 +56,6 @@ public class UserServiceTest {
 
     @Mock
     private static GoalRepository goalRepository;
-
-    @Spy
-    private UserMapperImpl userMapperIml;
 
     @Spy
     private UserMapperImpl userMapperIml;
@@ -193,41 +186,6 @@ public class UserServiceTest {
         verify(eventRepository, times(2)).save(event);
     }
 
-    @Test
-    void testGetUsersByIds() {
-        List<Long> userIds = List.of(userId);
-        List<User> users = List.of(user);
-        UserDto userDto = userMapperIml.toDto(user);
-        List<UserDto> userDtos = List.of(userDto);
-
-        Pageable pageable = PageRequest.of(0, 10);
-
-        when(userRepository.findByIdIn(anyList(), any(Pageable.class))).thenReturn(users);
-        when(userMapperIml.toDto(any(User.class))).thenReturn(userDto);
-        when(userRepository.countByIdIn(anyList())).thenReturn(1L);
-
-        Page<UserDto> result = userService.getUsersByIds(userIds, pageable);
-
-        assertEquals(1, result.getTotalElements());
-        assertEquals(userDtos, result.getContent());
-    }
-
-    @Test
-    void testGetUsersByIds_EmptyList() {
-        List<Long> userIds = Collections.emptyList();
-        List<User> users = Collections.emptyList();
-        List<UserDto> userDtos = Collections.emptyList();
-
-        Pageable pageable = PageRequest.of(0, 10);
-
-        when(userRepository.findByIdIn(anyList(), any(Pageable.class))).thenReturn(users);
-        when(userRepository.countByIdIn(anyList())).thenReturn(0L);
-
-        Page<UserDto> result = userService.getUsersByIds(userIds, pageable);
-
-        assertEquals(0, result.getTotalElements());
-        assertEquals(userDtos, result.getContent());
-    }
 
     @Test
     void uploadAvatar_ShouldUpdateProfileAndDeleteOldAvatars() {

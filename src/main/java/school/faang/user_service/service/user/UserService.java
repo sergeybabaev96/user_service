@@ -4,9 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserDto;
@@ -15,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.dto.avatar.AvatarType;
 import school.faang.user_service.entity.Country;
-import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
 import school.faang.user_service.entity.event.Event;
@@ -23,7 +19,6 @@ import school.faang.user_service.entity.event.EventStatus;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.CountryRepository;
-import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
@@ -49,7 +44,6 @@ public class UserService {
     private final AvatarS3Service avatarS3Service;
     private final UserAvatarService userAvatarService;
     private final UserContext userContext;
-    private final UserMapper userMapper;
 
     public boolean userExists(Long userId) {
         return userRepository.existsById(userId);
