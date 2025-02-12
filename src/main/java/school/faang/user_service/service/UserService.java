@@ -8,8 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.UserDto;
 import jakarta.persistence.EntityNotFoundException;
-import school.faang.user_service.entity.User;
 import school.faang.user_service.dto.UserFilterDto;
+import school.faang.user_service.dto.notification.UserChatIdUpdateDto;
+import school.faang.user_service.dto.notification.UserNotificationDto;
+import school.faang.user_service.entity.User;
 import school.faang.user_service.filter.user.UserFilter;
 import school.faang.user_service.filter.user.UserPageFilter;
 import school.faang.user_service.mapper.UserMapper;
@@ -31,9 +33,28 @@ public class UserService {
     private final UserMapper userMapper;
     private final MentorshipService mentorshipService;
 
-    public UserDto findUserById(Long id) {
-        return userMapper.toDto(userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User with id not found: " + id)));
+    @Transactional
+    public UserDto getUserDtoById(Long id) {
+        return userMapper.toDto(findUserById(id));
+    }
+
+    @Transactional
+    public UserNotificationDto getUserNotificationDtoById(long id) {
+        return userMapper.toNotificationDto(findUserById(id));
+    }
+
+    @Transactional
+    public User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + id + " not found"));
+    }
+
+    @Transactional
+    public UserNotificationDto updateUserChatId(UserChatIdUpdateDto userChatIdUpdateDto) {
+        User user = findUserById(userChatIdUpdateDto.getId());
+        userMapper.updateUserChatId(user, userChatIdUpdateDto);
+
+        return userMapper.toNotificationDto(userRepository.save(user));
     }
 
     public List<UserDto> getPremiumUsers(UserFilterDto userFilterDto) {
