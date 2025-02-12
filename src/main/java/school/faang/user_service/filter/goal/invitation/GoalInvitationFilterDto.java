@@ -1,4 +1,4 @@
-package school.faang.user_service.dto.goal;
+package school.faang.user_service.filter.goal.invitation;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +10,7 @@ import school.faang.user_service.entity.RequestStatus;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class InvitationFilterDto {
+public class GoalInvitationFilterDto {
 
     private String inviterNamePattern;
 

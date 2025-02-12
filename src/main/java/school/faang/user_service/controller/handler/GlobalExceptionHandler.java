@@ -40,6 +40,13 @@ public class GlobalExceptionHandler {
         return createError(ex.getMessage(), HttpStatus.NOT_FOUND.value());
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorModel handleIllegalArgumentException(IllegalArgumentException ex) {
+        log.error("Illegal argument exception", ex);
+        return createError(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
+    }
+
     @ExceptionHandler(FeignException.class)
     @ResponseStatus(HttpStatus.BAD_GATEWAY)
     public ErrorModel handleFeignException(FeignException ex) {
