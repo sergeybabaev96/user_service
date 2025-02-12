@@ -65,4 +65,11 @@ public class UserService {
         user.setActive(false);
         userRepository.save(user);
     }
+
+    public List<UserDto> findUsersByIds(List<Long> ids) {
+        return userRepository.findAllById(ids)
+                .stream()
+                .map(userMapper::toDto)
+                .toList();
+    }
 }
