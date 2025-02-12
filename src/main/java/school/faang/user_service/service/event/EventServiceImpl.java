@@ -1,11 +1,10 @@
 package school.faang.user_service.service.event;
 
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.event.EventRequestDto;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.event.EventFilterDto;
+import school.faang.user_service.dto.event.EventRequestDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
@@ -99,6 +98,12 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findParticipatedEventsByUserId(userId).stream()
                 .map(eventMapper::toEventDto)
                 .toList();
+    }
+
+    @Override
+    public Event findByIdOrThrow(long eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Event is not exists! id: " + eventId));
     }
 
     private List<Skill> getAndValidateRelatedSkills(List<Long> relatedSkillsIds, User owner) {
