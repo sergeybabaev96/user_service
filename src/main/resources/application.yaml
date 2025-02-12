@@ -1,4 +1,7 @@
 spring:
+  profiles:
+    active: local
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/postgres
@@ -43,7 +46,6 @@ services:
     secretKey: password
     bucketName: corpbucket
 
-
   project-service:
     host: localhost
     port: 8082
@@ -51,3 +53,25 @@ services:
   payment-service:
     host: localhost
     port: 9080
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local
+
+logging:
+  level:
+    root: debug
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    root: info
