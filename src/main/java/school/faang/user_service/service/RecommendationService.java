@@ -42,25 +42,22 @@ public class RecommendationService {
     private final RecommendationMapper recommendationMapper;
     private static final int PAGE_NUMBER = 0;
     private static final int PAGE_SIZE = 10;
+    private static final int RESTRICTION_TIME_PERIOD_MONTHS = 6;
 
 
     public RecommendationDto create(Recommendation recommendation) {
 
         Long newRecommendationId;
-        if (LocalDateTime.now().minusMonths(6).isAfter(getTimeOfLastRecommendation(recommendation))
-                && recommendationsArePresentedInSystem(recommendation.getSkillOffers())) {
 
-            newRecommendationId = saveRecommendation(recommendation);
-            List<SkillOffer> skillOffers = recommendation.getSkillOffers();
+        restrictionTimePeriodForNewRecommendationIsOver(recommendation);
+        skillsArePresentedInSystem(recommendation.getSkillOffers());
 
-            saveSkillOffers(skillOffers, newRecommendationId);
-            addSkillAndAddGuarantor(recommendation, newRecommendationId);
+        newRecommendationId = saveRecommendation(recommendation);
+        saveSkillOffers(recommendation.getSkillOffers(), newRecommendationId);
+        addSkillsAndAddGuarantor(recommendation, newRecommendationId);
 
-            Optional<Recommendation> recommendationFromDataBase = recommendationRepository.findById(newRecommendationId);
-            return recommendationFromDataBase.map(recommendationMapper::toDto).orElse(null);
-        } else {
-            throw new DataValidationException(SKILLS_PRESENCE_ERROR + RECOMMENDATION_FREQUENCY_ERROR);
-        }
+        Optional<Recommendation> recommendationFromDataBase = recommendationRepository.findById(newRecommendationId);
+        return recommendationFromDataBase.map(recommendationMapper::toDto).orElse(null);
     }
 
     /**
@@ -68,26 +65,24 @@ public class RecommendationService {
      * - Does not update guarantors of skills - doesn't delete lines from "user_skill_guarantee" table.(To brainstorm)
      * - Does not update skill offers from "skill_offer" table to keep the table consistent
      * - Does not update skills from "user_skill" table to keep the table consistent
+     *
      * @param recommendation - recommendation to update
      */
     @Transactional
     public RecommendationDto update(Recommendation recommendation) {
 
-        if (LocalDateTime.now().minusMonths(6).isAfter(getTimeOfLastRecommendation(recommendation))
-                && recommendationsArePresentedInSystem(recommendation.getSkillOffers())) {
-            recommendationRepository.updateByRecommendationId(
-                    recommendation.getId(),
-                    recommendation.getAuthor().getId(),
-                    recommendation.getReceiver().getId(),
-                    recommendation.getContent());
+        restrictionTimePeriodForNewRecommendationIsOver(recommendation);
+        skillsArePresentedInSystem(recommendation.getSkillOffers());
+        recommendationRepository.updateByRecommendationId(
+                recommendation.getId(),
+                recommendation.getAuthor().getId(),
+                recommendation.getReceiver().getId(),
+                recommendation.getContent());
 
-            updateRecommendation(recommendation);
+        updateRecommendation(recommendation);
 
-            Optional<Recommendation> recommendationFromDataBase = recommendationRepository.findById(recommendation.getId());
-            return recommendationFromDataBase.map(recommendationMapper::toDto).orElse(null);
-        } else {
-            throw new DataValidationException(SKILLS_PRESENCE_ERROR + "or" + RECOMMENDATION_FREQUENCY_ERROR);
-        }
+        Optional<Recommendation> recommendationFromDataBase = recommendationRepository.findById(recommendation.getId());
+        return recommendationFromDataBase.map(recommendationMapper::toDto).orElse(null);
     }
 
     /**
@@ -95,13 +90,13 @@ public class RecommendationService {
      * - Removes skill offers from "skill_offer" table due to hibernate annotation
      * - Does not remove guarantor from skills - doesn't delete lines from "user_skill_guarantee" table.(To brainstorm)
      * - Does not remove skills from "user_skill" table to keep the table consistent
+     *
      * @param id - id of recommendation to remove
      */
     @Transactional
     public void delete(long id) {
         Optional<Recommendation> optional = recommendationRepository.findById(id);
-        RecommendationDto recommendationDto = optional.map(recommendationMapper::toDto).orElse(null);
-        if(recommendationDto != null) {
+        if (optional.isPresent()) {
             recommendationRepository.deleteById(id);
         } else {
             throw new DataValidationException(RECOMMENDATION_NOT_FOUND);
@@ -126,27 +121,35 @@ public class RecommendationService {
                 .toList();
     }
 
-    private boolean  recommendationsArePresentedInSystem(@NonNull List<SkillOffer> skillOffers) {
+    private boolean skillsArePresentedInSystem(@NonNull List<SkillOffer> skillOffers) {
         for (SkillOffer skill : skillOffers) {
             if (!skillRepository.existsByTitle(skill.getSkill().getTitle())) {
-                return false;
+                throw new DataValidationException(SKILLS_PRESENCE_ERROR);
             }
         }
         return true;
     }
 
     @Transactional
-    private void addSkillAndAddGuarantor(Recommendation recommendation, long newRecommendationId) {
+    private void addSkillsAndAddGuarantor(Recommendation recommendation, long newRecommendationId) {
         List<SkillOffer> skillOffers = recommendation.getSkillOffers();
         if (!skillOffers.isEmpty()) {
             List<Skill> userOldSkills = skillRepository.findAllByUserId(recommendation.getReceiver().getId());
+            List<Long> userOldSkillsIds = userOldSkills.stream()
+                    .map(Skill::getId)
+                    .toList();
+
             List<Skill> allSkillsGuaranteedToUserByGuarantee = userSkillGuaranteeRepository
                     .findAllSkillsGuaranteedToUserByGuarantee(
                             recommendation.getReceiver().getId(),
                             recommendation.getAuthor().getId());
+            List<Long> allSkillsGuaranteedToUserByGuaranteeIds = allSkillsGuaranteedToUserByGuarantee.stream()
+                    .map(Skill::getId)
+                    .toList();
+
             for (SkillOffer skillOffer : skillOffers) {
-                if (userOldSkills.contains(skillOffer.getSkill())) {
-                    if (!allSkillsGuaranteedToUserByGuarantee.contains(skillOffer.getSkill())) {
+                if (userOldSkillsIds.contains(skillOffer.getSkill().getId())) {
+                    if (!allSkillsGuaranteedToUserByGuaranteeIds.contains(skillOffer.getSkill().getId())) {
                         addGuarantorToSkill(recommendation, skillOffer);
                     }
                 } else {
@@ -158,26 +161,36 @@ public class RecommendationService {
     }
 
     /**
-     * Returns time of last recommendation from DB created by recommendation.authorId to recommendation.receiverId
-     * @param recommendation - an object of recommendation received from API
-     * @return - date of last recommendation if recommendation exists in Database
-     * - Jan 01 0 (BC) if there is no recommendation
+     * @param recommendation - an object of recommendation received from Controller class
+     * @return
+     * - true if last recommendation from DB given by recommendation.authorId to recommendation.receiverId
+     * was created more than number of months ago set RESTRICTION_TIME_PERIOD_MONTHS
+     * - false if last recommendation from DB given by recommendation.authorId to recommendation.receiverId
+     * was created less than number of months ago set RESTRICTION_TIME_PERIOD_MONTHS
      */
-    private LocalDateTime getTimeOfLastRecommendation(Recommendation recommendation) {
+    private boolean restrictionTimePeriodForNewRecommendationIsOver(Recommendation recommendation) {
         Optional<Recommendation> recommendationFromDB = recommendationRepository.findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(
                 recommendation.getAuthor().getId(),
                 recommendation.getReceiver().getId());
-        return recommendationFromDB.map(Recommendation::getUpdatedAt).orElse(LocalDateTime.of(0, 1, 1, 0, 0));
+        LocalDateTime timeOfLastRecommendationGivenToReceiver = recommendationFromDB.map(Recommendation::getUpdatedAt)
+                .orElse(LocalDateTime.of(0, 1, 1, 0, 0));
+        if (LocalDateTime.now().minusMonths(RESTRICTION_TIME_PERIOD_MONTHS)
+                .isAfter(timeOfLastRecommendationGivenToReceiver)) {
+            return true;
+        } else {
+            throw new DataValidationException(RECOMMENDATION_FREQUENCY_ERROR);
+        }
     }
 
     private Long saveRecommendation(Recommendation recommendation) {
-        return recommendationRepository.create(recommendation.getAuthor().getId(),
+        return recommendationRepository.create(
+                recommendation.getAuthor().getId(),
                 recommendation.getReceiver().getId(),
                 recommendation.getContent());
     }
 
     private void saveSkillOffers(List<SkillOffer> skillOffers, Long newRecommendationId) {
-        if(skillOffers!=null) {
+        if (skillOffers != null) {
             for (SkillOffer skillOffer : skillOffers) {
                 skillOfferRepository.create(skillOffer.getSkill().getId(), newRecommendationId);
             }
