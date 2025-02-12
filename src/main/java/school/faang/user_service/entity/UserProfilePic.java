@@ -7,5 +7,6 @@ import lombok.Data;
 @Embeddable
 public class UserProfilePic {
     private String fileId;
+    private String mediumFileId;
     private String smallFileId;
 }
