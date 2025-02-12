@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.event.ParticipantsCountDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidationException;
@@ -73,10 +74,14 @@ public class EventParticipationServiceImpl implements EventParticipationService 
     }
 
     @Override
-    public int getParticipantsCount(long eventId) {
+    public ParticipantsCountDto getParticipantsCount(long eventId) {
         Event event = eventService.findByIdOrThrow(eventId);
+        int participantsCount = eventParticipationRepository.countParticipants(eventId);
 
-        return eventParticipationRepository.countParticipants(eventId);
+        return ParticipantsCountDto.builder()
+                .eventId(eventId)
+                .participantsCount(participantsCount)
+                .build();
     }
 
     private boolean isUserEventOwner(User user, Event event) {

@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.event.ParticipantsCountDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidationException;
@@ -193,14 +194,14 @@ class EventParticipationServiceImplTest {
         Mockito.when(eventParticipationRepositoryMock.countParticipants(event.getId()))
                 .thenReturn(1);
 
-        int count = eventParticipationServiceImpl.getParticipantsCount(event.getId());
+        ParticipantsCountDto participantsCountDto = eventParticipationServiceImpl.getParticipantsCount(event.getId());
 
         Mockito.verify(eventServiceMock, Mockito.times(1))
                 .findByIdOrThrow(event.getId());
         Mockito.verify(eventParticipationRepositoryMock, Mockito.times(1))
                 .countParticipants(event.getId());
 
-        Assertions.assertEquals(1, count);
+        Assertions.assertEquals(1, participantsCountDto.participantsCount());
     }
 
     private void testMissedEvent(long eventId) {
