@@ -1,4 +1,4 @@
-package school.faang.user_service.config.scheduler;
+package school.faang.user_service.config.app;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -8,13 +8,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Configuration
-public class SchedulerConfig {
+public class UserServiceConfig {
 
-    @Value("${user-service.scheduler.thread-pool-size}")
-    private int threadPoolSize;
+    @Value("${user-service.thread-pool-size}")
+    private int threadPool;
 
-    @Bean(name = "completableFutureExecutor")
+    @Bean
     public ExecutorService completableFutureExecutor() {
-        return Executors.newFixedThreadPool(threadPoolSize);
+        return Executors.newFixedThreadPool(threadPool);
     }
 }

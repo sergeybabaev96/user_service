@@ -1,11 +1,11 @@
 package school.faang.user_service.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.config.scheduler.SchedulerConfig;
 import school.faang.user_service.dto.EventDto;
 import school.faang.user_service.dto.EventFilterDto;
 import school.faang.user_service.entity.event.Event;
@@ -16,7 +16,9 @@ import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.validator.EventValidation;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -28,7 +30,7 @@ public class EventService {
     private final EventValidation validation;
     private final EventMapper eventMapper;
     private final List<EventFilter> eventFilters;
-    private final SchedulerConfig schedulerConfig;
+    private final ExecutorService completableFutureExecutor;
 
     @Value("${events.delete.count}")
     private int batchSize;
@@ -80,6 +82,7 @@ public class EventService {
                 .toList();
     }
 
+    @Transactional
     public void clearEvents() {
         EventFilterDto filterDto = EventFilterDto.builder()
                 .eventStatusPattern(EventStatus.COMPLETED)
@@ -100,13 +103,21 @@ public class EventService {
                             int end = Math.min(start + batchSize, eventsIds.size());
                             List<Long> batch = eventsIds.subList(start, end);
                             return CompletableFuture.runAsync(() -> eventRepository.deleteByIds(batch),
-                                    schedulerConfig.completableFutureExecutor());
+                                    completableFutureExecutor);
                         }).toList().toArray(CompletableFuture[]::new))
                 .join();
     }
 
     private Stream<Event> getEventsStreamByFilter(EventFilterDto filter) {
         Stream<Event> events = eventRepository.findAll().stream();
+
+        Optional<EventFilter> firstApplicableFilter = eventFilters.stream()
+                .filter(eventFilter -> eventFilter.isApplicable(filter))
+                .findFirst();
+
+        if (firstApplicableFilter.isEmpty()) {
+            return Stream.empty();
+        }
 
         events = eventFilters.stream()
                 .filter(eventFilter -> eventFilter.isApplicable(filter))

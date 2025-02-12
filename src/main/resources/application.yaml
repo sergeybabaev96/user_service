@@ -39,8 +39,7 @@ payment-service:
 events:
   delete:
     cron: "0 0 0 * * SUN"
-    count: 100
+    count: 1000
 
 user-service:
-  scheduler:
     thread-pool-size: 8
