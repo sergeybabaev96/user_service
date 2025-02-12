@@ -7,8 +7,8 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.repository.UserSkillGuaranteeRepository;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class UserSkillGuaranteeService {
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
     private final UserService userService;

@@ -16,8 +16,8 @@ import school.faang.user_service.service.skilloffer.SkillOfferService;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class RecommendationService {
     private final RecommendationRepository recommendationRepository;
     private final SkillService skillService;

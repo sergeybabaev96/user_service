@@ -10,9 +10,8 @@ import school.faang.user_service.validator.RecommendationDtoValidator;
 
 import java.util.List;
 
-
-@RequiredArgsConstructor
 @Controller
+@RequiredArgsConstructor
 public class RecommendationController {
     private final RecommendationService recommendationService;
     private final RecommendationDtoValidator recommendationDtoValidator;
