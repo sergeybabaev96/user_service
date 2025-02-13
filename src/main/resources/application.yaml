@@ -59,8 +59,31 @@ premium:
     size: 1000
 
 task:
-    execution:
-      pool:
-        core-size: 4
-        max-size: 8
-        keep-alive: 60
+  execution:
+    pool:
+      core-size: 4
+      max-size: 8
+      keep-alive: 60
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local
+
+---
+logging:
+  level:
+    root: debug
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    root: info
+
