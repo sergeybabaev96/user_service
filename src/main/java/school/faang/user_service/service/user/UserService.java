@@ -5,6 +5,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,14 +72,30 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public List<UserDto> getUsers(List<Long> ids) {
-        return userRepository.findAllById(ids).stream()
+        return findAllUsersByIds(ids).stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional
+    public Page<Long> findActiveUsersIds(Pageable pageable) {
+        Page<Long> usersIds = userRepository.findAllActiveUsers(pageable);
+        log.info("Got batch usersIds: {}", usersIds.getContent().size());
+        return usersIds;
+    }
+
+    @Transactional
+    public List<User> findAllUsersByIds(List<Long> ids) {
+        List<User> users = userRepository.findAllById(ids);
+        log.info("Found {} users", users.size());
+        return users;
+    }
+
+    @Transactional
     public boolean existsById(long userId) {
-        return userRepository.existsById(userId);
+        boolean isUserExists = userRepository.existsById(userId);
+        log.info(isUserExists ? "User with id {} exists" : "User with id: {} does not exist", userId);
+        return isUserExists;
     }
 
     @Transactional
@@ -148,9 +166,15 @@ public class UserService {
         userRepository.save(user);
     }
 
-    private User findUserById(long userId) {
+    User findUserById(long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(ErrorMessage.USER_NOT_FOUND, userId)));
+    }
+
+    @Transactional
+    public boolean isUserActive(long userId) {
+        User user = findUserById(userId);
+        return user.isActive();
     }
 
     @Transactional

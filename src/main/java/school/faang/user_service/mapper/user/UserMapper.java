@@ -5,13 +5,23 @@ import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.entity.user_cache.UserCacheDto;
 import school.faang.user_service.pojo.user.Person;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
+
+    @Mapping(source = "id", target = "userId")
+    @Mapping(source = "userProfilePic", target = "profilePicture", ignore = true)
+    List<UserCacheDto> toListUserCacheDto(List<User> users);
+
+    @Mapping(source = "id", target = "userId")
+    @Mapping(source = "userProfilePic", target = "profilePicture", ignore = true)
+    UserCacheDto toUserCacheDto(User user);
 
     @Mapping(source = "contactPreference.preference", target = "preference")
     UserDto toDto(User user);

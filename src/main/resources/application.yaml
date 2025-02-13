@@ -37,6 +37,35 @@ spring:
         mentorship:
           accepted: mentorship_accepted_channel
           requested: mentorship_requested_channel
+    cache:
+      type: redis
+      global-minutes-ttl: 10
+      users-hours-ttl: 24
+      users-cache-name: users
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      group-id: news-feed-group-1
+      auto-offset-reset: earliest
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    template:
+      default-topic: default-topic
+application:
+  kafka:
+    topics:
+      post-topic-name: cache-user
+      post-replications-count: 1
+      post-partitions-count: 3
+
+      heat-feed-cache-topic-name: heat-feed-cache
+      heat-feed-cache-replications-count: 1
+      heat-feed-cache-partitions-count: 3
+    heat-feed-batch-size: 1000
 
   servlet:
     multipart:

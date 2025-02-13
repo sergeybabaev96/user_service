@@ -2,7 +2,8 @@ name: CI for user_service Manticore
 
 on:
   pull_request:
-    branches: [ "Manticore-master-stream7" ]
+    branches: [ "Manticore-master-stream7",
+                "master-vova-buzivskyi" ]
 
 jobs:
   test:

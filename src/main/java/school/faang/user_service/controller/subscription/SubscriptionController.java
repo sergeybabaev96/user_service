@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -91,6 +90,16 @@ public class SubscriptionController {
     @GetMapping("/{followeeId}/followers/{followerId}")
     public boolean checkFollowerOfFollowee(@PathVariable long followeeId, @PathVariable long followerId) {
         return subscriptionService.checkFollowerOfFollowee(followeeId, followerId);
+    }
+
+    @GetMapping("/{followeeId}")
+    public List<Long> getFollowersIds(@PathVariable long followeeId) {
+        return subscriptionService.getFollowersIds(followeeId);
+    }
+
+    @GetMapping("/ids/{followerId}")
+    public List<Long> getFolloweesIds(@PathVariable Long followerId) {
+        return subscriptionService.getFolloweesIds(followerId);
     }
 
     private void isFollowerFolloweeIdsEqual(long followerId, long followeeId, String message) {

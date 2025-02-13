@@ -10,6 +10,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.config.context.UserContext;
@@ -297,8 +300,8 @@ class UserServiceTest {
                 .build();
         secondUser.setContactPreference(new ContactPreference(2, secondUser, EMAIL));
 
-        UserDto firstUserDto = new UserDto(firstUserId, "firstUser", "first@email.com", "1242142141241L", chatId, EMAIL,  LocalDateTime.now());
-        UserDto secondUserDto = new UserDto(secondUserId, "secondUser", "second@email.com", "90218421908421L", chatId, EMAIL,  LocalDateTime.now());
+        UserDto firstUserDto = new UserDto(firstUserId, "firstUser", "first@email.com", "1242142141241L", chatId, EMAIL, LocalDateTime.now());
+        UserDto secondUserDto = new UserDto(secondUserId, "secondUser", "second@email.com", "90218421908421L", chatId, EMAIL, LocalDateTime.now());
 
         Stream<User> users = Stream.of(firstUser, secondUser);
         List<UserDto> expectedUsersDto = List.of(firstUserDto, secondUserDto);
@@ -344,7 +347,7 @@ class UserServiceTest {
         secondUser.setContactPreference(new ContactPreference(2, secondUser, EMAIL));
 
         UserDto firstUserDto = new UserDto(firstUserId, "firstUser", "first@email.com", "90182590L", chatId, EMAIL, LocalDateTime.now());
-        UserDto secondUserDto = new UserDto(secondUserId, "secondUser", "second@email.com", "893248953L", chatId,  EMAIL, LocalDateTime.now());
+        UserDto secondUserDto = new UserDto(secondUserId, "secondUser", "second@email.com", "893248953L", chatId, EMAIL, LocalDateTime.now());
 
         List<UserDto> expectedUsersDto = List.of(firstUserDto, secondUserDto);
         List<User> usersList = List.of(firstUser, secondUser);
@@ -399,9 +402,9 @@ class UserServiceTest {
     @Test
     void parsePersonDataIntoUserDto() throws IOException {
         String csvData = """
-            firstName,lastName,yearOfBirth,group,studentID,email,phone,street,city,state,country,postalCode,faculty,yearOfStudy,major,GPA,status,admissionDate,graduationDate,degree,institution,completionYear,scholarship,employer
-            John,Doe,1998,A,123456,johndoe@example.com,+1-123-456-7890,123 Main Street,New York,NY,USA,10001,Computer Science,3,Software Engineering,3.8,Active,2016-09-01,2020-05-30,High School Diploma,XYZ High School,2016,true,XYZ Technologies
-            """;
+                firstName,lastName,yearOfBirth,group,studentID,email,phone,street,city,state,country,postalCode,faculty,yearOfStudy,major,GPA,status,admissionDate,graduationDate,degree,institution,completionYear,scholarship,employer
+                John,Doe,1998,A,123456,johndoe@example.com,+1-123-456-7890,123 Main Street,New York,NY,USA,10001,Computer Science,3,Software Engineering,3.8,Active,2016-09-01,2020-05-30,High School Diploma,XYZ High School,2016,true,XYZ Technologies
+                """;
 
         MultipartFile csvFile = mock(MultipartFile.class);
         when(csvFile.getInputStream()).thenReturn(new ByteArrayInputStream(csvData.getBytes()));
@@ -430,16 +433,93 @@ class UserServiceTest {
     }
 
     @Test
-    void parsePersonDataIntoUserDtoEmptyFile()  {
+    void parsePersonDataIntoUserDtoEmptyFile() {
         MockMultipartFile emptyFile = new MockMultipartFile("file", "file.csv",
                 "text/csv", new byte[0]);
         assertThrows(IllegalArgumentException.class, () -> userService.parsePersonDataIntoUserDto(emptyFile));
     }
 
     @Test
-    void parsePersonDataIntoUserDtoInvalidFileType()  {
+    void parsePersonDataIntoUserDtoInvalidFileType() {
         MockMultipartFile invalidTypeFile = new MockMultipartFile("file", "file.txt",
                 "text/plain", "Some content".getBytes());
         assertThrows(IllegalArgumentException.class, () -> userService.parsePersonDataIntoUserDto(invalidTypeFile));
+    }
+
+    @Test
+    public void findActiveUsersIdsTest() {
+        Pageable pageable = mock(Pageable.class);
+        Page<Long> page = new PageImpl<>(List.of(1L, 2L, 3L));
+        when(userRepository.findAllActiveUsers(pageable)).thenReturn(page);
+
+        Page<Long> result = userService.findActiveUsersIds(pageable);
+
+        verify(userRepository, times(1)).findAllActiveUsers(pageable);
+
+        assertEquals(page, result);
+    }
+
+    @Test
+    public void findAllUsersByIdsTest() {
+        User firstUser = User.builder().id(2L).build();
+        User seconfUser = User.builder().id(3L).build();
+        List<Long> usersIds = new ArrayList<>(List.of(2L, 3L));
+        List<User> users = new ArrayList<>(List.of(firstUser, seconfUser));
+
+        when(userRepository.findAllById(usersIds)).thenReturn(users);
+
+        List<User> result = userService.findAllUsersByIds(usersIds);
+
+        verify(userRepository).findAllById(usersIds);
+
+        assertEquals(users, result);
+    }
+
+    @Test
+    public void existsByIdTest() {
+        Long userId = 1L;
+
+        when(userRepository.existsById(userId)).thenReturn(true);
+
+        boolean result = userService.existsById(userId);
+
+        verify(userRepository).existsById(userId);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void isUserActiveTrueTest() {
+        long userId = 1L;
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(User.builder().active(true).build()));
+
+        boolean result = userService.isUserActive(userId);
+
+        verify(userRepository).findById(userId);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void isUserActiveFalseTest() {
+        long userId = 1L;
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(User.builder().active(false).build()));
+
+        boolean result = userService.isUserActive(userId);
+
+        verify(userRepository).findById(userId);
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void isUserActiveThrowsExceptionTest() {
+        long userId = 1L;
+
+        when(userRepository.findById(userId)).thenThrow(EntityNotFoundException.class);
+
+        assertThrows(EntityNotFoundException.class,() -> userService.isUserActive(userId));
     }
 }

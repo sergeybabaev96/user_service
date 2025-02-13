@@ -259,4 +259,32 @@ public class SubscriptionServiceTest {
 
         assertEquals(followingsAmount, actualResult);
     }
+
+    @Test
+    public void getFollowersIdsTest(){
+        Long followeeId = 1L;
+        List<Long> followersIds = new ArrayList<>(List.of(2L,3L,4L));
+        when(subscriptionRepository.findFollowersIdsByFolloweeId(followeeId))
+                .thenReturn(followersIds);
+
+       List<Long> result = subscriptionService.getFollowersIds(followeeId);
+
+       verify(subscriptionRepository).findFollowersIdsByFolloweeId(followeeId);
+
+       assertEquals(followersIds,result);
+    }
+
+    @Test
+    public void getFolloweesIdsTest(){
+        Long followerId = 1L;
+        List<Long> followeesIds = new ArrayList<>(List.of(2L,3L,4L));
+        when(subscriptionRepository.findFolloweesIdsByFollowerId(followerId))
+                .thenReturn(followeesIds);
+
+        List<Long> result = subscriptionService.getFolloweesIds(followerId);
+
+        verify(subscriptionRepository).findFolloweesIdsByFollowerId(followerId);
+
+        assertEquals(followeesIds,result);
+    }
 }

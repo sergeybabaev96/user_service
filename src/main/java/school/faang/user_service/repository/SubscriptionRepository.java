@@ -3,9 +3,11 @@ package school.faang.user_service.repository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import school.faang.user_service.entity.User;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 @Repository
@@ -41,4 +43,10 @@ public interface SubscriptionRepository extends CrudRepository<User, Long> {
 
     @Query(nativeQuery = true, value = "select count(id) from subscription where follower_id = :followerId")
     int findFolloweesAmountByFollowerId(long followerId);
+
+    @Query(nativeQuery = true, value = " SELECT follower_id FROM subscription WHERE followee_id = :followeeId")
+    List<Long> findFollowersIdsByFolloweeId(long followeeId);
+
+    @Query(nativeQuery = true, value = "SELECT followee_id FROM subscription WHERE follower_id = :userId")
+    List<Long> findFolloweesIdsByFollowerId(@Param("userId") long userId);
 }
