@@ -23,13 +23,11 @@ class RecommendationRequestEventPublisherTest {
     private static final Long RECEIVER_ID = 1L;
     private static final Long REQUESTER_ID = 2L;
     private static final Long RECOMMENDATION_ID = 3L;
-    private static final String CHANNEL_NAME = "recommendation_request_channel";
+    private static final String RECOMMENDATION_REQUEST_CHANNEL_NAME = "recommendation_request_channel";
 
     @Mock
     private RedisTemplate<String, Object> redisTemplate;
 
-    @Mock
-    private RedisProperties redisProperties;
 
     @InjectMocks
     private RecommendationRequestEventPublisher recommendationRequestEventPublisher;
@@ -38,10 +36,17 @@ class RecommendationRequestEventPublisherTest {
 
     @BeforeEach
     void setUp() {
-        RedisProperties.Channel channel = new RedisProperties.Channel();
-        channel.setRecommendationRequestChannel(CHANNEL_NAME);
+        RedisProperties.Channel channel = new RedisProperties.Channel(
+                "mentorship_channel",
+                "subscription_channel",
+                "recommendation_channel",
+                "user_ban_channel",
+                "mentorship_request_channel",
+                RECOMMENDATION_REQUEST_CHANNEL_NAME
+        );
 
-        when(redisProperties.getChannel()).thenReturn(channel);
+        RedisProperties redisProperties = new RedisProperties("localhost", 6379, channel);
+        recommendationRequestEventPublisher = new RecommendationRequestEventPublisher(redisTemplate, redisProperties);
 
         event = RecommendationRequestEvent.builder()
                 .requestId(RECOMMENDATION_ID)
@@ -50,20 +55,21 @@ class RecommendationRequestEventPublisherTest {
                 .build();
     }
 
+
     @Test
     @DisplayName("RecommendationRequestEvent published successfully")
     void testPublish_success() {
-        when(redisTemplate.convertAndSend(CHANNEL_NAME, event)).thenReturn(1L);
+        when(redisTemplate.convertAndSend(RECOMMENDATION_REQUEST_CHANNEL_NAME, event)).thenReturn(1L);
 
         recommendationRequestEventPublisher.publish(event);
 
-        verify(redisTemplate, times(1)).convertAndSend(CHANNEL_NAME, event);
+        verify(redisTemplate, times(1)).convertAndSend(RECOMMENDATION_REQUEST_CHANNEL_NAME, event);
     }
 
     @Test
     @DisplayName("RecommendationRequestEvent throws exception")
     void testPublish_withException() {
-        when(redisTemplate.convertAndSend(CHANNEL_NAME, event))
+        when(redisTemplate.convertAndSend(RECOMMENDATION_REQUEST_CHANNEL_NAME, event))
                 .thenThrow(new RuntimeException("Redis server unreachable"));
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
@@ -72,6 +78,6 @@ class RecommendationRequestEventPublisherTest {
 
         assertEquals("Redis server unreachable", exception.getMessage());
 
-        verify(redisTemplate, times(1)).convertAndSend(CHANNEL_NAME, event);
+        verify(redisTemplate, times(1)).convertAndSend(RECOMMENDATION_REQUEST_CHANNEL_NAME, event);
     }
 }

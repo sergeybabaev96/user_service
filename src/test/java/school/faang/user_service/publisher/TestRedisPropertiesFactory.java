@@ -13,7 +13,8 @@ public class TestRedisPropertiesFactory {
                         "subscription_event_channel",
                         "recommendationChannel",
                         "userBanChannel",
-                        "mentorshipRequest"
+                        "mentorshipRequest",
+                        "recommendationRequest"
                 )
         );
     }

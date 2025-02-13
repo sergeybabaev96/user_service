@@ -10,10 +10,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.listener.PatternTopic;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -25,31 +21,19 @@ import school.faang.user_service.listener.UserBanListener;
 @RequiredArgsConstructor
 public class RedisConfig {
     private final ObjectMapper objectMapper;
-
+    private final RedisProperties redisProperties;
     @Value("${spring.data.redis.channel.user-ban-channel}")
     private String userBanChannel;
-
     @Value("${spring.data.redis.channel.user-ban-channel:user_ban}")
     private String userBanTopic;
-
-    private final RedisProperties redisProperties;
 
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setHostName(redisProperties.getHost());
-        configuration.setPort(redisProperties.getPort());
-        log.info("Jedis client for Redis configured: host = {}, port = {}", redisProperties.getHost(), redisProperties.getPort());
+        configuration.setHostName(redisProperties.host());
+        configuration.setPort(redisProperties.port());
+        log.info("Jedis client for Redis configured: host = {}, port = {}", redisProperties.host(), redisProperties.port());
         return new JedisConnectionFactory(configuration);
-    }
-
-    @Bean
-    RedisTemplate<String, Object> redisTemplate(JedisConnectionFactory jedisConnectionFactory) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(jedisConnectionFactory);
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
-        return template;
     }
 
     @Bean
@@ -76,5 +60,11 @@ public class RedisConfig {
     @Bean
     public ChannelTopic userBanChannel() {
         return new ChannelTopic(userBanChannel);
+    }
+
+    @Bean
+    public ChannelTopic recommendationRequestChannel() {
+        String recommendationRequestChannelName = redisProperties.channel().recommendationRequestChannel();
+        return new ChannelTopic(recommendationRequestChannelName);
     }
 }

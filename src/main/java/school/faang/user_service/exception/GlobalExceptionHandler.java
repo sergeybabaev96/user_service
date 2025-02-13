@@ -1,11 +1,11 @@
 package school.faang.user_service.exception;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.lettuce.core.RedisException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import school.faang.user_service.exception.dto.ErrorResponse;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -154,18 +153,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @lombok.Builder
-    public static class ErrorResponse {
-        private LocalDateTime timestamp;
-        private String message;
-        private String details;
-    }
-
-}
-
     @ExceptionHandler(OutboxProcessingException.class)
     public ResponseEntity<String> handleOutboxProcessingException(OutboxProcessingException e) {
         log.error("OutboxProcessingException: {}", e.getMessage(), e);
@@ -192,5 +179,21 @@ public class GlobalExceptionHandler {
             return fullMessage.substring(lastBracketIndex + 1, fullMessage.length() - 1);
         }
         return "Unknown error";
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class ErrorResponse {
+        private LocalDateTime timestamp;
+        private String message;
+        private String details;
+
+        public ErrorResponse(String message, String details) {
+            this.timestamp = LocalDateTime.now();
+            this.message = message;
+            this.details = details;
+        }
     }
 }

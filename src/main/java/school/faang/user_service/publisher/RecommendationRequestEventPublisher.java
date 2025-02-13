@@ -16,8 +16,8 @@ public class RecommendationRequestEventPublisher implements MessagePublisher<Rec
 
     @Override
     public void publish(RecommendationRequestEvent event) {
-        Long count = redisTemplate.convertAndSend(redisProperties.getChannel().getRecommendationRequestChannel(), event);
+        Long count = redisTemplate.convertAndSend(redisProperties.channel().recommendationRequestChannel(), event);
         log.info("Published RecommendationRequestEvent: {} to channel {}. Receivers count: {}",
-                event, redisProperties.getChannel().getRecommendationRequestChannel(), count);
+                event, redisProperties.channel().recommendationRequestChannel(), count);
     }
 }
