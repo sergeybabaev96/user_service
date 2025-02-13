@@ -1,5 +1,6 @@
 package school.faang.user_service.repository.premium;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 import school.faang.user_service.entity.premium.Premium;
 
@@ -7,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
-public interface PremiumRepository extends CrudRepository<Premium, Long> {
+public interface PremiumRepository extends JpaRepository<Premium, Long> {
 
     boolean existsByUserId(long userId);
 
