@@ -1,6 +1,7 @@
 package school.faang.user_service.repository.goal;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
@@ -30,15 +31,19 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
     int countActiveGoalsPerUser(long userId);
 
     @Query(nativeQuery = true, value = """
-            WITH RECURSIVE subtasks AS (
+            WITH RECURSIVE subgoals AS (
             SELECT * FROM goal WHERE id = :goalId
             UNION
             SELECT g.* FROM goal g
-            JOIN subtasks st ON st.id = g.parent_goal_id
+            JOIN subgoals st ON st.id = g.parent_goal_id
             )
-            SELECT * FROM subtasks WHERE id != :goalId
+            SELECT * FROM subgoals WHERE id != :goalId
             """)
     List<Goal> findByParent(long goalId);
+
+    @Query(nativeQuery = true, value = "INSERT INTO user_goal (goal_id, user_id) VALUES (:goalId, :userId)")
+    @Modifying
+    void assignGoalToUser(long goalId, long userId);
 
     @Query(nativeQuery = true, value = """
             SELECT u.* FROM users u

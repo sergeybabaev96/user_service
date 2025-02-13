@@ -6,14 +6,16 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class GoalPrepareData {
     public static GoalDto getGoalDto() {
         return GoalDto.builder()
+                .id(1L)
                 .title("title")
                 .description("descr")
-                .skillIds(List.of())
+                .skillIds(Arrays.asList())
                 .build();
     }
 
@@ -21,15 +23,8 @@ public class GoalPrepareData {
         return GoalDto.builder()
                 .title("title")
                 .description("descr")
-                .skillIds(List.of(1L, 2L))
+                .skillIds(Arrays.asList(1L, 2L))
                 .build();
-    }
-
-    public static Goal getGoalFromDto(GoalDto goalDto) {
-        Goal goal = new Goal();
-        goal.setTitle(goalDto.title());
-        goal.setDescription(goalDto.description());
-        return goal;
     }
 
     public static User getUserWithMaxActiveGoals(long userId) {
@@ -46,7 +41,7 @@ public class GoalPrepareData {
     public static User getUser(long userId) {
         User user = new User();
         user.setId(userId);
-        user.setGoals(List.of(
+        user.setGoals(Arrays.asList(
                 Goal.builder().status(GoalStatus.ACTIVE).build(),
                 Goal.builder().status(GoalStatus.ACTIVE).build()
         ));
@@ -54,16 +49,24 @@ public class GoalPrepareData {
     }
 
     public static GoalDto getExpectedGoalDto() {
-        return new GoalDto("Updated Goal", "Updated Description", null, GoalStatus.ACTIVE, List.of(1L, 2L), null);
+        return GoalDto.builder()
+                .id(1L)
+                .title("Updated Goal")
+                .description("Updated Description")
+                .status( GoalStatus.ACTIVE)
+                .skillIds(List.of(1L, 2L))
+                .mentorId(2L)
+                .build();
     }
 
-    public static Goal getUpdatedGoal(long goalId, GoalDto goalDto) {
+    public static Goal getUpdatedGoal(long goalId) {
         Goal updatedGoal = new Goal();
         updatedGoal.setId(goalId);
-        updatedGoal.setTitle(goalDto.title());
-        updatedGoal.setDescription(goalDto.description());
+        updatedGoal.setTitle("Updated Goal");
+        updatedGoal.setDescription("Updated Description");
         updatedGoal.setStatus(GoalStatus.ACTIVE);
-        updatedGoal.setSkillsToAchieve(List.of(Skill.builder().id(1L).build(), Skill.builder().id(2L).build()));
+        updatedGoal.setSkillsToAchieve(Arrays.asList(Skill.builder().id(1L).build(), Skill.builder().id(2L).build()));
+        updatedGoal.setMentor(User.builder().id(2L).build());
         return updatedGoal;
     }
 
@@ -72,6 +75,9 @@ public class GoalPrepareData {
         existingGoal.setId(goalId);
         existingGoal.setTitle("Old Goal");
         existingGoal.setDescription("Old Description");
+        existingGoal.setStatus(GoalStatus.ACTIVE);
+        existingGoal.setMentor(User.builder().id(1L).build());
+        existingGoal.setSkillsToAchieve(Arrays.asList(Skill.builder().id(1L).build(), Skill.builder().id(2L).build()));
         return existingGoal;
     }
 }

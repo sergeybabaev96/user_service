@@ -54,7 +54,7 @@ class GoalControllerTest {
 
     @Test
     public void testRegisterUser() throws Exception {
-        GoalDto goalDto = new GoalDto("title", "descr", null, null, null, null);
+        GoalDto goalDto = new GoalDto(1L, "title", "descr", null, null, null, null);
         when(goalService.createGoal(eq(1L), eq(goalDto))).thenReturn(goalDto);
 
         mockMvc.perform(post(BASE_URL + "/user/1")

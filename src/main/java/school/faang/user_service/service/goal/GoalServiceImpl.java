@@ -1,6 +1,7 @@
 package school.faang.user_service.service.goal;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class GoalServiceImpl implements GoalService {
     private final List<Filter<Goal, GoalFilterDto>> goalFilters;
 //    private final KafkaTemplate<String, String> kafkaTemplate;
 
+    @Transactional
     @Override
     public GoalDto createGoal(long userId, GoalDto dto) {
         User user = userRepository.findById(userId).orElseThrow(() ->
@@ -40,9 +42,11 @@ public class GoalServiceImpl implements GoalService {
         goal.setParent(getParentGoal(dto));
         goal.setMentor(getMentorGoal(dto));
         updateSkillsInGoal(dto.skillIds(), goal);
+        goalRepository.assignGoalToUser(goal.getId(), user.getId());
         return goalMapper.toDto(goal);
     }
 
+    @Transactional
     @Override
     public GoalDto updateGoal(long id, GoalDto dto) {
         Goal goal = goalRepository.findById(id).orElseThrow(() ->
@@ -58,10 +62,10 @@ public class GoalServiceImpl implements GoalService {
         Goal updateGoal = goalMapper.update(dto, goal);
         updateGoal.setParent(getParentGoal(dto));
         updateGoal.setMentor(getMentorGoal(dto));
+        goalRepository.assignGoalToUser(goal.getId(), dto.mentorId());
         Goal updatedGoal = goalRepository.save(updateGoal);
         return goalMapper.toDto(updatedGoal);
     }
-
 
     // send notification and analytics
     // kafkaTemplate.send();
@@ -76,7 +80,7 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public List<GoalDto> findSubtasksByGoalId(long id, GoalFilterDto inputFilters) {
+    public List<GoalDto> findSubgoalsByGoalId(long id, GoalFilterDto inputFilters) {
         Goal goal = goalRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Goal with id = %d not found", id)));
         List<Goal> subtasks = goalRepository.findByParent(goal.getId());
@@ -123,8 +127,9 @@ public class GoalServiceImpl implements GoalService {
                 .filter(goal -> GoalStatus.ACTIVE.equals(goal.getStatus()))
                 .count();
         if (countActiveGoals >= 3) {
+            log.error("User with id = {} already has exists max count active goals", user.getId());
             throw new IllegalArgumentException(
-                    String.format("User with id = %d already exists max count active goals", user.getId()));
+                    String.format("User with id = %d already has exists max count active goals", user.getId()));
         }
     }
 

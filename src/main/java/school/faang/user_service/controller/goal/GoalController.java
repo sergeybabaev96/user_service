@@ -44,7 +44,7 @@ public class GoalController {
     @Operation(summary = "Получить все подзадачи цели по фильтру")
     @GetMapping("/{id}/subtasks")
     public List<GoalDto> getSubtasksByGoalId(@PathVariable @Min(1) long id, GoalFilterDto filters) {
-        return goalService.findSubtasksByGoalId(id, filters);
+        return goalService.findSubgoalsByGoalId(id, filters);
     }
 
     @Operation(summary = "Получить список целей по фильтру")
