@@ -15,12 +15,11 @@ import school.faang.user_service.service.SubscriptionService;
 import java.util.List;
 
 import static java.lang.System.lineSeparator;
-import static school.faang.user_service.utils.Constants.API_VERSION_1;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(API_VERSION_1 + "/subscription")
+@RequestMapping("/subscriptions")
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
@@ -29,7 +28,7 @@ public class SubscriptionController {
     public void followUser(long followerId, long followeeId) {
 
         log.info("Recieved HTTP request [POST] {} with parameters {} followerId = {}, followeeId = {}",
-                API_VERSION_1 + "/subscription/follow",
+                "/subscription/follow",
                 lineSeparator(),
                 followerId,
                 followeeId);
@@ -44,7 +43,7 @@ public class SubscriptionController {
     @PostMapping("/unfollow")
     public void unfollowUser(long followerId, long followeeId) {
         log.info("Recieved HTTP request [POST] {} with parameters {} followerId = {}, followeeId = {}",
-                API_VERSION_1 + "/subscription/unfollow",
+                "/subscription/unfollow",
                 lineSeparator(),
                 followerId,
                 followeeId);

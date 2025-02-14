@@ -17,11 +17,9 @@ import school.faang.user_service.service.recommendation.RecommendationRequestSer
 
 import java.util.List;
 
-import static school.faang.user_service.utils.Constants.API_VERSION_1;
-
 @RestController
 @AllArgsConstructor
-@RequestMapping(API_VERSION_1 + "/recommendation-request")
+@RequestMapping("/recommendation-request")
 public class RecommendationRequestController {
     private final RecommendationRequestService recommendationRequestService;
 

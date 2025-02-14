@@ -1,5 +1,6 @@
 package school.faang.user_service.service.user;
 
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockMultipartFile;
-import school.faang.user_service.dto.file.FileUploadResponseDto;
 import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.repository.CountryRepository;
 import school.faang.user_service.repository.UserRepository;
@@ -21,14 +21,15 @@ import java.io.IOException;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
-
-
     @Spy
     private UserMapperImpl userMapper;
+    @Spy
+    private CsvMapper csvMapper;
     @Mock
     private CountryService countryService;
     @Mock
     private CountryRepository countryRepositoryMock;
+
     @InjectMocks
     private UserServiceImpl userService;
     @Mock
@@ -47,7 +48,7 @@ class UserServiceImplTest {
                 "text/csv",
                 resource.getInputStream()
         );
-        FileUploadResponseDto fileUploadResponseDto = userService.processPersonsFromFile(file);
+        userService.processPersonsFromFile(file);
         Mockito.verify(userRepositoryMock, Mockito.times(1)).saveAll(Mockito.anyCollection());
     }
 }
