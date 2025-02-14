@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
 import school.faang.user_service.dto.mentorship.RejectionDto;
 import school.faang.user_service.dto.mentorship.RequestFilterDto;
@@ -29,28 +30,6 @@ public class MentorshipRequestControllerTest {
 
     @Spy
     private MentorshipRequestMapper requestMapper;
-
-    @Test
-    public void testDescriptionIsNull() {
-        MentorshipRequestDto testDto = MentorshipRequestDto.builder()
-                .description(null)
-                .build();
-
-        Assert.assertThrows(
-                DataValidationException.class,
-                () -> mentorshipRequestController.requestMentorship(testDto));
-    }
-
-    @Test
-    public void testDescriptionIsEmpty() {
-        MentorshipRequestDto testDto = MentorshipRequestDto.builder()
-                .description("")
-                .build();
-
-        Assert.assertThrows(
-                DataValidationException.class,
-                () -> mentorshipRequestController.requestMentorship(testDto));
-    }
 
     @Test
     public void testValidRequestDto() {
@@ -83,12 +62,12 @@ public class MentorshipRequestControllerTest {
 
     @Test
     public void testRejectRequest() {
+        long id = 1;
         RejectionDto reject = RejectionDto.builder()
-                .id(3L)
                 .rejectionReason("duplicate")
                 .build();
 
-        mentorshipRequestController.rejectRequest(reject.getId(), reject);
-        verify(mentorshipRequestService, Mockito.times(1)).rejectRequest(reject.getId(), reject);
+        mentorshipRequestController.rejectRequest(id, reject);
+        verify(mentorshipRequestService, Mockito.times(1)).rejectRequest(id, reject);
     }
 }
