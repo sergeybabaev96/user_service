@@ -20,20 +20,16 @@ public interface UserMapper {
 
     List<User> toUserEntities(List<Person> persons);
 
-    default User toUserEntity(Person person) {
-        String aboutMe = String.format(
-                        "State: " + person.getState() + ";" +
-                        "Faculty: " + person.getFaculty() + ";" +
-                        "Year of study: " + person.getYearOfStudy() + ";" +
-                        "Major: " + person.getMajor() + ";" +
-                        "Employer: " + person.getEmployer());
-        return User.builder()
-                .username(person.getFirstName() + person.getLastName())
-                .email(person.getEmail())
-                .phone(person.getPhone())
-                .city(person.getCity())
-                .country(Country.builder().title(person.getCountry()).build())
-                .aboutMe(aboutMe)
-                .build();
+    @Mapping(target = "username", expression = "java(getUsername(person))")
+    @Mapping(target = "country", expression = "java(getCountry(person))")
+    @Mapping(target = "aboutMe", expression = "java(person.toString())")
+    User toUserEntity(Person person);
+
+    default String getUsername(Person person) {
+        return person.getFirstName() + person.getLastName();
+    }
+
+    default Country getCountry(Person person) {
+        return Country.builder().title(person.getCountry()).build();
     }
 }

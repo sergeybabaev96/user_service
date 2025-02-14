@@ -1,6 +1,7 @@
 package school.faang.user_service.controller;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,9 +30,9 @@ class UserControllerTest {
     }
 
     @Test
-    void addResource() {
-        Long userId = 1L;
-        userController.uploadCSV(file);
+    @DisplayName("Test import users")
+    void testImportUsers() {
+        userController.importUsers(file);
         Mockito.verify(userServiceMock, Mockito.times(1)).processPersonsFromFile(Mockito.any());
     }
 }

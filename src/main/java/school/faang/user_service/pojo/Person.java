@@ -53,4 +53,13 @@ public class Person {
     String scholarship;
     @JsonProperty("employer")
     String employer;
+
+    public String toString() {
+        return String.format(
+                        "State: " + state + ";" +
+                        "Faculty: " + faculty + ";" +
+                        "Year of study: " + yearOfStudy + ";" +
+                        "Major: " + major + ";" +
+                        "Employer: " + employer);
+    }
 }
