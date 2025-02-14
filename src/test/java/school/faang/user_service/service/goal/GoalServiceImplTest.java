@@ -1,5 +1,6 @@
 package school.faang.user_service.service.goal;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -89,6 +90,8 @@ class GoalServiceImplTest {
     @Test
     public void testCreateGoalWhenUserNotFound() {
         when(userRepository.findById(eq(1L))).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> goalService.createGoal(1L, getGoalDto()));
     }
 
     @Test
