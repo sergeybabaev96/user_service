@@ -73,4 +73,4 @@ service:
 
 kafka:
   topic:
-    goal-completed: goal-completed-topic
+    goal-completed: goal_completed_topic

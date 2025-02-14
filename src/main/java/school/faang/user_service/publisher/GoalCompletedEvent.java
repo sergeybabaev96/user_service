@@ -11,9 +11,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class GoalCompletedEvent {
 
-    private Long userId;
+    private Long actorId;
 
     private Long goalId;
 
-    private LocalDateTime completionDateTime;
+    private String eventType;
+
+    private LocalDateTime receivedAt;
 }

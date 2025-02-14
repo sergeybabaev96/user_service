@@ -1,5 +1,6 @@
 package school.faang.user_service.service.goal;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -59,12 +60,17 @@ public class GoalServiceImpl implements GoalService {
         }
         checkExistsSkills(goalDto.skillIds());
         goalRepository.removeSkillsFromGoal(goal.getId());
-        goalDto.skillIds().forEach(skillId -> goalRepository.addSkillToGoal(skillId, goalId));
+        goalDto.skillIds().forEach(skillId -> goalRepository.addSkillToGoal(goalId, skillId));
 
         if (GoalStatus.COMPLETED.equals(goalDto.status())) {
-            List<User> users = goalRepository.findUsersByGoalId(goal.getId());
+            List<User> users = userRepository.findUsersByGoalId(goal.getId());
             updateUserSkills(users, goalDto.skillIds());
-            goalCompletedEventPublisher.publish(new GoalCompletedEvent(goalDto.mentorId(), goalId, LocalDateTime.now()));
+            try {
+                goalCompletedEventPublisher.publish(
+                        new GoalCompletedEvent(goalDto.mentorId(), goalId, "GOAL_COMPLETED", LocalDateTime.now()));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
         }
         Goal updatedGoal = goalRepository.save(getUpdateGoal(goalDto, goal));
         return goalMapper.toDto(updatedGoal);
