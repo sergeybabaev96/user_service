@@ -20,7 +20,7 @@ public class Person {
     @JsonProperty("group")
     private String group;
     @JsonProperty("studentID")
-    private String studentID;
+    private String studentId;
     @JsonProperty("email")
     private String email;
     @JsonProperty("phone")

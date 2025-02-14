@@ -172,7 +172,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void processCsvFile_WithValidCsvFromResources_SavesAllUsers() throws Exception {
+    public void processCsvFile_withValidCsvFromResources_savesAllUsers() throws Exception {
         InputStream csvStream = getClass().getClassLoader().getResourceAsStream("files/students.csv");
         MockMultipartFile csvFile = new MockMultipartFile("file", "students.csv", "text/csv", csvStream);
         Country country = Country.builder().id(1L).title("USA").build();
@@ -189,14 +189,14 @@ public class UserServiceTest {
     }
 
     @Test
-    public void processCsvFile_EmptyCsvFile_ThrowsUncheckedIOException() {
+    public void processCsvFile_emptyCsvFile_throwsUncheckedIoException() {
         MockMultipartFile csvFile =
                 new MockMultipartFile("file", "empty.csv", "text/csv", new byte[0]);
         assertThrows(UncheckedIOException.class, () -> service.processCsvFile(csvFile));
     }
 
     @Test
-    public void processCsvFile_WithExistingUsername_GeneratesNewUsername() throws Exception {
+    public void processCsvFile_withExistingUsername_generatesNewUsername() throws Exception {
         InputStream csvStream = getClass().getClassLoader().getResourceAsStream("files/students.csv");
         MockMultipartFile csvFile = new MockMultipartFile("file", "students.csv", "text/csv", csvStream);
         Country country = Country.builder().id(1L).title("USA").build();
