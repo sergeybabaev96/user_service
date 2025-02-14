@@ -39,7 +39,7 @@ public class PremiumService {
     private final UserService userService;
     private final PremiumMapper premiumMapper;
 
-    @Value("${premium.batch-size}")
+    @Value("${app.config.max_data_group_size}")
     private int removerBatchSize;
 
     @Transactional
