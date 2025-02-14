@@ -11,7 +11,7 @@ public class CountryService {
 
     private final CountryRepository countryRepository;
 
-    public Country updateCountryByTitle(String title) {
+    public Country findOrCreateCountry(String title) {
         return countryRepository.findByTitle(title)
                 .orElseGet(() -> countryRepository.save(Country
                         .builder()

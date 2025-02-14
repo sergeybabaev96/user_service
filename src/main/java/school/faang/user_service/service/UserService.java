@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.client.PromotionServiceClient;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
@@ -43,12 +44,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static school.faang.user_service.config.KafkaConstants.PAYMENT_PROMOTION_TOPIC;
 import static school.faang.user_service.config.KafkaConstants.USER_KEY;
-
 
 @Service
 @RequiredArgsConstructor
@@ -178,34 +177,37 @@ public class UserService {
     }
 
     @Transactional
-    public void processCsvFile(InputStream file) {
+    public void processCsvFile(MultipartFile csvFile) {
         try {
+            InputStream file = csvFile.getInputStream();
             CsvMapper csvMapper = new CsvMapper();
             CsvSchema schema = CsvSchema.emptySchema().withHeader();
             MappingIterator<Person> mappingIterator = csvMapper.readerFor(Person.class)
                     .with(schema)
                     .readValues(file);
             List<Person> people = mappingIterator.readAll();
-            List<CompletableFuture<Void>> future = new ArrayList<>();
-            for (Person person : people) {
-                CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(() -> processPerson(person));
-                future.add(completableFuture);
-            }
-            CompletableFuture.allOf(future.toArray(new CompletableFuture[0])).join();
+            List<User> users = people.stream()
+                    .filter(person -> !userRepository.existsByPhone(person.getPhone())
+                            && !userRepository.existsByEmail(person.getEmail()))
+                    .map(this::processPerson)
+                    .toList();
+            userRepository.saveAll(users);
         } catch (IOException e) {
             throw new UncheckedIOException("Ошибка при чтении CSV файла", e);
         }
     }
 
-    private void processPerson(Person person) {
+    private User processPerson(Person person) {
         String username = generateUsername(person);
         String password = generatePassword();
-        String personCountry = person.getContactInfo()
-                .getAddress()
-                .getCountry();
-        Country country = countryService.updateCountryByTitle(personCountry);
-        User user = userMapper.toEntity(person, username, password, country);
-        userRepository.save(user);
+        String personCountry = person.getCountry();
+        Country country = countryService.findOrCreateCountry(personCountry);
+        String aboutMe = generateAboutMe(person);
+        User user = userMapper.toEntity(person, username, password, country, aboutMe);
+        if (user.getRatingHistories() == null) {
+            user.setRatingHistories(new ArrayList<>());
+        }
+        return user;
     }
 
     private String generatePassword() {
@@ -213,6 +215,22 @@ public class UserService {
     }
 
     private String generateUsername(Person person) {
-        return person.getFirstName() + "." + person.getLastName();
+        StringBuilder username = new StringBuilder(person.getFirstName() + "." + person.getLastName());
+        int id = 0;
+        while (userRepository.existsByUsername(username.toString())) {
+            username.append(id++);
+        }
+        return username.toString();
+    }
+
+    private String generateAboutMe(Person person) {
+        return String.format(
+                "State: %s; Faculty: %s; Year of study: %s; Major: %s; Employer: %s",
+                person.getState() != null ? person.getState() : "N/A",
+                person.getFaculty() != null ? person.getFaculty() : "N/A",
+                person.getYearOfStudy() != null ? person.getYearOfStudy() : "N/A",
+                person.getMajor() != null ? person.getMajor() : "N/A",
+                person.getEmployer() != null ? person.getEmployer() : "N/A"
+        );
     }
 }

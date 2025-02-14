@@ -12,8 +12,6 @@ import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.model.Person;
 
-import java.util.List;
-
 @Mapper(
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         componentModel = MappingConstants.ComponentModel.SPRING,
@@ -23,11 +21,15 @@ public interface UserMapper {
     User toEntity(UserDto dto);
 
     @Mapping(source = "countryId", target = "country.id")
+    @Mapping(target = "ratingPoints", constant = "0")
     User toEntity(UserRegisterRequest request);
 
-    User toEntity(Person person, String username, String password, Country country);
-
-    List<User> toEntity(List<Person> persons);
+    @Mapping(target = "username", source = "username")
+    @Mapping(target = "password", source = "password")
+    @Mapping(target = "country", source = "country")
+    @Mapping(target = "aboutMe", source = "aboutMe")
+    @Mapping(target = "ratingPoints", constant = "0")
+    User toEntity(Person person, String username, String password, Country country, String aboutMe);
 
     UserDto toDto(User entity);
 
