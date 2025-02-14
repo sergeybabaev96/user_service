@@ -14,9 +14,9 @@ import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.recommendation.RecommendationMapper;
 import school.faang.user_service.repository.SkillRepository;
-import school.faang.user_service.repository.UserSkillGuaranteeRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
+import school.faang.user_service.repository.user.UserSkillGuaranteeRepository;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -73,7 +73,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         if (recommendations == null || recommendations.isEmpty()) {
             return Page.empty(pageable);
         }
-        return recommendations.map(recommendation -> recommendationMapper.toDto(recommendation));
+        return recommendations.map(recommendationMapper::toDto);
     }
 
 
@@ -84,7 +84,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         if (recommendations == null || recommendations.isEmpty()) {
             return Page.empty(pageable);
         }
-        return recommendations.map(recommendation -> recommendationMapper.toDto(recommendation));
+        return recommendations.map(recommendationMapper::toDto);
     }
 
     private void createSkillOffersByExistSkills(RecommendationDto recommendation) {
@@ -155,20 +155,20 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     private Long processSkillOffer(List<SkillOffer> findOffersOfSkill, SkillOfferDto skillOffer, Long userId, Long receiverId, Long recommendationId) {
         if (isNotEmpty(findOffersOfSkill)) {
-            handleGuarantee(findOffersOfSkill, skillOffer, userId, receiverId);
-            return findMatchingOfferId(findOffersOfSkill, recommendationId);
+            handleGuarantee(skillOffer, userId, receiverId);
+            return findMatchingOfferId(findOffersOfSkill);
         } else {
             return skillOfferRepository.create(skillOffer.getSkillId(), recommendationId);
         }
     }
 
-    private void handleGuarantee(List<SkillOffer> findOffersOfSkill, SkillOfferDto skillOffer, Long userId, Long receiverId) {
+    private void handleGuarantee(SkillOfferDto skillOffer, Long userId, Long receiverId) {
         if (!isGuaranteeExist(userId, receiverId, skillOffer.getSkillId())) {
             guaranteeRepository.create(receiverId, skillOffer.getSkillId(), userId);
         }
     }
 
-    private Long findMatchingOfferId(List<SkillOffer> findOffersOfSkill, Long recommendationId) {
+    private Long findMatchingOfferId(List<SkillOffer> findOffersOfSkill) {
         return findOffersOfSkill.stream()
                 .sorted(Comparator.comparing((SkillOffer offer) -> offer.getRecommendation().getId()).reversed())
                 .map(SkillOffer::getId)

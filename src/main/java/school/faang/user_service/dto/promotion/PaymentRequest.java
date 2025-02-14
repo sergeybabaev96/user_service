@@ -10,14 +10,14 @@ import java.util.UUID;
 
 @Builder
 public record PaymentRequest(
-        @NotNull
+        @NotNull(message = "Payment number can't be null")
         UUID paymentNumber,
 
-        @Min(1)
+        @Min(value = 1, message = "Amount should be more than 0")
         @NotNull
         BigDecimal amount,
 
-        @NotNull
+        @NotNull(message = "Currency can't be null")
         Currency currency
 ) {
 }

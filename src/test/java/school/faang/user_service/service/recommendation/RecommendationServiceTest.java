@@ -20,7 +20,7 @@ import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.recommendation.RecommendationMapper;
 import school.faang.user_service.repository.SkillRepository;
-import school.faang.user_service.repository.UserSkillGuaranteeRepository;
+import school.faang.user_service.repository.user.UserSkillGuaranteeRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 
@@ -56,7 +56,7 @@ public class RecommendationServiceTest {
                 () -> recommendationService.create(getRecommendationDtoWithOffer()));
 
         Mockito.verify(recommendationRepository, Mockito.times(0))
-                .create(12l, 14l, "content");
+                .create(12L, 14L, "content");
     }
 
     @Test
@@ -66,7 +66,7 @@ public class RecommendationServiceTest {
                 .thenReturn(Optional.of(getRecommendationValidCreatedDate()));
         recommendationService.create(getRecommendationDtoWithNullableOffer());
         Mockito.verify(recommendationRepository, Mockito.times(1))
-                .create(12l, 14l, "content");
+                .create(12L, 14L, "content");
     }
 
     @Test
@@ -77,7 +77,7 @@ public class RecommendationServiceTest {
         )).thenReturn(Optional.empty());
         recommendationService.create(getRecommendationDtoWithNullableOffer());
         Mockito.verify(recommendationRepository, Mockito.times(1))
-                .create(12l, 14l, "content");
+                .create(12L, 14L, "content");
     }
 
     @Test
@@ -92,9 +92,9 @@ public class RecommendationServiceTest {
         assertThrows(DataValidationException.class,
                 () -> recommendationService.create(getRecommendationDtoWithOffer()));
         Mockito.verify(recommendationRepository, Mockito.times(1))
-                .create(12l, 14l, "content");
+                .create(12L, 14L, "content");
         Mockito.verify(skillOfferRepository, Mockito.times(0))
-                .create(15l, 1L);
+                .create(15L, 1L);
     }
 
     @Test
@@ -108,7 +108,7 @@ public class RecommendationServiceTest {
 
         recommendationService.create(getRecommendationDtoWithOffer());
         Mockito.verify(recommendationRepository, Mockito.times(1))
-                .create(12l, 14l, "content");
+                .create(12L, 14L, "content");
         Mockito.verify(skillOfferRepository, Mockito.times(1))
                 .create(Mockito.anyLong(), Mockito.anyLong());
     }
@@ -127,11 +127,11 @@ public class RecommendationServiceTest {
 
         recommendationService.create(getRecommendationDtoWithOffer());
         Mockito.verify(recommendationRepository, Mockito.times(1))
-                .create(12l, 14l, "content");
+                .create(12L, 14L, "content");
         Mockito.verify(skillOfferRepository, Mockito.times(0))
                 .create(Mockito.anyLong(), Mockito.anyLong());
         Mockito.verify(guaranteeRepository, Mockito.times(0))
-                .create(14l, 15L, 12L);
+                .create(14L, 15L, 12L);
     }
 
     @Test
@@ -148,11 +148,11 @@ public class RecommendationServiceTest {
 
         recommendationService.create(getRecommendationDtoWithOffer());
         Mockito.verify(recommendationRepository, Mockito.times(1))
-                .create(12l, 14l, "content");
+                .create(12L, 14L, "content");
         Mockito.verify(skillOfferRepository, Mockito.times(0))
                 .create(Mockito.anyLong(), Mockito.anyLong());
         Mockito.verify(guaranteeRepository, Mockito.times(1))
-                .create(14l, 15L, 12L);
+                .create(14L, 15L, 12L);
 
     }
 
@@ -162,7 +162,7 @@ public class RecommendationServiceTest {
                 () -> recommendationService.update(getRecommendationDtoWithNullableOffer()));
 
         Mockito.verify(recommendationRepository, Mockito.times(0))
-                .update(12l, 14l, "content");
+                .update(12L, 14L, "content");
     }
 
     @Test
@@ -174,7 +174,7 @@ public class RecommendationServiceTest {
         recommendation.setId(4L);
         recommendationService.update(recommendation);
         Mockito.verify(recommendationRepository, Mockito.times(1))
-                .update(12l, 14l, "content");
+                .update(12L, 14L, "content");
     }
 
     @Test
@@ -186,7 +186,7 @@ public class RecommendationServiceTest {
         recommendation.setId(4L);
         recommendationService.update(recommendation);
         Mockito.verify(recommendationRepository, Mockito.times(1))
-                .update(12l, 14l, "content");
+                .update(12L, 14L, "content");
         Mockito.verify(skillOfferRepository, Mockito.times(1))
                 .deleteAllByRecommendationId(recommendation.getId());
 

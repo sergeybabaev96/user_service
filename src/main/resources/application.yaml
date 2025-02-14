@@ -65,6 +65,11 @@ avatar:
 dicebear:
   endpoint: https://api.dicebear.com
 
+user:
+  ban:
+    redis:
+      channel: user_ban
+
 service:
   name: user-service
 

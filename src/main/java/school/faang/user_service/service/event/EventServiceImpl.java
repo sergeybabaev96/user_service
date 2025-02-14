@@ -4,15 +4,15 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.filter.Filter;
 import school.faang.user_service.dto.event.EventDto;
-import school.faang.user_service.dto.event.EventFilter;
-import school.faang.user_service.dto.event.EventFilterDto;
+import school.faang.user_service.filter.event.EventFilterDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.mapper.event.EventMapper;
 import school.faang.user_service.repository.SkillRepository;
-import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.repository.user.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 
 import java.util.HashSet;
@@ -25,7 +25,7 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final SkillRepository skillRepository;
     private final EventMapper eventMapper;
-    private final List<EventFilter> filters;
+    private final List<Filter<Event, EventFilterDto>> filters;
 
     @Transactional
     @Override
@@ -107,7 +107,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private List<Event> getFilteredEvents(EventFilterDto filter, List<Event> events) {
-        for (EventFilter eventFilter : filters) {
+        for (Filter<Event, EventFilterDto> eventFilter : filters) {
             if (eventFilter.isApplicable(filter)) {
                 events = eventFilter.apply(events, filter);
             }

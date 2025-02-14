@@ -9,29 +9,32 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class RecommendationDto {
+
     private Long id;
+
     @NotNull(message = "The authorId field cannot be null!")
     private Long authorId;
+
     @NotNull(message = "The receiverId field cannot be null!")
     private Long receiverId;
+
     @NotBlank(message = "The content field cannot be null!")
     private String content;
+
     private List<SkillOfferDto> skillOffers;
+
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public void setCreatedAt(LocalDateTime createdAt) {
-        if (createdAt == null) {
-            this.createdAt = LocalDateTime.now();
-        } else {
-            this.createdAt = createdAt;
-        }
+        this.createdAt = Objects.requireNonNullElseGet(createdAt, LocalDateTime::now);
     }
 
 }
