@@ -31,7 +31,7 @@ public class SubscriptionController {
         subscriptionService.followUser(followerId, followeeId);
     }
 
-    @DeleteMapping()
+    @DeleteMapping
     public void unfollowUser(@RequestParam long followerId, @RequestParam long followeeId) {
         subscriptionService.unfollowUser(followerId, followeeId);
     }

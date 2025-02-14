@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Repository
-public class TopUserRepository {
+public class TopUserCacheRepository {
     private static final String REDIS_KEY_TOP_USERS = "topusers";
     private final RedisTemplate<String, Long> redisTemplate;
 
@@ -21,14 +21,10 @@ public class TopUserRepository {
     }
 
     public Map<Long, Double> getTopUsersWithScores() {
-        try {
-            return Objects.requireNonNull(redisTemplate.opsForZSet()
-                            .reverseRangeWithScores(REDIS_KEY_TOP_USERS, 0, 100))
-                    .stream()
-                    .collect(Collectors.toMap(ZSetOperations.TypedTuple::getValue, ZSetOperations.TypedTuple::getScore));
-        } catch (NullPointerException e) {
-            return Map.of();
-        }
+        return Objects.requireNonNull(redisTemplate.opsForZSet()
+                        .reverseRangeWithScores(REDIS_KEY_TOP_USERS, 0, 100))
+                .stream()
+                .collect(Collectors.toMap(ZSetOperations.TypedTuple::getValue, ZSetOperations.TypedTuple::getScore));
     }
 
     public double getTopUserScore(Long userId) {

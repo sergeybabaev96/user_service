@@ -4,13 +4,13 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.service.rating.annotation.FollowUser;
-import school.faang.user_service.service.rating.annotation.UnFollowUser;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.enums.RatingType;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.userFilter.UserFilter;
 import school.faang.user_service.repository.SubscriptionRepository;
+import school.faang.user_service.service.rating.annotation.RatingChanging;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -23,7 +23,7 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final List<UserFilter> userFilters;
 
-    @FollowUser
+    @RatingChanging(ratingType = RatingType.SUBSCRIPTION_RATING)
     @Transactional
     public void followUser(long followerId, long followeeId) {
         checkSameUsers(followerId, followeeId);
@@ -32,7 +32,7 @@ public class SubscriptionService {
         subscriptionRepository.followUser(followerId, followeeId);
     }
 
-    @UnFollowUser
+    @RatingChanging(ratingType = RatingType.SUBSCRIPTION_RATING, positiveAction = false)
     @Transactional
     public void unfollowUser(long followerId, long followeeId) {
         checkSameUsers(followerId, followeeId);

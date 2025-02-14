@@ -1,18 +1,20 @@
 package school.faang.user_service.service.rating;
 
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.rating.UserRating;
 import school.faang.user_service.entity.rating.UserRatingType;
+import school.faang.user_service.enums.RatingType;
+import school.faang.user_service.service.rating.annotation.RatingChanging;
 
-import java.util.List;
+import java.lang.reflect.Method;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -28,94 +30,59 @@ class RatingAspectTest {
     UserRating mockedResult;
 
     @Test
-    void followUser() {
+    void addScore() {
         setResultSubscriptionRating();
         JoinPoint joinPoint = mock(JoinPoint.class);
+        MethodSignature signature = mock(MethodSignature.class);
+        Method method = mock(Method.class);
+        RatingChanging ratingChanging = mock(RatingChanging.class);
 
-        when(ratingService.addScore(3L, "Subscription rating")).thenReturn(mockedResult);
+        when(ratingService.addScore(3L, RatingType.SUBSCRIPTION_RATING)).thenReturn(mockedResult);
         when(joinPoint.getArgs()).thenReturn(new Object[]{7L, 3L});
+        when(joinPoint.getSignature()).thenReturn(signature);
+        when(signature.getMethod()).thenReturn(method);
+        when(method.getAnnotation(RatingChanging.class)).thenReturn(ratingChanging);
+        when(ratingChanging.ratingType()).thenReturn(RatingType.SUBSCRIPTION_RATING);
+        when(ratingChanging.positiveAction()).thenReturn(true);
 
-        UserRating actualResult = ratingAspect.followUser(joinPoint);
+        UserRating actualResult = ratingAspect.changeRating(joinPoint);
 
         Assertions.assertEquals(mockedResult, actualResult);
-        verify(ratingService).addScore(3L, "Subscription rating");
+        verify(ratingService).addScore(3L, RatingType.SUBSCRIPTION_RATING);
         verify(joinPoint, times(1)).getArgs();
+        verify(joinPoint, times(1)).getSignature();
+        verify(signature, times(1)).getMethod();
+        verify(method, times(1)).getAnnotation(RatingChanging.class);
+        verify(ratingChanging, times(1)).ratingType();
+        verify(ratingChanging, times(1)).positiveAction();
     }
 
     @Test
-    void unfollowUser() {
+    void minusScore() {
         setResultSubscriptionRating();
         JoinPoint joinPoint = mock(JoinPoint.class);
+        MethodSignature signature = mock(MethodSignature.class);
+        Method method = mock(Method.class);
+        RatingChanging ratingChanging = mock(RatingChanging.class);
 
-        when(ratingService.minusScore(3L, "Subscription rating")).thenReturn(mockedResult);
+        when(ratingService.minusScore(3L, RatingType.SUBSCRIPTION_RATING)).thenReturn(mockedResult);
         when(joinPoint.getArgs()).thenReturn(new Object[]{7L, 3L});
+        when(joinPoint.getSignature()).thenReturn(signature);
+        when(signature.getMethod()).thenReturn(method);
+        when(method.getAnnotation(RatingChanging.class)).thenReturn(ratingChanging);
+        when(ratingChanging.ratingType()).thenReturn(RatingType.SUBSCRIPTION_RATING);
+        when(ratingChanging.positiveAction()).thenReturn(false);
 
-        UserRating actualResult = ratingAspect.unfollowUser(joinPoint);
+        UserRating actualResult = ratingAspect.changeRating(joinPoint);
 
         Assertions.assertEquals(mockedResult, actualResult);
-        verify(ratingService).minusScore(3L, "Subscription rating");
+        verify(ratingService).minusScore(3L, RatingType.SUBSCRIPTION_RATING);
         verify(joinPoint, times(1)).getArgs();
-    }
-
-    @Test
-    void acquireSkillFromOffers() {
-        setResultSkillRating();
-        JoinPoint joinPoint = mock(JoinPoint.class);
-
-        when(ratingService.addScore(3L, "Skill rating")).thenReturn(mockedResult);
-        when(joinPoint.getArgs()).thenReturn(new Object[]{7L, 3L});
-
-        UserRating actualResult = ratingAspect.acquireSkillFromOffers(joinPoint);
-
-        Assertions.assertEquals(mockedResult, actualResult);
-        verify(ratingService).addScore(3L, "Skill rating");
-        verify(joinPoint, times(1)).getArgs();
-    }
-
-    @Test
-    void createSkill() {
-        setResultSkillRating();
-        UserRating mockedResultUser2 = UserRating.builder()
-                .id(1L)
-                .score(20)
-                .type(UserRatingType.builder()
-                        .id(2L)
-                        .cost(20)
-                        .name("Skill rating")
-                        .isActivity(true)
-                        .build())
-                .user(User.builder()
-                        .id(2L)
-                        .username("testUser")
-                        .build())
-                .build();
-        Skill skill = Skill.builder()
-                .id(2L)
-                .build();
-        List<User> users = List.of(
-                User.builder()
-                        .id(3L)
-                        .skills(List.of(skill))
-                        .build(),
-                User.builder()
-                        .id(2L)
-                        .skills(List.of(skill))
-                        .build());
-        skill.setUsers(users);
-
-        JoinPoint joinPoint = mock(JoinPoint.class);
-
-        when(ratingService.addScore(3L, "Skill rating")).thenReturn(mockedResult);
-        when(ratingService.addScore(2L, "Skill rating")).thenReturn(mockedResultUser2);
-        when(joinPoint.getArgs()).thenReturn(new Object[]{skill});
-
-        List<UserRating> actualResult = ratingAspect.createSkill(joinPoint);
-        List<UserRating> expected = List.of(mockedResult, mockedResultUser2);
-
-        Assertions.assertEquals(expected, actualResult);
-        verify(ratingService).addScore(3L, "Skill rating");
-        verify(ratingService).addScore(2L, "Skill rating");
-        verify(joinPoint, times(1)).getArgs();
+        verify(joinPoint, times(1)).getSignature();
+        verify(signature, times(1)).getMethod();
+        verify(method, times(1)).getAnnotation(RatingChanging.class);
+        verify(ratingChanging, times(1)).ratingType();
+        verify(ratingChanging, times(1)).positiveAction();
     }
 
     void setResultSubscriptionRating() {
@@ -125,24 +92,7 @@ class RatingAspectTest {
                 .type(UserRatingType.builder()
                         .id(2L)
                         .cost(20)
-                        .name("Subscription rating")
-                        .isActivity(true)
-                        .build())
-                .user(User.builder()
-                        .id(3L)
-                        .username("testUser")
-                        .build())
-                .build();
-    }
-
-    void setResultSkillRating() {
-        mockedResult = UserRating.builder()
-                .id(1L)
-                .score(20)
-                .type(UserRatingType.builder()
-                        .id(2L)
-                        .cost(20)
-                        .name("Skill rating")
+                        .name(RatingType.SUBSCRIPTION_RATING)
                         .isActivity(true)
                         .build())
                 .user(User.builder()

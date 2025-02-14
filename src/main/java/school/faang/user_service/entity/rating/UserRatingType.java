@@ -2,18 +2,19 @@ package school.faang.user_service.entity.rating;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import school.faang.user_service.enums.RatingType;
 
 import java.util.List;
 
@@ -29,19 +30,17 @@ public class UserRatingType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Column(name = "name", length = 64, nullable = false, unique = true)
-    private String name;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "name")
+    private RatingType name;
 
     @PositiveOrZero
     @Column(name = "cost")
     private Integer cost;
 
-    @NotNull
     @Column(name = "activity")
     private Boolean isActivity;
 
-    @NotNull
     @OneToMany(mappedBy = "type")
     private List<UserRating> userRatings;
 }

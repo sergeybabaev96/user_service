@@ -11,10 +11,11 @@ import org.mockito.stubbing.Answer;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.rating.UserRating;
 import school.faang.user_service.entity.rating.UserRatingType;
-import school.faang.user_service.repository.rating.TopUserRepository;
+import school.faang.user_service.enums.RatingType;
+import school.faang.user_service.repository.rating.TopUserCacheRepository;
 import school.faang.user_service.repository.rating.UserRatingRepository;
 import school.faang.user_service.service.UserService;
-import school.faang.user_service.service.rating.user_rating.UserRank;
+import school.faang.user_service.service.rating.user_rating.CalculateRatingService;
 
 import java.util.List;
 import java.util.Map;
@@ -38,17 +39,17 @@ class RatingServiceTest {
     @Mock
     private UserService userService;
     @Mock
-    private TopUserRepository topUserRepository;
+    private TopUserCacheRepository topUserCacheRepository;
     @Mock
-    private UserRank userRank;
+    private CalculateRatingService calculateRatingService;
     @Mock
-    private List<UserRank> userRanks;
+    private List<CalculateRatingService> calculateRatingServices;
     @InjectMocks
     private RatingService ratingService;
 
     @BeforeEach
     void setUp() {
-        lenient().when(userRanks.stream()).thenReturn(Stream.of(userRank));
+        lenient().when(calculateRatingServices.stream()).thenReturn(Stream.of(calculateRatingService));
     }
 
     @Test
@@ -72,11 +73,11 @@ class RatingServiceTest {
 
     @Test
     void addScore() {
-        String ratingTypeName = "Skill rating";
+        RatingType type = RatingType.SKILL_RATING;
         Long userId = 1L;
         UserRatingType userRatingType = UserRatingType.builder()
                 .id(1L)
-                .name("Skill rating")
+                .name(RatingType.SKILL_RATING)
                 .cost(5)
                 .build();
         UserRating userRating = UserRating.builder()
@@ -88,28 +89,28 @@ class RatingServiceTest {
                 .type(userRatingType)
                 .build();
 
-        when(userRatingRepository.findByUserIdAndTypeNameIs(userId, ratingTypeName)).thenReturn(userRating);
-        when(ratingTypeService.findByName(ratingTypeName)).thenReturn(userRatingType);
-        when(topUserRepository.getTopUserScore(userId)).thenReturn(20.0);
-        when(topUserRepository.save(1L, 25.0)).thenReturn(true);
+        when(userRatingRepository.findByUserIdAndTypeName(userId, type)).thenReturn(userRating);
+        when(ratingTypeService.findByName(type)).thenReturn(userRatingType);
+        when(topUserCacheRepository.getTopUserScore(userId)).thenReturn(20.0);
+        when(topUserCacheRepository.save(1L, 25.0)).thenReturn(true);
         when(userRatingRepository.save(userRating)).thenReturn(userRating);
 
-        assertDoesNotThrow(() -> ratingService.addScore(userId, ratingTypeName));
+        assertDoesNotThrow(() -> ratingService.addScore(userId, type));
         assertEquals(15, userRating.getScore());
-        verify(userRatingRepository, times(1)).findByUserIdAndTypeNameIs(userId, ratingTypeName);
-        verify(ratingTypeService, times(1)).findByName(ratingTypeName);
-        verify(topUserRepository, times(1)).getTopUserScore(userId);
-        verify(topUserRepository, times(1)).save(1L, 25.0);
+        verify(userRatingRepository, times(1)).findByUserIdAndTypeName(userId, type);
+        verify(ratingTypeService, times(1)).findByName(type);
+        verify(topUserCacheRepository, times(1)).getTopUserScore(userId);
+        verify(topUserCacheRepository, times(1)).save(1L, 25.0);
         verify(userRatingRepository, times(1)).save(userRating);
     }
 
     @Test
     void addScoreRatingNotFound() {
-        String ratingTypeName = "Skill rating";
+        RatingType type = RatingType.SKILL_RATING;
         Long userId = 1L;
         UserRatingType userRatingType = UserRatingType.builder()
                 .id(1L)
-                .name("Skill rating")
+                .name(RatingType.SKILL_RATING)
                 .cost(5)
                 .build();
 
@@ -122,28 +123,28 @@ class RatingServiceTest {
                 .type(userRatingType)
                 .build();
 
-        when(userRatingRepository.findByUserIdAndTypeNameIs(userId, ratingTypeName)).thenReturn(null);
-        when(ratingTypeService.findByName(ratingTypeName)).thenReturn(userRatingType);
-        when(topUserRepository.getTopUserScore(userId)).thenReturn(20.0);
-        when(topUserRepository.save(1L, 25.0)).thenReturn(true);
+        when(userRatingRepository.findByUserIdAndTypeName(userId, type)).thenReturn(null);
+        when(ratingTypeService.findByName(type)).thenReturn(userRatingType);
+        when(topUserCacheRepository.getTopUserScore(userId)).thenReturn(20.0);
+        when(topUserCacheRepository.save(1L, 25.0)).thenReturn(true);
         when(userRatingRepository.save(any())).thenReturn(resultUserRating);
 
-        assertDoesNotThrow(() -> ratingService.addScore(userId, ratingTypeName));
+        assertDoesNotThrow(() -> ratingService.addScore(userId, type));
         assertEquals(5, resultUserRating.getScore());
-        verify(userRatingRepository, times(1)).findByUserIdAndTypeNameIs(userId, ratingTypeName);
-        verify(ratingTypeService, times(1)).findByName(ratingTypeName);
-        verify(topUserRepository, times(1)).getTopUserScore(userId);
-        verify(topUserRepository, times(1)).save(1L, 25.0);
+        verify(userRatingRepository, times(1)).findByUserIdAndTypeName(userId, type);
+        verify(ratingTypeService, times(1)).findByName(type);
+        verify(topUserCacheRepository, times(1)).getTopUserScore(userId);
+        verify(topUserCacheRepository, times(1)).save(1L, 25.0);
         verify(userRatingRepository, times(1)).save(any());
     }
 
     @Test
     void minusScore() {
-        String ratingTypeName = "Skill rating";
+        RatingType type = RatingType.SKILL_RATING;
         Long userId = 1L;
         UserRatingType userRatingType = UserRatingType.builder()
                 .id(1L)
-                .name("Skill rating")
+                .name(RatingType.SKILL_RATING)
                 .cost(5)
                 .build();
         UserRating userRating = UserRating.builder()
@@ -155,28 +156,28 @@ class RatingServiceTest {
                 .type(userRatingType)
                 .build();
 
-        when(userRatingRepository.findByUserIdAndTypeNameIs(userId, ratingTypeName)).thenReturn(userRating);
-        when(ratingTypeService.findByName(ratingTypeName)).thenReturn(userRatingType);
-        when(topUserRepository.getTopUserScore(userId)).thenReturn(20.0);
-        when(topUserRepository.save(1L, 15.0)).thenReturn(true);
+        when(userRatingRepository.findByUserIdAndTypeName(userId, type)).thenReturn(userRating);
+        when(ratingTypeService.findByName(type)).thenReturn(userRatingType);
+        when(topUserCacheRepository.getTopUserScore(userId)).thenReturn(20.0);
+        when(topUserCacheRepository.save(1L, 15.0)).thenReturn(true);
         when(userRatingRepository.save(userRating)).thenReturn(userRating);
 
-        assertDoesNotThrow(() -> ratingService.minusScore(userId, ratingTypeName));
+        assertDoesNotThrow(() -> ratingService.minusScore(userId, type));
         assertEquals(5, userRating.getScore());
-        verify(userRatingRepository, times(1)).findByUserIdAndTypeNameIs(userId, ratingTypeName);
-        verify(ratingTypeService, times(1)).findByName(ratingTypeName);
-        verify(topUserRepository, times(1)).getTopUserScore(userId);
-        verify(topUserRepository, times(1)).save(1L, 15.0);
+        verify(userRatingRepository, times(1)).findByUserIdAndTypeName(userId, type);
+        verify(ratingTypeService, times(1)).findByName(type);
+        verify(topUserCacheRepository, times(1)).getTopUserScore(userId);
+        verify(topUserCacheRepository, times(1)).save(1L, 15.0);
         verify(userRatingRepository, times(1)).save(userRating);
     }
 
     @Test
     void minusScoreRatingNotFound() {
-        String ratingTypeName = "Skill rating";
+        RatingType type = RatingType.SKILL_RATING;
         Long userId = 1L;
         UserRatingType userRatingType = UserRatingType.builder()
                 .id(1L)
-                .name("Skill rating")
+                .name(RatingType.SKILL_RATING)
                 .cost(5)
                 .build();
 
@@ -189,18 +190,18 @@ class RatingServiceTest {
                 .type(userRatingType)
                 .build();
 
-        when(userRatingRepository.findByUserIdAndTypeNameIs(userId, ratingTypeName)).thenReturn(null);
-        when(ratingTypeService.findByName(ratingTypeName)).thenReturn(userRatingType);
-        when(topUserRepository.getTopUserScore(userId)).thenReturn(20.0);
-        when(topUserRepository.save(1L, 15.0)).thenReturn(true);
+        when(userRatingRepository.findByUserIdAndTypeName(userId, type)).thenReturn(null);
+        when(ratingTypeService.findByName(type)).thenReturn(userRatingType);
+        when(topUserCacheRepository.getTopUserScore(userId)).thenReturn(20.0);
+        when(topUserCacheRepository.save(1L, 15.0)).thenReturn(true);
         when(userRatingRepository.save(any())).thenReturn(resultUserRating);
 
-        assertDoesNotThrow(() -> ratingService.minusScore(userId, ratingTypeName));
+        assertDoesNotThrow(() -> ratingService.minusScore(userId, type));
         assertEquals(0, resultUserRating.getScore());
-        verify(userRatingRepository, times(1)).findByUserIdAndTypeNameIs(userId, ratingTypeName);
-        verify(ratingTypeService, times(1)).findByName(ratingTypeName);
-        verify(topUserRepository, times(1)).getTopUserScore(userId);
-        verify(topUserRepository, times(1)).save(1L, 15.0);
+        verify(userRatingRepository, times(1)).findByUserIdAndTypeName(userId, type);
+        verify(ratingTypeService, times(1)).findByName(type);
+        verify(topUserCacheRepository, times(1)).getTopUserScore(userId);
+        verify(topUserCacheRepository, times(1)).save(1L, 15.0);
         verify(userRatingRepository, times(1)).save(any());
     }
 
@@ -211,11 +212,11 @@ class RatingServiceTest {
                 2L, 19.0,
                 3L, 7.0
         );
-        when(topUserRepository.getTopUsersWithScores()).thenReturn(topUsers);
+        when(topUserCacheRepository.getTopUsersWithScores()).thenReturn(topUsers);
         List<Long> excepted = List.of(2L, 1L, 3L);
         List<Long> result = ratingService.getTopUsers();
         assertEquals(excepted, result);
-        verify(topUserRepository, times(1)).getTopUsersWithScores();
+        verify(topUserCacheRepository, times(1)).getTopUsersWithScores();
     }
 
     @Test
@@ -225,7 +226,7 @@ class RatingServiceTest {
                 2L, 19.0,
                 3L, 7.0
         );
-        when(topUserRepository.getTopUsersWithScores()).thenAnswer(
+        when(topUserCacheRepository.getTopUsersWithScores()).thenAnswer(
                 new Answer() {
                     private int count = 0;
 
@@ -241,7 +242,7 @@ class RatingServiceTest {
         List<Long> excepted = List.of(2L, 1L, 3L);
         List<Long> result = ratingService.getTopUsers();
         assertEquals(excepted, result);
-        verify(topUserRepository, times(2)).getTopUsersWithScores();
+        verify(topUserCacheRepository, times(2)).getTopUsersWithScores();
     }
 
     @Test
@@ -251,7 +252,7 @@ class RatingServiceTest {
                 2L, 19.0,
                 3L, 7.0
         );
-        when(topUserRepository.getTopUsersWithScores()).thenAnswer(
+        when(topUserCacheRepository.getTopUsersWithScores()).thenAnswer(
                 new Answer() {
                     private int count = 0;
 
@@ -267,7 +268,7 @@ class RatingServiceTest {
         List<Long> excepted = List.of(2L, 1L, 3L);
         List<Long> result = ratingService.getTopUsers();
         assertEquals(excepted, result);
-        verify(topUserRepository, times(2)).getTopUsersWithScores();
+        verify(topUserCacheRepository, times(2)).getTopUsersWithScores();
     }
 
 

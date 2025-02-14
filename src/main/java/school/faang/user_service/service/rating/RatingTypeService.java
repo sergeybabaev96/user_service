@@ -3,9 +3,11 @@ package school.faang.user_service.service.rating;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import school.faang.user_service.entity.rating.UserRatingType;
+import school.faang.user_service.enums.RatingType;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.rating.UserRatingTypeRepository;
 
@@ -18,16 +20,24 @@ import java.util.List;
 public class RatingTypeService {
     private final UserRatingTypeRepository userRatingTypeRepository;
 
+    @Value("${rating.cost.default:10}")
+    private Integer defaultRatingCost;
+
     public List<UserRatingType> findAll() {
         log.info("Find all user rating types");
         return userRatingTypeRepository.findAll();
     }
 
-    public UserRatingType findByName(@NotNull String name) {
-        log.info("Find user rating type by name: {}", name);
-        UserRatingType userRatingType = userRatingTypeRepository.findByName(name);
+    public UserRatingType findByName(@NotNull RatingType type) {
+        log.info("Find user rating type by name: {}", type);
+        UserRatingType userRatingType = userRatingTypeRepository.findByName(type);
         if (userRatingType == null) {
-            throw new DataValidationException("User rating type by name: %s - not found".formatted(name));
+            userRatingType = UserRatingType.builder()
+                    .name(type)
+                    .cost(defaultRatingCost)
+                    .isActivity(false)
+                    .build();
+            userRatingType = userRatingTypeRepository.save(userRatingType);
         }
         return userRatingType;
     }

@@ -4,14 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import school.faang.user_service.dto.rating.UserRatingDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.rating.UserRating;
 import school.faang.user_service.entity.rating.UserRatingType;
-import school.faang.user_service.repository.rating.TopUserRepository;
+import school.faang.user_service.enums.RatingType;
+import school.faang.user_service.repository.rating.TopUserCacheRepository;
 import school.faang.user_service.repository.rating.UserRatingRepository;
 import school.faang.user_service.service.UserService;
-import school.faang.user_service.service.rating.user_rating.UserRank;
+import school.faang.user_service.service.rating.user_rating.CalculateRatingService;
 
 import java.util.Comparator;
 import java.util.List;
@@ -27,8 +27,8 @@ public class RatingService {
     private final UserRatingRepository userRatingRepository;
     private final RatingTypeService ratingTypeService;
     private final UserService userService;
-    private final TopUserRepository topUserRepository;
-    private final List<UserRank> userRanks;
+    private final TopUserCacheRepository topUserCacheRepository;
+    private final List<CalculateRatingService> calculateRatingServices;
 
     public UserRating addRating(@Validated UserRating userRating) {
         log.info("Adding user rating to database");
@@ -40,14 +40,14 @@ public class RatingService {
         userRatingRepository.delete(userRating);
     }
 
-    public UserRating addScore(@Validated Long userId, String ratingTypeName) {
-        log.info("Adding score for user {} by type {}", userId, ratingTypeName);
-        UserRating userRating = userRatingRepository.findByUserIdAndTypeNameIs(userId, ratingTypeName);
-        UserRatingType ratingType = ratingTypeService.findByName(ratingTypeName);
+    public UserRating addScore(@Validated Long userId, RatingType type) {
+        log.info("Adding score for user {} by type {}", userId, type);
+        UserRating userRating = userRatingRepository.findByUserIdAndTypeName(userId, type);
+        UserRatingType ratingType = ratingTypeService.findByName(type);
 
         if (userRating == null) {
             log.warn("Rating with userId %s and type %s not found".formatted(userId,
-                    ratingTypeName));
+                    type));
             userRating = getEmptyUserRating(userId, ratingType);
         }
 
@@ -56,14 +56,14 @@ public class RatingService {
         return userRatingRepository.save(userRating);
     }
 
-    public UserRating minusScore(@Validated Long userId, String ratingTypeName) {
-        log.info("Minus score for user {} by type {}", userId, ratingTypeName);
-        UserRating userRating = userRatingRepository.findByUserIdAndTypeNameIs(userId, ratingTypeName);
-        UserRatingType ratingType = ratingTypeService.findByName(ratingTypeName);
+    public UserRating minusScore(@Validated Long userId, RatingType type) {
+        log.info("Minus score for user {} by type {}", userId, type);
+        UserRating userRating = userRatingRepository.findByUserIdAndTypeName(userId, type);
+        UserRatingType ratingType = ratingTypeService.findByName(type);
 
         if (userRating == null) {
             log.warn("Rating with userId %s and type %s not found".formatted(userId,
-                    ratingTypeName));
+                    type));
             userRating = getEmptyUserRating(userId, ratingType);
         }
 
@@ -77,12 +77,12 @@ public class RatingService {
     }
 
     public List<Long> getTopUsers() {
-        Map<Long, Double> topUsers = topUserRepository.getTopUsersWithScores();
+        Map<Long, Double> topUsers = topUserCacheRepository.getTopUsersWithScores();
 
         if (topUsers == null || topUsers.isEmpty()) {
             List<UserRating> userRatings = calculateAllRatings();
             updateFullRating(calculateFullScores(userRatings));
-            topUsers = topUserRepository.getTopUsersWithScores();
+            topUsers = topUserCacheRepository.getTopUsersWithScores();
         }
 
         return topUsers.entrySet().stream()
@@ -106,7 +106,7 @@ public class RatingService {
         log.info("Updating full rating");
         scoreMap.forEach((key, value) -> {
             log.debug("Updating user rating {}", key);
-            topUserRepository.save(key, value.doubleValue());
+            topUserCacheRepository.save(key, value.doubleValue());
         });
     }
 
@@ -120,28 +120,20 @@ public class RatingService {
 
     private List<UserRating> calculateAllRatings() {
         log.info("Calculating all ratings");
-        UserRatingDto ratingDto = UserRatingDto.builder()
-                .followeeRating(true)
-                .goalRating(true)
-                .menteeRating(true)
-                .premiumRating(true)
-                .skillRating(true)
-                .build();
 
         List<Long> allUsersId = userService.findAllUsers().stream()
                 .map(User::getId)
                 .toList();
 
-        return userRanks.stream()
-                .filter(userRank -> userRank.isApplicable(ratingDto))
-                .flatMap(userRank -> userRank.calculate(allUsersId, ratingDto).stream())
+        return calculateRatingServices.stream()
+                .flatMap(userRank -> userRank.calculate(allUsersId).stream())
                 .toList();
 
     }
 
     private void updateFullScore(@Validated Long userId, int changeScore) {
-        int score = (int) topUserRepository.getTopUserScore(userId);
+        int score = (int) topUserCacheRepository.getTopUserScore(userId);
         score += changeScore;
-        topUserRepository.save(userId, (double) score);
+        topUserCacheRepository.save(userId, (double) score);
     }
 }

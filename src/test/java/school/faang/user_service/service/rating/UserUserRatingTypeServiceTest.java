@@ -7,13 +7,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.entity.rating.UserRatingType;
+import school.faang.user_service.enums.RatingType;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.rating.UserRatingTypeRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,13 +31,13 @@ class UserUserRatingTypeServiceTest {
         List<UserRatingType> userRatingTypes = List.of(
                 UserRatingType.builder()
                         .id(1L)
-                        .name("Skill rating")
+                        .name(RatingType.SKILL_RATING)
                         .isActivity(true)
                         .cost(10)
                         .build(),
                 UserRatingType.builder()
                         .id(2L)
-                        .name("Views rating")
+                        .name(RatingType.SUBSCRIPTION_RATING)
                         .isActivity(false)
                         .cost(7)
                         .build()
@@ -51,27 +52,27 @@ class UserUserRatingTypeServiceTest {
     void findByName() {
         UserRatingType userRatingType = UserRatingType.builder()
                 .id(1L)
-                .name("Skill rating")
+                .name(RatingType.SKILL_RATING)
                 .isActivity(true)
                 .cost(10)
                 .build();
-        when(userRatingTypeRepository.findByName(anyString())).thenReturn(userRatingType);
-        Assertions.assertEquals(userRatingType, ratingTypeService.findByName("Skill rating"));
-        verify(userRatingTypeRepository, times(1)).findByName(anyString());
+        when(userRatingTypeRepository.findByName(any())).thenReturn(userRatingType);
+        Assertions.assertEquals(userRatingType, ratingTypeService.findByName(RatingType.SKILL_RATING));
+        verify(userRatingTypeRepository, times(1)).findByName(any());
     }
 
     @Test
     void findByNameNotFound() {
-        when(userRatingTypeRepository.findByName(anyString())).thenReturn(null);
-        Assertions.assertThrows(DataValidationException.class, () -> ratingTypeService.findByName(""));
-        verify(userRatingTypeRepository, times(1)).findByName(anyString());
+        when(userRatingTypeRepository.findByName(any())).thenReturn(null);
+        Assertions.assertThrows(DataValidationException.class, () -> ratingTypeService.findByName(RatingType.SKILL_RATING));
+        verify(userRatingTypeRepository, times(1)).findByName(any());
     }
 
     @Test
     void add() {
         UserRatingType userRatingType = UserRatingType.builder()
                 .id(2L)
-                .name("Skill rating")
+                .name(RatingType.SKILL_RATING)
                 .isActivity(true)
                 .cost(10)
                 .build();
@@ -84,7 +85,7 @@ class UserUserRatingTypeServiceTest {
     void updateCost() {
         UserRatingType source = UserRatingType.builder()
                 .id(2L)
-                .name("Skill rating")
+                .name(RatingType.SKILL_RATING)
                 .isActivity(true)
                 .cost(10)
                 .build();
@@ -92,14 +93,14 @@ class UserUserRatingTypeServiceTest {
 
         UserRatingType updated = UserRatingType.builder()
                 .id(2L)
-                .name("Skill rating")
+                .name(RatingType.SKILL_RATING)
                 .isActivity(true)
                 .cost(9)
                 .build();
 
         UserRatingType expected = UserRatingType.builder()
                 .id(2L)
-                .name("Skill rating")
+                .name(RatingType.SKILL_RATING)
                 .isActivity(true)
                 .cost(9)
                 .build();
@@ -127,7 +128,7 @@ class UserUserRatingTypeServiceTest {
     void findById() {
         UserRatingType userRatingType = UserRatingType.builder()
                 .id(2L)
-                .name("Skill rating")
+                .name(RatingType.SKILL_RATING)
                 .isActivity(true)
                 .cost(9)
                 .build();

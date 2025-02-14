@@ -4,17 +4,17 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.service.rating.annotation.AcquireSkill;
-import school.faang.user_service.service.rating.annotation.CreateSkill;
 import school.faang.user_service.dto.SkillCandidateDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.entity.recommendation.SkillOffer;
+import school.faang.user_service.enums.RatingType;
 import school.faang.user_service.mapper.SkillCandidateMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
+import school.faang.user_service.service.rating.annotation.RatingChanging;
 import school.faang.user_service.utility.validator.SkillValidator;
 
 import java.util.Collections;
@@ -68,7 +68,7 @@ public class SkillService {
         return skills;
     }
 
-    @CreateSkill
+    @RatingChanging(ratingType = RatingType.SKILL_RATING)
     @Transactional
     public Skill create(Skill skill) {
         skillValidator.validateSkill(skill);
@@ -98,7 +98,7 @@ public class SkillService {
                 .toList();
     }
 
-    @AcquireSkill
+    @RatingChanging(ratingType = RatingType.SKILL_RATING)
     @Transactional
     public Skill acquireSkillFromOffers(long skillId, long userId) {
         Skill skill = getSkillById(skillId);
