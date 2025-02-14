@@ -64,8 +64,15 @@ class UserUserRatingTypeServiceTest {
     @Test
     void findByNameNotFound() {
         when(userRatingTypeRepository.findByName(any())).thenReturn(null);
-        Assertions.assertThrows(DataValidationException.class, () -> ratingTypeService.findByName(RatingType.SKILL_RATING));
+        when(userRatingTypeRepository.save(any())).thenReturn(UserRatingType.builder()
+                        .name(RatingType.SKILL_RATING)
+                .build());
+
+        RatingType excepted = RatingType.SKILL_RATING;
+        RatingType actual = ratingTypeService.findByName(RatingType.SKILL_RATING).getName();
+        Assertions.assertEquals(excepted, actual);
         verify(userRatingTypeRepository, times(1)).findByName(any());
+        verify(userRatingTypeRepository, times(1)).save(any());
     }
 
     @Test
