@@ -10,7 +10,6 @@ import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.mapper.mentorship.MentorshipRejectionMapper;
 import school.faang.user_service.mapper.mentorship.MentorshipRequestMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
@@ -27,7 +26,6 @@ import java.util.stream.Stream;
 public class MentorshipRequestService {
 
     private final MentorshipRequestMapper requestMapper;
-    private final MentorshipRejectionMapper rejectionMapper;
     private final MentorshipRequestRepository requestRepository;
     private final MentorshipRequestValidator requestValidator;
     private final UserRepository userRepository;
