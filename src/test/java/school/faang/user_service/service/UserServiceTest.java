@@ -8,8 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
+import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.goal.Goal;
@@ -22,16 +24,18 @@ import school.faang.user_service.service.filter.UserFilter;
 import school.faang.user_service.service.filter.realisation.CityFilter;
 import school.faang.user_service.service.goal.GoalService;
 
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -47,6 +51,8 @@ public class UserServiceTest {
     private List<UserFilter> userFilters;
     @Mock
     private MentorshipService mentorshipService;
+    @Mock
+    private CountryService countryService;
 
     @InjectMocks
     private UserService service;
@@ -163,5 +169,52 @@ public class UserServiceTest {
 
         List<UserDto> result = service.getUsersByIds(ids);
         assertEquals(2, result.size());
+    }
+
+    @Test
+    public void processCsvFile_WithValidCsvFromResources_SavesAllUsers() throws Exception {
+        InputStream csvStream = getClass().getClassLoader().getResourceAsStream("files/students.csv");
+        MockMultipartFile csvFile = new MockMultipartFile("file", "students.csv", "text/csv", csvStream);
+        Country country = Country.builder().id(1L).title("USA").build();
+        when(userRepository.existsByPhone(anyString())).thenReturn(false);
+        when(userRepository.existsByEmail(anyString())).thenReturn(false);
+        when(countryService.findOrCreateCountry(anyString())).thenReturn(country);
+        when(userMapper.toEntity(any(), anyString(), anyString(), any(), anyString())).thenReturn(new User());
+        service.processCsvFile(csvFile);
+        verify(userRepository).saveAll(argThat(iterator -> {
+            List<User> users = new ArrayList<>();
+            iterator.forEach(users::add);
+            return users.size() == 4;
+        }));
+    }
+
+    @Test
+    public void processCsvFile_EmptyCsvFile_ThrowsUncheckedIOException() {
+        MockMultipartFile csvFile =
+                new MockMultipartFile("file", "empty.csv", "text/csv", new byte[0]);
+        assertThrows(UncheckedIOException.class, () -> service.processCsvFile(csvFile));
+    }
+
+    @Test
+    public void processCsvFile_WithExistingUsername_GeneratesNewUsername() throws Exception {
+        InputStream csvStream = getClass().getClassLoader().getResourceAsStream("files/students.csv");
+        MockMultipartFile csvFile = new MockMultipartFile("file", "students.csv", "text/csv", csvStream);
+        Country country = Country.builder().id(1L).title("USA").build();
+        when(userRepository.existsByPhone(anyString())).thenReturn(false);
+        when(userRepository.existsByEmail(anyString())).thenReturn(false);
+        when(userRepository.existsByUsername("John.Doe")).thenReturn(true).thenReturn(false);
+        when(countryService.findOrCreateCountry(anyString())).thenReturn(country);
+        when(userMapper.toEntity(any(), anyString(), anyString(), any(), anyString())).thenAnswer(invocation -> {
+            User user1 = new User();
+            user1.setUsername(invocation.getArgument(1));
+            return user1;
+        });
+        service.processCsvFile(csvFile);
+        verify(userRepository).saveAll(argThat(iterator -> {
+            List<User> users = new ArrayList<>();
+            iterator.forEach(users::add);
+            return users.stream().anyMatch(user1 -> user1.getUsername() != null
+                    && user1.getUsername().matches("John.Doe\\d+"));
+        }));
     }
 }

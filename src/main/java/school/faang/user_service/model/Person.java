@@ -1,9 +1,15 @@
 package school.faang.user_service.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Person {
     @JsonProperty("firstName")
     private String firstName;
@@ -36,7 +42,7 @@ public class Person {
     @JsonProperty("major")
     private String major;
     @JsonProperty("GPA")
-    private String GPA;
+    private String gpa;
     @JsonProperty("status")
     private String status;
     @JsonProperty("admissionDate")
