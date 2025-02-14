@@ -37,10 +37,6 @@ public class PremiumServiceImpl implements PremiumService {
                                 log.info("Success deleting batch for premium ids: {}", ids);
                             }
                             return ids;
-                        })
-                        .exceptionally(ex -> {
-                            log.error("Error deleting batch: ", ex);
-                            throw new RemoveExpiredPremiumException("Failed to delete batch expired premium");
                         }))
                 .toList();
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
