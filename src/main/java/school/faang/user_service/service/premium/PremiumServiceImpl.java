@@ -28,8 +28,16 @@ public class PremiumServiceImpl implements PremiumService {
     public void removeAllExpiredPremiumAccess() {
         List<Premium> expiredPremium = premiumRepository.findAllByEndDateBefore(LocalDateTime.now());
         List<List<Premium>> batches = new ArrayList<>(Lists.partition(expiredPremium, properties.getBatch()));
-        List<CompletableFuture<Void>> futures = batches.stream()
+        List<CompletableFuture<List<Long>>> futures = batches.stream()
                 .map(batch -> removeExpiredPremiumBatchAsync(batch)
+                        .handleAsync((ids, ex) -> {
+                            if (ex != null) {
+                                log.error("Error deleting batch for premium ids: {}", ids, ex);
+                            } else {
+                                log.info("Success deleting batch for premium ids: {}", ids);
+                            }
+                            return ids;
+                        })
                         .exceptionally(ex -> {
                             log.error("Error deleting batch: ", ex);
                             throw new RemoveExpiredPremiumException("Failed to delete batch expired premium");
@@ -39,13 +47,13 @@ public class PremiumServiceImpl implements PremiumService {
     }
 
     @Async(value = "cachedExecutorService")
-    public CompletableFuture<Void> removeExpiredPremiumBatchAsync(List<Premium> premiums) {
+    public CompletableFuture<List<Long>> removeExpiredPremiumBatchAsync(List<Premium> premiums) {
         premiumRepository.deleteAll(premiums);
         List<Long> premiumsIds = premiums.stream()
                 .map(Premium::getId)
                 .toList();
         log.info("Deleting expired premiums: {}", premiumsIds);
-        return CompletableFuture.completedFuture(null);
+        return CompletableFuture.completedFuture(premiumsIds);
     }
 
 }
