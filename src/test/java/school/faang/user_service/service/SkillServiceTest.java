@@ -238,11 +238,4 @@ class SkillServiceTest {
         verify(skillMapper, times(1)).toDto(skill);
         verify(guaranteeRepository,times(offers.size())).save(any(UserSkillGuarantee.class));
     }
-
-
-    @Test
-    void testAddition() {
-        int result = 2 + 2;
-        Assertions.assertEquals(5, result, "Addition should result in 4, not 5"); // Неправильное утверждение!
-    }
 }
