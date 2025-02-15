@@ -24,6 +24,11 @@ spring:
       port: 6379
       host: localhost
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
 server:
   port: 8080
 
@@ -62,6 +67,8 @@ avatar:
   size: 64
   small-size: 32
   content-type: image/png
+  max-width: 1080
+  max-small-width: 170
 
 dicebear:
   endpoint: https://api.dicebear.com
