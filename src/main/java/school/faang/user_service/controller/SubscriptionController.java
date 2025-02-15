@@ -1,6 +1,12 @@
 package school.faang.user_service.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
@@ -12,6 +18,7 @@ import school.faang.user_service.utility.validator.UserDtoValidator;
 import java.util.List;
 
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/subscriptions")
 @RestController
 public class SubscriptionController {
 
@@ -19,15 +26,18 @@ public class SubscriptionController {
     private final UserMapper userMapper;
     private final UserDtoValidator userDtoValidator;
 
-    public void followUser(long followerId, long followeeId) {
+    @PostMapping
+    public void followUser(@RequestParam long followerId, @RequestParam long followeeId) {
         subscriptionService.followUser(followerId, followeeId);
     }
 
-    public void unfollowUser(long followerId, long followeeId) {
+    @DeleteMapping
+    public void unfollowUser(@RequestParam long followerId, @RequestParam long followeeId) {
         subscriptionService.unfollowUser(followerId, followeeId);
     }
 
-    public List<UserDto> getFollowers(long followerId, UserFilterDto filterDto) {
+    @GetMapping("/getFollowers")
+    public List<UserDto> getFollowers(@RequestParam long followerId, @RequestBody UserFilterDto filterDto) {
         List<User> users = subscriptionService.getFollowers(followerId, filterDto);
         List<UserDto> userDtos = userMapper.toDtoList(users);
         userDtoValidator.validate(userDtos);
