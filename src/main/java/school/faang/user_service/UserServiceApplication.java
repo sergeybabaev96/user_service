@@ -6,9 +6,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.scheduling.annotation.EnableAsync;
 
-@SpringBootApplication
+@EnableAsync
+@EnableKafka
 @EnableFeignClients("school.faang.user_service.client")
+@SpringBootApplication
 public class UserServiceApplication {
 
     public static void main(String[] args) {

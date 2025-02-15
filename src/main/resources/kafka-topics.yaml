@@ -1,0 +1,4 @@
+user-profile-viewed:
+  topic-name: "user-profile-viewed"
+  partitions: 3
+  replicas: 1
