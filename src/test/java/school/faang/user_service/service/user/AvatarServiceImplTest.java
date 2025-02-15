@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 class AvatarServiceImplTest {
 
     @Mock
-    private MinioService minioService;
+    private S3Service s3Service;
 
     @Mock
     private AvatarFeignClient avatarFeignClient;
@@ -39,26 +39,25 @@ class AvatarServiceImplTest {
     private AvatarServiceImpl avatarService;
 
     @Test
-    public void testSaveAvatarsToMinio() {
+    public void testSaveRandomAvatarsToS3() {
         byte[] image = "image".getBytes(StandardCharsets.UTF_8);
-        ByteArrayResource byteArrayResource = new ByteArrayResource(image);
-        when(avatarFeignClient.getAvatar(any(), anyInt())).thenReturn(byteArrayResource);
+        when(avatarFeignClient.getAvatar(any(), anyInt())).thenReturn(image);
 
-        Pair<String, String> avatars = avatarService.saveAvatarsToMinio(User.builder().build());
+        Pair<String, String> avatars = avatarService.saveRandomAvatarsToS3(User.builder().build());
 
         assertNotNull(avatars);
     }
 
     @Test
-    public void testSaveAvatarsToMinioWhenFeignClientNotAvailable() {
+    public void testSaveRandomAvatarsToS3WhenFeignClientNotAvailable() {
         byte[] image = "image".getBytes(StandardCharsets.UTF_8);
         when(avatarProperties.getBucket()).thenReturn("bucket");
         when(avatarProperties.getDefaultAvatar()).thenReturn("avatar");
-        when(minioService.downloadFile(anyString(), anyString())).thenReturn(new ByteArrayInputStream(image));
+        when(s3Service.downloadFile(anyString(), anyString())).thenReturn(new ByteArrayInputStream(image));
         when(avatarFeignClient.getAvatar(any(), anyInt())).thenThrow(new RuntimeException("Feign client error"));
 
         avatarService.init();
-        Pair<String, String> avatars = avatarService.saveAvatarsToMinio(User.builder().build());
+        Pair<String, String> avatars = avatarService.saveRandomAvatarsToS3(User.builder().build());
 
         assertNotNull(avatars);
     }

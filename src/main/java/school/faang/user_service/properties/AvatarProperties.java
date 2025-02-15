@@ -17,4 +17,6 @@ public class AvatarProperties {
 
     private int smallSize;
 
+    private String contentType;
+
 }

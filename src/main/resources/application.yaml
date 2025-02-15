@@ -61,6 +61,7 @@ avatar:
   default-avatar: default-avatar.png
   size: 64
   small-size: 32
+  content-type: image/png
 
 dicebear:
   endpoint: https://api.dicebear.com
@@ -72,3 +73,8 @@ user:
 
 service:
   name: user-service
+
+s3:
+  endpoint: http://127.0.0.1:9000
+  accessKey: user
+  secretKey: password

@@ -5,6 +5,6 @@ import school.faang.user_service.entity.User;
 
 public interface AvatarService {
 
-    Pair<String, String> saveAvatarsToMinio(User user);
+    Pair<String, String> saveRandomAvatarsToS3(User user);
 
 }

@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
         Country country = countryRepository.findById(dto.getCountryId()).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Country with id = %d doesn't exists", dto.getCountryId())));
         user.setCountry(country);
-        Pair<String, String> avatars = avatarService.saveAvatarsToMinio(user);
+        Pair<String, String> avatars = avatarService.saveRandomAvatarsToS3(user);
         User savedUser = saveUser(user, avatars);
         return userMapper.toResponseRegisterDto(savedUser);
     }
