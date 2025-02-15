@@ -20,34 +20,33 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private static final int MAX_THREAD_POOL_SIZE = 10;
-
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final CountryService countryService;
     private final CsvMapper csvMapper;
+    private final ExecutorService executorService;
     private final Random random = new Random();
 
     @Override
     public void processPersonsFromFile(MultipartFile file) {
         try (InputStream fileInputStream = file.getInputStream()) {
-            log.info("Begin parsing file");
+            log.debug("Begin parsing file");
             List<Person> persons = parsePersonsFromInputStream(fileInputStream);
-            log.info("End parsing file. Read {} records", persons.size());
+            log.debug("End parsing file. Read {} records", persons.size());
 
-            log.info("Begin transforming records to entities");
+            log.debug("Begin transforming records to entities");
             List<User> users = mapToUsers(persons);
-            log.info("End transforming records to entities");
+            log.debug("End transforming records to entities");
 
             userRepository.saveAll(users);
-            log.info("Entities saved into DB");
+            log.debug("Entities saved into DB");
+            log.info("Persons from file {} are imported", file.getOriginalFilename());
         } catch (IOException e) {
             log.error("Error in file {}", file, e);
             throw new RuntimeException("Failed to reading file", e);
@@ -55,32 +54,16 @@ public class UserServiceImpl implements UserService {
     }
 
     private List<User> mapToUsers(List<Person> persons) {
-        ExecutorService executor = Executors.newFixedThreadPool(MAX_THREAD_POOL_SIZE);
-        try {
-            List<CompletableFuture<User>> futureUsers = persons.stream()
+            return persons.stream()
                     .map(person -> CompletableFuture.supplyAsync(() -> {
                         User user = userMapper.toUserEntity(person);
                         user.setPassword(generatePassword());
                         user.setCountry(countryService.getOrCreateCountry(person.getCountry()));
                         return user;
-                    }, executor)).toList();
-
-            CompletableFuture<Void> allFuturesResult =
-                    CompletableFuture.allOf(futureUsers.toArray(new CompletableFuture[0]));
-
-            CompletableFuture<List<User>> completableFutureUsers = allFuturesResult.thenApply(v ->
-                    futureUsers.stream()
-                            .map(CompletableFuture::join)
-                            .toList()
-            ).exceptionally(error -> {
-                log.error("Error processing file", error);
-                throw new RuntimeException("Failed to process users", error);
-            });
-
-            return completableFutureUsers.join();
-        } finally {
-            executor.shutdown();
-        }
+                    }, executorService).exceptionally(error -> {
+                        log.error("Error processing file", error);
+                        throw new RuntimeException("Failed to process users", error);
+                    })).map(CompletableFuture::join).toList();
     }
 
     private List<Person> parsePersonsFromInputStream(InputStream fileInputStream) {

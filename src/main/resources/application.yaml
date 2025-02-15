@@ -26,6 +26,9 @@ server:
   servlet:
     context-path: /api/v1
 
+thread_pool:
+  max_threads: 10
+
 logging:
   level:
     root: info

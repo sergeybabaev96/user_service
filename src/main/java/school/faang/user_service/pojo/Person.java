@@ -32,6 +32,8 @@ public class Person {
     private String scholarship;
     private String employer;
 
+
+    @Override
     public String toString() {
         return String.format(
                         "State: " + state + ";" +
