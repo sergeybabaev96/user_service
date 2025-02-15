@@ -13,10 +13,10 @@ import java.util.concurrent.Executors;
 public class ThreadPoolConfig {
 
     @Value("${thread_pool.max_threads}")
-    private final int ThreadsNumber;
+    private final int threadsNumber;
 
     @Bean
     public ExecutorService executorService() {
-        return Executors.newFixedThreadPool(ThreadsNumber);
+        return Executors.newFixedThreadPool(threadsNumber);
     }
 }
