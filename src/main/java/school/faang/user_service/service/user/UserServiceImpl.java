@@ -74,7 +74,6 @@ public class UserServiceImpl implements UserService {
         UserProfilePic userProfilePic = new UserProfilePic();
         userProfilePic.setFileId(avatars.getLeft());
         userProfilePic.setSmallFileId(avatars.getRight());
-
         user.setUserProfilePic(userProfilePic);
         return userRepository.save(user);
     }

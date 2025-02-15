@@ -12,7 +12,11 @@ public interface AvatarService {
 
     void saveAvatars(long userId, MultipartFile file);
 
-    InputStream getAvatar(String key);
+    InputStream getAvatarByUser(long userId, String size);
 
-    void deleteAvatar(String key);
+    InputStream getAvatarByKey(String key);
+
+    void deleteAvatarByUser(long userId);
+
+    void deleteAvatarByKey(String key);
 }

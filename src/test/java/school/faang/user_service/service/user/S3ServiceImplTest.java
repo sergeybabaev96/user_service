@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import school.faang.user_service.service.s3.S3ServiceImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

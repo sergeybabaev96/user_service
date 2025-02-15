@@ -1,14 +1,11 @@
 package school.faang.user_service.controller.user;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.service.user.AvatarService;
 
@@ -22,18 +19,30 @@ public class AvatarController {
 
     private final AvatarService avatarService;
 
-    @PostMapping("/users/{userId}")
+    @PostMapping("/user/{userId}")
     public void saveAvatar(@PathVariable long userId, @RequestBody MultipartFile file) {
         avatarService.saveAvatars(userId, file);
     }
 
+    @GetMapping(value = "/user/{userId}")
+    public ResponseEntity<InputStreamResource> getAvatarByUser(@PathVariable long userId, @RequestParam String size) {
+        InputStream avatar = avatarService.getAvatarByUser(userId, size);
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(new InputStreamResource(avatar));
+    }
+
     @GetMapping("/{key}")
-    public InputStream getAvatar(@PathVariable String key) {
-        return avatarService.getAvatar(key);
+    public ResponseEntity<InputStreamResource> getAvatarByKey(@PathVariable String key) {
+        InputStream avatar = avatarService.getAvatarByKey(key);
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(new InputStreamResource(avatar));
+    }
+
+    @DeleteMapping("/user/{userId}")
+    public void deleteAvatarByUser(@PathVariable long userId) {
+        avatarService.deleteAvatarByUser(userId);
     }
 
     @DeleteMapping("/{key}")
-    public void deleteAvatar(@PathVariable String key) {
-        avatarService.deleteAvatar(key);
+    public void deleteAvatarByKey(@PathVariable String key) {
+        avatarService.deleteAvatarByKey(key);
     }
 }

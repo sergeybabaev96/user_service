@@ -1,4 +1,4 @@
-package school.faang.user_service.service.user;
+package school.faang.user_service.service.s3;
 
 import java.io.File;
 import java.io.InputStream;
