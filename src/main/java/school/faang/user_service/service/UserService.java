@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.UserRepository;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -28,5 +29,9 @@ public class UserService {
 
     public void saveUser(User user) {
         userRepository.save(user);
+    }
+
+    public List<User> findAllUsers() {
+        return userRepository.findAll();
     }
 }
