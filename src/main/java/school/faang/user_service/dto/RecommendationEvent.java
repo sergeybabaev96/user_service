@@ -4,7 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record RecommendationEvent(
-        Long authorId,
+        Long requesterId,
         Long receiverId,
         Long recommendationId
 ) {

@@ -135,8 +135,8 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
                 .orElseThrow(() -> new IllegalArgumentException(String.format("User with id %d not found", id)));
     }
 
-    private void createRecommendationPublisherEvent(long authorId, long receiverId, long recommendationId) {
-        RecommendationEvent event = new RecommendationEvent(authorId, receiverId, recommendationId);
+    private void createRecommendationPublisherEvent(long requesterId, long receiverId, long recommendationId) {
+        RecommendationEvent event = new RecommendationEvent(requesterId, receiverId, recommendationId);
         publisher.publish(event);
     }
 }
