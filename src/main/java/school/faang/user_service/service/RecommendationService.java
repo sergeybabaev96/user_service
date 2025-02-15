@@ -22,7 +22,10 @@ import school.faang.user_service.repository.recommendation.RecommendationReposit
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import school.faang.user_service.validator.RecommendationValidation;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -46,10 +49,10 @@ public class RecommendationService {
             Long recommendationId = recommendationRepository.create(recommendationDto.getAuthorId(),
                     recommendationDto.getReceiverId(),
                     recommendationDto.getContent());
+            recommendationDto.setId(recommendationId);
             addSkillOffers(recommendationDto);
             List<Long> listGuaranteedSkills = getGuaranteedSkillIds(recommendationDto);
             saveMismatchedSkill(listGuaranteedSkills, recommendationDto);
-            recommendationDto.setId(recommendationId);
             return recommendationDto;
         } catch (Exception e) {
             throw new DataValidationException("Ошибка при создании рекомендации", e);
@@ -83,33 +86,54 @@ public class RecommendationService {
     }
 
 
-    private void addSkillOffers(RecommendationDto recommendationDto) {
+    public void addSkillOffers(RecommendationDto recommendationDto) {
+        if (recommendationDto.getSkillOffers().isEmpty()) {
+            log.info("Список SkillOffersDto в dto пуст");
+        }
         List<Long> skillsId = recommendationDto.getSkillOffers().stream().map(skillOfferDto ->
                 skillOfferDto.getSkillId()).toList();
         skillsId.forEach(id -> skillOfferRepository.create(id, recommendationDto.getId()));
     }
 
-    private void saveMismatchedSkill(List<Long> skillForSave, RecommendationDto recommendationDto) {
+    public void saveMismatchedSkill(List<Long> skillForSave, RecommendationDto recommendationDto) {
         User receiver = userRepository.findById(recommendationDto.getReceiverId())
-                .orElseThrow(() -> new DataValidationException("Получатель рекомендации отсутствует"));
+                .orElseThrow(() -> new DataValidationException("Получатель отсутствует"));
         User guarantor = userRepository.findById(recommendationDto.getAuthorId())
-                .orElseThrow(() -> new DataValidationException("Гарантер рекомендации отсутствует"));
+                .orElseThrow(() -> new DataValidationException("Гарантер отсутствует"));
+
+        List<Skill> newSkills = new ArrayList<>();
+        Set<Long> existingSkillIds = receiver.getSkills().stream()
+                .map(Skill::getId)
+                .collect(Collectors.toSet());
+
         for (Long id : skillForSave) {
+            if (existingSkillIds.contains(id)) continue; // Пропустить существующие скиллы
+
             Skill skill = skillRepository.findById(id)
-                    .orElseThrow(() -> new DataValidationException("Скилл отсутствует"));
-            UserSkillGuarantee newUserSkillGuarantee = UserSkillGuarantee.builder().user(receiver)
+                    .orElseThrow(() -> new DataValidationException("Скилл не найден"));
+
+            UserSkillGuarantee guarantee = UserSkillGuarantee.builder()
+                    .user(receiver)
                     .skill(skill)
                     .guarantor(guarantor)
                     .build();
-            UserSkillGuarantee userSkillGuarantee = userSkillGuaranteeRepository.save(newUserSkillGuarantee);
-            skill.getGuarantees().add(userSkillGuarantee);
-            receiver.getSkills().add(skill);
+            userSkillGuaranteeRepository.save(guarantee);
+
+            skill.getGuarantees().add(guarantee);
             skillRepository.save(skill);
-            userRepository.save(receiver);
+            newSkills.add(skill);
+            existingSkillIds.add(id); // Добавить в существующие, чтобы избежать дублей
+        }
+
+        if (!newSkills.isEmpty()) {
+            List<Skill> updatedSkills = new ArrayList<>(receiver.getSkills());
+            updatedSkills.addAll(newSkills);
+            receiver.setSkills(updatedSkills);
+            userRepository.save(receiver); // Сохранить 1 раз
         }
     }
 
-    private List<Long> getGuaranteedSkillIds(RecommendationDto recommendationDto) {
+    public List<Long> getGuaranteedSkillIds(RecommendationDto recommendationDto) {
         Long guarantorId = recommendationDto.getAuthorId();
         User receiver = userRepository.findById(recommendationDto.getReceiverId())
                 .orElseThrow(() -> new EntityNotFoundException("Получатель рекомендации отсутствует"));
@@ -130,7 +154,9 @@ public class RecommendationService {
                         .skill(skill)
                         .guarantor(guarantor)
                         .build();
-                skill.getGuarantees().add(newUserSkillGuarantee);
+                List<UserSkillGuarantee> newGuarantees = new ArrayList<>(skill.getGuarantees());
+                newGuarantees.add(newUserSkillGuarantee);
+                skill.setGuarantees(newGuarantees);
                 userSkillGuaranteeRepository.save(newUserSkillGuarantee);
                 skillRepository.save(skill);
             }
@@ -140,7 +166,7 @@ public class RecommendationService {
                 .toList();
     }
 
-    private void clearingSkills(RecommendationDto recommendation) {
+    public void clearingSkills(RecommendationDto recommendation) {
         skillOfferRepository.deleteAllByRecommendationId(recommendation.getId());
         for (SkillOfferDto skillOffers : recommendation.getSkillOffers()) {
             skillOfferRepository.create(skillOffers.getSkillId(), recommendation.getId());

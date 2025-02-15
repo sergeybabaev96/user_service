@@ -2,7 +2,7 @@ package school.faang.user_service.validator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.common.DataValidationException;
+import school.faang.user_service.exception.DataValidationException;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
 import school.faang.user_service.dto.recommendation.SkillOfferDto;
@@ -25,20 +25,20 @@ public class RecommendationValidation {
     private final RecommendationRepository recommendationRepository;
     private final SkillRepository skillRepository;
 
-    public static boolean textAvailability(RecommendationDto recommendationDto) {
+    public boolean textAvailability(RecommendationDto recommendationDto) {
         if (!recommendationDto.getContent().isEmpty()) {
             return true;
         }
         throw new DataValidationException("В рецензии должен содержатся текст");
     }
 
-    public void checkRecommendationInterval(RecommendationDto recommendation) {
+    public void checkRecommendationInterval(RecommendationDto recommendationDto) {
         Optional<Recommendation> lastRecommendation = recommendationRepository.
-                findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(recommendation.getAuthorId(),
-                        recommendation.getReceiverId());
+                findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(recommendationDto.getAuthorId(),
+                        recommendationDto.getReceiverId());
         if (lastRecommendation.isPresent()) {
             Duration interval = Duration.between(lastRecommendation.get().getCreatedAt(),
-                    recommendation.getCreatedAt());
+                    recommendationDto.getCreatedAt());
             if (interval.compareTo(MIN_RECOMMENDATION_INTERVAL) < 0) {
                 throw new DataValidationException("Минимальный интервал между рекомендациями составляет "
                         + MIN_RECOMMENDATION_INTERVAL.toDays() + " дней.");
