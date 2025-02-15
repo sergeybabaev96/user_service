@@ -20,6 +20,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.entity.recommendation.SkillRequest;
 import school.faang.user_service.mapper.RecommendationRequestMapperImpl;
+import school.faang.user_service.publisher.recommendation.RecommendationEventPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
@@ -71,6 +72,9 @@ public class RecommendationRequestServiceTest {
     @Mock
     private SkillRepository skillRepository;
 
+    @Mock
+    private RecommendationEventPublisher publisher;
+
     @InjectMocks
     private RecommendationRequestServiceImpl recommendationRequestService;
 
@@ -102,7 +106,8 @@ public class RecommendationRequestServiceTest {
                 userRepository,
                 skillRepository,
                 skillRequestRepository,
-                filters);
+                filters,
+                publisher);
 
         List<User> users = getUsers();
         requester = users.get(0);

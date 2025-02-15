@@ -3,6 +3,7 @@ package school.faang.user_service.service.recommendation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.RecommendationEvent;
 import school.faang.user_service.dto.RecommendationRequestDto;
 import school.faang.user_service.dto.RecommendationRequestRcvDto;
 import school.faang.user_service.dto.RejectionDto;
@@ -12,6 +13,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.entity.recommendation.SkillRequest;
 import school.faang.user_service.mapper.RecommendationRequestMapper;
+import school.faang.user_service.publisher.recommendation.RecommendationEventPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
@@ -34,6 +36,7 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
     private final SkillRepository skillRepository;
     private final SkillRequestRepository skillRequestRepository;
     private final List<RecommendationRequestFilter> recommendationRequestFilters;
+    private final RecommendationEventPublisher publisher;
 
     @Override
     public RecommendationRequestDto createRequest(RecommendationRequestRcvDto requestDto) {
@@ -45,6 +48,8 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
                 .map(skillId -> skillRequestRepository.create(requestSaved.getId(), skillId))
                 .toList();
         requestSaved.setSkills(skills);
+        createRecommendationPublisherEvent(requestSaved.getRequester().getId(),
+                requestSaved.getReceiver().getId(), requestSaved.getId());
         return mapper.toRecommendationRequestDto(requestSaved);
     }
 
@@ -128,5 +133,10 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
     private User getUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("User with id %d not found", id)));
+    }
+
+    private void createRecommendationPublisherEvent(long authorId, long receiverId, long recommendationId) {
+        RecommendationEvent event = new RecommendationEvent(authorId, receiverId, recommendationId);
+        publisher.publish(event);
     }
 }

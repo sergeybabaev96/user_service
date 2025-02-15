@@ -20,9 +20,16 @@ spring:
     redis:
       port: 6379
       host: localhost
+      channel:
+        recommendation-channel: recommendation_channel
+
+  #mvc:
+    #servlet:
+      #path: /api/v1
 
 server:
   port: 8080
+
   servlet:
     context-path: /api/v1
 
