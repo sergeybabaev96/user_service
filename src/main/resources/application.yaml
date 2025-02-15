@@ -77,7 +77,7 @@ promotion-service:
   port: ${PROMOTION_SERVICE_PORT:8089}
 
 premium:
-  shedule: "0 0 0 * * *"
+  schedule: "0 0 0 * * 1"
   batch-size: 100
 
 thread-pool-config:
