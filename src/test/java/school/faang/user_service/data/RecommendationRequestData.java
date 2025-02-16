@@ -17,8 +17,7 @@ public enum RecommendationRequestData {
     DATA_NULL_MESSAGE(1L, UserData.USER1, UserData.USER1, null, RequestStatus.ACCEPTED, "", null,
             List.of(SkillData.SKILL_DEV),
             LocalDateTime.now(),
-            LocalDateTime.of(2024, 2, 2, 2, 2))
-    ;
+            LocalDateTime.of(2024, 2, 2, 2, 2));
 
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
