@@ -1,7 +1,4 @@
 spring:
-  profiles:
-    active: local
-
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/postgres
@@ -46,6 +43,7 @@ services:
     secretKey: password
     bucketName: corpbucket
 
+
   project-service:
     host: localhost
     port: 8082
@@ -54,6 +52,18 @@ services:
     host: localhost
     port: 9080
 
+premium:
+  schedule:
+    removal-cron: "0 0 0 * * SUN"
+  batch:
+    size: 1000
+
+task:
+  execution:
+    pool:
+      core-size: 4
+      max-size: 8
+      keep-alive: 60
 ---
 
 spring:
@@ -61,12 +71,13 @@ spring:
     activate:
       on-profile: local
 
+---
 logging:
   level:
     root: debug
 
----
 
+---
 spring:
   config:
     activate:
@@ -75,3 +86,4 @@ spring:
 logging:
   level:
     root: info
+

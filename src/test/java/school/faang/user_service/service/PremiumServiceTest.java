@@ -20,6 +20,7 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.EntityNotFoundException;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.premium.PremiumRepository;
+import school.faang.user_service.schedulers.PremiumExpirationManager;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -37,6 +38,8 @@ public class PremiumServiceTest {
 
     @InjectMocks
     private PremiumService premiumService;
+    @Mock
+    private PremiumExpirationManager premiumExpirationManager;
 
     @Mock
     private UserRepository userRepository;
@@ -64,6 +67,12 @@ public class PremiumServiceTest {
                 .servicePlan("month")
                 .paymentStatus(PaymentStatus.SUCCESS)
                 .build();
+    }
+
+    @Test
+    public void testDeleteExpiredPremiums() {
+        premiumService.deleteExpiredPremiums();
+        verify(premiumExpirationManager).deleteExpiredPremiums();
     }
 
     @Test
