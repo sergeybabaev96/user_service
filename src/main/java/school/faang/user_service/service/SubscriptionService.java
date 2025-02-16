@@ -1,7 +1,6 @@
 package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.subscriber.SubscriberReadDto;
 import school.faang.user_service.dto.subscriber.SubscriberFilterDto;
@@ -11,7 +10,6 @@ import school.faang.user_service.filter.subscriber.SubscriberFilter;
 import school.faang.user_service.mapper.SubscriberMapper;
 import school.faang.user_service.repository.SubscriptionRepository;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
