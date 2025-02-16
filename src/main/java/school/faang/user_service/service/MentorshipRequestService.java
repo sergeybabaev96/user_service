@@ -7,11 +7,13 @@ import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.mentorshipRequest.MentorshipRequestDto;
 import school.faang.user_service.dto.mentorshipRequest.RejectionDto;
 import school.faang.user_service.dto.mentorshipRequest.RequestFilterDto;
+import school.faang.user_service.dto.messaging.MentorshipStartEvent;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.BusinessException;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
+import school.faang.user_service.publisher.MentorshipEventPublisher;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 
@@ -26,6 +28,7 @@ public class MentorshipRequestService {
     private final MentorshipRequestRepository mentorshipRequestRepository;
     private final MentorshipRequestMapper mapper;
     private final UserRepository userRepository;
+    private final MentorshipEventPublisher mentorshipEventPublisher;
 
     public MentorshipRequestDto requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
         if (!userRepository.existsById(mentorshipRequestDto.getRequesterId())) {
@@ -95,6 +98,7 @@ public class MentorshipRequestService {
 
         request.setStatus(RequestStatus.ACCEPTED);
         MentorshipRequest updatedRequest = mentorshipRequestRepository.save(request);
+        mentorshipEventPublisher.publish(new MentorshipStartEvent(requester.getId(), receiver.getId()));
         return mapper.toDto(updatedRequest);
     }
 
