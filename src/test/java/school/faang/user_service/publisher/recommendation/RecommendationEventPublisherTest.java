@@ -54,7 +54,8 @@ public class RecommendationEventPublisherTest {
 
     @Test
     void testPublish_JsonProcessingException() throws JsonProcessingException {
-        when(objectMapper.writeValueAsString(recommendationEvent)).thenThrow(new JsonProcessingException("JSON error") {});
+        when(objectMapper.writeValueAsString(recommendationEvent))
+                .thenThrow(new JsonProcessingException("JSON error") {});
 
         RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> recommendationEventPublisher.publish(recommendationEvent));
