@@ -20,4 +20,12 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             WHERE ue.user_id = :userId
             """)
     List<Event> findParticipatedEventsByUserId(long userId);
+
+    @Query(nativeQuery = true, value = """
+            WITH deleted AS ( DELETE FROM event
+            WHERE end_date < NOW()
+            RETURNING * )
+            SELECT count(*) FROM deleted
+            """)
+    int deleteAllEndedInPast();
 }

@@ -63,7 +63,11 @@ premium:
     cron: "0 0 3 * * ?"  # Запуск каждый день в 03:00 (Quartz формат)
     batch-size: 100  # Размер батча
     thread-pool-size: 4
-    
+
+event:
+  removal:
+    cron: "0 0 6 * * SAT"
+
 image:
   avatar:
     folder-name: users_avatars

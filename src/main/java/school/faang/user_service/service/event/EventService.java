@@ -53,6 +53,10 @@ public class EventService {
         return events.toList();
     }
 
+    public int clearEvents() {
+        return eventRepository.deleteAllEndedInPast();
+    }
+
     public void deleteEvent(Long id) {
         eventRepository.deleteById(id);
     }
