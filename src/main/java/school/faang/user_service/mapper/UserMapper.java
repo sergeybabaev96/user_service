@@ -17,6 +17,7 @@ public interface UserMapper {
     UserDto toUserDto(User user);
 
     User toUserEntity(UserDto userDto);
+
     @Mapping(target = "username", expression = "java(getUsername(person))")
     @Mapping(target = "country", expression = "java(getCountry(person))")
     @Mapping(target = "aboutMe", expression = "java(person.toString())")
