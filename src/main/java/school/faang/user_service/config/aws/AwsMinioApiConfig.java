@@ -31,22 +31,11 @@ public class AwsMinioApiConfig {
 
     @Bean
     public S3Client minioS3Client() {
-//        return AmazonS3ClientBuilder.standard()
-//                .withEndpointConfiguration(
-//                        new AwsClientBuilder.EndpointConfiguration(endpoint, region))
-//                .withCredentials(new AWSStaticCredentialsProvider(
-//                        new BasicAWSCredentials(accessKey, secretKey)))
-//                .enablePathStyleAccess()
-//                .build();
         return S3Client.builder()
-                // Устанавливаем кастомный endpoint для MinIO
                 .endpointOverride(URI.create(endpoint))
-                // Задаём регион (например, "us-east-1")
                 .region(Region.of(region))
-                // Устанавливаем учётные данные
                 .credentialsProvider(StaticCredentialsProvider.create(
                         AwsBasicCredentials.create(accessKey, secretKey)))
-                // Включаем режим path-style для совместимости с MinIO
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(true)
                         .build())
@@ -56,7 +45,13 @@ public class AwsMinioApiConfig {
     @Bean
     public S3Presigner s3Presigner() {
         s3Presigner = S3Presigner.builder()
-                .region(Region.US_EAST_1)
+                .endpointOverride(URI.create(endpoint))
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .serviceConfiguration(S3Configuration.builder()
+                        .pathStyleAccessEnabled(true)
+                        .build())
                 .build();
         return s3Presigner;
     }

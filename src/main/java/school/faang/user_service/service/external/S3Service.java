@@ -4,18 +4,18 @@ import com.amazonaws.SdkClientException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.exception.CustomS3Exception;
-import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
+
 import java.time.Duration;
 
 @RequiredArgsConstructor
@@ -53,14 +53,12 @@ public class S3Service {
         return presignedRequest.url().toString();
     }
 
-    public byte[] getUserAvatar(String bucketName, String key) {
-        GetObjectRequest request = GetObjectRequest.builder()
+    public void deleteImageFromBucket(String bucketName, String key) {
+        DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
                 .build();
-
-        ResponseBytes<GetObjectResponse> response = amazonS3Client.getObjectAsBytes(request);
-        return response.asByteArray();
+        amazonS3Client.deleteObject(deleteRequest);
     }
 
     private void ensureBucketExists(String bucketName) {

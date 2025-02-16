@@ -2,6 +2,7 @@ package school.faang.user_service.service;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Validated
 @Service
@@ -38,7 +40,7 @@ public class UserAvatarService {
     @Value("${avatar.customAvatars}")
     private String customAvatarsStorage;
 
-    @Value("#{${avatar.maxImageSizeInMb}}")
+    @Value("#{${avatar.maxImageSize}}")
     private int maxImageSize;
 
     @Value("${avatar.maxLargeImageSideSize}")
@@ -47,6 +49,7 @@ public class UserAvatarService {
     @Value("${avatar.maxSmallImageSideSize}")
     private int smallImageSideSize;
 
+    @Transactional
     public User generateRandomAvatar(@NotNull User user, AvatarType type) {
         String randomName = UUID.randomUUID().toString();
         byte[] avatarData = diceBearService.generateAvatar(randomName, type);
@@ -56,6 +59,7 @@ public class UserAvatarService {
         return setUploadedAvatar(user, fileId);
     }
 
+    @Transactional(readOnly = true)
     public String getUserAvatar(@NotNull User user) {
         String fileId = Optional.ofNullable(user.getUserProfilePic())
                 .map(UserProfilePic::getFileId)
@@ -65,6 +69,7 @@ public class UserAvatarService {
         return s3Service.getUnexpiredUrl(bucketName, fileId);
     }
 
+    @Transactional
     private User setUploadedAvatar(User user, String url) {
         UserProfilePic newPic = new UserProfilePic();
         newPic.setFileId(url);
@@ -86,11 +91,8 @@ public class UserAvatarService {
                 throw new IllegalArgumentException("Invalid image format");
             }
 
-            BufferedImage largeImage = resizeImage(originalImage, largeImageSideSize);
-            BufferedImage smallImage = resizeImage(originalImage, smallImageSideSize);
-
-            byte[] largeImageBytes = bufferedImageToByteArray(largeImage);
-            byte[] smallImageBytes = bufferedImageToByteArray(smallImage);
+            byte[] largeImageBytes = processImage(originalImage, largeImageSideSize);
+            byte[] smallImageBytes = processImage(originalImage, smallImageSideSize);
 
             String largeImageKey = String.format("%s.jpg", UUID.randomUUID());
             String smallImageKey = String.format("%s.jpg", UUID.randomUUID());
@@ -102,8 +104,9 @@ public class UserAvatarService {
             profilePic.setFileId(largeImageKey);
             profilePic.setSmallFileId(smallImageKey);
             user.setUserProfilePic(profilePic);
+            log.info("User #{} upload new avatar", userId);
 
-           return AvatarResponseDto.builder()
+            return AvatarResponseDto.builder()
                     .userId(userId)
                     .smallImageKey(smallImageKey)
                     .largeImageKey(largeImageKey)
@@ -114,17 +117,21 @@ public class UserAvatarService {
         }
     }
 
-    public byte[] getAvatar(Long userId, String size) {
-        User user = userService.getUser(userId);
-        UserProfilePic profilePic = user.getUserProfilePic();
+    @Transactional(readOnly = true)
+    public String getAvatar(Long userId) {
+        UserProfilePic profilePic = isUserHasAvatar(userId);
 
-        String imageKey = "small".equalsIgnoreCase(size) ? profilePic.getSmallFileId() : profilePic.getFileId();
-
-        return null;
+       return s3Service.getUnexpiredUrl(customAvatarsStorage, profilePic.getFileId());
     }
 
+    @Transactional
     public void deleteAvatar(Long userId) {
-
+        UserProfilePic profilePic = isUserHasAvatar(userId);
+        s3Service.deleteImageFromBucket(customAvatarsStorage, profilePic.getFileId());
+        s3Service.deleteImageFromBucket(customAvatarsStorage, profilePic.getSmallFileId());
+        User user = userService.getUser(userId);
+        user.setUserProfilePic(null);
+        log.info("User with ID#{} delete avatar", userId);
     }
 
     private byte[] bufferedImageToByteArray(BufferedImage image) {
@@ -144,5 +151,21 @@ public class UserAvatarService {
         }
 
         return Scalr.resize(originalImage, Scalr.Method.QUALITY, maxSize);
+    }
+
+    private UserProfilePic isUserHasAvatar(Long userId) {
+        User user = userService.getUser(userId);
+        UserProfilePic profilePic = user.getUserProfilePic();
+
+        if (profilePic == null) {
+            throw new NoSuchElementException(String.format("User with ID#%d has not set an avatar yet", userId));
+        }
+
+        return profilePic;
+    }
+
+    private byte[] processImage(BufferedImage image, int sideSize) {
+        BufferedImage resizedImage = resizeImage(image, sideSize);
+        return bufferedImageToByteArray(resizedImage);
     }
 }

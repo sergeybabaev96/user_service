@@ -32,6 +32,12 @@ spring:
   web:
     locale: en_US
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+
 minio:
   s3:
     endpoint: http://localhost:9000
@@ -47,7 +53,7 @@ dicebear:
 avatar:
   bucketName: user-avatars
   customAvatars: custom-user-avatars
-  maxImageSizeInMb: 5 * 1024 * 1024
+  maxImageSize: 5 * 1024 * 1024
   maxLargeImageSideSize: 1080
   maxSmallImageSideSize: 170
 
