@@ -21,3 +21,5 @@ databaseChangeLog:
       file: db/changelog/changeset/user_V010__promotion.sql
   - include:
       file: db/changelog/changeset/user_V011__alter_user_add_banned.sql
+  - include:
+      file: db/changelog/changeset/user_V012__shedlock.sql

@@ -81,6 +81,11 @@ user:
 service:
   name: user-service
 
+premium:
+  scheduler:
+    remove-cron: "0 0 * * * 1"  # every monday in 00:00
+    batch: 5
+
 s3:
   endpoint: http://127.0.0.1:9000
   accessKey: user
