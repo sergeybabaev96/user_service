@@ -1,39 +1,48 @@
 package school.faang.user_service.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 import school.faang.user_service.dto.subscriber.SubscriberReadDto;
 import school.faang.user_service.dto.subscriber.SubscriberFilterDto;
 import school.faang.user_service.service.SubscriptionService;
 
 import java.util.List;
 
-@Controller
+@RestController
+@RequestMapping("/subscriptions")
 @RequiredArgsConstructor
 public class SubscriptionController {
     private final SubscriptionService service;
 
-    public void followUser(long followerId, long followeeId) {
+    @PostMapping("/{followerId}/{followeeId}")
+    public void followUser(@PathVariable long followerId, @PathVariable long followeeId) {
         service.followUser(followerId, followeeId);
     }
 
-    public void unfollowUser(long followerId, long followeeId) {
+    @DeleteMapping("/{followerId}/{followeeId}")
+    public void unfollowUser(@PathVariable long followerId, @PathVariable long followeeId) {
         service.unfollowUser(followerId, followeeId);
     }
 
-    public List<SubscriberReadDto> getFollowers(long followeeId, SubscriberFilterDto filters) {
+    @GetMapping("/followers/{followeeId}")
+    public List<SubscriberReadDto> getFollowers(@PathVariable long followeeId,
+                                                @ModelAttribute SubscriberFilterDto filters) {
         return service.getFollowers(followeeId, filters);
     }
 
-    public int getFollowersCount(long followeeId) {
+    @GetMapping("/followers/{followeeId}/count")
+    public int getFollowersCount(@PathVariable long followeeId) {
         return service.getFollowersCount(followeeId);
     }
 
-    public List<SubscriberReadDto> getFollowing(long followeeId, SubscriberFilterDto filters) {
-        return service.getFollowing(followeeId, filters);
+    @GetMapping("/following/{followerId}")
+    public List<SubscriberReadDto> getFollowing(@PathVariable long followerId,
+                                                @ModelAttribute SubscriberFilterDto filters) {
+        return service.getFollowing(followerId, filters);
     }
 
-    public int getFollowingCount(long followerId) {
+    @GetMapping("/following/{followerId}/count")
+    public int getFollowingCount(@PathVariable long followerId) {
         return service.getFollowingCount(followerId);
     }
 }

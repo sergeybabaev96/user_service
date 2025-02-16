@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class SubscriberReadDto {
-    Long id;
-    String username;
-    String email;
+    private Long id;
+    private String username;
+    private String email;
 }

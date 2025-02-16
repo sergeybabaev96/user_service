@@ -1,6 +1,7 @@
 package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.subscriber.SubscriberReadDto;
 import school.faang.user_service.dto.subscriber.SubscriberFilterDto;
@@ -10,6 +11,8 @@ import school.faang.user_service.filter.subscriber.SubscriberFilter;
 import school.faang.user_service.mapper.SubscriberMapper;
 import school.faang.user_service.repository.SubscriptionRepository;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -42,20 +45,10 @@ public class SubscriptionService {
         repository.unfollowUser(followerId, followeeId);
     }
 
-    private void checkActionOnYourself(long followerId, long followeeId, String errorMessage) {
-        if (followerId == followeeId) {
-            throw new DataValidationException(errorMessage);
-        }
-    }
-
     public List<SubscriberReadDto> getFollowers(long followeeId, SubscriberFilterDto filters) {
         Stream<User> followers = repository.findByFolloweeId(followeeId);
 
-        return subscriberFilters.stream()
-                .filter(subscriberFilter -> subscriberFilter.isApplicable(filters))
-                .flatMap(subscriberFilter -> subscriberFilter.apply(followers, filters))
-                .map(mapper::toDto)
-                .toList();
+        return filterUsers(filters, followers);
     }
 
     public int getFollowersCount(long followeeId) {
@@ -65,14 +58,31 @@ public class SubscriptionService {
     public List<SubscriberReadDto> getFollowing(long followerId, SubscriberFilterDto filters) {
         Stream<User> following = repository.findByFollowerId(followerId);
 
-        return subscriberFilters.stream()
-                .filter(subscriberFilter -> subscriberFilter.isApplicable(filters))
-                .flatMap(subscriberFilter -> subscriberFilter.apply(following, filters))
-                .map(mapper::toDto)
-                .toList();
+        return filterUsers(filters, following);
     }
 
     public int getFollowingCount(long followerId) {
         return repository.findFolloweesAmountByFollowerId(followerId);
+    }
+
+    private void checkActionOnYourself(long followerId, long followeeId, String errorMessage) {
+        if (followerId == followeeId) {
+            throw new DataValidationException(errorMessage);
+        }
+    }
+
+    private List<SubscriberReadDto> filterUsers(SubscriberFilterDto filters, Stream<User> followers) {
+        List<SubscriberFilter> fwfew = subscriberFilters.stream()
+                .filter(subscriberFilter -> subscriberFilter.isApplicable(filters))
+                .toList();
+
+        if (fwfew.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return fwfew.stream()
+                .flatMap(subscriberFilter -> subscriberFilter.apply(followers, filters))
+                .map(mapper::toDto)
+                .toList();
     }
 }
