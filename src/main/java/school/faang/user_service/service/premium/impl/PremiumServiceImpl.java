@@ -1,10 +1,12 @@
 package school.faang.user_service.service.premium.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.client.PaymentServiceFeignClient;
 import school.faang.user_service.common.PaymentStatus;
 import school.faang.user_service.common.PremiumPeriod;
+import school.faang.user_service.config.JobProperties;
 import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.dto.PremiumDto;
 import school.faang.user_service.dto.payment.PaymentRequest;
@@ -20,7 +22,14 @@ import school.faang.user_service.service.premium.PremiumService;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class PremiumServiceImpl implements PremiumService {
@@ -29,6 +38,7 @@ public class PremiumServiceImpl implements PremiumService {
     private final UserRepository userRepository;
     private final PaymentServiceFeignClient paymentServiceClient;
     private final UserContext userContext;
+    private final JobProperties jobProperties;
 
     @Override
     public PremiumDto buyPremium(Integer days) {
@@ -43,6 +53,54 @@ public class PremiumServiceImpl implements PremiumService {
             return premiumMapper.toDto(premium);
         }
         throw new PremiumInvalidDataException(String.format("Error from paymentService: %s", paymentResponse.message()));
+    }
+
+    @Override
+    public void deleteExpiredPremiumsAsync() {
+        List<Premium> allByEndDateBefore = premiumRepository.findAllByEndDateBefore(LocalDateTime.now());
+
+        if (allByEndDateBefore.isEmpty()) {
+            log.info("Нет истёкших премиум аккаунтов для удаления.");
+            return;
+        }
+
+        List<List<Premium>> premiumBatches = getPremiumBatches(allByEndDateBefore, jobProperties.getBatchSize());
+        ExecutorService executorService = Executors.newFixedThreadPool(jobProperties.getThreadPoolSize());
+        List<Future<?>> futures = new ArrayList<>();
+
+        for (List<Premium> batch : premiumBatches) {
+            futures.add(executorService.submit(() -> deletePremiumsInBatch(batch)));
+        }
+        waitForCompletion(futures);
+        executorService.shutdown();
+    }
+
+    public void deletePremiumsInBatch(List<Premium> batch) {
+        try {
+            premiumRepository.deleteAllByIdsInBatch(batch.stream().map(Premium::getId).toList());
+            log.info("Удалено {} премиум аккаунтов", batch.size());
+        } catch (Exception e) {
+            log.error("Ошибка при удалении батча: {}", e.getMessage(), e);
+        }
+    }
+
+    private List<List<Premium>> getPremiumBatches(List<Premium> allExpired, Integer batchSize) {
+        List<List<Premium>> batches = new ArrayList<>();
+        for (int i = 0; i < allExpired.size(); i += batchSize) {
+            batches.add(allExpired.subList(i, Math.min(allExpired.size(), i + batchSize)));
+        }
+        return batches;
+    }
+
+    protected void waitForCompletion(List<Future<?>> futures) {
+        for (Future<?> future : futures) {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("Ошибка при выполнении потока: {}", e.getMessage(), e);
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     private User validateAndGetUser(Long userId) {

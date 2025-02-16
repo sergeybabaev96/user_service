@@ -62,4 +62,8 @@ user-service:
       priority: 2
   recommendation-request:
     min-month: 6
-    
+
+job:
+  batch-size: 100
+  thread-pool-size: 3
+  removePremiumCron: 0 1 0 ? * MON
