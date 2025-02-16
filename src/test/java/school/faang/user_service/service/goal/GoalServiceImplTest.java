@@ -10,12 +10,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
-import school.faang.user_service.entity.goal.GoalStatus;
+import school.faang.user_service.enums.goal.GoalStatus;
+import school.faang.user_service.exception.MaxActiveGoalsLimitExceededException;
 import school.faang.user_service.filter.Filter;
 import school.faang.user_service.filter.goal.GoalFilterDto;
 import school.faang.user_service.filter.goal.GoalTitleFilter;
 import school.faang.user_service.mapper.goal.GoalMapperImpl;
-import school.faang.user_service.publisher.GoalCompletedEventPublisher;
+import school.faang.user_service.kafka.goal.GoalCompletedEventKafkaProducer;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.repository.user.UserRepository;
@@ -50,7 +51,7 @@ class GoalServiceImplTest {
     private SkillRepository skillRepository;
 
     @Mock
-    private GoalCompletedEventPublisher goalCompletedEventPublisher;
+    private GoalCompletedEventKafkaProducer goalCompletedEventKafkaProducer;
 
     @Spy
     private GoalMapperImpl goalMapper;
@@ -62,7 +63,7 @@ class GoalServiceImplTest {
     @BeforeEach
     void init() {
         goalFilters.add(new GoalTitleFilter());
-        goalService = new GoalServiceImpl(goalRepository, userRepository, skillRepository, goalMapper, goalFilters, goalCompletedEventPublisher);
+        goalService = new GoalServiceImpl(goalRepository, userRepository, skillRepository, goalMapper, goalFilters, goalCompletedEventKafkaProducer);
     }
 
     @Test
@@ -100,7 +101,7 @@ class GoalServiceImplTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(User.builder().id(1L).build()));
         when(goalRepository.countActiveGoalsPerUser(eq(1L))).thenReturn(3);
 
-        assertThrows(IllegalArgumentException.class, () -> goalService.createGoal(userId, getGoalDto()));
+        assertThrows(MaxActiveGoalsLimitExceededException.class, () -> goalService.createGoal(userId, getGoalDto()));
     }
 
     @Test
@@ -170,6 +171,6 @@ class GoalServiceImplTest {
         List<GoalDto> result = goalService.findGoalsByUser(1L, filter);
 
         assertEquals(1, result.size());
-        assertEquals("Goal 1", result.get(0).title());
+        assertEquals("Goal 1", result.get(0).getTitle());
     }
 }

@@ -10,18 +10,23 @@ import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
-import school.faang.user_service.entity.goal.GoalStatus;
+import school.faang.user_service.exception.KafkaProduceException;
+import school.faang.user_service.exception.MaxActiveGoalsLimitExceededException;
 import school.faang.user_service.filter.Filter;
 import school.faang.user_service.filter.goal.GoalFilterDto;
+import school.faang.user_service.kafka.goal.GoalCompletedEvent;
+import school.faang.user_service.kafka.goal.KafkaProducer;
 import school.faang.user_service.mapper.goal.GoalMapper;
-import school.faang.user_service.publisher.GoalCompletedEvent;
-import school.faang.user_service.publisher.GoalCompletedEventPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.repository.user.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+
+import static school.faang.user_service.enums.goal.GoalEventType.GOAL_COMPLETED;
+import static school.faang.user_service.enums.goal.GoalStatus.COMPLETED;
 
 @Slf4j
 @Service
@@ -35,7 +40,7 @@ public class GoalServiceImpl implements GoalService {
     private final SkillRepository skillRepository;
     private final GoalMapper goalMapper;
     private final List<Filter<Goal, GoalFilterDto>> goalFilters;
-    private final GoalCompletedEventPublisher goalCompletedEventPublisher;
+    private final KafkaProducer<GoalCompletedEvent> kafkaProducer;
 
     @Transactional
     @Override
@@ -43,10 +48,10 @@ public class GoalServiceImpl implements GoalService {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new EntityNotFoundException(String.format("User with id = %d not found", userId)));
         checkActiveGoals(user);
-        checkExistsSkills(goalDto.skillIds());
-        Goal goal = goalRepository.create(goalDto.title(), goalDto.description(), goalDto.parent());
+        checkExistsSkills(goalDto.getSkillIds());
+        Goal goal = goalRepository.create(goalDto.getTitle(), goalDto.getDescription(), goalDto.getParent());
         goalRepository.assignGoalToUser(goal.getId(), user.getId());
-        goalDto.skillIds().forEach(skillId -> goalRepository.addSkillToGoal(goal.getId(), skillId));
+        goalDto.getSkillIds().forEach(skillId -> goalRepository.addSkillToGoal(goal.getId(), skillId));
         return goalMapper.toDto(goal);
     }
 
@@ -55,21 +60,23 @@ public class GoalServiceImpl implements GoalService {
     public GoalDto updateGoal(long goalId, GoalDto goalDto) {
         Goal goal = goalRepository.findById(goalId).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Goal with id = %s not found", goalId)));
-        if (GoalStatus.COMPLETED.equals(goal.getStatus())) {
-            throw new IllegalStateException("Cannot update a completed goal");
+        if (COMPLETED.equals(goal.getStatus())) {
+            throw new IllegalStateException(
+                    String.format("Cannot update a completed goal with id = %d", goalId));
         }
-        checkExistsSkills(goalDto.skillIds());
+        checkExistsSkills(goalDto.getSkillIds());
         goalRepository.removeSkillsFromGoal(goal.getId());
-        goalDto.skillIds().forEach(skillId -> goalRepository.addSkillToGoal(goalId, skillId));
+        goalDto.getSkillIds().forEach(skillId -> goalRepository.addSkillToGoal(goalId, skillId));
 
-        if (GoalStatus.COMPLETED.equals(goalDto.status())) {
+        if (COMPLETED.equals(goalDto.getStatus())) {
             List<User> users = userRepository.findUsersByGoalId(goal.getId());
-            updateUserSkills(users, goalDto.skillIds());
+            updateUserSkills(users, goalDto.getSkillIds());
             try {
-                goalCompletedEventPublisher.publish(
-                        new GoalCompletedEvent(goalDto.mentorId(), goalId, "GOAL_COMPLETED", LocalDateTime.now()));
+                kafkaProducer.produce(
+                        new GoalCompletedEvent(goalDto.getMentorId(), goalId, GOAL_COMPLETED, LocalDateTime.now()));
             } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                throw new KafkaProduceException(
+                        String.format("Failed kafka produce goal completed event. Goal id = %d", goal.getId()));
             }
         }
         Goal updatedGoal = goalRepository.save(getUpdateGoal(goalDto, goal));
@@ -90,7 +97,11 @@ public class GoalServiceImpl implements GoalService {
         Goal goal = goalRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Goal with id = %d not found", id)));
         List<Goal> subtasks = goalRepository.findByParent(goal.getId());
-        subtasks = filteredGoals(subtasks, inputFilters);
+        for (Filter<Goal, GoalFilterDto> filter : goalFilters) {
+            if (filter.isApplicable(inputFilters)) {
+                subtasks = filter.apply(subtasks, inputFilters);
+            }
+        }
         return subtasks.stream()
                 .map(goalMapper::toDto)
                 .toList();
@@ -99,7 +110,11 @@ public class GoalServiceImpl implements GoalService {
     @Override
     public List<GoalDto> findGoalsByUser(long userId, GoalFilterDto inputFilters) {
         List<Goal> goals = goalRepository.findGoalsByUserId(userId);
-        goals = filteredGoals(goals, inputFilters);
+        for (Filter<Goal, GoalFilterDto> filter : goalFilters) {
+            if (filter.isApplicable(inputFilters)) {
+                goals = filter.apply(goals, inputFilters);
+            }
+        }
         return goals.stream()
                 .map(goalMapper::toDto)
                 .toList();
@@ -132,34 +147,22 @@ public class GoalServiceImpl implements GoalService {
     private void checkActiveGoals(User user) {
         if (goalRepository.countActiveGoalsPerUser(user.getId()) >= MAX_ACTIVE_GOALS_FOR_USER) {
             log.error("User with id = {} can't have more than {} active goals", user.getId(), MAX_ACTIVE_GOALS_FOR_USER);
-            throw new IllegalArgumentException(
+            throw new MaxActiveGoalsLimitExceededException(
                     String.format("User with id = %d already has exists max count active goals", user.getId()));
         }
     }
 
     private User getMentorGoal(GoalDto dto) {
-        User mentor = null;
-        if (dto.mentorId() != null) {
-            mentor = userRepository.findById(dto.mentorId()).orElse(null);
-        }
-        return mentor;
+        return Optional.ofNullable(dto.getMentorId())
+                .flatMap(userRepository::findById)
+                .orElse(null);
     }
 
     private Goal getParentGoal(GoalDto dto) {
         Goal parentGoal = null;
-        if (dto.parent() != null) {
-            parentGoal = goalRepository.findById(dto.parent()).orElse(null);
+        if (dto.getParent() != null) {
+            parentGoal = goalRepository.findById(dto.getParent()).orElse(null);
         }
         return parentGoal;
     }
-
-    private List<Goal> filteredGoals(List<Goal> goals, GoalFilterDto inputFilters) {
-        for (Filter<Goal, GoalFilterDto> filter : goalFilters) {
-            if (filter.isApplicable(inputFilters)) {
-                goals = filter.apply(goals, inputFilters);
-            }
-        }
-        return goals;
-    }
-
 }

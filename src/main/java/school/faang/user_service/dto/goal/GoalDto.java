@@ -1,19 +1,22 @@
 package school.faang.user_service.dto.goal;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
-import school.faang.user_service.entity.goal.GoalStatus;
+import lombok.*;
+import school.faang.user_service.enums.goal.GoalStatus;
 
 import java.util.List;
 
+@Data
 @Builder
-public record GoalDto(
-        @JsonProperty("id") Long id,
-        @JsonProperty("title") @NotBlank String title,
-        @JsonProperty("description") String description,
-        @JsonProperty("parent") Long parent,
-        @JsonProperty("status") GoalStatus status,
-        @JsonProperty("skillIds") List<Long> skillIds,
-        @JsonProperty("mentorId") Long mentorId) {
+@AllArgsConstructor
+@NoArgsConstructor
+public class GoalDto {
+    private Long id;
+    private @NotBlank String title;
+    private String description;
+    private Long parent;
+    private GoalStatus status;
+    private List<Long> skillIds;
+    private Long mentorId;
+
 }

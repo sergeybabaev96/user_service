@@ -1,8 +1,9 @@
-package school.faang.user_service.publisher;
+package school.faang.user_service.kafka.goal;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import school.faang.user_service.enums.goal.GoalEventType;
 
 import java.time.LocalDateTime;
 
@@ -15,7 +16,7 @@ public class GoalCompletedEvent {
 
     private Long goalId;
 
-    private String eventType;
+    private GoalEventType eventType;
 
     private LocalDateTime receivedAt;
 }
