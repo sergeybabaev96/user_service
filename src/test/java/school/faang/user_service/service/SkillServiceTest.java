@@ -11,6 +11,7 @@ import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
+import school.faang.user_service.service.skill.SkillService;
 
 import java.util.List;
 import java.util.Map;
@@ -100,7 +101,7 @@ class SkillServiceTest {
     void acquireSkillFromOffersWhenNotEnoughConfirmations() {
         List<SkillOffer> returnedSkillOffers = List.of(new SkillOffer(), new SkillOffer());
 
-        doReturn(Optional.ofNullable(null))
+        doReturn(Optional.empty())
                 .when(skillRepository).findUserSkill(SKILL_ID1, USER_ID);
         doReturn(returnedSkillOffers).when(skillOfferRepository).findAllOffersOfSkill(SKILL_ID1, USER_ID);
 
@@ -124,7 +125,7 @@ class SkillServiceTest {
     void acquireSkillFromOffersCompleteSuccess() {
         List<SkillOffer> returnedSkillOffers = List.of(new SkillOffer(), new SkillOffer(), new SkillOffer());
 
-        doReturn(Optional.ofNullable(null))
+        doReturn(Optional.empty())
                 .doReturn(Optional.of(sentSkill1))
                 .when(skillRepository).findUserSkill(SKILL_ID1, USER_ID);
         doReturn(returnedSkillOffers).when(skillOfferRepository).findAllOffersOfSkill(SKILL_ID1, USER_ID);

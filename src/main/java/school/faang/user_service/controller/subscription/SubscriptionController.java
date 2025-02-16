@@ -1,9 +1,10 @@
-package school.faang.user_service.controller;
+package school.faang.user_service.controller.subscription;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import school.faang.user_service.dto.UserDto;
-import school.faang.user_service.dto.UserFilterDto;
+import org.springframework.validation.annotation.Validated;
+import school.faang.user_service.dto.user.UserDto;
+import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.service.subscription.SubscriptionService;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
+@Validated
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
