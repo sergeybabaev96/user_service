@@ -80,10 +80,7 @@ public class UserAvatarService {
     @Transactional
     public AvatarResponseDto uploadAvatar(Long userId, MultipartFile file) {
         User user = userService.getUser(userId);
-
-        if (file.getSize() > maxImageSize) {
-            throw new IllegalArgumentException(String.format("File size must not be more than %d Mb", maxImageSize));
-        }
+        checkFileSize(file);
 
         try (InputStream inputStream = file.getInputStream()) {
             BufferedImage originalImage = ImageIO.read(inputStream);
@@ -100,11 +97,7 @@ public class UserAvatarService {
             s3Service.uploadToBucket(customAvatarsStorage, largeImageKey, largeImageBytes, "image/jpeg");
             s3Service.uploadToBucket(customAvatarsStorage, smallImageKey, smallImageBytes, "image/jpeg");
 
-            UserProfilePic profilePic = new UserProfilePic();
-            profilePic.setFileId(largeImageKey);
-            profilePic.setSmallFileId(smallImageKey);
-            user.setUserProfilePic(profilePic);
-            log.info("User #{} upload new avatar", userId);
+            saveAvatarLinks(user, largeImageKey, smallImageKey);
 
             return AvatarResponseDto.builder()
                     .userId(userId)
@@ -131,6 +124,7 @@ public class UserAvatarService {
         s3Service.deleteImageFromBucket(customAvatarsStorage, profilePic.getSmallFileId());
         User user = userService.getUser(userId);
         user.setUserProfilePic(null);
+        userService.saveUser(user);
         log.info("User with ID#{} delete avatar", userId);
     }
 
@@ -153,6 +147,11 @@ public class UserAvatarService {
         return Scalr.resize(originalImage, Scalr.Method.QUALITY, maxSize);
     }
 
+    private byte[] processImage(BufferedImage image, int sideSize) {
+        BufferedImage resizedImage = resizeImage(image, sideSize);
+        return bufferedImageToByteArray(resizedImage);
+    }
+
     private UserProfilePic isUserHasAvatar(Long userId) {
         User user = userService.getUser(userId);
         UserProfilePic profilePic = user.getUserProfilePic();
@@ -164,8 +163,18 @@ public class UserAvatarService {
         return profilePic;
     }
 
-    private byte[] processImage(BufferedImage image, int sideSize) {
-        BufferedImage resizedImage = resizeImage(image, sideSize);
-        return bufferedImageToByteArray(resizedImage);
+    private void checkFileSize(MultipartFile file) {
+        if (file.getSize() > maxImageSize) {
+            throw new IllegalArgumentException(String.format("File size must not be more than %d Mb", maxImageSize));
+        }
+    }
+
+    private void saveAvatarLinks(User user, String largeImageKey, String smallImageKey) {
+        UserProfilePic profilePic = new UserProfilePic();
+        profilePic.setFileId(largeImageKey);
+        profilePic.setSmallFileId(smallImageKey);
+        user.setUserProfilePic(profilePic);
+        userService.saveUser(user);
+        log.info("User #{} upload new avatar", user.getId());
     }
 }
