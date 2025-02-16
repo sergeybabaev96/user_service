@@ -2,10 +2,9 @@ package school.faang.user_service.service.subscription.user.filter;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import school.faang.user_service.dto.UserFilterDto;
+import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.service.user.filter.ContactFilter;
 import school.faang.user_service.service.user.filter.CountryFilter;
 
 import java.util.List;

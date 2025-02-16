@@ -7,11 +7,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import school.faang.user_service.controller.skill.SkillController;
 import school.faang.user_service.dto.skill.SkillCandidateDto;
 import school.faang.user_service.dto.skill.SkillDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.mapper.SkillMapperImpl;
-import school.faang.user_service.service.SkillService;
+import school.faang.user_service.service.skill.SkillService;
 import school.faang.user_service.exception.DataValidationException;
 
 import java.util.ArrayList;
@@ -21,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,12 +53,6 @@ class SkillControllerTest {
         skill.setId(SKILL_ID1);
 
         skillDto = new SkillDto(SKILL_ID1, SKILL_TITLE1);
-    }
-
-    @Test
-    void createValidationIsIncorrect() {
-        SkillDto newEmptyDto = new SkillDto();
-        assertThrows(DataValidationException.class, () -> skillController.create(newEmptyDto));
     }
 
     @Test

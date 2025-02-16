@@ -14,7 +14,7 @@ public class UserServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(UserServiceApplication.class, args);
     }
-
+    
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();

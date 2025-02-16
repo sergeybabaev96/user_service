@@ -1,9 +1,7 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.skill;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.skill.SkillCandidateDto;
-import school.faang.user_service.dto.skill.SkillDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.exception.DataValidationException;

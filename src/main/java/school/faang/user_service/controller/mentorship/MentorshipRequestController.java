@@ -5,6 +5,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,9 +17,9 @@ import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
 import school.faang.user_service.dto.mentorship.RejectionDto;
 import school.faang.user_service.dto.mentorship.RequestFilterDto;
 import school.faang.user_service.entity.MentorshipRequest;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.mentorship.MentorshipRequestMapper;
 import school.faang.user_service.service.mentorship.MentorshipRequestService;
-import school.faang.user_service.validator.mentorship.MentorshipRequestValidator;
 
 import java.util.List;
 
@@ -28,8 +30,6 @@ import java.util.List;
 public class MentorshipRequestController {
     private final MentorshipRequestService mentorshipRequestService;
     private final MentorshipRequestMapper requestMapper;
-    private final MentorshipRequestValidator requestValidator;
-
 
     @Operation(
             summary = "Request for mentorship",
@@ -37,7 +37,7 @@ public class MentorshipRequestController {
     @PostMapping("/request")
     public MentorshipRequestDto requestMentorship(@Valid @RequestBody MentorshipRequestDto requestDto) {
         if (requestDto.getRequesterId() == requestDto.getReceiverId()) {
-            throw new IllegalArgumentException("User can't request mentoring from yourself");
+            throw new DataValidationException("User can't request mentoring from yourself");
         }
         MentorshipRequest request = mentorshipRequestService.requestMentorship(requestMapper.toEntity(requestDto));
         return requestMapper.toDto(request);
@@ -67,7 +67,7 @@ public class MentorshipRequestController {
     @PutMapping("/{id}/reject")
     public MentorshipRequestDto rejectRequest(
             @PathVariable("id")
-            @Min(value = 1, message = "Id must be greater than 0") long requestId,
+            @Min(value = 1, message = "Id must be greater than 1") long requestId,
             @Valid @RequestBody RejectionDto rejection) {
         return requestMapper.toDto(mentorshipRequestService.rejectRequest(requestId, rejection));
     }
