@@ -28,6 +28,10 @@ spring:
     #servlet:
       #path: /api/v1
 
+redis:
+  topic:
+    user-profile-view: UserProfileView
+
 server:
   port: 8080
 

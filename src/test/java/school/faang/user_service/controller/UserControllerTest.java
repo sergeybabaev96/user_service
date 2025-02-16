@@ -19,6 +19,11 @@ class UserControllerTest {
     @InjectMocks
     UserController userController;
 
+    @Mock
+    private UsersService usersService;
+    @InjectMocks
+    private UserController userController;
+
     private MultipartFile file;
 
     @BeforeEach
@@ -35,4 +40,14 @@ class UserControllerTest {
         userController.importUsers(file);
         Mockito.verify(userServiceMock, Mockito.times(1)).processPersonsFromFile(Mockito.any());
     }
+
+    @Test
+    @DisplayName("Test get user")
+    void getUser() {
+        Long userId = 1L;
+        userController.getUser(userId);
+        Mockito.verify(usersService, Mockito.times(1)).getUser(userId);
+    }
 }
+
+
