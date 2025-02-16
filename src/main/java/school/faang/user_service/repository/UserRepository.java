@@ -31,7 +31,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(nativeQuery = true, value = """
             UPDATE users
             SET banned = :banned
-            WHERE id IN (:userIds)
+            WHERE id = :userId
             """)
-    void setBannedField(boolean banned, List<Long> userIds);
+    void setBannedField(long userId, boolean banned);
 }
