@@ -66,7 +66,13 @@ payment-service:
 
 goal:
   max-active-goals-per-user: 3
-
+  
+premium:
+  removal:
+    cron: "0 0 3 * * ?"  # Запуск каждый день в 03:00 (Quartz формат)
+    batch-size: 100  # Размер батча
+    thread-pool-size: 4
+    
 image:
   avatar:
     folder-name: users_avatars

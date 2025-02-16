@@ -12,6 +12,7 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.MentorshipService;
+import school.faang.user_service.service.s3.AvatarS3Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final GoalRepository goalRepository;
+    private final AvatarS3Service avatarS3Service;
+    private final UserAvatarService userAvatarService;
+    private final UserContext userContext;
 
     public boolean userExists(Long userId) {
         return userRepository.existsById(userId);
@@ -75,6 +79,55 @@ public class UserService {
     @Transactional
     public void setBannedField(long userId, boolean banned) {
         userRepository.setBannedField(userId, banned);
+    }
+
+    @Transactional
+    public String uploadAvatar(MultipartFile file, String size) {
+        long userId = userContext.getUserId();
+        User currentUser = getUser(userId);
+
+        Pair<UserProfilePic, String> uploadResult = avatarS3Service.uploadAvatar(file, size);
+
+        if (currentUser.getUserProfilePic() != null) {
+            String largeImageKey = currentUser.getUserProfilePic().getFileId();
+            String smallImageKey = currentUser.getUserProfilePic().getSmallFileId();
+            avatarS3Service.deleteAvatar(largeImageKey);
+            avatarS3Service.deleteAvatar(smallImageKey);
+        }
+
+        currentUser.setUserProfilePic(uploadResult.getFirst());
+
+        userRepository.save(currentUser);
+
+        return uploadResult.getSecond();
+    }
+
+    @Transactional(readOnly = true)
+    public String downloadAvatar(String size) {
+        long userId = userContext.getUserId();
+        User currentUser = getUser(userId);
+
+        String imageKey = currentUser.getUserProfilePic().getFileId();
+        if (size.equalsIgnoreCase("large")) {
+            imageKey = currentUser.getUserProfilePic().getSmallFileId();
+        }
+
+        return avatarS3Service.downloadAvatar(imageKey);
+    }
+
+    @Transactional
+    public void deleteAvatar() {
+        long userId = userContext.getUserId();
+        User currentUser = getUser(userId);
+
+        String largeImageKey = currentUser.getUserProfilePic().getFileId();
+        String smallImageKey = currentUser.getUserProfilePic().getSmallFileId();
+
+        avatarS3Service.deleteAvatar(largeImageKey);
+        avatarS3Service.deleteAvatar(smallImageKey);
+
+        currentUser.setUserProfilePic(null);
+        userRepository.save(currentUser);
     }
 
     private void deactivateUserDependencies(Long userId) {

@@ -3,7 +3,6 @@ package school.faang.user_service.service.s3;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,16 +13,14 @@ import school.faang.user_service.entity.UserProfilePic;
 import school.faang.user_service.exception.FileException;
 import school.faang.user_service.utils.image.ImageProcessor;
 
-import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class S3Service {
+public class AvatarS3Service {
     private final AmazonS3 s3Client;
     private final ImageProcessor imageProcessor;
 
