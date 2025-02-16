@@ -23,29 +23,19 @@ public class SubscriptionService {
 
     public void followUser(long followerId, long followeeId) {
         checkActionOnYourself(followerId, followeeId, "Нельзя подписаться на свой аккаунт.");
-
-        boolean isThereSub = repository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
-        if (isThereSub) {
-            throw new DataValidationException("Вы уже подписаны на этого пользователя.");
-        }
-
+        checkSubscription(followerId, followeeId, "Вы уже подписаны на этого пользователя.");
         repository.followUser(followerId, followeeId);
     }
 
     public void unfollowUser(long followerId, long followeeId) {
         checkActionOnYourself(followerId, followeeId, "Нельзя отписаться от самого себя.");
-
-        boolean isThereSub = repository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
-        if (!isThereSub) {
-            throw new DataValidationException("Невозможно отписаться от пользователя, на которого вы не подписаны.");
-        }
-
+        checkSubscription(followerId, followeeId,
+                "Невозможно отписаться от пользователя, на которого вы не подписаны.");
         repository.unfollowUser(followerId, followeeId);
     }
 
     public List<SubscriberReadDto> getFollowers(long followeeId, SubscriberFilterDto filters) {
         Stream<User> followers = repository.findByFolloweeId(followeeId);
-
         return filterUsers(filters, followers);
     }
 
@@ -55,12 +45,18 @@ public class SubscriptionService {
 
     public List<SubscriberReadDto> getFollowing(long followerId, SubscriberFilterDto filters) {
         Stream<User> following = repository.findByFollowerId(followerId);
-
         return filterUsers(filters, following);
     }
 
     public int getFollowingCount(long followerId) {
         return repository.findFolloweesAmountByFollowerId(followerId);
+    }
+
+    private void checkSubscription(long followerId, long followeeId, String message) {
+        boolean isThereSub = repository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
+        if (isThereSub) {
+            throw new DataValidationException(message);
+        }
     }
 
     private void checkActionOnYourself(long followerId, long followeeId, String errorMessage) {
@@ -69,17 +65,18 @@ public class SubscriptionService {
         }
     }
 
-    private List<SubscriberReadDto> filterUsers(SubscriberFilterDto filters, Stream<User> followers) {
-        List<SubscriberFilter> fwfew = subscriberFilters.stream()
-                .filter(subscriberFilter -> subscriberFilter.isApplicable(filters))
+    private List<SubscriberReadDto> filterUsers(SubscriberFilterDto filters, Stream<User> users) {
+        List<SubscriberFilter> applicableFilters = subscriberFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
                 .toList();
 
-        if (fwfew.isEmpty()) {
+        if (applicableFilters.isEmpty()) {
             return Collections.emptyList();
         }
 
-        return fwfew.stream()
-                .flatMap(subscriberFilter -> subscriberFilter.apply(followers, filters))
+        return applicableFilters.stream()
+                .reduce(users, (currentStream, filter) -> filter.apply(currentStream, filters),
+                        (s1, s2) -> s2)
                 .map(mapper::toDto)
                 .toList();
     }
