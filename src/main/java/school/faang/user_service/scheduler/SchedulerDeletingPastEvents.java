@@ -7,7 +7,7 @@ import school.faang.user_service.service.event.EventService;
 
 @Component
 @RequiredArgsConstructor
-public class Scheduler {
+public class SchedulerDeletingPastEvents {
 
     private final EventService eventService;
 

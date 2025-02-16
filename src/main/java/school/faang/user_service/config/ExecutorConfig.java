@@ -13,9 +13,11 @@ public class ExecutorConfig {
     @Value("${scheduler.thread-pool-size}")
     private int numThreads;
 
+    @Value("${scheduler.event-batch-size}")
+    private int batchSize;
+
     @Bean
     public ExecutorService threadPool() {
         return Executors.newFixedThreadPool(numThreads);
     }
-
 }

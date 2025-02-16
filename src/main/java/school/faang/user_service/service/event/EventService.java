@@ -81,8 +81,8 @@ public class EventService {
     }
 
     @Async("threadPool")
-    public void deletePastEventsByBatches(List<Event> events) {
-        events.forEach((event) -> log.info(" Deleting past event with ID : {}", event.getId()));
+    public void deletePastEventsByBatches(List<Event> subEventsToDelete) {
+        subEventsToDelete.forEach((event) -> log.info(" Deleting past event with ID : {}", event.getId()));
         eventRepository.deleteAllInBatch();
     }
 

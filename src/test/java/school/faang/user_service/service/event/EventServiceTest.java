@@ -1,6 +1,5 @@
 package school.faang.user_service.service.event;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -281,7 +280,6 @@ class EventServiceTest {
         );
     }
     @Test
-    @Transactional
     void testDeletePastEvents_NoPastEvents() {
 
         when(eventRepository.findAllByEndDateBefore(any(LocalDateTime.class))).thenReturn(List.of());

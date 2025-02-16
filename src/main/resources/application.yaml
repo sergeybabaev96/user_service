@@ -70,8 +70,8 @@ server:
   port: 8080
 
 scheduler:
-  clear-events-cron: "@weekly"
-  event-batch-size: 100
+  clear-events-cron: "0 0 0 * * *"  # at 00:00 every day
+  event-batch-size: 10
   thread-pool-size: 4
 
 
