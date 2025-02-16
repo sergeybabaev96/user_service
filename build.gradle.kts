@@ -42,6 +42,8 @@ dependencies {
     implementation("redis.clients:jedis:4.3.2")
     implementation("org.springframework.kafka:spring-kafka")
     runtimeOnly("org.postgresql:postgresql")
+    implementation("net.javacrumbs.shedlock:shedlock-spring:6.2.0")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.2.0")
 
     /**
      * Amazon S3

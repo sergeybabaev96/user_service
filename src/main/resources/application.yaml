@@ -68,8 +68,18 @@ avatar:
 dicebear:
   endpoint: https://api.dicebear.com
 
+user:
+  ban:
+    redis:
+      channel: user_ban
+
 service:
   name: user-service
+
+premium:
+  scheduler:
+    remove-cron: "0 0 * * * 1"  # every monday in 00:00
+    batch: 5
 
 kafka:
   topic:

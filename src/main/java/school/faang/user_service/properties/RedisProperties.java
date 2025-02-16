@@ -1,4 +1,4 @@
-package school.faang.user_service.config.properties;
+package school.faang.user_service.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
