@@ -84,6 +84,16 @@ payment-service:
 app:
   max-active-goals: 3
 
+kafka:
+  producer:
+    bootstrap-servers: localhost:9092
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  topic:
+    name: profileViewEvent
+    group: profileViewEvent
+
 data:
   batch-size: 10
 
