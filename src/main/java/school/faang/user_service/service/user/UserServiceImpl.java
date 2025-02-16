@@ -54,16 +54,16 @@ public class UserServiceImpl implements UserService {
     }
 
     private List<User> mapToUsers(List<Person> persons) {
-            return persons.stream()
-                    .map(person -> CompletableFuture.supplyAsync(() -> {
-                        User user = userMapper.toUserEntity(person);
-                        user.setPassword(generatePassword());
-                        user.setCountry(countryService.getOrCreateCountry(person.getCountry()));
-                        return user;
-                    }, executorService).exceptionally(error -> {
-                        log.error("Error processing file", error);
-                        throw new RuntimeException("Failed to process users", error);
-                    })).map(CompletableFuture::join).toList();
+        return persons.stream()
+                .map(person -> CompletableFuture.supplyAsync(() -> {
+                    User user = userMapper.toUserEntity(person);
+                    user.setPassword(generatePassword());
+                    user.setCountry(countryService.getOrCreateCountry(person.getCountry()));
+                    return user;
+                }, executorService).exceptionally(error -> {
+                    log.error("Error processing file", error);
+                    throw new RuntimeException("Failed to process users", error);
+                })).map(CompletableFuture::join).toList();
     }
 
     private List<Person> parsePersonsFromInputStream(InputStream fileInputStream) {

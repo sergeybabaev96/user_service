@@ -17,13 +17,12 @@ public interface UserMapper {
     UserDto toUserDto(User user);
 
     User toUserEntity(UserDto userDto);
-
-    List<User> toUserEntities(List<Person> persons);
-
     @Mapping(target = "username", expression = "java(getUsername(person))")
     @Mapping(target = "country", expression = "java(getCountry(person))")
     @Mapping(target = "aboutMe", expression = "java(person.toString())")
     User toUserEntity(Person person);
+
+    List<User> toUserEntities(List<Person> persons);
 
     default String getUsername(Person person) {
         return person.getFirstName() + person.getLastName();

@@ -32,14 +32,13 @@ public class Person {
     private String scholarship;
     private String employer;
 
-
     @Override
     public String toString() {
         return String.format(
-                        "State: " + state + ";" +
-                        "Faculty: " + faculty + ";" +
-                        "Year of study: " + yearOfStudy + ";" +
-                        "Major: " + major + ";" +
-                        "Employer: " + employer);
+                        "State: " + state + ";"
+                                + "Faculty: " + faculty + ";"
+                                + "Year of study: " + yearOfStudy + ";"
+                                + "Major: " + major + ";"
+                                + "Employer: " + employer);
     }
 }

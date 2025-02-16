@@ -21,7 +21,7 @@ public class UserController {
 
     @PostMapping("/import")
     @ResponseStatus(HttpStatus.CREATED)
-    public void importUsers (@RequestBody MultipartFile file) {
+    public void importUsers(@RequestBody MultipartFile file) {
         userService.processPersonsFromFile(file);
     }
 }
