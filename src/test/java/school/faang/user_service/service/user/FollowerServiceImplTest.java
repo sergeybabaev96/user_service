@@ -11,7 +11,7 @@ import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.user.UserMapperImpl;
 import school.faang.user_service.repository.SubscriptionRepository;
-import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.repository.user.UserRepository;
 
 import java.util.Arrays;
 import java.util.List;
