@@ -2,7 +2,7 @@ package school.faang.user_service.utils.event;
 
 import lombok.experimental.UtilityClass;
 import school.faang.user_service.dto.event.EventDto;
-import school.faang.user_service.dto.event.EventFilterDto;
+import school.faang.user_service.filter.event.EventFilterDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;

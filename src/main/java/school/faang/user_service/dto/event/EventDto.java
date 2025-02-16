@@ -19,29 +19,40 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EventDto {
+
     private Long id;
-    @NotNull
-    @NotBlank
+
+    @NotNull(message = "Title can't be null")
+    @NotBlank(message = "Title can't be empty")
     private String title;
-    @NotNull
+
+    @NotNull(message = "Start date can't be empty")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime startDate;
-    @NotNull
+
+    @NotNull(message = "End date can't be null")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime endDate;
-    @NotNull
+
+    @NotNull(message = "Owner can't be null")
     private Long ownerId;
-    @NotNull
+
+    @NotNull(message = "Description can't be null")
     private String description;
-    @NotNull
+
+    @NotNull(message = "Description can't be null")
     private List<Long> relatedSkills;
-    @NotNull
+
+    @NotNull(message = "Location can't be null")
     private String location;
+
     private int maxAttendees;
-    @NotNull
+
+    @NotNull(message = "Event type can't be null")
     @Enumerated
     private EventType eventType;
-    @NotNull
+
+    @NotNull(message = "Event status can't be null")
     @Enumerated
     private EventStatus eventStatus;
 }
