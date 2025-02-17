@@ -23,12 +23,21 @@ public class UserProfileViewedAspect {
     @AfterReturning(pointcut = "@annotation(school.faang.user_service.utility.aspect_annotations.UserProfileViewed)",
             returning = "user")
     public void afterUserProfileViewed(User user) {
-        Long viewerId = userContext.getUserId();
+        Long viewerId = getContextUserId();
         Long profileOwnerId = user.getId();
 
         if (viewerId != 0 && notSameUser(viewerId, profileOwnerId) && hasContactPreference(user)) {
             log.info("User profile viewed: viewerId={}, profileOwnerId={}", viewerId, profileOwnerId);
             producer.sendMessage(viewerId, profileOwnerId);
+        }
+    }
+
+    private Long getContextUserId() {
+        try {
+            return userContext.getUserId();
+        } catch (IllegalArgumentException e) {
+            log.debug(e.getMessage());
+            return 0L;
         }
     }
 
