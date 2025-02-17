@@ -51,14 +51,17 @@ public class UserService {
                 .toList();
     }
 
+    @Transactional
     public boolean isUserExistById(Long id) {
         return userRepository.existsById(id);
     }
 
+    @Transactional
     public void saveUser(User user) {
         userRepository.save(user);
     }
 
+    @Transactional
     public List<User> findAllUsers() {
         return userRepository.findAll();
     }
