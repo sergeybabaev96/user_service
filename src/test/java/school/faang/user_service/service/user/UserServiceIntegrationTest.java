@@ -15,10 +15,15 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.TariffMapper;
 import school.faang.user_service.repository.TariffRepository;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.tariff.impl.TariffServiceImpl;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceIntegrationTest extends BaseTest {
