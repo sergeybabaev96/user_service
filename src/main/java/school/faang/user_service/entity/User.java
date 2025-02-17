@@ -26,10 +26,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 import school.faang.user_service.entity.contact.Contact;
 import school.faang.user_service.entity.contact.ContactPreference;
 import school.faang.user_service.entity.event.Event;
+import school.faang.user_service.entity.event.Rating;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalInvitation;
-import school.faang.user_service.entity.event.Rating;
 import school.faang.user_service.entity.premium.Premium;
+import school.faang.user_service.entity.rating.UserRating;
 import school.faang.user_service.entity.recommendation.Recommendation;
 
 import java.time.LocalDateTime;
@@ -159,6 +160,9 @@ public class User {
 
     @OneToOne(mappedBy = "user")
     private Premium premium;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserRating> userRatings;
 
     @Column(name = "locale", length = 8)
     private Locale locale;

@@ -43,6 +43,11 @@ public class PremiumService {
         return premiumRepository.save(premium);
     }
 
+    public boolean checkPremiumByUserId(Long userId) {
+        LocalDateTime now = LocalDateTime.now();
+        return premiumRepository.findByUserIdAndStartDateAfterAndEndDateBefore(userId, now, now).isPresent();
+    }
+
     private void checkUserDoesntHavePremium(Long userId) {
         LocalDateTime currentTime = LocalDateTime.now();
 

@@ -30,6 +30,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
+    implementation("org.springframework.boot:spring-boot-starter-aop:3.4.2")
     implementation("org.springframework.kafka:spring-kafka:3.0.6")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
@@ -74,6 +75,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.mockito:mockito-inline:2.13.0")
+    testImplementation("org.mockito:mockito-core:5.10.0")
 }
 
 jsonSchema2Pojo {
