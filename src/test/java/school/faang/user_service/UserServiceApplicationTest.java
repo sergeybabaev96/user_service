@@ -7,7 +7,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(properties = {"spring.liquibase.enabled=false"})
 @ActiveProfiles("test")
-class ApplicationTests {
+class UserServiceApplicationTest {
 
     @Test
     void contextLoads() {
