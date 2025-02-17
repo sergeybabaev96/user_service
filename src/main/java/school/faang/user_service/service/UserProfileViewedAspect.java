@@ -8,7 +8,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.service.kafka.UserProfileViewedProducer;
+import school.faang.user_service.service.kafka.KafkaProducer;
 
 import java.util.Objects;
 
@@ -18,7 +18,7 @@ import java.util.Objects;
 @Component
 public class UserProfileViewedAspect {
     private final UserContext userContext;
-    private final UserProfileViewedProducer producer;
+    private final KafkaProducer producer;
 
     @AfterReturning(pointcut = "@annotation(school.faang.user_service.utility.aspect_annotations.UserProfileViewed)",
             returning = "user")

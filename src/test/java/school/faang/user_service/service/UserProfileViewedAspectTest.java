@@ -10,7 +10,7 @@ import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.contact.ContactPreference;
 import school.faang.user_service.entity.contact.PreferredContact;
-import school.faang.user_service.service.kafka.UserProfileViewedProducer;
+import school.faang.user_service.service.kafka.KafkaProducer;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
@@ -26,7 +26,7 @@ class UserProfileViewedAspectTest {
     private UserContext userContext;
 
     @Mock
-    private UserProfileViewedProducer producer;
+    private KafkaProducer producer;
 
     @InjectMocks
     private UserProfileViewedAspect aspect;
