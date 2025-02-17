@@ -25,6 +25,7 @@ public class UserPrepareData {
                 .country(Country.builder()
                         .id(1L)
                         .build())
+                .phone("phone")
                 .build();
     }
 
@@ -35,10 +36,6 @@ public class UserPrepareData {
     }
 
     public static UserDto getUserDto() {
-        return UserDto.builder()
-                .id(1L)
-                .username("username")
-                .email("email")
-                .build();
+        return new UserDto(1L, "username", "email", "phone");
     }
 }

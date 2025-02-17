@@ -61,6 +61,6 @@ class PromotionSearchServiceImplTest {
 
         List<Object> result = promotionSearchService.searchResults("user and event", 5);
 
-        assertEquals(result.get(0), getUserDto());
+        assertEquals(getUserDto(), result.get(0));
     }
 }

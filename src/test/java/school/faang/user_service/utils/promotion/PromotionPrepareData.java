@@ -145,7 +145,12 @@ public class PromotionPrepareData {
     public static Promotion getUserPromotion() {
         return Promotion.builder()
                 .id(1L)
-                .user(User.builder().id(1L).username("user").build())
+                .user(User.builder()
+                        .id(1L)
+                        .username("user")
+                        .email("email")
+                        .phone("phone")
+                        .build())
                 .promotionPayment(PromotionPayment.builder()
                         .id(RANDOM_UUID)
                         .build())
@@ -159,8 +164,11 @@ public class PromotionPrepareData {
     public static Promotion getEventPromotion() {
         return Promotion.builder()
                 .id(1L)
-                .user(User.builder().id(1L)
+                .user(User.builder()
+                        .id(1L)
                         .username("user")
+                        .email("email")
+                        .phone("phone")
                         .participatedEvents(List.of(Event.builder().id(1L).build()))
                         .build())
                 .event(Event.builder()
@@ -193,10 +201,7 @@ public class PromotionPrepareData {
     }
 
     public static UserDto getUserDto() {
-        return UserDto.builder()
-                .id(1L)
-                .username("user")
-                .build();
+        return new UserDto(1L, "user", "email", "phone");
     }
 
     public static Event getEvent() {
