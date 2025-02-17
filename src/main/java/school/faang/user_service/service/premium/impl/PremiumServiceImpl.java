@@ -60,7 +60,7 @@ public class PremiumServiceImpl implements PremiumService {
         List<Premium> allByEndDateBefore = premiumRepository.findAllByEndDateBefore(LocalDateTime.now());
 
         if (allByEndDateBefore.isEmpty()) {
-            log.info("Нет истёкших премиум аккаунтов для удаления.");
+            log.info("No expired premium for deletion.");
             return;
         }
 
@@ -75,12 +75,12 @@ public class PremiumServiceImpl implements PremiumService {
         executorService.shutdown();
     }
 
-    public void deletePremiumsInBatch(List<Premium> batch) {
+    private void deletePremiumsInBatch(List<Premium> batch) {
         try {
             premiumRepository.deleteAllByIdsInBatch(batch.stream().map(Premium::getId).toList());
-            log.info("Удалено {} премиум аккаунтов", batch.size());
         } catch (Exception e) {
-            log.error("Ошибка при удалении батча: {}", e.getMessage(), e);
+            log.info("Deleted {} premium accounts", batch.size());
+            log.error("Error occurred while deleting the batch: {}", e.getMessage(), e);
         }
     }
 
@@ -97,7 +97,7 @@ public class PremiumServiceImpl implements PremiumService {
             try {
                 future.get();
             } catch (InterruptedException | ExecutionException e) {
-                log.error("Ошибка при выполнении потока: {}", e.getMessage(), e);
+                log.error("Error executing thread: {}", e.getMessage(), e);
                 Thread.currentThread().interrupt();
             }
         }

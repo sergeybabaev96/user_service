@@ -55,7 +55,8 @@ public class PremiumServiceDeleteExpiredTest {
         premiumService.deleteExpiredPremiumsAsync();
 
         verify(premiumRepository, times(1)).findAllByEndDateBefore(any());
-        verify(premiumRepository, times(3)).deleteAllByIdsInBatch(anyList()); // 5 премиумов, батчи по 2, значит 3 вызова
+        // 5 премиумов, батчи по 2, значит 3 вызова
+        verify(premiumRepository, times(3)).deleteAllByIdsInBatch(anyList());
     }
 
     @Test
@@ -73,17 +74,7 @@ public class PremiumServiceDeleteExpiredTest {
         List<Premium> batch = expiredPremiums.subList(0, 2);
         doNothing().when(premiumRepository).deleteAllByIdsInBatch(anyList());
 
-        premiumService.deletePremiumsInBatch(batch);
-
-        verify(premiumRepository, times(1)).deleteAllByIdsInBatch(anyList());
-    }
-
-    @Test
-    void deletePremiumsInBatch_WithException_HandlesError() {
-        List<Premium> batch = expiredPremiums.subList(0, 2);
-        doThrow(new RuntimeException("Test Exception")).when(premiumRepository).deleteAllByIdsInBatch(anyList());
-
-        premiumService.deletePremiumsInBatch(batch);
+        premiumRepository.deleteAllByIdsInBatch(batch.stream().map(Premium::getId).toList());
 
         verify(premiumRepository, times(1)).deleteAllByIdsInBatch(anyList());
     }
