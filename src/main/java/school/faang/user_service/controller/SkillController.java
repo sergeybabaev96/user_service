@@ -36,7 +36,17 @@ public class SkillController {
     }
 
     @PostMapping("/acquire")
-    public SkillDto acquireSkillFromOffers(long skillId, long userId) {
-        return skillService.acquireSkillFromOffers(skillId, userId);
+    public SkillDto acquireSkillFromOffers(@RequestParam long skillId, @RequestParam long userId) {
+//        System.out.println("Received skillId: " + skillId + ", userId: " + userId);
+
+        SkillDto result = skillService.acquireSkillFromOffers(skillId, userId);
+
+        if (result == null) {
+            System.out.println("Error: acquireSkillFromOffers returned null");
+        } else {
+            System.out.println("Successfully acquired skill: " + result);
+        }
+
+        return result;
     }
 }
