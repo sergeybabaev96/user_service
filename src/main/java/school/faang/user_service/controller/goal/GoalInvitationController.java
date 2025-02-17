@@ -1,7 +1,5 @@
 package school.faang.user_service.controller.goal;
 
-import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -14,11 +12,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/goal-invitations")
 @RequiredArgsConstructor
+@Validated
 public class GoalInvitationController {
     private final GoalInvitationService goalInvitationService;
 
     @PostMapping("/create")
-    public void createInvitation(@Valid @RequestBody GoalInvitationDto invitation) {
+    public void createInvitation(@RequestBody GoalInvitationDto invitation) {
         goalInvitationService.createInvitation(invitation);
     }
 
@@ -33,7 +32,7 @@ public class GoalInvitationController {
     }
 
     @GetMapping("/get-goal-invitations")
-    public List<GoalInvitationDto> getInvitations(@Valid @RequestBody GoalInvitationFilterDto filter) {
+    public List<GoalInvitationDto> getInvitations(@RequestBody GoalInvitationFilterDto filter) {
         return goalInvitationService.getInvitations(filter);
     }
 
