@@ -56,8 +56,9 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Валидация не пройдена")
-                .message(validationErrors.toString())
+                .message("Следующие поля не прошли проверку:")
                 .timestamp(LocalDateTime.now())
+                .details(validationErrors)
                 .build();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
