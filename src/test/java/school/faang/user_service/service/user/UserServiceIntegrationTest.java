@@ -15,11 +15,15 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.TariffMapper;
 import school.faang.user_service.repository.TariffRepository;
 import school.faang.user_service.repository.UserRepository;
-import school.faang.user_service.service.tariff.TariffService;
+import school.faang.user_service.service.tariff.impl.TariffServiceImpl;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceIntegrationTest extends BaseTest {
@@ -28,7 +32,7 @@ public class UserServiceIntegrationTest extends BaseTest {
     private UserService userService;
 
     @SpyBean
-    private TariffService tariffService;
+    private TariffServiceImpl tariffService;
     @MockBean
     private UserRepository userRepository;
     @MockBean
@@ -42,7 +46,7 @@ public class UserServiceIntegrationTest extends BaseTest {
     }
 
     @Test
-    public void findUsersByFilterDecrementShows() {
+    public void findUsersByFilterDecrementShows() throws InterruptedException {
 
         GetUserRequest request = new GetUserRequest();
         request.setFilter(UserDto.builder().build());
@@ -60,12 +64,12 @@ public class UserServiceIntegrationTest extends BaseTest {
                         .id(1L)
                         .tariff(tariff)
                         .build()));
-        when(tariffRepository.existsById(1L)).thenReturn(true);
+        when(tariffRepository.findById(1L)).thenReturn(Optional.of(tariff));
 
         userService.findUsersByFilter(request);
 
-        verify(tariffService).decrementShows(tariff);
-        verify(tariffRepository).save(Tariff.builder()
+        verify(tariffService, timeout(100)).decrementShows(tariff.getId());
+        verify(tariffRepository, timeout(100)).save(Tariff.builder()
                 .isActive(false)
                 .id(1L)
                 .shows(0)

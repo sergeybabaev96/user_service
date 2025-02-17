@@ -12,8 +12,6 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(exclude = {"id",
         "isActive",
         "expirePeriod",
-        "userId",
-        "eventId",
         "paymentId"})
 public class TariffDto {
     private Long id;
@@ -22,7 +20,5 @@ public class TariffDto {
     private Integer priority;
     private Boolean isActive;
     private LocalDateTime expirePeriod;
-    private Long userId;
-    private Long eventId;
     private Long paymentId;
 }
