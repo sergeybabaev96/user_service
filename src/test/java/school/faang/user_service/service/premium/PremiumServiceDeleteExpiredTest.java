@@ -40,7 +40,6 @@ public class PremiumServiceDeleteExpiredTest {
     void setUp() {
         jobProperties.setBatchSize(2);
         jobProperties.setThreadPoolSize(2);
-
         expiredPremiums = new ArrayList<>();
         for (long i = 1; i <= 5; i++) {
             expiredPremiums.add(Premium.builder()
