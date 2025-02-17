@@ -8,11 +8,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import school.faang.user_service.BaseTest;
-import school.faang.user_service.client.payment.PaymentResponse;
-import school.faang.user_service.client.payment.PaymentServiceFeignClient;
+import school.faang.user_service.client.PaymentServiceFeignClient;
 import school.faang.user_service.common.Currency;
 import school.faang.user_service.common.PaymentStatus;
 import school.faang.user_service.dto.TariffDto;
+import school.faang.user_service.dto.payment.PaymentResponse;
 import school.faang.user_service.entity.Tariff;
 import school.faang.user_service.mapper.TariffMapper;
 import school.faang.user_service.properties.UserServiceProperties;
@@ -50,13 +50,13 @@ public class TariffServiceTest extends BaseTest {
 
         when(paymentServiceFeignClient.sendPayment(any()))
                 .thenReturn(new ResponseEntity<>(new PaymentResponse(1111L,
-                                PaymentStatus.SUCCESS,
-                                1,
-                                1L,
-                                BigDecimal.valueOf(100),
-                                Currency.USD,
-                                "message"), HttpStatus.OK)
-                        );
+                        PaymentStatus.SUCCESS,
+                        1,
+                        1L,
+                        BigDecimal.valueOf(100),
+                        Currency.USD,
+                        "message"), HttpStatus.OK)
+                );
 
         Tariff.TariffBuilder tariff = Tariff.builder()
                 .plan("super-user")

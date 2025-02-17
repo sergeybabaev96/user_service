@@ -1,14 +1,6 @@
 package school.faang.user_service.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -62,7 +54,7 @@ public class Skill extends Identifiable {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public void addGuarantee(UserSkillGuarantee skillGuarantee){
+    public void addGuarantee(UserSkillGuarantee skillGuarantee) {
         guarantees.add(skillGuarantee);
     }
 }
