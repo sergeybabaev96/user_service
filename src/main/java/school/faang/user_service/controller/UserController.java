@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @GetMapping("/premium")
-    public List<UserDto> getPremiumUsers(@RequestBody(required = false) UserFilterDto userFilterDto) {
+    public List<UserDto> getPremiumUsers(@Validated @RequestBody(required = false) UserFilterDto userFilterDto) {
         return userService.getPremiumUsers(userFilterDto);
     }
 

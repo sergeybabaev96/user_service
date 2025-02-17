@@ -15,13 +15,12 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-@Validated
 public class RecommendationRequestController {
 
     private final RecommendationRequestService recommendationRequestService;
 
     public ResponseEntity<RecommendationRequestDto> requestRecommendation(
-            @RequestBody RecommendationRequestDto recommendationRequest) {
+            @Validated @RequestBody RecommendationRequestDto recommendationRequest) {
 
         RecommendationRequestDto createdRequest = recommendationRequestService.create(recommendationRequest);
         return ResponseEntity.ok(createdRequest);
@@ -40,7 +39,7 @@ public class RecommendationRequestController {
 
     public ResponseEntity<RecommendationRequestDto> rejectRequest(
             @PathVariable long id,
-            @RequestBody RejectionDto rejection) {
+            @Validated @RequestBody RejectionDto rejection) {
 
         RecommendationRequestDto rejectRequest = recommendationRequestService.rejectRequest(id, rejection);
         return ResponseEntity.ok(rejectRequest);

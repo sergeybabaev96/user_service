@@ -23,7 +23,7 @@ public class SubscriptionController {
         subscriptionService.unfollowUser(followerId, followeeId);
     }
 
-    private List<SubscriptionUserDto> getFollowers(long followeeId, UserFilterDto dto) {
+    private List<SubscriptionUserDto> getFollowers(long followeeId, @Validated UserFilterDto dto) {
         return subscriptionService.getFollowers(followeeId, dto);
     }
 
@@ -31,7 +31,7 @@ public class SubscriptionController {
         return subscriptionService.getFollowersCount(followerId);
     }
 
-    private List<SubscriptionUserDto> getFollowing(long followerId, UserFilterDto dto) {
+    private List<SubscriptionUserDto> getFollowing(long followerId, @Validated UserFilterDto dto) {
         return subscriptionService.getFollowing(followerId, dto);
     }
 

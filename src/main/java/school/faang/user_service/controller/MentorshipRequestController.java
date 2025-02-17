@@ -13,17 +13,17 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/mentorship")
 @RequiredArgsConstructor
-@Validated
+
 public class MentorshipRequestController {
     private final MentorshipRequestService mentorshipRequestService;
 
     @PostMapping
-    public MentorshipRequestDto requestMentorship(@RequestBody MentorshipRequestDto mentorshipRequestDto) {
+    public MentorshipRequestDto requestMentorship(@Validated @RequestBody MentorshipRequestDto mentorshipRequestDto) {
         return mentorshipRequestService.requestMentorship(mentorshipRequestDto);
     }
 
     @GetMapping
-    public List<MentorshipRequestDto> getRequests(@RequestBody RequestFilterDto requestFilterDto) {
+    public List<MentorshipRequestDto> getRequests(@Validated @RequestBody RequestFilterDto requestFilterDto) {
         return mentorshipRequestService.getRequests(requestFilterDto);
     }
 
@@ -35,7 +35,7 @@ public class MentorshipRequestController {
     @PutMapping("/{id}/reject")
     public MentorshipRequestDto rejectRequest(
             @PathVariable long id,
-            @RequestBody RejectionDto rejection
+            @Validated @RequestBody RejectionDto rejection
     ) {
         return mentorshipRequestService.rejectRequest(id, rejection);
     }

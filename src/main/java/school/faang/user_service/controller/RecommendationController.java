@@ -11,15 +11,14 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-@Validated
 public class RecommendationController {
     private final RecommendationService recommendationService;
 
-    public RecommendationDto giveRecommendation(@RequestBody RecommendationDto recommendationDto) {
+    public RecommendationDto giveRecommendation(@Validated @RequestBody RecommendationDto recommendationDto) {
         return recommendationService.create(recommendationDto);
     }
 
-    public RecommendationDto updateRecommendation(@RequestBody RecommendationDto recommendationDto) {
+    public RecommendationDto updateRecommendation(@Validated @RequestBody RecommendationDto recommendationDto) {
         return recommendationService.update(recommendationDto);
     }
 

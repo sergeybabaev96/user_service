@@ -2,6 +2,7 @@ package school.faang.user_service.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +20,7 @@ public class PromotionController {
 
     private final PromotionService promotionService;
 
-    public OrderDto buyPromotion(@Valid @RequestBody BuyPromotionDto buyPromotionDto) {
+    public OrderDto buyPromotion(@Validated @RequestBody BuyPromotionDto buyPromotionDto) {
         return promotionService.buyPromotion(buyPromotionDto);
     }
 
@@ -31,7 +32,7 @@ public class PromotionController {
         return promotionService.getAllPromotionsForUser(userId);
     }
 
-    public PromotionDto updatePromotion(@RequestBody BuyPromotionDto buyPromotionDto, @PathVariable Long promotionId) {
+    public PromotionDto updatePromotion(@Validated @RequestBody BuyPromotionDto buyPromotionDto, @PathVariable Long promotionId) {
         return promotionService.updatePromotion(buyPromotionDto, promotionId);
     }
 

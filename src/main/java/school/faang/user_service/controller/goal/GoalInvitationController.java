@@ -12,12 +12,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/goal-invitations")
 @RequiredArgsConstructor
-@Validated
 public class GoalInvitationController {
     private final GoalInvitationService goalInvitationService;
 
     @PostMapping("/create")
-    public void createInvitation(@RequestBody GoalInvitationDto invitation) {
+    public void createInvitation(@Validated @RequestBody GoalInvitationDto invitation) {
         goalInvitationService.createInvitation(invitation);
     }
 
@@ -32,7 +31,7 @@ public class GoalInvitationController {
     }
 
     @GetMapping("/get-goal-invitations")
-    public List<GoalInvitationDto> getInvitations(@RequestBody GoalInvitationFilterDto filter) {
+    public List<GoalInvitationDto> getInvitations(@Validated @RequestBody GoalInvitationFilterDto filter) {
         return goalInvitationService.getInvitations(filter);
     }
 
