@@ -10,26 +10,30 @@ import school.faang.user_service.dto.goal.GoalInvitationFilterDto;
 import school.faang.user_service.service.goal.GoalInvitationService;
 
 import java.util.List;
+
 @RestController
 @RequestMapping("/goal-invitations")
 @RequiredArgsConstructor
-@Validated
 public class GoalInvitationController {
     private final GoalInvitationService goalInvitationService;
+
     @PostMapping("/create")
-    public void createInvitation(@Valid @RequestBody GoalInvitationDto invitation){
-         goalInvitationService.createInvitation(invitation);
+    public void createInvitation(@Valid @RequestBody GoalInvitationDto invitation) {
+        goalInvitationService.createInvitation(invitation);
     }
+
     @PutMapping("/accept-invitation/{id}")
-    public void acceptGoalInvitation(@PathVariable long id){
+    public void acceptGoalInvitation(@PathVariable long id) {
         goalInvitationService.acceptInvitation(id);
     }
+
     @PutMapping("/decline-invitation/{id}")
-    public void rejectGoalInvitation(@PathVariable long id){
+    public void rejectGoalInvitation(@PathVariable long id) {
         goalInvitationService.rejectGoalInvitation(id);
     }
+
     @GetMapping("/get-goal-invitations")
-    public List<GoalInvitationDto> getInvitations(@Valid @RequestBody GoalInvitationFilterDto filter){
+    public List<GoalInvitationDto> getInvitations(@Valid @RequestBody GoalInvitationFilterDto filter) {
         return goalInvitationService.getInvitations(filter);
     }
 

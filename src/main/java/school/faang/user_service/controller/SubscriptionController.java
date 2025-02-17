@@ -1,7 +1,7 @@
 package school.faang.user_service.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.subscription.SubscriptionUserDto;
 import school.faang.user_service.dto.user.UserFilterDto;
@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@Validated
 public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
@@ -23,7 +22,7 @@ public class SubscriptionController {
         subscriptionService.unfollowUser(followerId, followeeId);
     }
 
-    private List<SubscriptionUserDto> getFollowers(long followeeId, UserFilterDto dto) {
+    private List<SubscriptionUserDto> getFollowers(long followeeId, @Valid UserFilterDto dto) {
         return subscriptionService.getFollowers(followeeId, dto);
     }
 
@@ -31,7 +30,7 @@ public class SubscriptionController {
         return subscriptionService.getFollowersCount(followerId);
     }
 
-    private List<SubscriptionUserDto> getFollowing(long followerId, UserFilterDto dto) {
+    private List<SubscriptionUserDto> getFollowing(long followerId, @Valid UserFilterDto dto) {
         return subscriptionService.getFollowing(followerId, dto);
     }
 
