@@ -67,7 +67,6 @@ public class UserServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(User.builder().build()));
 
         Tariff tariff = Tariff.builder().build();
-        tariffDto.setUserId(userId);
 
         when(tariffService.buyTariff(eq(tariffDto), eq(userId)))
                 .thenReturn(Tariff.builder().build());

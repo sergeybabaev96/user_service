@@ -14,7 +14,6 @@ import school.faang.user_service.common.PaymentStatus;
 import school.faang.user_service.dto.TariffDto;
 import school.faang.user_service.dto.payment.PaymentResponse;
 import school.faang.user_service.entity.Tariff;
-import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.TariffMapper;
 import school.faang.user_service.properties.UserServiceProperties;
 import school.faang.user_service.repository.TariffRepository;
@@ -65,12 +64,10 @@ public class TariffServiceTest extends BaseTest {
                 .priority(1)
                 .isActive(true)
                 .expirePeriod(LocalDateTime.now())
-                .paymentId(1111L)
-                .user(User.builder().id(userId).build());
+                .paymentId(1111L);
 
         when(tariffRepository.save(any())).thenReturn(tariff.build());
 
-        dto.setUserId(userId);
         tariffService.buyTariff(dto, userId);
 
         verify(tariffRepository).save(tariff.expirePeriod(any()).build());

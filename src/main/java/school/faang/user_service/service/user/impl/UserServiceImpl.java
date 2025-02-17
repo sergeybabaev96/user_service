@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.TariffDto;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.user.GetUserRequest;
@@ -48,7 +47,6 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("User already has active tariff");
         }
 
-        tariffDto.setUserId(userId);
         Tariff tariff = tariffService.buyTariff(tariffDto, userId);
         user.setTariff(tariff);
         userRepository.save(user);
@@ -57,7 +55,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public List<UserDto> findUsersByFilter(GetUserRequest request) {
         List<User> users = userRepository.findAllOrderByTariffAndLimit(request.getLimit(), request.getOffset());
 
@@ -67,8 +64,11 @@ public class UserServiceImpl implements UserService {
             }
         }
 
+        users.stream()
+                .filter(user -> user.getTariff() != null)
+                .forEach(user -> tariffService.decrementShows(user.getTariff().getId()));
+
         return users.stream()
-                .peek(user -> tariffService.decrementShows(user.getTariff()))
                 .map(userMapper::toDto)
                 .toList();
     }
