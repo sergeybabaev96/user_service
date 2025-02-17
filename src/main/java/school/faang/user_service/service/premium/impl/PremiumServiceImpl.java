@@ -33,10 +33,11 @@ import java.util.concurrent.Future;
 @Service
 @RequiredArgsConstructor
 public class PremiumServiceImpl implements PremiumService {
-    private final PremiumRepository premiumRepository;
+    private final PaymentServiceFeignClient paymentServiceClient;
+    private final PremiumDeletionService premiumDeletionService;
     private final PremiumMapper premiumMapper;
     private final UserRepository userRepository;
-    private final PaymentServiceFeignClient paymentServiceClient;
+    private final PremiumRepository premiumRepository;
     private final UserContext userContext;
     private final JobProperties jobProperties;
 
@@ -69,19 +70,10 @@ public class PremiumServiceImpl implements PremiumService {
         List<Future<?>> futures = new ArrayList<>();
 
         for (List<Premium> batch : premiumBatches) {
-            futures.add(executorService.submit(() -> deletePremiumsInBatch(batch)));
+            futures.add(executorService.submit(() -> premiumDeletionService.deletePremiumsInBatch(batch)));
         }
         waitForCompletion(futures);
         executorService.shutdown();
-    }
-
-    private void deletePremiumsInBatch(List<Premium> batch) {
-        try {
-            premiumRepository.deleteAllByIdsInBatch(batch.stream().map(Premium::getId).toList());
-        } catch (Exception e) {
-            log.info("Deleted {} premium accounts", batch.size());
-            log.error("Error occurred while deleting the batch: {}", e.getMessage(), e);
-        }
     }
 
     private List<List<Premium>> getPremiumBatches(List<Premium> allExpired, Integer batchSize) {

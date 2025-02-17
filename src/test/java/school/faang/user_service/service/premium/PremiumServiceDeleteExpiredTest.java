@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.config.JobProperties;
 import school.faang.user_service.entity.premium.Premium;
 import school.faang.user_service.repository.premium.PremiumRepository;
+import school.faang.user_service.service.premium.impl.PremiumDeletionService;
 import school.faang.user_service.service.premium.impl.PremiumServiceImpl;
 
 import java.time.LocalDateTime;
@@ -23,6 +24,9 @@ import static org.mockito.Mockito.*;
 public class PremiumServiceDeleteExpiredTest {
     @Mock
     private PremiumRepository premiumRepository;
+
+    @Mock
+    private PremiumDeletionService premiumDeletionService;
 
     @Spy
     private JobProperties jobProperties;
@@ -50,13 +54,13 @@ public class PremiumServiceDeleteExpiredTest {
     @Test
     void deleteExpiredPremiumsAsync_WithExpiredPremiums_Success() {
         when(premiumRepository.findAllByEndDateBefore(any())).thenReturn(expiredPremiums);
-        doNothing().when(premiumRepository).deleteAllByIdsInBatch(anyList());
+        doNothing().when(premiumDeletionService).deletePremiumsInBatch(anyList());
 
         premiumService.deleteExpiredPremiumsAsync();
 
         verify(premiumRepository, times(1)).findAllByEndDateBefore(any());
         // 5 премиумов, батчи по 2, значит 3 вызова
-        verify(premiumRepository, times(3)).deleteAllByIdsInBatch(anyList());
+        verify(premiumDeletionService, times(3)).deletePremiumsInBatch(anyList());
     }
 
     @Test
@@ -66,16 +70,16 @@ public class PremiumServiceDeleteExpiredTest {
         premiumService.deleteExpiredPremiumsAsync();
 
         verify(premiumRepository, times(1)).findAllByEndDateBefore(any());
-        verify(premiumRepository, never()).deleteAllByIdsInBatch(anyList());
+        verify(premiumDeletionService, never()).deletePremiumsInBatch(anyList());
     }
 
     @Test
     void deletePremiumsInBatch_WithValidBatch_Success() {
         List<Premium> batch = expiredPremiums.subList(0, 2);
-        doNothing().when(premiumRepository).deleteAllByIdsInBatch(anyList());
+        doNothing().when(premiumDeletionService).deletePremiumsInBatch(anyList());
 
-        premiumRepository.deleteAllByIdsInBatch(batch.stream().map(Premium::getId).toList());
+        premiumDeletionService.deletePremiumsInBatch(batch);
 
-        verify(premiumRepository, times(1)).deleteAllByIdsInBatch(anyList());
+        verify(premiumDeletionService, times(1)).deletePremiumsInBatch(anyList());
     }
 }
