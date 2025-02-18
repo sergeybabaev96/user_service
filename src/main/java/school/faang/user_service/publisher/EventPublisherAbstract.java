@@ -12,6 +12,8 @@ public abstract class EventPublisherAbstract<T> {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
 
+    public abstract void publish(T event);
+
     protected void handleEvent(T event, String topic) {
         try {
             String eventToPublish = objectMapper.writeValueAsString(event);
