@@ -13,7 +13,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import school.faang.user_service.config.dicebear.DiceBearApiConfig;
 import school.faang.user_service.config.dicebear.DicebearStyleGenerator;
-import school.faang.user_service.entity.avatar.AvatarType;
+import school.faang.user_service.config.dicebear.AvatarType;
 import school.faang.user_service.exception.DiceBearException;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -39,7 +39,7 @@ class DiceBearServiceTest {
     @BeforeEach
     void setUp() {
         filename = "Filename";
-        url = "API/bottts/jpeg?seed=Filename&width=400&height=400";
+        url = "https://api.dicebear.com/9.x/bottts/jpeg?seed=Filename&width=400&height=400";
     }
 
     @Test
@@ -47,7 +47,7 @@ class DiceBearServiceTest {
         when(styleGenerator.getRandomStyleString()).thenReturn("bottts");
         when(restTemplate.exchange(url, HttpMethod.GET, null, byte[].class))
                 .thenThrow(new RestClientException("Ex"));
-        when(dicebearConfig.getApiUrl()).thenReturn("API");
+        when(dicebearConfig.getApiUrl()).thenReturn("https://api.dicebear.com/9.x");
 
         DiceBearException exception = assertThrows(DiceBearException.class,
                 () -> service.generateAvatar(filename, AvatarType.JPEG));
@@ -66,7 +66,7 @@ class DiceBearServiceTest {
         when(styleGenerator.getRandomStyleString()).thenReturn("bottts");
         when(restTemplate.exchange(url, HttpMethod.GET, null, byte[].class))
                 .thenAnswer(i -> response);
-        when(dicebearConfig.getApiUrl()).thenReturn("API");
+        when(dicebearConfig.getApiUrl()).thenReturn("https://api.dicebear.com/9.x");
 
         byte[] bytes = service.generateAvatar(filename, AvatarType.JPEG);
 

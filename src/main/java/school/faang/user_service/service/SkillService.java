@@ -12,7 +12,6 @@ import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.enums.RatingType;
 import school.faang.user_service.mapper.SkillCandidateMapper;
 import school.faang.user_service.repository.SkillRepository;
-import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import school.faang.user_service.service.rating.annotation.RatingChanging;
 import school.faang.user_service.utility.validator.SkillValidator;
@@ -31,7 +30,6 @@ public class SkillService {
     private static final int MIN_SKILL_OFFERS = 3;
     private final SkillValidator skillValidator;
     private final SkillOfferRepository skillOfferRepository;
-    private final UserRepository userRepository;
     private final SkillCandidateMapper skillCandidateMapper;
     private final SkillRepository skillRepository;
 
@@ -51,6 +49,7 @@ public class SkillService {
         skillRepository.delete(skill);
     }
 
+    @Transactional
     public List<Skill> getSkills(List<Long> ids) {
         log.info("Getting Skills with ids {}", ids);
         if (ids.isEmpty()) {

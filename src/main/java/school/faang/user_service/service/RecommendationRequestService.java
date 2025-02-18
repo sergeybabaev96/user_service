@@ -1,14 +1,11 @@
 package school.faang.user_service.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.stream.Stream;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import school.faang.user_service.dto.request.RejectionDto;
 import school.faang.user_service.dto.request.RequestFilterDto;
 import school.faang.user_service.entity.RequestStatus;
@@ -17,32 +14,37 @@ import school.faang.user_service.filter.Filter;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
-import school.faang.user_service.validator.RecommendationRequestValidator;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
+@Validated
 @Service
 public class RecommendationRequestService {
     private final RecommendationRequestRepository recommendationRequestRepository;
     private final SkillRepository skillRepository;
     private final UserRepository userRepository;
     private final SkillRequestService skillRequestService;
-    private final RecommendationRequestValidator recommendationValidator;
     private final List<Filter<RequestFilterDto, RecommendationRequest>> filters;
 
     @Transactional
-    public RecommendationRequest create(Long requesterId, Long receiverId, String message, List<Long> skillIds) {
-        recommendationValidator.validateMessage(message);
+    public RecommendationRequest create(
+            Long requesterId, Long receiverId, @NotBlank String message, List<Long> skillIds) {
         validateUserExistence(requesterId);
         validateUserExistence(receiverId);
         validateSkillsExist(skillIds);
 
         final RecommendationRequest[] result = new RecommendationRequest[1];
         Optional<RecommendationRequest> latestRecommendationRequest =
-            recommendationRequestRepository.findLatestPendingRequest(requesterId, receiverId);
+                recommendationRequestRepository.findLatestPendingRequest(requesterId, receiverId);
 
         latestRecommendationRequest.ifPresentOrElse(rec ->
-                updateExistingRecommendation(skillIds, rec, result),
-            () -> creatNewRecommendation(requesterId, receiverId, message, skillIds, result)
+                        updateExistingRecommendation(skillIds, rec, result),
+                () -> creatNewRecommendation(requesterId, receiverId, message, skillIds, result)
         );
 
         return result[0];
@@ -50,21 +52,20 @@ public class RecommendationRequestService {
 
     public List<RecommendationRequest> getAllRequests(RequestFilterDto filterDto) {
         Stream<RecommendationRequest> allRecommendation =
-            recommendationRequestRepository.findAll().stream();
+                recommendationRequestRepository.findAll().stream();
         return filters.stream()
-            .filter(f -> f.isApplicable(filterDto))
-            .reduce(allRecommendation, (stream, filter) ->
-                filter.apply(stream, filterDto), (s1, s2) -> s1)
-            .toList();
+                .filter(f -> f.isApplicable(filterDto))
+                .reduce(allRecommendation, (stream, filter) ->
+                        filter.apply(stream, filterDto), (s1, s2) -> s1)
+                .toList();
     }
 
     public RecommendationRequest getRequestById(Long id) {
         return recommendationRequestRepository.findById(id)
-            .orElseThrow(() -> new NoSuchElementException("Not Found: " + id));
+                .orElseThrow(() -> new NoSuchElementException("Not Found: " + id));
     }
 
     public RecommendationRequest rejectRequest(Long recommendationRequestId, RejectionDto rejectionDto) {
-        recommendationValidator.validateMessage(rejectionDto.reason());
 
         RecommendationRequest entity = getRequestById(recommendationRequestId);
         if (entity.getStatus() == RequestStatus.PENDING) {
@@ -77,8 +78,8 @@ public class RecommendationRequestService {
         return entity;
     }
 
-    private RecommendationRequest creatNewRecommendation(Long requesterId, Long receiverId, String message, List<Long> skillIds,
-                                                         RecommendationRequest[] result) {
+    private RecommendationRequest creatNewRecommendation(
+            Long requesterId, Long receiverId, String message, List<Long> skillIds, RecommendationRequest[] result) {
         RecommendationRequest rec = new RecommendationRequest();
         rec.setMessage(message);
         rec.setRequester(userRepository.findById(requesterId).orElseThrow());
@@ -89,7 +90,8 @@ public class RecommendationRequestService {
         return result[0];
     }
 
-    private RecommendationRequest updateExistingRecommendation(List<Long> skillIds, RecommendationRequest rec, RecommendationRequest[] result) {
+    private RecommendationRequest updateExistingRecommendation(
+            List<Long> skillIds, RecommendationRequest rec, RecommendationRequest[] result) {
         LocalDateTime nowAfterAccept = LocalDateTime.now().minusMonths(6);
 
         if (rec.getCreatedAt().isBefore(nowAfterAccept)) {
@@ -101,7 +103,7 @@ public class RecommendationRequestService {
             return result[0];
         } else {
             throw new IllegalArgumentException(
-                "The recommendation already exists and less than 6 months have passed since the last request.");
+                    "The recommendation already exists and less than 6 months have passed since the last request.");
         }
     }
 

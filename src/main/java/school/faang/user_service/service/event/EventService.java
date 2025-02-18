@@ -1,5 +1,6 @@
 package school.faang.user_service.service.event;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,31 +30,43 @@ public class EventService {
     private final EventRepository eventRepository;
     private final List<EventFilter> eventFilters;
 
+    @Transactional
     public Event create(Event inputEvent, Long ownerId, List<Long> relatedSkillIds) {
         Event event = fetchOwnerAndSkills(inputEvent, ownerId, relatedSkillIds);
         validateOwnerSkills(event);
         return eventRepository.save(event);
     }
 
+    @Transactional
     public Event getEvent(Long id) {
         log.info("Getting Event id {}", id);
         return eventRepository.findByIdOrThrow(id);
     }
 
+    @Transactional
     public List<Event> getEventsByFilter(EventFiltersDto filters) {
         List<Event> allEvents = eventRepository.findAll();
 
         return eventFilters.stream()
                 .filter(eventFilter -> eventFilter.isApplicable(filters))
                 .flatMap(filter -> filter.apply(allEvents.stream(), filters))
+                .collect(Collectors.toMap(
+                        Event::getId,
+                        event -> event,
+                        (existing, duplicate) -> existing
+                ))
+                .values()
+                .stream()
                 .toList();
     }
 
+    @Transactional
     public void deleteEvent(Long eventId) {
         log.info("Deleting Event id {}", eventId);
         eventRepository.deleteById(eventId);
     }
 
+    @Transactional
     public void updateEvent(Event inputEvent, Long ownerId, List<Long> relatedSkillIds) {
         Event eventFromDto = fetchOwnerAndSkills(inputEvent, ownerId, relatedSkillIds);
         validateOwnerSkills(eventFromDto);
@@ -62,10 +76,12 @@ public class EventService {
         eventRepository.save(existingEvent);
     }
 
+    @Transactional
     public List<Event> getOwnedEvents(Long userId) {
         return eventRepository.findAllByUserId(userId);
     }
 
+    @Transactional
     public List<Event> getParticipatedEvents(Long userId) {
         return eventRepository.findParticipatedEventsByUserId(userId);
     }

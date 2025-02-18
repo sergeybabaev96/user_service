@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.UserRepository;
-
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -18,6 +17,11 @@ public class UserService {
     public User getUser(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException(String.format("User with id #%d not found", id)));
+    }
+
+    public List<User> getUsers(List<Long> ids) {
+        log.info("Getting Users with ids {}", ids);
+        return userRepository.findAllById(ids);
     }
 
     public boolean isUserExistById(Long id) {

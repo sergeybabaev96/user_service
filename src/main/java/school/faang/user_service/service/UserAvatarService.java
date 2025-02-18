@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.dto.avatar.AvatarResponseDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
-import school.faang.user_service.entity.avatar.AvatarType;
+import school.faang.user_service.config.dicebear.AvatarType;
 import school.faang.user_service.service.external.DiceBearService;
 import school.faang.user_service.service.external.S3Service;
 

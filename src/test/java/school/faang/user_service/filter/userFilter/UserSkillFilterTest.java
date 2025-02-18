@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.filter.user.UserFilter;
+import school.faang.user_service.filter.user.UserSkillFilter;
 
 import java.util.List;
 import java.util.stream.IntStream;

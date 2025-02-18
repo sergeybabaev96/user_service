@@ -51,6 +51,7 @@ class UserServiceTest {
         NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> userService.getUser(USER_ID));
 
         assertEquals(String.format("User with id #%d not found", USER_ID), exception.getMessage());
+
         verify(userRepository, times(1)).findById(USER_ID);
     }
 
