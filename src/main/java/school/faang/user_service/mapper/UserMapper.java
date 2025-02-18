@@ -36,6 +36,6 @@ public interface UserMapper {
 
     UserRegisterResponse toUserRegisterResponse(User user);
 
-    @Mapping(source = "contactPreference.preference", target = "contactPreferencePreference")
+    @Mapping(source = "contactPreference.preference", target = "preference")
     UserNotificationDto toUserNotificationDto(User user);
 }
