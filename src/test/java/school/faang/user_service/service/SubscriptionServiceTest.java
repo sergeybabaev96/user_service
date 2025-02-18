@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,6 +30,7 @@ public class SubscriptionServiceTest {
     @Spy
     SubscriptionUserMapper mapper = new SubscriptionUserMapperImpl();
 
+    @Mock
     private FollowerEventPublisher followerEventPublisher;
 
     private long followerId;
@@ -44,7 +46,8 @@ public class SubscriptionServiceTest {
 
         subscriptionRepositoryMock = Mockito.mock(SubscriptionRepository.class);
         //SubscriptionFilter filterMock = Mockito.mock(SubscriptionFilter.class);
-        subscriptionService = new SubscriptionServiceImpl(subscriptionRepositoryMock, filters, mapper, followerEventPublisher);
+        subscriptionService = new SubscriptionServiceImpl(
+                subscriptionRepositoryMock, filters, mapper, followerEventPublisher);
     }
 
 

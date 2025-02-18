@@ -44,7 +44,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         FollowerEvent followerEvent = new FollowerEvent(followerId, followeeId, LocalDateTime.now());
 
         followerEventPublisher.publish(followerEvent);
-  }
+    }
 
     public void unfollowUser(long followerId, long followeeId) {
         subscriptionRepository.unfollowUser(followerId, followeeId);

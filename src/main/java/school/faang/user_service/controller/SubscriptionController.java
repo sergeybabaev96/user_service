@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,12 +30,7 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
     @PostMapping("/follow")
-    public void followUser(@RequestBody FollowRequestDto followRequest, HttpServletRequest servletRequest) {
-
-        long followerId = followRequest.followerId();
-        long followeeId = followRequest.followeeId();
-
-        System.out.println("servletRequest = " + servletRequest.getRequestURI());
+    public void followUser(@RequestParam long followerId, @RequestParam long followeeId, HttpServletRequest servletRequest) {
 
         log.info("Recieved HTTP request [POST] {} with parameters {} followerId = {}, followeeId = {}",
                 servletRequest.getRequestURL().toString(),
