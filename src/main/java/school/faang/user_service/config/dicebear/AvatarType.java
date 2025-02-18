@@ -1,4 +1,4 @@
-package school.faang.user_service.entity.avatar;
+package school.faang.user_service.config.dicebear;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

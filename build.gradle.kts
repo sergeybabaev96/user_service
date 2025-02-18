@@ -121,6 +121,7 @@ tasks.jacocoTestReport {
                 .exclude("**/config/**")
                 .exclude("**/dto/**")
                 .exclude("**/mapper/**")
+                .exclude("**/filter/**")
         )
     )
 

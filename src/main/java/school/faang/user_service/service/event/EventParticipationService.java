@@ -1,5 +1,6 @@
 package school.faang.user_service.service.event;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,11 +15,12 @@ import java.util.Objects;
 public class EventParticipationService {
     private final EventParticipationRepository eventParticipationRepository;
 
+    @Transactional
     public void registerParticipant(long eventId, long userId) {
         List<User> users = eventParticipationRepository.findAllParticipantsByEventId(eventId);
 
         boolean isRegistered = users.stream()
-                .anyMatch(user -> Objects.equals(user.getId(),userId));
+                .anyMatch(user -> Objects.equals(user.getId(), userId));
         if (isRegistered) {
             throw new IllegalArgumentException("User %d already registered to the event %d".formatted(userId, eventId));
         }
@@ -26,11 +28,12 @@ public class EventParticipationService {
         log.info("User: {} registered to the event: {}", userId, eventId);
     }
 
+    @Transactional
     public void unregisterParticipant(long eventId, long userId) {
         List<User> users = eventParticipationRepository.findAllParticipantsByEventId(eventId);
 
         boolean isRegistered = users.stream()
-                .anyMatch(user -> Objects.equals(user.getId(),userId));
+                .anyMatch(user -> Objects.equals(user.getId(), userId));
         if (isRegistered) {
             eventParticipationRepository.unregister(eventId, userId);
             log.info("Registration is cancelled to user: {} from the event: {}", userId, eventId);
@@ -39,7 +42,8 @@ public class EventParticipationService {
         }
     }
 
-    public List<User> getParticipant(long eventId) {
+    @Transactional
+    public List<User> getParticipants(long eventId) {
         log.info("Registered users to the event: {}", eventId);
         return eventParticipationRepository.findAllParticipantsByEventId(eventId);
     }

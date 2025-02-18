@@ -27,10 +27,10 @@ import school.faang.user_service.filter.Filter;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
-import school.faang.user_service.validator.RecommendationRequestValidator;
+
 
 @ExtendWith(MockitoExtension.class)
-public class RecommendationRequestServiceTest {
+class RecommendationRequestServiceTest {
 
     @Mock
     private RecommendationRequestRepository recommendationRequestRepository;
@@ -43,9 +43,6 @@ public class RecommendationRequestServiceTest {
 
     @Mock
     private SkillRequestService skillRequestService;
-
-    @Mock
-    private RecommendationRequestValidator recommendationValidator;
 
     @Mock
     private List<Filter<RequestFilterDto, RecommendationRequest>> filters;

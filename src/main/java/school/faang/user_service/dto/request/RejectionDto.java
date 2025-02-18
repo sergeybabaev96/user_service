@@ -1,5 +1,6 @@
 package school.faang.user_service.dto.request;
 
-public record RejectionDto(String reason) {
+import jakarta.validation.constraints.NotBlank;
 
+public record RejectionDto(@NotBlank String reason) {
 }

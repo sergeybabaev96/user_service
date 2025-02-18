@@ -7,9 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import school.faang.user_service.config.dicebear.DiceBearApiConfig;
 import school.faang.user_service.config.dicebear.DicebearStyleGenerator;
-import school.faang.user_service.entity.avatar.AvatarType;
+import school.faang.user_service.config.dicebear.AvatarType;
 import school.faang.user_service.exception.DiceBearException;
 
 @Slf4j
@@ -21,14 +22,14 @@ public class DiceBearService {
     private final DicebearStyleGenerator styleGenerator;
 
     public byte[] generateAvatar(String filename, AvatarType type) {
-        String url = String.format(
-                "%s/%s/%s?seed=%s&width=%d&height=%d",
-                dicebearConfig.getApiUrl(),
-                styleGenerator.getRandomStyleString(),
-                type.name().toLowerCase(),
-                filename,
-                type.getWidth(),
-                type.getHeight());
+        String url = UriComponentsBuilder.fromHttpUrl(dicebearConfig.getApiUrl())
+                .pathSegment(styleGenerator.getRandomStyleString())
+                .pathSegment(type.name().toLowerCase())
+                .queryParam("seed", filename)
+                .queryParam("width", type.getWidth())
+                .queryParam("height", type.getHeight())
+                .build()
+                .toUriString();
 
         return getImageFromDicebear(url);
     }

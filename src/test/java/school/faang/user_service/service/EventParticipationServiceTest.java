@@ -9,12 +9,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.event.EventParticipationRepository;
 import school.faang.user_service.service.event.EventParticipationService;
+
 import java.util.Collections;
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
-public class EventParticipationServiceTest {
+class EventParticipationServiceTest {
     private static final long EVENT_ID = 1L;
     private static final long USER_ID = 10L;
 
@@ -25,7 +27,7 @@ public class EventParticipationServiceTest {
     private EventParticipationService eventParticipationService;
 
     @Test
-    public void testExceptionIfUserIsAlreadyRegisteredToEvent() {
+    void testExceptionIfUserIsAlreadyRegisteredToEvent() {
         User user = new User();
         user.setId(USER_ID);
         List<User> users = List.of(user);
@@ -38,7 +40,7 @@ public class EventParticipationServiceTest {
     }
 
     @Test
-    public void testUserIsSuccessfullyRegisteredToEvent() {
+    void testUserIsSuccessfullyRegisteredToEvent() {
         Mockito.when(eventParticipationRepository.findAllParticipantsByEventId(EVENT_ID))
                 .thenReturn(Collections.emptyList());
         eventParticipationService.registerParticipant(EVENT_ID, USER_ID);
@@ -47,7 +49,7 @@ public class EventParticipationServiceTest {
     }
 
     @Test
-    public void testUnregisterUserFromEvent() {
+    void testUnregisterUserFromEvent() {
         User user = new User();
         user.setId(USER_ID);
         List<User> users = List.of(user);
@@ -59,7 +61,7 @@ public class EventParticipationServiceTest {
     }
 
     @Test
-    public void testExceptionIfUserIsNotRegisteredToEvent() {
+    void testExceptionIfUserIsNotRegisteredToEvent() {
         Mockito.when(eventParticipationRepository.findAllParticipantsByEventId(EVENT_ID))
                 .thenReturn(Collections.emptyList());
         assertThrows(IllegalArgumentException.class, () ->
@@ -69,14 +71,14 @@ public class EventParticipationServiceTest {
     }
 
     @Test
-    public void testGetUserOfEvent() {
-        eventParticipationService.getParticipant(EVENT_ID);
+    void testGetUserOfEvent() {
+        eventParticipationService.getParticipants(EVENT_ID);
         Mockito.verify(eventParticipationRepository, Mockito.times(1))
                 .findAllParticipantsByEventId(EVENT_ID);
     }
 
     @Test
-    public void testGetUserCount() {
+    void testGetUserCount() {
         eventParticipationService.getParticipantsCount(EVENT_ID);
         Mockito.verify(eventParticipationRepository, Mockito.times(1))
                 .countParticipants(EVENT_ID);
