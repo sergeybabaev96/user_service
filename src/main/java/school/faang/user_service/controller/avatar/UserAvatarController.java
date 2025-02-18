@@ -35,7 +35,6 @@ public class UserAvatarController {
         return ResponseEntity.ok(imageUrl);
     }
 
-
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteAvatar(@PathVariable @Positive long userId) {
         avatarService.deleteAvatar(userId);
