@@ -4,12 +4,9 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
-import school.faang.user_service.dto.Create;
-import school.faang.user_service.dto.Update;
 import school.faang.user_service.entity.event.EventStatus;
 import school.faang.user_service.entity.event.EventType;
 import school.faang.user_service.utility.validator.event.dto.ValidEventDates;
@@ -20,8 +17,7 @@ import java.util.List;
 @Builder
 @ValidEventDates
 public record EventDto(
-        @Null(groups = Create.class)
-        @NotNull(groups = Update.class)
+
         Long id,
         @NotBlank
         @Size(max = 64)
