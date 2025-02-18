@@ -11,9 +11,9 @@ import school.faang.user_service.dto.user.UserParticipantDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.mapper.user.UserParticipantMapper;
-import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventParticipationRepository;
 import school.faang.user_service.repository.event.EventRepository;
+import school.faang.user_service.repository.user.UserRepository;
 
 import java.util.List;
 import java.util.Optional;

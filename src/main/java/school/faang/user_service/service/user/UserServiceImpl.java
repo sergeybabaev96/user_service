@@ -70,6 +70,14 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
+    @Override
+    public UserDto getUserById(long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(
+                String.format("User with id = %d not found", id)
+        ));
+        return userMapper.toDto(user);
+    }
+
     private User saveUser(User user, Pair<String, String> avatars) {
         UserProfilePic userProfilePic = new UserProfilePic();
         userProfilePic.setFileId(avatars.getLeft());

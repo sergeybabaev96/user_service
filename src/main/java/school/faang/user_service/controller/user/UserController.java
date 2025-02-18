@@ -28,6 +28,12 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
+    @Operation(summary = "Получение пользователя по id")
+    @GetMapping("/{id}")
+    public UserDto getUserById(@PathVariable long id) {
+        return userService.getUserById(id);
+    }
+
     @Operation(summary = "Регистрация пользователя")
     @PostMapping
     public UserResponseRegisterDto registerUser(@RequestBody @Valid UserRegisterDto dto) {
