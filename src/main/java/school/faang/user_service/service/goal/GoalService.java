@@ -6,18 +6,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.GoalFilterDto;
-import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
-import school.faang.user_service.entity.goal.GoalInvitation;
 import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.filter.goal.GoalFilter;
+import school.faang.user_service.mapper.GoalMapper;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.skill.SkillService;
 import school.faang.user_service.service.user.UserService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -32,6 +31,7 @@ public class GoalService {
     private final SkillService skillService;
     private final UserService userService;
     private final List<GoalFilter> goalFilters;
+    private final GoalMapper goalMapper;
 
     @Value("${goal.max-active-goals-per-user}")
     private Integer maxActiveGoalsPerUser;
@@ -62,23 +62,35 @@ public class GoalService {
     }
 
     @Transactional
-    public Goal updateGoal(Long goalId, Goal goalUpdated, Long goalParentId, List<Long> skillIds) {
+    public Goal updateGoal(Long goalId, GoalDto updateDto) {
+        Long goalParentId = updateDto.getParentId();
+        List<Long> skillIds = Optional.ofNullable(updateDto.getSkillIds()).orElse(List.of());
+
         //validation
-        Goal goalOld = goalRepository.findById(goalId).orElseThrow(() -> new NoSuchElementException(String.format("No goal found with such id %s", goalId)));
-        if (goalOld.getStatus() == GoalStatus.COMPLETED) {
-            log.error("The goal with id {} and title {} is already completed and impossible to modify", goalId, goalOld.getTitle());
-            throw new IllegalStateException(String.format("The goal with id %s and title %s is already completed and impossible to modify", goalId, goalOld.getTitle()));
+        Goal goalToUpdate = goalRepository.findById(goalId).orElseThrow(() ->
+                new NoSuchElementException(String.format("No goal found with such id %s", goalId))
+        );
+
+        if (goalToUpdate.getStatus() == GoalStatus.COMPLETED) {
+            log.error("The goal with id {} and title {} is already completed and impossible to modify",
+                    goalId, goalToUpdate.getTitle()
+            );
+            throw new IllegalStateException(String.format("The goal with id %s and title %s is already completed and impossible to modify",
+                    goalId, goalToUpdate.getTitle())
+            );
         }
 
         validateSkills(skillIds);
 
         //perform goal update
+        goalToUpdate = goalMapper.updateGoalFromDto(updateDto, goalToUpdate);
+
         if (goalParentId != null) {
-            goalUpdated.setParent(Goal.builder().id(goalParentId).build());
+            goalToUpdate.setParent(Goal.builder().id(goalParentId).build());
         }
-        setAllMissingFields(goalUpdated, goalOld);
-        goalUpdated = goalRepository.save(goalUpdated);
-        log.info("Goal with id {} and title {} has been updated successfully", goalUpdated.getId(), goalUpdated.getTitle());
+
+        goalToUpdate = goalRepository.save(goalToUpdate);
+        log.info("Goal with id {} and title {} has been updated successfully", updateDto.getId(), updateDto.getTitle());
 
         //update skills assigned to the goal
         if (!skillIds.isEmpty()) {
@@ -87,12 +99,21 @@ public class GoalService {
             log.info("Skills with ids {} have been set for the goal with id {}", skillIds, goalId);
         }
 
-        if (goalUpdated.getStatus() == GoalStatus.COMPLETED) {
-            skillService.assignSkillsFromGoalToUsers(goalId, goalUpdated.getUsers());
-            log.info("Skills from the goal with id {} have been assigned to the users {}", goalId, goalUpdated.getUsers().stream().map(User::getId).toList());
+        if (updateDto.getStatus() == GoalStatus.COMPLETED) {
+            skillService.assignSkillsFromGoalToUsers(goalId, goalToUpdate.getUsers());
+            log.info("Skills from the goal with id {} have been assigned to the users {}", goalId, goalToUpdate.getUsers().stream().map(User::getId).toList());
         }
 
-        return goalUpdated;
+        return goalToUpdate;
+    }
+
+    @Transactional
+    public Goal updateGoal(Long goalId, Goal goalUpdated, Long goalParentId, List<Long> skillIds) {
+        GoalDto goalDto = goalMapper.toDto(goalUpdated);
+        goalDto.setParentId(goalParentId);
+        goalDto.setSkillIds(skillIds);
+
+        return updateGoal(goalId, goalDto);
     }
 
     public void deleteGoal(Long goalId) {
@@ -112,8 +133,8 @@ public class GoalService {
                 .toList();
 
         return subGoals.filter(goal -> applicableFilters.stream()
-                                .allMatch(filter -> filter.apply(filterDto, goal))
-                ).toList();
+                .allMatch(filter -> filter.apply(filterDto, goal))
+        ).toList();
     }
 
     @Transactional(readOnly = true)
@@ -131,26 +152,8 @@ public class GoalService {
                 .toList();
 
         return subGoals.filter(goal -> applicableFilters.stream()
-                                .allMatch(filter -> filter.apply(filterDto, goal))
-                ).toList();
-    }
-
-    private void setAllMissingFields(Goal goalTo, Goal goalFrom) {
-        goalTo.setId((Long) getOrDefault(goalTo.getId(), goalFrom.getId()));
-        goalTo.setParent((Goal) getOrDefault(goalTo.getParent(), goalFrom.getParent()));
-        goalTo.setTitle((String) getOrDefault(goalTo.getTitle(), goalFrom.getTitle()));
-        goalTo.setDescription((String) getOrDefault(goalTo.getDescription(), goalFrom.getDescription()));
-        goalTo.setStatus((GoalStatus) getOrDefault(goalTo.getStatus(), goalFrom.getStatus()));
-        goalTo.setDeadline((LocalDateTime) getOrDefault(goalTo.getDeadline(), goalFrom.getDeadline()));
-        goalTo.setCreatedAt((LocalDateTime) getOrDefault(goalTo.getCreatedAt(), goalFrom.getCreatedAt()));
-        goalTo.setMentor((User) getOrDefault(goalTo.getMentor(), goalFrom.getMentor()));
-        goalTo.setInvitations((List<GoalInvitation>) getOrDefault(goalTo.getInvitations(), goalFrom.getInvitations()));
-        goalTo.setUsers((List<User>) getOrDefault(goalTo.getUsers(), goalFrom.getUsers()));
-        goalTo.setSkillsToAchieve((List<Skill>) getOrDefault(goalTo.getSkillsToAchieve(), goalFrom.getSkillsToAchieve()));
-    }
-
-    private Object getOrDefault(Object value, Object defaultValue) {
-        return Optional.ofNullable(value).orElse(defaultValue);
+                .allMatch(filter -> filter.apply(filterDto, goal))
+        ).toList();
     }
 
     private void assignSkillsToGoal(Long goalId, @NotNull(message = "list of skills can't be null") List<Long> skillsId) {

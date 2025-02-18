@@ -6,11 +6,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
+import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.GoalFilterDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.filter.goal.GoalFilter;
+import school.faang.user_service.mapper.GoalMapper;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.skill.SkillService;
 import school.faang.user_service.service.user.UserService;
@@ -48,6 +50,9 @@ class GoalServiceTest {
 
     @Mock
     private List<GoalFilter> goalFilters;
+
+    @Mock
+    private GoalMapper goalMapper;
 
     @InjectMocks
     private GoalService goalService;
@@ -101,11 +106,14 @@ class GoalServiceTest {
     @Test
     void updateGoal_ShouldReturnUpdatedGoal() {
         Goal goal = new Goal();
+        GoalDto goalDto = new GoalDto();
+        goalDto.setSkillIds(List.of(1L));
         when(goalRepository.save(any(Goal.class))).thenReturn(goal);
         when(goalRepository.findById(1L)).thenReturn(Optional.of(new Goal()));
+        when(goalMapper.updateGoalFromDto(any(GoalDto.class), any(Goal.class))).thenReturn(goal);
         when(skillService.findSkillById(anyLong())).thenReturn(Optional.of(new Skill()));
 
-        Goal result = goalService.updateGoal(1L, goal, 1L, List.of(1L));
+        Goal result = goalService.updateGoal(1L, goalDto);
 
         assertEquals(goal, result);
         verify(goalRepository, times(1)).findById(1L);
@@ -118,13 +126,17 @@ class GoalServiceTest {
     void updateGoalToCompleted_ShouldReturnUpdatedGoal() {
         Goal goal = new Goal();
         goal.setStatus(COMPLETED);
+        GoalDto goalDto = new GoalDto();
+        goalDto.setSkillIds(List.of(1L));
+        goalDto.setStatus(COMPLETED);
         User user = new User();
         goal.setUsers(List.of(user));
         when(goalRepository.save(any(Goal.class))).thenReturn(goal);
         when(goalRepository.findById(1L)).thenReturn(Optional.of(new Goal()));
+        when(goalMapper.updateGoalFromDto(any(GoalDto.class), any(Goal.class))).thenReturn(goal);
         when(skillService.findSkillById(anyLong())).thenReturn(Optional.of(new Skill()));
 
-        Goal result = goalService.updateGoal(1L, goal, 1L, List.of(1L));
+        Goal result = goalService.updateGoal(1L, goalDto);
 
         assertEquals(goal, result);
         verify(goalRepository, times(1)).findById(1L);
@@ -138,7 +150,7 @@ class GoalServiceTest {
     void updateGoal_ShouldThrowNoSuchElementException_WhenGoalNotFound() {
         when(goalRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> goalService.updateGoal(1L, new Goal(), 1L, List.of()));
+        assertThrows(NoSuchElementException.class, () -> goalService.updateGoal(1L, new GoalDto()));
     }
 
     @Test
@@ -146,8 +158,9 @@ class GoalServiceTest {
         Goal goal = new Goal();
         goal.setStatus(COMPLETED);
         when(goalRepository.findById(1L)).thenReturn(Optional.of(goal));
+        when(goalMapper.updateGoalFromDto(any(GoalDto.class), any(Goal.class))).thenReturn(goal);
 
-        assertThrows(IllegalStateException.class, () -> goalService.updateGoal(1L, goal, 1L, List.of()));
+        assertThrows(IllegalStateException.class, () -> goalService.updateGoal(1L, new GoalDto()));
     }
 
     @Test
@@ -155,7 +168,7 @@ class GoalServiceTest {
         when(goalRepository.findById(1L)).thenReturn(Optional.of(new Goal()));
         when(skillService.findSkillById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> goalService.updateGoal(1L, new Goal(), 1L, List.of(1L)));
+        assertThrows(NoSuchElementException.class, () -> goalService.updateGoal(1L, GoalDto.builder().skillIds(List.of(1L)).build()));
     }
 
     @Test

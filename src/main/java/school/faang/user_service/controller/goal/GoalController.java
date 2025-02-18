@@ -55,9 +55,7 @@ public class GoalController {
             @RequestBody @Valid GoalDto goalDto) {
 
         Goal updatedGoal = goalService.updateGoal(goalId,
-                goalMapper.toEntity(goalDto),
-                goalDto.getParentId(),
-                Optional.ofNullable(goalDto.getSkillIds()).orElse(List.of())
+                goalDto
         );
         GoalDto updatedGoalDto = goalMapper.toDto(updatedGoal);
         return ResponseEntity.status(HttpStatus.OK).
@@ -72,7 +70,7 @@ public class GoalController {
         return ResponseEntity.ok().body(String.format("Goal with id %s has been deleted successfully !", goalId));
     }
 
-    @PostMapping("/find-sub-goals/{parentGoalId}")
+    @PostMapping("/parent-goal/{parentGoalId}/goals")
     public ResponseEntity<List<GoalDto>> findSubGoalsByParentIdWithFilter(
             @PathVariable @Positive(message = "Please, provide positive parent goal ID") Long parentGoalId,
             @RequestBody GoalFilterDto goalFilterDto) {
@@ -83,7 +81,7 @@ public class GoalController {
                 .body(goalsDtoList);
     }
 
-    @PostMapping("/find-goals/{userId}")
+    @PostMapping("/user/{userId}/goals")
     public ResponseEntity<List<GoalDto>> findGoalsByUserIdWithFilter(
             @PathVariable @Positive(message = "Please, provide positive user ID") Long userId,
             @RequestBody GoalFilterDto goalFilterDto) {
