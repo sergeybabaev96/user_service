@@ -124,21 +124,26 @@ tasks.named<Checkstyle>("checkstyleTest") {
 kotlin {
     jvmToolchain(17)
 }
+
 spotless {
     java {
-        target("src/**/*.java")
-        googleJavaFormat()
+        target("src/*/.java")
+        googleJavaFormat().aosp()
+        indentWithSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
     }
 }
+
 /**
  * JaCoCo Configuration
  */
 val jacocoIncludes = listOf(
     "**/controller/**",
-    "**/filter/**",
-    "**/mapper/**",
     "**/service/**",
-    "**/validation/**"
+    "**/validation/**",
+    "**/filter/**",
+    "**/mapper/**"
 )
 val jacocoExcludes = listOf(
     "**/adapter/**",

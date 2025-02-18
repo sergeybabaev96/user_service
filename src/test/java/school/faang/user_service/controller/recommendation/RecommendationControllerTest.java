@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.controller.recommendation;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
