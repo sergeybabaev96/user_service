@@ -64,7 +64,7 @@ class UserServiceImplTest {
     public void testRegisterUser() {
         Pair<String, String> avatarsIds = Pair.of("random-1", "random-2");
         when(countryRepository.findById(eq(1L))).thenReturn(Optional.ofNullable(getCountry()));
-        when(avatarService.saveAvatarsToMinio(any())).thenReturn(avatarsIds);
+        when(avatarService.saveRandomAvatarsToS3(any())).thenReturn(avatarsIds);
         when(userRepository.save(any())).thenReturn(getUser());
         UserRegisterDto userRegisterDto = getUserRegisterDto();
 
