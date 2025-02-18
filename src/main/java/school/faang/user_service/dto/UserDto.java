@@ -30,6 +30,18 @@ public class UserDto {
     private String email;
 
     private String phone;
+
+    private String aboutMe;
+
+    private String country;
+
+    private String city;
+
+    private Integer experience;
+
+    private String createdAt;
+
     private PreferredContact preference;
+
     private Locale locale;
 }
