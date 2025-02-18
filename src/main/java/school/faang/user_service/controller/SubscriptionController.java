@@ -30,7 +30,9 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
     @PostMapping("/follow")
-    public void followUser(@RequestParam long followerId, @RequestParam long followeeId, HttpServletRequest servletRequest) {
+    public void followUser(@RequestParam long followerId,
+                           @RequestParam long followeeId,
+                           HttpServletRequest servletRequest) {
 
         log.info("Recieved HTTP request [POST] {} with parameters {} followerId = {}, followeeId = {}",
                 servletRequest.getRequestURL().toString(),
