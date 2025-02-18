@@ -1,0 +1,30 @@
+package school.faang.user_service.publisher;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class FollowerEventPublisher {
+    @Value("${spring.data.redis.channel.follower}")
+    private String followerTopic;
+
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
+
+    public void publish(Object event) {
+        String json = null;
+        try {
+            json = objectMapper.writeValueAsString(event);
+            System.out.println("objectMapper.writeValueAsString(event) = " + objectMapper.writeValueAsString(event));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        redisTemplate.convertAndSend(followerTopic, json);
+    }
+}

@@ -15,6 +15,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.SubscriptionUserMapper;
 import school.faang.user_service.mapper.SubscriptionUserMapperImpl;
+import school.faang.user_service.publisher.FollowerEventPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.service.impl.*;
 
@@ -27,6 +28,9 @@ public class SubscriptionServiceTest {
     private SubscriptionService subscriptionService;
     @Spy
     SubscriptionUserMapper mapper = new SubscriptionUserMapperImpl();
+
+    private FollowerEventPublisher followerEventPublisher;
+
     private long followerId;
     private long followeeId;
     private List<User> allUsers;
@@ -40,7 +44,7 @@ public class SubscriptionServiceTest {
 
         subscriptionRepositoryMock = Mockito.mock(SubscriptionRepository.class);
         //SubscriptionFilter filterMock = Mockito.mock(SubscriptionFilter.class);
-        subscriptionService = new SubscriptionServiceImpl(subscriptionRepositoryMock, filters, mapper);
+        subscriptionService = new SubscriptionServiceImpl(subscriptionRepositoryMock, filters, mapper, followerEventPublisher);
     }
 
 
