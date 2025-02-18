@@ -2,12 +2,18 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRepository;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -39,5 +45,26 @@ public class MentorshipService {
                 .peek(goal -> goal.setMentor(mentee))
                 .toList());
         userRepository.save(mentee);
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<Long> getMentees(Long userId) {
+        return mentorshipRepository.findMenteeIdsByMentorId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> getMentors(Long userId) {
+        return mentorshipRepository.findMentorIdsByMenteeId(userId);
+    }
+
+    @Transactional
+    public void deleteMentee(Long mentorId, Long menteeId) {
+        mentorshipRepository.deleteByMentorIdAndMenteeId(mentorId, menteeId);
+    }
+
+    @Transactional
+    public void deleteMentor(Long menteeId, Long mentorId) {
+        mentorshipRepository.deleteByMenteeIdAndMentorId(menteeId, mentorId);
     }
 }
