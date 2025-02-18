@@ -7,13 +7,8 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRepository;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -39,7 +34,7 @@ public class MentorshipService {
         userRepository.save(mentee);
     }
 
-    private void removeMentorFromGoals(User mentee,Long userId) {
+    private void removeMentorFromGoals(User mentee, Long userId) {
         mentee.setGoals(mentee.getGoals().stream()
                 .filter(goal -> Objects.equals(goal.getMentor().getId(), userId))
                 .peek(goal -> goal.setMentor(mentee))
