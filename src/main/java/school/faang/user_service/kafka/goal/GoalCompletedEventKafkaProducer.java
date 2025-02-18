@@ -16,7 +16,7 @@ public class GoalCompletedEventKafkaProducer implements KafkaProducer<GoalComple
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${kafka.topic.goal-completed}")
+    @Value("${kafka.goal.completed.topic}")
     private String topic;
 
     public void produce(GoalCompletedEvent event) throws JsonProcessingException {
