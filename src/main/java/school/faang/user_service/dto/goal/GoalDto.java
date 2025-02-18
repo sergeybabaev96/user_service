@@ -12,11 +12,18 @@ import java.util.List;
 @NoArgsConstructor
 public class GoalDto {
     private Long id;
-    private @NotBlank String title;
+
+    @NotBlank
+    private String title;
+
     private String description;
+
     private Long parent;
+
     private GoalStatus status;
+
     private List<Long> skillIds;
+
     private Long mentorId;
 
 }
