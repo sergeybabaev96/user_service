@@ -14,4 +14,7 @@ public interface PremiumRepository extends CrudRepository<Premium, Long> {
     Optional<Premium> findByUserIdAndEndDateAfter(Long userId, LocalDateTime currentTime);
 
     List<Premium> findAllByEndDateBefore(LocalDateTime endDate);
+
+    Optional<Premium> findByUserIdAndStartDateAfterAndEndDateBefore(long userId, LocalDateTime startDate,
+                                                                    LocalDateTime endDate);
 }

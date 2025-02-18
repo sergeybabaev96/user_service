@@ -9,9 +9,11 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.entity.recommendation.SkillOffer;
+import school.faang.user_service.enums.RatingType;
 import school.faang.user_service.mapper.SkillCandidateMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
+import school.faang.user_service.service.rating.annotation.RatingChanging;
 import school.faang.user_service.utility.validator.SkillValidator;
 
 import java.util.Collections;
@@ -25,9 +27,8 @@ import java.util.Optional;
 @Service
 public class SkillService {
 
-    private final SkillValidator skillValidator;
     private static final int MIN_SKILL_OFFERS = 3;
-
+    private final SkillValidator skillValidator;
     private final SkillOfferRepository skillOfferRepository;
     private final SkillCandidateMapper skillCandidateMapper;
     private final SkillRepository skillRepository;
@@ -66,6 +67,7 @@ public class SkillService {
         return skills;
     }
 
+    @RatingChanging(ratingType = RatingType.SKILL_RATING)
     @Transactional
     public Skill create(Skill skill) {
         skillValidator.validateSkill(skill);
@@ -95,6 +97,7 @@ public class SkillService {
                 .toList();
     }
 
+    @RatingChanging(ratingType = RatingType.SKILL_RATING)
     @Transactional
     public Skill acquireSkillFromOffers(long skillId, long userId) {
         Skill skill = getSkillById(skillId);
