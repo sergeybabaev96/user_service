@@ -3,64 +3,64 @@ package school.faang.user_service.utility.validator;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.exception.DataValidationException;
 
 class UserDtoValidatorTest {
     Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
     UserDtoValidator userDtoValidator = new UserDtoValidator(validator);
+    UserDto userDto;
+
+    @BeforeEach
+    void setUp() {
+        userDto = UserDto.builder()
+                .id(1L)
+                .username("username")
+                .email("user@gmail.com")
+                .phone("54361")
+                .aboutMe("blablabla")
+                .country("Russia")
+                .city("Moscow")
+                .experience(2)
+                .createdAt("20.20.20")
+                .build();
+    }
 
     @Test
     void validate() {
-        UserDto userDto = new UserDto(1L, "user", "user@mail.com",
-                "54361", "blablabla", "Russia", "Pupok",
-                2, "20.20.20");
         Assertions.assertTrue(userDtoValidator.validate(userDto));
     }
 
-    @Test
-    void validateEmailIsEmpty() {
-        UserDto dto = new UserDto(1L, "user", "",
-                "54361", "blablabla", "Russia", "Pupok",
-                2, "20.20.20");
+    @ParameterizedTest
+    @ValueSource(strings = {"", "122"})
+    void testEmailEmptyIncorrect(String arg){
+        userDto.setEmail(arg);
         String exceptionMessage = "email is not correct";
-        Assertions.assertThrows(DataValidationException.class, () -> userDtoValidator.validate(dto), exceptionMessage);
-    }
-
-    @Test
-    void validateEmailIsNotCorrect() {
-        UserDto dto = new UserDto(1L, "user", "usermail.com",
-                "54361", "blablabla", "Russia", "Pupok",
-                2, "20.20.20");
-        String exceptionMessage = "must be a well-formed email address";
-        Assertions.assertThrows(DataValidationException.class, () -> userDtoValidator.validate(dto), exceptionMessage);
+        Assertions.assertThrows(DataValidationException.class, () -> userDtoValidator.validate(userDto), exceptionMessage);
     }
 
     @Test
     void validateEmailIsNull() {
-        UserDto dto = new UserDto(1L, "user", null,
-                "54361", "blablabla", "Russia", "Pupok",
-                2, "20.20.20");
+        userDto.setEmail(null);
         String exceptionMessage = "email must not be null";
-        Assertions.assertThrows(DataValidationException.class, () -> userDtoValidator.validate(dto), exceptionMessage);
+        Assertions.assertThrows(DataValidationException.class, () -> userDtoValidator.validate(userDto), exceptionMessage);
     }
 
     @Test
     void validateUserNameIsEmpty() {
-        UserDto dto = new UserDto(1L, "", "user@mail.com",
-                "54361", "blablabla", "Russia", "Pupok",
-                2, "20.20.20");
+        userDto.setUsername("");
         String exceptionMessage = "username must not be empty";
-        Assertions.assertThrows(DataValidationException.class, () -> userDtoValidator.validate(dto), exceptionMessage);
+        Assertions.assertThrows(DataValidationException.class, () -> userDtoValidator.validate(userDto), exceptionMessage);
     }
 
     @Test
     void validateUserNameIsNull() {
-        UserDto dto = new UserDto(1L, null, "user@mail.com",
-                "54361", "blablabla", "Russia", "Pupok",
-                2, "20.20.20");
+        userDto.setUsername(null);
         String exceptionMessage = "username must not be null";
-        Assertions.assertThrows(DataValidationException.class, () -> userDtoValidator.validate(dto), exceptionMessage);
+        Assertions.assertThrows(DataValidationException.class, () -> userDtoValidator.validate(userDto), exceptionMessage);
     }
 }
