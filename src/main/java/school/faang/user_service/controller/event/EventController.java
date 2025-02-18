@@ -1,8 +1,8 @@
 package school.faang.user_service.controller.event;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import school.faang.user_service.dto.Create;
-import school.faang.user_service.dto.Update;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.event.EventFiltersDto;
 import school.faang.user_service.entity.event.Event;
@@ -33,7 +31,7 @@ public class EventController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public EventDto create(@Validated(Create.class) @RequestBody EventDto eventDto) {
+    public EventDto create(@Valid @RequestBody EventDto eventDto) {
         Event inputEvent = eventMapper.toEntity(eventDto);
 
         Event createdEvent = eventService.create(inputEvent, eventDto.ownerId(), eventDto.relatedSkillIds());
@@ -64,7 +62,7 @@ public class EventController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/update")
     public EventDto updateEvent(
-            @Validated(Update.class) @RequestBody EventDto eventDto,
+            @Valid @RequestBody EventDto eventDto,
             @RequestParam Long ownerId,
             @RequestParam List<Long> relatedSkillIds) {
         Event inputEvent = eventMapper.toEntity(eventDto);
