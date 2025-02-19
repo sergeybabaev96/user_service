@@ -17,10 +17,9 @@ public class FollowerEventPublisher {
     private final ObjectMapper objectMapper;
 
     public void publish(Object event) {
-        String json = null;
+        String json;
         try {
             json = objectMapper.writeValueAsString(event);
-            System.out.println("objectMapper.writeValueAsString(event) = " + objectMapper.writeValueAsString(event));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
