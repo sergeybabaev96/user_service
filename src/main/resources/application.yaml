@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: dev # prod
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/postgres
@@ -8,10 +10,6 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
@@ -24,28 +22,8 @@ spring:
     multipart:
       max-file-size: 5MB
 
-swagger:
-  api-docs:
-    path: /v1/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    display-request-duration: true
-    operations-sorter: method
-    tags-sorter: alpha
-
 server:
   port: 8080
-
-logging:
-  level:
-    root: info
-
-s3:
-  endpoint: http://localhost:9000
-  download-path: /api/v1/buckets/corpbucket/objects/download?preview=true&prefix=
-  accessKey: user
-  secretKey: password
-  bucketName: corpbucket
 
 project-service:
   host: localhost
@@ -55,28 +33,22 @@ payment-service:
   host: localhost
   port: 9080
 
-goal:
-  max-active-goals-per-user: 3
-  
-premium:
-  removal:
-    cron: "0 0 3 * * ?"  # Запуск каждый день в 03:00 (Quartz формат)
-    batch-size: 100  # Размер батча
-    thread-pool-size: 4
-    
-image:
-  avatar:
-    folder-name: users_avatars
-    sizes:
-      large: 1080
-      small: 170
+swagger:
+  api-docs:
+    path: /v1/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    display-request-duration: true
+    operations-sorter: method
+    tags-sorter: alpha
 
-minio:
-  s3:
-    endpoint: http://localhost:9000
-    region: us-east-1
-    accessKey: user
-    secretKey: password
+s3:
+  endpoint: http://localhost:9000
+  region: us-east-1
+  accessKey: user
+  secretKey: password
+  download-path: /api/v1/buckets/corpbucket/objects/download?preview=true&prefix=
+  bucketName: corpbucket
 
 dicebear:
   apiUrl: https://api.dicebear.com/9.x
@@ -86,3 +58,19 @@ dicebear:
 
 avatar:
   bucketName: user-avatars
+
+goal:
+  max-active-goals-per-user: 3
+
+premium:
+  removal:
+    cron: "0 0 3 * * ?"  # Запуск каждый день в 03:00 (Quartz формат)
+    batch-size: 100
+    thread-pool-size: 4
+
+image:
+  avatar:
+    folder-name: users_avatars
+    sizes:
+      large: 1080
+      small: 170
