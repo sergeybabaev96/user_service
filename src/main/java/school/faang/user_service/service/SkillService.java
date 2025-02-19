@@ -34,26 +34,32 @@ public class SkillService {
     private final SkillCandidateMapper skillCandidateMapper;
     private final SkillRepository skillRepository;
 
+    @Transactional
     public boolean skillExistsByTitle(String title) {
         return skillRepository.existsByTitle(title);
     }
 
+    @Transactional
     public void assignSkillToGoal(long skillId, long goalId) {
         skillRepository.assignSkillToGoal(skillId, goalId);
     }
 
+    @Transactional
     public List<Skill> findSkillsByGoalId(long goalId) {
         return skillRepository.findSkillsByGoalId(goalId);
     }
 
+    @Transactional
     public void deleteSkill(Skill skill) {
         skillRepository.delete(skill);
     }
 
+    @Transactional
     public List<Skill> findAllByUserId(long userId){
         return skillRepository.findAllByUserId(userId);
     }
 
+    @Transactional
     public List<Skill> getSkills(List<Long> ids) {
         log.info("Getting Skills with ids {}", ids);
         if (ids.isEmpty()) {
@@ -118,6 +124,7 @@ public class SkillService {
         return skill;
     }
 
+    @Transactional
     private Skill getSkillById(long skillId) {
         return skillRepository.findById(skillId)
                 .orElseThrow(() -> new NoSuchElementException(String

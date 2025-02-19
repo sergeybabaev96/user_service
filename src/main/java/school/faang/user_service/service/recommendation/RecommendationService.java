@@ -2,6 +2,7 @@ package school.faang.user_service.service.recommendation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.recommendation.SkillOfferDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.Recommendation;
@@ -25,6 +26,7 @@ public class RecommendationService {
     private final SkillOfferService skillOfferService;
     private final UserSkillGuaranteeService userSkillGuaranteeService;
 
+    @Transactional
     public Recommendation create(Long authorId, Long receiverId,
                                  List<SkillOfferDto> skillOffersId, String content,
                                  LocalDateTime createdAt) {
@@ -36,6 +38,7 @@ public class RecommendationService {
         return recommendationRepository.save(recommendation);
     }
 
+    @Transactional
     public Recommendation update(Long authorId, Long receiverId,
                                  List<SkillOfferDto> skillOffersId, String content, LocalDateTime createdAt) {
         Recommendation recommendation = buildRecommendation(authorId, receiverId, skillOffersId,
@@ -52,14 +55,17 @@ public class RecommendationService {
         return recommendation;
     }
 
+    @Transactional
     public void delete(long recommendationId) {
         recommendationRepository.deleteById(recommendationId);
     }
 
+    @Transactional
     public List<Recommendation> getAllUserRecommendations(long receiverId) {
         return recommendationRepository.findAllByReceiverId(receiverId);
     }
 
+    @Transactional
     public List<Recommendation> getAllGivenRecommendations(long authorId) {
         return recommendationRepository.findAllByAuthorId(authorId);
     }

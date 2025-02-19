@@ -68,8 +68,6 @@ class RecommendationServiceTest {
     private UserSkillGuarantee firstUserSkillGuarantee;
     private UserSkillGuarantee secondUserSkillGuarantee;
     private boolean exist = true;
-    private boolean notExist = false;
-    private List<Recommendation> recommendations;
 
     @BeforeEach
     void setUp() {
@@ -177,20 +175,6 @@ class RecommendationServiceTest {
         verify(recommendationRepository, times(1)).save(any());
     }
 
-    private void checkExistSkillsOfferOrNot(boolean trueOrFalse) {
-        skillOffers.forEach(skillOffer -> when(skillService.skillExistsByTitle(skillOffer
-                .skill.getTitle())).thenReturn(trueOrFalse));
-    }
-
-    private void prepare() {
-        when(userService.getUser(firstUser.getId())).thenReturn(firstUser);
-        when(userService.getUser(secondUser.getId())).thenReturn(secondUser);
-        when(skillOfferService.getSkillOffers(skillOffersDto, secondUser.getId()))
-                .thenReturn(skillOffers);
-        when(recommendationRepository.findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(1L,
-                2L)).thenReturn(Optional.of(firstRecommendation));
-    }
-
     @Test
     void testUpdateRecommendation() {
         prepare();
@@ -234,5 +218,19 @@ class RecommendationServiceTest {
 
         verify(recommendationRepository, times(1))
                 .findAllByAuthorId(secondUser.getId());
+    }
+
+    private void checkExistSkillsOfferOrNot(boolean trueOrFalse) {
+        skillOffers.forEach(skillOffer -> when(skillService.skillExistsByTitle(skillOffer
+                .skill.getTitle())).thenReturn(trueOrFalse));
+    }
+
+    private void prepare() {
+        when(userService.getUser(firstUser.getId())).thenReturn(firstUser);
+        when(userService.getUser(secondUser.getId())).thenReturn(secondUser);
+        when(skillOfferService.getSkillOffers(skillOffersDto, secondUser.getId()))
+                .thenReturn(skillOffers);
+        when(recommendationRepository.findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(1L,
+                2L)).thenReturn(Optional.of(firstRecommendation));
     }
 }
