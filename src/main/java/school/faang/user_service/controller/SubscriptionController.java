@@ -9,7 +9,7 @@ import school.faang.user_service.service.SubscriptionService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/subscriptions")
+@RequestMapping("/subscriptions")
 @RequiredArgsConstructor
 public class SubscriptionController {
     private final SubscriptionService service;
