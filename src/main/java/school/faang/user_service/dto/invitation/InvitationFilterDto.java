@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import school.faang.user_service.entity.RequestStatus;
+
 @Getter
 @Setter
 @AllArgsConstructor

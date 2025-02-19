@@ -35,16 +35,13 @@ public class EventParticipationService {
         eventParticipationRepository.unregister(dtoEventId.id(), dtoUserId.id());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public int getParticipantCount(EventParticipationDto dtoEventId) throws DataValidationException {
         List<UserParticipationDto> reg = userParticipationMapper.toDtoList(eventParticipationRepository.findAllParticipantsByEventId(dtoEventId.id()));
-        if (reg.isEmpty()) {
-            return 0;
-        }
         return reg.size();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<UserParticipationDto> getParticipant(EventParticipationDto eventId) throws DataValidationException {
         if (getParticipantCount(eventId) > 0) {
             throw new DataValidationException("Users list is empty");
