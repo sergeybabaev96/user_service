@@ -9,7 +9,7 @@ import school.faang.user_service.service.event.EventService;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class Scheduler {
+public class EventScheduler {
 
     private final EventService eventService;
 

@@ -10,13 +10,13 @@ import school.faang.user_service.service.event.EventService;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class SchedulerTest {
+public class EventSchedulerTest {
 
     @Mock
     private EventService eventService;
 
     @InjectMocks
-    private Scheduler scheduler;
+    private EventScheduler scheduler;
 
     @BeforeEach
     void setUp() {
