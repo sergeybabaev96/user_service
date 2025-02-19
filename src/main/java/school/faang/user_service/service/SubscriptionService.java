@@ -23,14 +23,23 @@ public class SubscriptionService {
 
     public void followUser(long followerId, long followeeId) {
         checkActionOnYourself(followerId, followeeId, "Нельзя подписаться на свой аккаунт.");
-        checkSubscription(followerId, followeeId, "Вы уже подписаны на этого пользователя.");
+
+        boolean isThereSub = repository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
+        if (isThereSub) {
+            throw new DataValidationException("Вы уже подписаны на этого пользователя.");
+        }
+
         repository.followUser(followerId, followeeId);
     }
 
     public void unfollowUser(long followerId, long followeeId) {
         checkActionOnYourself(followerId, followeeId, "Нельзя отписаться от самого себя.");
-        checkSubscription(followerId, followeeId,
-                "Невозможно отписаться от пользователя, на которого вы не подписаны.");
+
+        boolean isThereSub = repository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
+        if (!isThereSub) {
+            throw new DataValidationException("Невозможно отписаться от пользователя, на которого вы не подписаны.");
+        }
+
         repository.unfollowUser(followerId, followeeId);
     }
 
@@ -50,13 +59,6 @@ public class SubscriptionService {
 
     public int getFollowingCount(long followerId) {
         return repository.findFolloweesAmountByFollowerId(followerId);
-    }
-
-    private void checkSubscription(long followerId, long followeeId, String message) {
-        boolean isThereSub = repository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
-        if (isThereSub) {
-            throw new DataValidationException(message);
-        }
     }
 
     private void checkActionOnYourself(long followerId, long followeeId, String errorMessage) {
