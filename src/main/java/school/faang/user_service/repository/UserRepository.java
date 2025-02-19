@@ -1,5 +1,6 @@
 package school.faang.user_service.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -34,4 +35,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             WHERE id = :userId
             """)
     void setBannedField(long userId, boolean banned);
+
+    List<User> findByIdIn(List<Long> ids, Pageable pageable);
+
+    long countByIdIn(List<Long> ids);
 }
