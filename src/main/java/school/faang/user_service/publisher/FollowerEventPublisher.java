@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class FollowerEventPublisher {
     @Value("${spring.data.redis.channel.follower}")
-    private String followerTopic;
+    private final String followerTopic;
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
