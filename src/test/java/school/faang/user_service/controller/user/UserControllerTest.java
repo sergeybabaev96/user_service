@@ -75,7 +75,7 @@ class UserControllerTest {
     @Test
     public void testGetPremiumUsersByFilter() throws Exception {
         UserFilterDto filters = new UserFilterDto(1L, true);
-        UserDto user = new UserDto(1L, "username", "email", "phone");
+        UserDto user = new UserDto(1L, "username", "email", "phone", null);
         when(userService.getPremiumUsersByFilters(eq(1), eq(5), eq(filters))).thenReturn(List.of(user));
 
         mockMvc.perform(get(BASE_URL + "/page/{pageNumber}/size/{pageSize}/premium", 1, 5)
@@ -87,7 +87,7 @@ class UserControllerTest {
     @Test
     public void testGetAllUsersByFilter() throws Exception {
         UserFilterDto filters = new UserFilterDto(1L, true);
-        UserDto user = new UserDto(1L, "username", "email", "phone");
+        UserDto user = new UserDto(1L, "username", "email", "phone", null);
         when(userService.getAllUsersByFilters(eq(1), eq(5), eq(filters))).thenReturn(List.of(user));
 
         mockMvc.perform(get(BASE_URL + "/page/{pageNumber}/size/{pageSize}", 1, 5)

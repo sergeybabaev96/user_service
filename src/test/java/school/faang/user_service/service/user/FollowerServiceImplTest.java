@@ -56,7 +56,7 @@ class FollowerServiceImplTest {
     }
 
     private UserDto getFollowerDto() {
-        return new UserDto(2L, null, null, null);
+        return new UserDto(2L, null, null, null, null);
     }
 
     private User getFollowee() {

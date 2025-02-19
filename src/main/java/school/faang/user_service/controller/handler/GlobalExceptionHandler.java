@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import school.faang.user_service.dto.error.ErrorModel;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.exception.KafkaProduceException;
 import school.faang.user_service.exception.ResourceNotFoundException;
 
 @Slf4j
@@ -47,11 +48,18 @@ public class GlobalExceptionHandler {
         return createError(ex.getMessage(), HttpStatus.BAD_GATEWAY.value());
     }
 
+    @ExceptionHandler(KafkaProduceException.class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    public ErrorModel handleKafkaProduceException(KafkaProduceException ex) {
+        log.error("Kafka produce exception", ex);
+        return createError(ex.getMessage(), HttpStatus.BAD_GATEWAY.value());
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorModel handleGenericException(Exception ex) {
         log.error("Internal server error exception", ex);
-        return createError("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return createError(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
     }
 
     private ErrorModel createError(String message, int statusCode) {
