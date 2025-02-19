@@ -2,6 +2,8 @@ package school.faang.user_service.controller.user;
 
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -104,5 +106,10 @@ public class UserController {
     public ResponseEntity<Void> deleteAvatar() {
         userService.deleteAvatar();
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/page")
+    public Page<UserDto> getUsersByIds(@RequestParam("ids") List<Long> ids, Pageable pageable) {
+        return userService.getUsersByIds(ids, pageable);
     }
 }

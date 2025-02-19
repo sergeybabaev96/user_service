@@ -12,8 +12,10 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRepository;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -67,5 +69,41 @@ public class MentorshipServiceTest {
 
         verify(mentorshipRepository, times(1)).findById(mentorId);
         verify(userRepository, times(2)).save(any(User.class));
+    }
+
+    @Test
+    void testGetMentees() {
+        List<Long> expectedMentees = List.of(mentee.getId(), 3L, 4L);
+        when(mentorshipRepository.findMenteeIdsByMentorId(mentor.getId())).thenReturn(expectedMentees);
+
+        List<Long> actualMentees = mentorshipService.getMentees(mentor.getId());
+
+        assertEquals(expectedMentees, actualMentees);
+        verify(mentorshipRepository).findMenteeIdsByMentorId(mentor.getId());
+    }
+
+    @Test
+    void testGetMentors() {
+        List<Long> expectedMentors = List.of(mentor.getId(), 5L, 6L);
+        when(mentorshipRepository.findMentorIdsByMenteeId(mentee.getId())).thenReturn(expectedMentors);
+
+        List<Long> actualMentors = mentorshipService.getMentors(mentee.getId());
+
+        assertEquals(expectedMentors, actualMentors);
+        verify(mentorshipRepository).findMentorIdsByMenteeId(mentee.getId());
+    }
+
+    @Test
+    void testDeleteMentee() {
+        mentorshipService.deleteMentee(mentor.getId(), mentee.getId());
+
+        verify(mentorshipRepository).deleteByMentorIdAndMenteeId(mentor.getId(), mentee.getId());
+    }
+
+    @Test
+    void testDeleteMentor() {
+        mentorshipService.deleteMentor(mentee.getId(), mentor.getId());
+
+        verify(mentorshipRepository).deleteByMenteeIdAndMentorId(mentee.getId(), mentor.getId());
     }
 }

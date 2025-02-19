@@ -2,12 +2,13 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRepository;
 
+import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -33,11 +34,32 @@ public class MentorshipService {
         userRepository.save(mentee);
     }
 
-    private void removeMentorFromGoals(User mentee,Long userId) {
+    private void removeMentorFromGoals(User mentee, Long userId) {
         mentee.setGoals(mentee.getGoals().stream()
                 .filter(goal -> Objects.equals(goal.getMentor().getId(), userId))
                 .peek(goal -> goal.setMentor(mentee))
                 .toList());
         userRepository.save(mentee);
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<Long> getMentees(Long userId) {
+        return mentorshipRepository.findMenteeIdsByMentorId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> getMentors(Long userId) {
+        return mentorshipRepository.findMentorIdsByMenteeId(userId);
+    }
+
+    @Transactional
+    public void deleteMentee(Long mentorId, Long menteeId) {
+        mentorshipRepository.deleteByMentorIdAndMenteeId(mentorId, menteeId);
+    }
+
+    @Transactional
+    public void deleteMentor(Long menteeId, Long mentorId) {
+        mentorshipRepository.deleteByMenteeIdAndMentorId(menteeId, mentorId);
     }
 }
