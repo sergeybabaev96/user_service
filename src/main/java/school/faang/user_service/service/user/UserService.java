@@ -1,9 +1,6 @@
 package school.faang.user_service.service.user;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +13,7 @@ import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.avatar.AvatarType;
 import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.entity.UserProfilePic;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.event.EventStatus;
 import school.faang.user_service.entity.goal.Goal;
@@ -31,16 +29,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static school.faang.user_service.utils.UserErrorMessage.USERS_NOT_FOUND;
-import static school.faang.user_service.utils.UserErrorMessage.USER_NOT_FOUND;
+import static school.faang.user_service.utils.user.UserErrorMessage.USERS_NOT_FOUND;
+import static school.faang.user_service.utils.user.UserErrorMessage.USER_NOT_FOUND;
 
-@Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserService {
     private final MentorshipService mentorshipService;
-
     private final UserRepository userRepository;
+    private final CountryRepository countryRepository;
     private final EventRepository eventRepository;
     private final GoalRepository goalRepository;
     private final AvatarS3Service avatarS3Service;
@@ -50,6 +47,10 @@ public class UserService {
 
     public boolean userExists(Long userId) {
         return userRepository.existsById(userId);
+    }
+
+    public long getCurrentUserId() {
+        return userContext.getUserId();
     }
 
     public User getUser(long id) {
@@ -68,13 +69,37 @@ public class UserService {
         return users;
     }
 
-    public User updateUser(User user) {
-        return userRepository.save(user);
+    public void updateUser(User user) {
+        userRepository.save(user);
     }
 
     public User getUserById(long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("There is no user with id = " + userId));
+    }
+
+    @Transactional
+    public User registerUser(String username, String email, String password, Long countryId) {
+        Country country = countryRepository.findById(countryId)
+                .orElseThrow(() -> new IllegalArgumentException("Country not found with id: " + countryId));
+
+        User newUser = User.builder()
+                .username(username)
+                .email(email)
+                .password(password)
+                .country(country)
+                .active(true)
+                .experience(0)
+                .build();
+
+        userAvatarService.generateAvatarForNewUser(newUser, AvatarType.JPEG);
+
+        return userRepository.save(newUser);
+    }
+
+    @Transactional
+    public void setBannedField(long userId, boolean banned) {
+        userRepository.setBannedField(userId, banned);
     }
 
     @Transactional
@@ -88,11 +113,6 @@ public class UserService {
         userRepository.save(user);
 
         mentorshipService.stopUserMentorship(userId);
-    }
-
-    @Transactional
-    public void setBannedField(long userId, boolean banned) {
-        userRepository.setBannedField(userId, banned);
     }
 
     @Transactional
@@ -150,7 +170,7 @@ public class UserService {
     }
 
     private void removeUserFromGoals(Long userId) {
-        List<Goal> userGoals =  goalRepository.findGoalsByUserId(userId).toList();
+        List<Goal> userGoals = goalRepository.findGoalsByUserId(userId).toList();
 
         List<Goal> goalsToDelete = userGoals.stream()
                 .filter(goal -> goal.getUsers().size() == 1)
