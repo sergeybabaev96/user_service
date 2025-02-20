@@ -126,6 +126,7 @@ public class User {
     @ManyToMany(mappedBy = "users")
     private List<Goal> goals;
 
+    @ToString.Exclude
     @ManyToMany(mappedBy = "users")
     private List<Skill> skills;
 

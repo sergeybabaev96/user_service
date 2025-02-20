@@ -4,13 +4,13 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.goal.GoalInvitationDto;
-import school.faang.user_service.dto.goal.InvitationFilterDto;
-import school.faang.user_service.dto.goal.filter.InvitationFilter;
+import school.faang.user_service.enums.goal.GoalStatus;
+import school.faang.user_service.filter.Filter;
+import school.faang.user_service.filter.goal.invitation.GoalInvitationFilterDto;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalInvitation;
-import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.mapper.goal.GoalInvitationMapper;
 import school.faang.user_service.repository.user.UserRepository;
 import school.faang.user_service.repository.goal.GoalInvitationRepository;
@@ -27,7 +27,7 @@ public class GoalInvitationServiceImpl implements GoalInvitationService {
     private final GoalInvitationMapper mapper;
     private final UserRepository userRepository;
     private final GoalRepository goalRepository;
-    private final List<InvitationFilter> invitationFilters;
+    private final List<Filter<GoalInvitation, GoalInvitationFilterDto>> invitationFilters;
 
     @Override
     public void createInvitation(GoalInvitationDto goalInvitationDto) {
@@ -56,9 +56,9 @@ public class GoalInvitationServiceImpl implements GoalInvitationService {
     }
 
     @Override
-    public List<GoalInvitationDto> getInvitationsWithFilters(InvitationFilterDto filters) {
+    public List<GoalInvitationDto> getInvitationsWithFilters(GoalInvitationFilterDto filters) {
         List<GoalInvitation> goalInvitations = goalInvitationRepository.findAll();
-        for (InvitationFilter filter : invitationFilters) {
+        for (Filter<GoalInvitation, GoalInvitationFilterDto> filter : invitationFilters) {
             if (filter.isApplicable(filters)) {
                 goalInvitations = filter.apply(goalInvitations, filters);
             }

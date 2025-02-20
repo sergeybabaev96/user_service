@@ -27,4 +27,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByUsernameLike(String username);
 
+    @Query(nativeQuery = true, value = """
+            SELECT u.* FROM users u
+                        JOIN user_goal ug ON u.id = ug.user_id
+                        WHERE ug.goal_id = :goalId
+            """)
+    List<User> findUsersByGoalId(long goalId);
 }

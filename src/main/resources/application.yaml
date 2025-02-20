@@ -16,6 +16,9 @@ spring:
     host: localhost
     port: 6379
 
+  kafka:
+    bootstrap-servers: localhost:9092
+
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
@@ -90,3 +93,8 @@ s3:
   endpoint: http://127.0.0.1:9000
   accessKey: user
   secretKey: password
+
+kafka:
+  goal:
+    completed:
+      topic: goal_completed_topic
