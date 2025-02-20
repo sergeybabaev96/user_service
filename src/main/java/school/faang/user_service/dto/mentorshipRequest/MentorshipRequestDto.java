@@ -12,14 +12,17 @@ import school.faang.user_service.entity.RequestStatus;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MentorshipRequestDto {
+    private final String notNullId = "Поле Id не может быть равным нулю";
+    private final String positiveId = "Поле Id должно быть положительным числом";
+
     private Long id;
     @NotBlank(message = "Описание запроса на менторство не может быть пустым.")
     private String description;
-    @Positive(message = "Поле Id должно быть положительным числом")
-    @NotNull(message = "Поле Id не может равняться нулю")
+    @Positive(message = positiveId)
+    @NotNull(message = notNullId)
     private Long requesterId;
-    @Positive(message = "Поле Id должно быть положительным числом")
-    @NotNull(message = "Поле Id не может равняться нулю")
+    @Positive(message = positiveId)
+    @NotNull(message = notNullId)
     private Long receiverId;
     private RequestStatus status;
     private String rejectionReason;

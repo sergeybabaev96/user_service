@@ -27,7 +27,7 @@ public class RecommendationRequestController {
     }
 
     public ResponseEntity<List<RecommendationRequestDto>> getRecommendationRequests(
-            @RequestBody RequestFilterDto filter) {
+            @Validated @RequestBody RequestFilterDto filter) {
         List<RecommendationRequestDto> requests = recommendationRequestService.getRequests(filter);
         return ResponseEntity.ok(requests);
     }

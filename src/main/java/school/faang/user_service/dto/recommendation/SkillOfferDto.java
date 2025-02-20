@@ -15,7 +15,6 @@ public class SkillOfferDto {
     @Positive(message = "Id должно быть больше нуля")
     private Long id;
 
-
     @Positive(message = "Id должно быть больше нуля")
     private Long skillId;
 }
