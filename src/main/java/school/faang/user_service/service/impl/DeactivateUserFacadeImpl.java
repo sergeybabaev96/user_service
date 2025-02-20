@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.service.DeactivateUserFacade;
-import school.faang.user_service.service.EventService;
 import school.faang.user_service.service.GoalService;
-import school.faang.user_service.service.UserService;
+import school.faang.user_service.service.event.EventService;
 import school.faang.user_service.service.mentorship.MentorshipService;
+import school.faang.user_service.service.user.UserService;
 
 @RequiredArgsConstructor
 @Service

@@ -13,4 +13,6 @@ public interface EventService {
     TariffDto buyEventTariff(TariffDto tariffDto, Long eventId);
 
     List<EventDto> findEventByFilter(GetEventRequest request);
+
+    void deactivateEventsByUserId(long userId);
 }
