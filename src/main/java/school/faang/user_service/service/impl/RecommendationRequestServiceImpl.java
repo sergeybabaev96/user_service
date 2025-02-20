@@ -4,12 +4,14 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.dto.publish.RecommendationEventDto;
 import school.faang.user_service.dto.request.RecommendationRequestDto;
 import school.faang.user_service.dto.request.RejectionDto;
 import school.faang.user_service.dto.request.SearchRequest;
 import school.faang.user_service.dto.response.RecommendationRequestResponseDto;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.exception.RecommendationFrequencyException;
+import school.faang.user_service.publisher.MessagePublisher;
 import school.faang.user_service.repository.genericSpecification.GenericSpecification;
 import school.faang.user_service.mapper.RecommendationRequestMapper;
 import school.faang.user_service.repository.SkillRepository;
@@ -34,6 +36,7 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
     private final SkillRequestRepository skillRequestRepository;
     private final SkillRepository skillRepository;
     private final UserRepository userRepository;
+    private final MessagePublisher recommendationPublisher;
 
     @Override
     @Transactional
@@ -46,6 +49,11 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
         RecommendationRequest recommendationRequest = createRecommendationRequest(recommendationRequestDto);
         associateRecommendationRequestWithSkill(recommendationRequest.getId(),
                 recommendationRequestDto.getSkillIds());
+        RecommendationEventDto recommendationEventDto = new RecommendationEventDto(recommendationRequest.getId(),
+                recommendationRequest.getRequester().getId(),
+                recommendationRequest.getReceiver().getId(),
+                recommendationRequest.getCreatedAt());
+        recommendationPublisher.publish(recommendationEventDto);
         return "Successfully completed";
     }
 
