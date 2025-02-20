@@ -98,6 +98,11 @@ public class UserService {
     }
 
     @Transactional
+    public void setBannedField(long userId, boolean banned) {
+        userRepository.setBannedField(userId, banned);
+    }
+
+    @Transactional
     public void deactivateUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException(String.format(USER_NOT_FOUND, userId)));

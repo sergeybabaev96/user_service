@@ -13,6 +13,15 @@ spring:
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: user-group
+    topics:
+      user-ban-topic:
+        name: user_ban_topic
+
   data:
     redis:
       port: 6379
