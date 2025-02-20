@@ -3,6 +3,7 @@ package school.faang.user_service.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +16,7 @@ import school.faang.user_service.service.SkillService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/skills")
 @RequiredArgsConstructor
 public class SkillController {
 
@@ -26,7 +27,8 @@ public class SkillController {
         return skillService.create(skill);
     }
 
-    public void getUserSkills(long userId) {
+    @GetMapping("/{userId}")
+    public void getUserSkills(@PathVariable long userId) {
         skillService.getUserSkills(userId);
     }
 
