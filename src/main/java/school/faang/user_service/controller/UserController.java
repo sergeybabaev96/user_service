@@ -33,7 +33,7 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public UserDto getUser(@PathVariable long userId) {
-        return userService.getUserDtoById(userId);
+        return userService.getUserById(userId);
     }
 
     @GetMapping("/{id}/notification")

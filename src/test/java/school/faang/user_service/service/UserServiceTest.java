@@ -75,7 +75,7 @@ class UserServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        UserDto result = userService.getUserDtoById(userId);
+        UserDto result = userService.getUserById(userId);
 
         assertEquals(userMapper.toDto(user), result);
         verify(userRepository, times(1)).findById(userId);
@@ -86,7 +86,7 @@ class UserServiceTest {
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> userService.getUserDtoById(userId));
+        assertThrows(EntityNotFoundException.class, () -> userService.getUserById(userId));
         verify(userRepository, times(1)).findById(userId);
     }
 

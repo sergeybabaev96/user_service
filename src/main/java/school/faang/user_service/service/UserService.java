@@ -34,7 +34,7 @@ public class UserService {
     private final MentorshipService mentorshipService;
 
     @Transactional
-    public UserDto getUserDtoById(Long id) {
+    public UserDto getUserById(Long id) {
         return userMapper.toDto(findUserById(id));
     }
 
