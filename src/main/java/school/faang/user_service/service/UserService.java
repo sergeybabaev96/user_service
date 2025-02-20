@@ -34,11 +34,6 @@ public class UserService {
     private final MentorshipService mentorshipService;
 
     @Transactional
-    public UserDto getUserById(Long id) {
-        return userMapper.toDto(findUserById(id));
-    }
-
-    @Transactional
     public UserNotificationDto getUserNotificationDtoById(long id) {
         return userMapper.toNotificationDto(findUserById(id));
     }
@@ -47,6 +42,11 @@ public class UserService {
     public User findUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User with id " + id + " not found"));
+    }
+
+    @Transactional
+    public UserDto getUserById(Long id) {
+        return userMapper.toDto(findUserById(id));
     }
 
     @Transactional
