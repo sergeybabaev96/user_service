@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import school.faang.user_service.dto.RecommendationEvent;
 import school.faang.user_service.dto.RecommendationRequestDto;
 import school.faang.user_service.dto.RecommendationRequestRcvDto;
 import school.faang.user_service.dto.RejectionDto;
@@ -20,6 +21,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.entity.recommendation.SkillRequest;
 import school.faang.user_service.mapper.RecommendationRequestMapperImpl;
+import school.faang.user_service.publisher.recommendation.RecommendationEventPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
@@ -71,6 +73,9 @@ public class RecommendationRequestServiceTest {
     @Mock
     private SkillRepository skillRepository;
 
+    @Mock
+    private RecommendationEventPublisher publisher;
+
     @InjectMocks
     private RecommendationRequestServiceImpl recommendationRequestService;
 
@@ -102,7 +107,8 @@ public class RecommendationRequestServiceTest {
                 userRepository,
                 skillRepository,
                 skillRequestRepository,
-                filters);
+                filters,
+                publisher);
 
         List<User> users = getUsers();
         requester = users.get(0);
@@ -156,6 +162,8 @@ public class RecommendationRequestServiceTest {
         assertEquals(recommendationRequestRcvDto.message(), requestFromDb.message());
         assertEquals(RequestStatus.PENDING, requestFromDb.status());
         assertEquals(recommendationRequestRcvDto.skillIds(), requestFromDb.skillIds());
+        RecommendationEvent event = new RecommendationEvent(requester.getId(), receiver.getId(), 1L);
+        verify(publisher).publish(event);
     }
 
     @Test
