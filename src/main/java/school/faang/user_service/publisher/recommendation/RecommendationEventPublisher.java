@@ -18,6 +18,7 @@ public class RecommendationEventPublisher extends EventPublisherAbstract<Recomme
         this.channels = channels;
     }
 
+    @Override
     public void publish(RecommendationEvent event) {
         handleEvent(event, channels.getRecommendationChannel());
     }
