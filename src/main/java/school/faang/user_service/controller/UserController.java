@@ -3,19 +3,14 @@ package school.faang.user_service.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import school.faang.user_service.dto.BuyTariffRequest;
+import school.faang.user_service.dto.TariffDto;
 import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.user.GetUserRequest;
+import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.service.DeactivateUserFacade;
-import school.faang.user_service.service.EventService;
-import school.faang.user_service.service.GoalService;
-import school.faang.user_service.service.UserService;
-import school.faang.user_service.service.mentorship.MentorshipService;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,5 +29,15 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserDto> getUser(@PathVariable long userId) {
         return userService.getUser(userId);
+    }
+
+    @PostMapping("/buy-tariff")
+    public TariffDto buyTariff(@RequestBody BuyTariffRequest request) {
+        return userService.buyUserTariff(request.tariffDto(), request.id());
+    }
+
+    @GetMapping("/users")
+    public List<UserDto> getUsers(@RequestBody GetUserRequest request) {
+        return userService.findUsersByFilter(request);
     }
 }

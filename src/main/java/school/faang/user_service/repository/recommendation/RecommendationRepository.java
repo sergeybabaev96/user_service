@@ -11,6 +11,7 @@ import java.util.Optional;
 
 public interface RecommendationRepository extends CrudRepository<Recommendation, Long> {
 
+    @Modifying
     @Query(nativeQuery = true, value = """
             INSERT INTO recommendation (author_id, receiver_id, content)
             VALUES (?1, ?2, ?3) returning id

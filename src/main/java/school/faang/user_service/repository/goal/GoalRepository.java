@@ -17,6 +17,7 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
             """)
     Stream<Goal> findGoalsByUserId(long userId);
 
+    @Modifying
     @Query(nativeQuery = true, value = """
             INSERT INTO goal (title, description, parent_goal_id, status, created_at, updated_at)
             VALUES (?1, ?2, ?3, 0, NOW(), NOW()) returning *

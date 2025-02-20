@@ -17,8 +17,7 @@ public enum RecommendationRequestData {
     DATA_NULL_MESSAGE(1L, UserData.USER1, UserData.USER1, null, RequestStatus.ACCEPTED, "", null,
             List.of(SkillData.SKILL_DEV),
             LocalDateTime.now(),
-            LocalDateTime.of(2024, 2, 2, 2, 2))
-    ;
+            LocalDateTime.of(2024, 2, 2, 2, 2));
 
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
@@ -73,7 +72,7 @@ public enum RecommendationRequestData {
     public school.faang.user_service.entity.recommendation.RecommendationRequest toRecommendationRequest() {
         return school.faang.user_service.entity.recommendation.RecommendationRequest.builder()
                 .id(this.id)
-                .skills(this.skillsRequested.stream()
+                .skills((List<SkillRequest>) this.skillsRequested.stream()
                         .map(skillData -> SkillRequest.builder()
                                 .skill(skillData.toSkill())
                                 .build())

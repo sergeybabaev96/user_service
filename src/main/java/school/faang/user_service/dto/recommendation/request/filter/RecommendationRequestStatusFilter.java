@@ -3,8 +3,8 @@ package school.faang.user_service.dto.recommendation.request.filter;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 
+import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 @Component
 public class RecommendationRequestStatusFilter implements RecommendationRequestFilter {
@@ -16,8 +16,9 @@ public class RecommendationRequestStatusFilter implements RecommendationRequestF
     }
 
     @Override
-    public Stream<RecommendationRequest> apply(Stream<RecommendationRequest> recommendationRequests, RecommendationRequestFilterDto requestFilterDto) {
-        return recommendationRequests
-                .filter(request -> Objects.equals(request.getStatus().name(), requestFilterDto.getStatus()));
+    public List<RecommendationRequest> apply(List<RecommendationRequest> recommendationRequests, RecommendationRequestFilterDto requestFilterDto) {
+        return recommendationRequests.stream()
+                .filter(request -> Objects.equals(request.getStatus().name(), requestFilterDto.getStatus()))
+                .toList();
     }
 }

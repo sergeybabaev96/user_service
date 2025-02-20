@@ -2,6 +2,7 @@ package school.faang.user_service.controller;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @ControllerAdvice
 public class ControllerExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -92,6 +94,7 @@ public class ControllerExceptionHandler {
     public ErrorResponse handlePremiumBadRequestException(PremiumBadRequestException e) {
         return new ErrorResponse(e.getMessage());
     }
+
     @ExceptionHandler(ServiceNotAvailableException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleServiceNotAvailableException(ServiceNotAvailableException e) {
@@ -103,4 +106,19 @@ public class ControllerExceptionHandler {
         return new ErrorResponse(e.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(PaymentException.class)
+    public ErrorResponse handlePaymentException(PaymentException e) {
+        log.error("PaymentException: {}", e.getMessage());
+
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    @ExceptionHandler(BusinessException.class)
+    public ErrorResponse handleBusinessException(BusinessException e) {
+        log.error("BusinessException: {}", e.getMessage());
+
+        return new ErrorResponse(e.getMessage());
+    }
 }

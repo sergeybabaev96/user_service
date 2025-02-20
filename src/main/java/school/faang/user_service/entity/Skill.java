@@ -1,21 +1,11 @@
 package school.faang.user_service.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import school.faang.user_service.entity.event.Event;
@@ -24,17 +14,14 @@ import school.faang.user_service.entity.goal.Goal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "skill")
-public class Skill {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+public class Skill extends Identifiable {
 
     @Column(name = "title", length = 64, nullable = false, unique = true)
     private String title;
@@ -67,7 +54,7 @@ public class Skill {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public void addGuarantee(UserSkillGuarantee skillGuarantee){
+    public void addGuarantee(UserSkillGuarantee skillGuarantee) {
         guarantees.add(skillGuarantee);
     }
 }

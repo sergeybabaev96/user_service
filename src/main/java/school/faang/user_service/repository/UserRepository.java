@@ -26,4 +26,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByUsernameLike(String username);
 
+    @Query(nativeQuery = true, value = """
+                    SELECT u.*
+                    FROM users u
+                        LEFT JOIN tariff t ON t.user_id = u.id
+                    ORDER BY
+                        CASE WHEN t.active = true THEN t.priority END
+                    LIMIT ?1 OFFSET ?2
+            """)
+    List<User> findAllOrderByTariffAndLimit(Integer limit, Integer offset);
+
 }
