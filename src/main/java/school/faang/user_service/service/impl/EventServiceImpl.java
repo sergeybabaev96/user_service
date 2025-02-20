@@ -19,14 +19,14 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public void deactivateEventsByUserId(long userId) {
-        List<Long> eventListId = eventRepository.findAllByUserId(userId)
+        List<Long> eventIds = eventRepository.findAllByUserId(userId)
                 .stream()
                 .filter(event -> event.getStatus() == EventStatus.PLANNED)
                 .map(Event::getId)
                 .toList();
-        if (!eventListId.isEmpty()) {
-            eventRepository.deleteUserParticipationByEventId(eventListId);
-            eventRepository.deleteAllById(eventListId);
+        if (!eventIds.isEmpty()) {
+            eventRepository.deleteUserParticipationByEventId(eventIds);
+            eventRepository.deleteAllById(eventIds);
         }
     }
 }

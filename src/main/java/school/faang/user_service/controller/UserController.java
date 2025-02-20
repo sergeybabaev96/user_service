@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.service.DeactivateUserFacade;
 import school.faang.user_service.service.EventService;
 import school.faang.user_service.service.GoalService;
 import school.faang.user_service.service.UserService;
@@ -22,21 +23,12 @@ import school.faang.user_service.service.mentorship.MentorshipService;
 public class UserController {
 
     private final UserService userService;
-    private final MentorshipService mentorshipService;
-    private final GoalService goalService;
-    private final EventService eventService;
+    private final DeactivateUserFacade deactivateUserFacade;
 
 
     @PostMapping("/deactivate")
     public UserDto deactivateUser(@RequestParam("user_id") long userId) {
-
-        goalService.deactivateGoalsByUserId(userId);
-        eventService.deactivateEventsByUserId(userId);
-
-        UserDto userDto = userService.deactivateUser(userId);
-
-        mentorshipService.deactivateMentorship(userId);
-        return userDto;
+        return deactivateUserFacade.deactivateUser(userId);
     }
 
     @GetMapping("/{userId}")

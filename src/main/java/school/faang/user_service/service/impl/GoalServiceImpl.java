@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.GoalService;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 @Service
@@ -16,11 +17,13 @@ public class GoalServiceImpl implements GoalService {
     @Override
     @Transactional
     public void deactivateGoalsByUserId(long userId) {
-        Stream<Long> goalIdStream = goalRepository.deleteUserGoalByUserId(userId);
-        Stream<Long> mustBeDeletedGoalIds = goalIdStream
-                .filter(goalId -> !goalRepository.existsOtherGoalsInProcess(goalId, userId)
-                );
-        goalRepository.deleteAllById(mustBeDeletedGoalIds.toList());
+        List<Long> mustBeDeletedGoalIds = goalRepository
+                .deleteUserGoalByUserId(userId)
+                .filter(
+                    goalId -> !goalRepository.existsOtherGoalsInProcess(goalId, userId)
+                )
+                .toList();
+        goalRepository.deleteAllById(mustBeDeletedGoalIds);
     }
 }
 

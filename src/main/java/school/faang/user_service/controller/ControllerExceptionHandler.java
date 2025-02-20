@@ -11,10 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import school.faang.user_service.common.Currency;
 import school.faang.user_service.dto.ErrorResponse;
-import school.faang.user_service.exception.PremiumBadRequestException;
-import school.faang.user_service.exception.PremiumInvalidDataException;
-import school.faang.user_service.exception.PremiumNotFoundException;
-import school.faang.user_service.exception.ServiceNotAvailableException;
+import school.faang.user_service.exception.*;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -98,6 +95,11 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(ServiceNotAvailableException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleServiceNotAvailableException(ServiceNotAvailableException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleUserNotFoundException(UserNotFoundException e) {
         return new ErrorResponse(e.getMessage());
     }
 
