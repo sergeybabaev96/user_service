@@ -1,9 +1,12 @@
 package school.faang.user_service.repository;
 
+import feign.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.entity.Skill;
+import school.faang.user_service.entity.recommendation.SkillRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,4 +49,18 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
             WHERE gs.goal_id = ?1)
             """)
     List<Skill> findSkillsByGoalId(long goalId);
+
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true, value = """
+    INSERT INTO skill_request (message, status, requester_id, receiver_id)
+    VALUES (:message, :status, :requesterId, :receiverId)
+    RETURNING *;
+    """)
+    SkillRequest create(@Param("message") String message,
+                        @Param("status") String status,
+                        @Param("requesterId") long requesterId,
+                        @Param("receiverId") long receiverId);
+
+
 }

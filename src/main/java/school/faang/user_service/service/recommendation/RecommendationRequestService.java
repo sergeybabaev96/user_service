@@ -12,6 +12,7 @@ import school.faang.user_service.exception.RecommendationRequestCreatedException
 import school.faang.user_service.exception.RequestAlreadyProcessedException;
 import school.faang.user_service.exception.ResourceNotFoundException;
 import school.faang.user_service.mapper.RecommendationRequestMapper;
+import school.faang.user_service.messaging.kafka.RecommendationRequestedEventPublisher;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 import school.faang.user_service.service.SkillRequestService;
 import school.faang.user_service.service.UserService;
@@ -30,20 +31,33 @@ public class RecommendationRequestService {
     private final SkillRequestService skillRequestService;
     private final RecommendationRequestMapper recommendationRequestMapper;
     private final RecommendationRequestFilter recommendationRequestFilter;
+    private final RecommendationRequestedEventPublisher eventPublisher;
 
     @Transactional
     public CreateRecommendationRequestResponse create(CreateRecommendationRequestRequest createRecommendationRequestRequest) {
         long requesterId = createRecommendationRequestRequest.requesterId();
         long receiverId = createRecommendationRequestRequest.receiverId();
+
         User requester = userService.findById(requesterId);
         User receiver = userService.findById(receiverId);
+
         isSixMonthLeft(requesterId, receiverId);
+
         RecommendationRequest mappedRecommendationRequest
                 = recommendationRequestMapper.toEntity(createRecommendationRequestRequest, requester, receiver);
+
         RecommendationRequest recommendationRequest = recommendationRequestRepository.save(mappedRecommendationRequest);
         List<SkillRequest> skillRequests
                 = skillRequestService.createSkillRequests(recommendationRequest.getId(), createRecommendationRequestRequest.skills());
         recommendationRequest.setSkills(skillRequests);
+
+        RecommendationRequestedEvent event = new RecommendationRequestedEvent(
+                recommendationRequest.getRequester().getId(),
+                recommendationRequest.getReceiver().getId(),
+                recommendationRequest.getId()
+        );
+        eventPublisher.publishEvent(event);
+
         return recommendationRequestMapper.toCreateDto(recommendationRequest);
     }
 
