@@ -1,5 +1,6 @@
 package school.faang.user_service.exception;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -13,17 +14,18 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public class ApiError {
 
-  private HttpStatus status;
-  private String message;
+    private HttpStatus status;
+    private String message;
 
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  private Map<String, String> errors;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Map<String, String> errors;
 
-  private LocalDateTime timestamp = LocalDateTime.now();
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime timestamp = LocalDateTime.now();
 
-  public ApiError(HttpStatus status, String message, Map<String, String> errors) {
-    this.status = status;
-    this.message = message;
-    this.errors = errors;
-  }
+    public ApiError(HttpStatus status, String message, Map<String, String> errors) {
+        this.status = status;
+        this.message = message;
+        this.errors = errors;
+    }
 }
