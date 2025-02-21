@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import school.faang.user_service.dto.error.ErrorModel;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.exception.KafkaProduceException;
+import school.faang.user_service.exception.MaxActiveGoalsLimitExceededException;
 import school.faang.user_service.exception.ResourceNotFoundException;
 
 @Slf4j
@@ -40,11 +42,32 @@ public class GlobalExceptionHandler {
         return createError(ex.getMessage(), HttpStatus.NOT_FOUND.value());
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorModel handleIllegalArgumentException(IllegalArgumentException ex) {
+        log.error("Illegal argument exception", ex);
+        return createError(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
+    }
+
     @ExceptionHandler(FeignException.class)
     @ResponseStatus(HttpStatus.BAD_GATEWAY)
     public ErrorModel handleFeignException(FeignException ex) {
         log.error("Feign exception", ex);
         return createError(ex.getMessage(), HttpStatus.BAD_GATEWAY.value());
+    }
+
+    @ExceptionHandler(KafkaProduceException.class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    public ErrorModel handleKafkaProduceException(KafkaProduceException ex) {
+        log.error("Kafka produce exception", ex);
+        return createError(ex.getMessage(), HttpStatus.BAD_GATEWAY.value());
+    }
+
+    @ExceptionHandler(MaxActiveGoalsLimitExceededException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorModel handleMaxActiveGoalsLimitExceedException(MaxActiveGoalsLimitExceededException ex) {
+        log.error("Max active goals limit exceeded exception", ex);
+        return createError(ex.getMessage(), HttpStatus.CONFLICT.value());
     }
 
     @ExceptionHandler(Exception.class)

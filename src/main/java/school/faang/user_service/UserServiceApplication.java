@@ -2,16 +2,24 @@ package school.faang.user_service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.kafka.annotation.EnableKafka;
 
 @SpringBootApplication
 @EnableFeignClients("school.faang.user_service.client")
 @EnableCaching
+@EnableScheduling
+@EnableSchedulerLock(defaultLockAtMostFor = "30s")
+@EnableAsync
+@EnableKafka
 @PropertySource("classpath:.env")
 public class UserServiceApplication {
 

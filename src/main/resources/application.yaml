@@ -16,6 +16,9 @@ spring:
     host: localhost
     port: 6379
 
+  kafka:
+    bootstrap-servers: localhost:9092
+
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
@@ -23,6 +26,11 @@ spring:
     redis:
       port: 6379
       host: localhost
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 
 server:
   port: 8080
@@ -61,6 +69,9 @@ avatar:
   default-avatar: default-avatar.png
   size: 64
   small-size: 32
+  content-type: image/png
+  max-width: 1080
+  max-small-width: 170
 
 dicebear:
   endpoint: https://api.dicebear.com
@@ -72,3 +83,18 @@ user:
 
 service:
   name: user-service
+
+premium:
+  scheduler:
+    remove-cron: "0 0 * * * 1"  # every monday in 00:00
+    batch: 5
+
+s3:
+  endpoint: http://127.0.0.1:9000
+  accessKey: user
+  secretKey: password
+
+kafka:
+  goal:
+    completed:
+      topic: goal_completed_topic

@@ -40,13 +40,15 @@ dependencies {
      */
     implementation("org.liquibase:liquibase-core")
     implementation("redis.clients:jedis:4.3.2")
+    implementation("org.springframework.kafka:spring-kafka")
     runtimeOnly("org.postgresql:postgresql")
+    implementation("net.javacrumbs.shedlock:shedlock-spring:6.2.0")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.2.0")
 
     /**
      * Amazon S3
      */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.464")
-    implementation("io.minio:minio:8.5.17")
 
     /**
      * Utils & Logging
@@ -60,8 +62,9 @@ dependencies {
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
-
+    implementation("net.coobird:thumbnailator:0.4.20")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.13.0")
+    implementation("com.google.guava:guava:23.0")
 
     /**
      * Test containers

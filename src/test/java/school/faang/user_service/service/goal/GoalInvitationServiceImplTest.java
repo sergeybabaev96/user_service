@@ -8,8 +8,9 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.goal.GoalInvitationDto;
-import school.faang.user_service.dto.goal.filter.InvitationFilter;
-import school.faang.user_service.dto.goal.filter.InviterIdFilter;
+import school.faang.user_service.filter.Filter;
+import school.faang.user_service.filter.goal.invitation.GoalInvitationFilterDto;
+import school.faang.user_service.filter.goal.invitation.GoalInvitationInviterIdFilter;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.goal.GoalInvitation;
 import school.faang.user_service.mapper.goal.GoalInvitationMapperImpl;
@@ -58,13 +59,13 @@ class GoalInvitationServiceImplTest {
     @Spy
     private GoalInvitationMapperImpl mapper;
 
-    private final List<InvitationFilter> invitationFilters = new ArrayList<>();
+    private final List<Filter<GoalInvitation, GoalInvitationFilterDto>> invitationFilters = new ArrayList<>();
 
     private GoalInvitationServiceImpl service;
 
     @BeforeEach
     void init() {
-        invitationFilters.add(new InviterIdFilter());
+        invitationFilters.add(new GoalInvitationInviterIdFilter());
         service = new GoalInvitationServiceImpl(repository, mapper, userRepository, goalRepository, invitationFilters);
     }
 

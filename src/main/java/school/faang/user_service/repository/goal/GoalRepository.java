@@ -1,12 +1,11 @@
 package school.faang.user_service.repository.goal;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 public interface GoalRepository extends JpaRepository<Goal, Long> {
 
@@ -15,7 +14,7 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
             JOIN user_goal ug ON g.id = ug.goal_id
             WHERE ug.user_id = ?1
             """)
-    Stream<Goal> findGoalsByUserId(long userId);
+    List<Goal> findGoalsByUserId(long userId);
 
     @Query(nativeQuery = true, value = """
             INSERT INTO goal (title, description, parent_goal_id, status, created_at, updated_at)
@@ -31,20 +30,25 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
     int countActiveGoalsPerUser(long userId);
 
     @Query(nativeQuery = true, value = """
-            WITH RECURSIVE subtasks AS (
+            WITH RECURSIVE subgoals AS (
             SELECT * FROM goal WHERE id = :goalId
             UNION
             SELECT g.* FROM goal g
-            JOIN subtasks st ON st.id = g.parent_goal_id
+            JOIN subgoals st ON st.id = g.parent_goal_id
             )
-            SELECT * FROM subtasks WHERE id != :goalId
+            SELECT * FROM subgoals WHERE id != :goalId
             """)
-    Stream<Goal> findByParent(long goalId);
+    List<Goal> findByParent(long goalId);
 
-    @Query(nativeQuery = true, value = """
-            SELECT u.* FROM users u
-            JOIN user_goal ug ON u.id = ug.user_id
-            WHERE ug.goal_id = :goalId
-            """)
-    List<User> findUsersByGoalId(long goalId);
+    @Query(nativeQuery = true, value = "INSERT INTO user_goal (goal_id, user_id) VALUES (:goalId, :userId)")
+    @Modifying
+    void assignGoalToUser(long goalId, long userId);
+
+    @Query(nativeQuery = true, value = "INSERT INTO goal_skill (goal_id, skill_id) VALUES (:goalId, :skillId)")
+    @Modifying
+    void addSkillToGoal(long goalId, long skillId);
+
+    @Query(nativeQuery = true, value = "DELETE FROM goal_skill WHERE goal_id = :goalId")
+    @Modifying
+    void removeSkillsFromGoal(long goalId);
 }

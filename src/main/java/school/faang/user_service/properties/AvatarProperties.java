@@ -17,4 +17,10 @@ public class AvatarProperties {
 
     private int smallSize;
 
+    private String contentType;
+
+    private int maxWidth;
+
+    private int maxSmallWidth;
+
 }

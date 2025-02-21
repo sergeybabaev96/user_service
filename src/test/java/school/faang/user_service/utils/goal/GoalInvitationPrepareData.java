@@ -2,12 +2,12 @@ package school.faang.user_service.utils.goal;
 
 import lombok.experimental.UtilityClass;
 import school.faang.user_service.dto.goal.GoalInvitationDto;
-import school.faang.user_service.dto.goal.InvitationFilterDto;
+import school.faang.user_service.enums.goal.GoalStatus;
+import school.faang.user_service.filter.goal.invitation.GoalInvitationFilterDto;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalInvitation;
-import school.faang.user_service.entity.goal.GoalStatus;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,8 +51,8 @@ public class GoalInvitationPrepareData {
                 .build();
     }
 
-    public static InvitationFilterDto getInviterIdFilter() {
-        return InvitationFilterDto.builder()
+    public static GoalInvitationFilterDto getInviterIdFilter() {
+        return GoalInvitationFilterDto.builder()
                 .inviterId(INVITER_ID)
                 .build();
     }
