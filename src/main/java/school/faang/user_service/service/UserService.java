@@ -24,11 +24,8 @@ public class UserService {
     @UserProfileViewed
     @Transactional
     public User getUser(Long id) {
-        log.info("Getting User with id {}", id);
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Not found user with id " + id));
-        log.info("User with id {} found", id);
-        return user;
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(String.format("User with id #%d not found", id)));
     }
 
     @Transactional

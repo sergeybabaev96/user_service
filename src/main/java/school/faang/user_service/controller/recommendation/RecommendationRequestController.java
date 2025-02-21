@@ -1,8 +1,6 @@
 package school.faang.user_service.controller.recommendation;
 
 import jakarta.validation.Valid;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,14 +12,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.request.RecommendationRequestDto;
 import school.faang.user_service.dto.request.RejectionDto;
-import school.faang.user_service.dto.respones.RecommendationResponseDto;
 import school.faang.user_service.dto.request.RequestFilterDto;
+import school.faang.user_service.dto.respones.RecommendationResponseDto;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.mapper.RecommendationRequestMapper;
 import school.faang.user_service.service.RecommendationRequestService;
 
+import java.util.List;
+
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/recommendation-requests")
+@RequestMapping("/recommendation-requests")
 @RestController
 public class RecommendationRequestController {
     private final RecommendationRequestService recommendationRequestService;
@@ -29,8 +29,9 @@ public class RecommendationRequestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RecommendationResponseDto requestRecommendation(@RequestBody RecommendationRequestDto rec) {
-        RecommendationRequest entity = recommendationRequestService.create(rec.requesterId(), rec.receiverId(), rec.message(), rec.skillsIds());
+    public RecommendationResponseDto requestRecommendation(@Valid @RequestBody RecommendationRequestDto rec) {
+        RecommendationRequest entity = recommendationRequestService.create(
+                rec.requesterId(), rec.receiverId(), rec.message(), rec.skillsIds());
         return mapper.toDto(entity);
     }
 
@@ -50,7 +51,7 @@ public class RecommendationRequestController {
 
     @PostMapping("/reject/{id}")
     public RecommendationResponseDto rejectRequest(@PathVariable(name = "id") Long recommendationId,
-                                                   @RequestBody
+                                                   @Valid @RequestBody
                                                    RejectionDto rejection) {
         RecommendationRequest entity = recommendationRequestService.rejectRequest(recommendationId, rejection);
         return mapper.toDto(entity);

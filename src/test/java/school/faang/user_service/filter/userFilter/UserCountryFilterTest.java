@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.filter.user.UserCountryFilter;
+import school.faang.user_service.filter.user.UserFilter;
 
 import java.util.List;
 import java.util.stream.IntStream;

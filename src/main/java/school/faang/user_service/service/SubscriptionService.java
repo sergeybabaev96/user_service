@@ -8,7 +8,7 @@ import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.enums.RatingType;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.filter.userFilter.UserFilter;
+import school.faang.user_service.filter.user.UserFilter;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.service.rating.annotation.RatingChanging;
 

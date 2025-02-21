@@ -1,22 +1,31 @@
 package school.faang.user_service.service.external;
 
-import com.amazonaws.SdkClientException;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import school.faang.user_service.exception.S3Exception;
+import school.faang.user_service.exception.CustomS3Exception;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import java.net.URL;
-import java.util.Date;
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,7 +33,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class S3ServiceTest {
     @Mock
-    private AmazonS3 amazonS3Client;
+    private S3Client amazonS3Client;
+
     @InjectMocks
     S3Service s3Service;
     String bucketName;
@@ -43,9 +53,15 @@ class S3ServiceTest {
 
     @Test
     void testUploadToBucketThrowsS3Exception() {
-        when(amazonS3Client.doesBucketExistV2(any())).thenReturn(false);
-        when(amazonS3Client.putObject(any(), any(), any(), any())).thenThrow(new SdkClientException("Ex"));
-        S3Exception exception = assertThrows(S3Exception.class,
+        when(amazonS3Client.headBucket(any(HeadBucketRequest.class)))
+                .thenThrow(NoSuchBucketException.builder()
+                        .message("Bucket not found")
+                        .build());
+        when(amazonS3Client.createBucket(any(CreateBucketRequest.class))).thenReturn(null);
+        when(amazonS3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
+                .thenThrow(SdkClientException.builder().message("Ex").build());
+
+        CustomS3Exception exception = assertThrows(CustomS3Exception.class,
                 () -> s3Service.uploadToBucket(bucketName, fileName, data, contentType));
 
         assertEquals("Error working with S3", exception.getMessage());
@@ -53,37 +69,39 @@ class S3ServiceTest {
 
     @Test
     void testUploadToBucketCorrect() {
-        when(amazonS3Client.doesBucketExistV2(any())).thenReturn(true);
-        when(amazonS3Client.putObject(any(), any(), any(), any())).thenReturn(null);
+        when(amazonS3Client.headBucket(any(HeadBucketRequest.class)))
+                .thenThrow(NoSuchBucketException.builder()
+                        .message("Bucket not found")
+                        .build());
+        when(amazonS3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class))).thenReturn(null);
         String actualFileName = s3Service.uploadToBucket(bucketName, fileName, data, contentType);
 
         assertEquals(fileName, actualFileName);
 
-        verify(amazonS3Client, times(1)).putObject(any(), any(), any(), any());
+        verify(amazonS3Client, times(1)).putObject(any(PutObjectRequest.class), any(RequestBody.class));
     }
 
     @Test
     void testGetUnexpiredUrl() throws Exception {
         String expectedUrl = "http://localhost/test-bucket/test-file.txt?X";
         URL mockUrl = new URL(expectedUrl);
-        when(amazonS3Client.generatePresignedUrl(any(GeneratePresignedUrlRequest.class))).thenReturn(mockUrl);
+        S3Presigner s3Presigner = mock(S3Presigner.class);
+        S3Client client = mock(S3Client.class);
+        S3Service s3Service = new S3Service(client, s3Presigner);
+        PresignedGetObjectRequest mockPresignedRequest = mock(PresignedGetObjectRequest.class);
+
+        when(mockPresignedRequest.url()).thenReturn(mockUrl);
+        when(s3Presigner.presignGetObject(any(GetObjectPresignRequest.class))).thenReturn(mockPresignedRequest);
 
         String actualUrl = s3Service.getUnexpiredUrl(bucketName, fileName);
 
-        assertEquals(actualUrl, expectedUrl);
-        verify(amazonS3Client, times(1)).generatePresignedUrl(any());
-    }
+        assertEquals(expectedUrl, actualUrl);
+        ArgumentCaptor<GetObjectPresignRequest> captor = ArgumentCaptor.forClass(GetObjectPresignRequest.class);
+        verify(s3Presigner).presignGetObject(captor.capture());
 
-    @Test
-    void testGetPresignedUrlForDownload() throws Exception {
-        String expectedUrl = "http://localhost/test-bucket/test-file.txt?X";
-        URL mockUrl = new URL(expectedUrl);
-        Date expirationDate = new Date(System.currentTimeMillis() + 3600_000);
-        when(amazonS3Client.generatePresignedUrl(bucketName, fileName, expirationDate)).thenReturn(mockUrl);
+        GetObjectPresignRequest capturedRequest = captor.getValue();
+        assertEquals(Duration.ofMinutes(60), capturedRequest.signatureDuration());
 
-        String actualUrl = s3Service.getPresignedUrlForDownload(bucketName, fileName, expirationDate);
-
-        assertEquals(actualUrl, expectedUrl);
-        verify(amazonS3Client, times(1)).generatePresignedUrl(bucketName, fileName, expirationDate);
+        verify(s3Presigner, times(1)).presignGetObject(any(GetObjectPresignRequest.class));
     }
 }
