@@ -6,8 +6,10 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 import school.faang.user_service.dto.UserDto;
 import jakarta.persistence.EntityNotFoundException;
+import school.faang.user_service.dto.UserEventDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.filter.user.UserFilter;
@@ -34,6 +36,11 @@ public class UserService {
     public UserDto findUserById(Long id) {
         return userMapper.toDto(userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User with id not found: " + id)));
+    }
+
+    public UserEventDto getUserForEvent(Long userId) {
+        return userMapper.toDtoForEvent(userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User with id not found: " + userId)));
     }
 
     public List<UserDto> getPremiumUsers(UserFilterDto userFilterDto) {

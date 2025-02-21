@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.UserEventDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.service.UserService;
 
@@ -32,5 +33,10 @@ public class UserController {
     @GetMapping("/{userId}")
     public UserDto getUser(@PathVariable long userId) {
         return userService.findUserById(userId);
+    }
+
+    @GetMapping("/event/{userId}")
+    public UserEventDto getUserForEvent(@PathVariable long userId) {
+        return userService.getUserForEvent(userId);
     }
 }
