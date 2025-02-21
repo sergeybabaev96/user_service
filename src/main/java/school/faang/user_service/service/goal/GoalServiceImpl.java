@@ -25,7 +25,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static school.faang.user_service.enums.goal.GoalEventType.GOAL_COMPLETED;
 import static school.faang.user_service.enums.goal.GoalStatus.COMPLETED;
 
 @Slf4j
@@ -68,18 +67,14 @@ public class GoalServiceImpl implements GoalService {
         goalRepository.removeSkillsFromGoal(goal.getId());
         goalDto.getSkillIds().forEach(skillId -> goalRepository.addSkillToGoal(goalId, skillId));
 
+        Goal updatedGoal = goalRepository.save(getUpdateGoal(goalDto, goal));
         if (COMPLETED.equals(goalDto.getStatus())) {
             List<User> users = userRepository.findUsersByGoalId(goal.getId());
             updateUserSkills(users, goalDto.getSkillIds());
-            try {
-                kafkaProducer.produce(
-                        new GoalCompletedEvent(goalDto.getMentorId(), goalId, GOAL_COMPLETED, LocalDateTime.now()));
-            } catch (JsonProcessingException e) {
-                throw new KafkaProduceException(
-                        String.format("Failed kafka produce goal completed event. Goal id = %d", goal.getId()));
+            for (User user : users) {
+                sendEventToKafka(new GoalCompletedEvent(user.getId(), goalId, LocalDateTime.now()));
             }
         }
-        Goal updatedGoal = goalRepository.save(getUpdateGoal(goalDto, goal));
         return goalMapper.toDto(updatedGoal);
     }
 
@@ -164,5 +159,14 @@ public class GoalServiceImpl implements GoalService {
             parentGoal = goalRepository.findById(dto.getParent()).orElse(null);
         }
         return parentGoal;
+    }
+
+    private void sendEventToKafka(GoalCompletedEvent goalCompletedEvent) {
+        try {
+            kafkaProducer.produce(goalCompletedEvent);
+        } catch (JsonProcessingException e) {
+            throw new KafkaProduceException(
+                    String.format("Failed kafka produce goal completed event. Comment id = %d", goalCompletedEvent.goalId()));
+        }
     }
 }
