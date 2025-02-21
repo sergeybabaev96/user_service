@@ -26,6 +26,8 @@ spring:
     redis:
       port: 6379
       host: localhost
+      channel:
+        follow: follow_channel
 
 server:
   port: 8080

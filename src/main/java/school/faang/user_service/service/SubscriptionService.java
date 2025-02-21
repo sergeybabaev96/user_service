@@ -1,18 +1,22 @@
 package school.faang.user_service.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.subscription.SubscriptionUserDto;
 import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.event.FollowEvent;
 import school.faang.user_service.exception.BusinessException;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filters.user.UserFilter;
 import school.faang.user_service.mapper.SubscriptionMapper;
+import school.faang.user_service.publisher.FollowMessagePublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -24,7 +28,9 @@ public class SubscriptionService {
     private final UserRepository userRepository;
     private final List<UserFilter> userFilters;
     private final SubscriptionMapper subscriptionMapper;
+    private final FollowMessagePublisher followMessagePublisher;
 
+    @Transactional
     public void followUser(long followerId, long followeeId) {
         validateFollowerAndFollowee(followerId, followeeId);
         if (subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
@@ -32,6 +38,9 @@ public class SubscriptionService {
         }
         subscriptionRepository.followUser(followerId, followeeId);
         log.info("Пользователь с id {} подписался на пользователя с id {}", followerId, followeeId);
+        followMessagePublisher.publish(
+                new FollowEvent(followerId, followeeId, LocalDateTime.now())
+        );
     }
 
     public void unfollowUser(long followerId, long followeeId) {
@@ -49,9 +58,9 @@ public class SubscriptionService {
         return applyFiltersAndPagination(dto, followers);
     }
 
-    public int getFollowersCount(Long followerId) {
-        checkIdOnExist(followerId);
-        return subscriptionRepository.findFollowersAmountByFolloweeId(followerId);
+    public int getFollowersCount(Long followeeId) {
+        checkIdOnExist(followeeId);
+        return subscriptionRepository.findFollowersAmountByFolloweeId(followeeId);
     }
 
     public List<SubscriptionUserDto> getFollowing(long followerId, UserFilterDto dto) {
