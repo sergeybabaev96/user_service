@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import school.faang.user_service.dto.goal.GoalInvitationDto;
-import school.faang.user_service.dto.goal.InvitationFilterDto;
+import school.faang.user_service.filter.goal.invitation.GoalInvitationFilterDto;
 import school.faang.user_service.service.goal.GoalInvitationService;
 
 import java.util.List;
@@ -37,7 +37,7 @@ public class GoalInvitationController {
 
     @Operation(summary = "Получить все приглашения, используя фильтры")
     @PostMapping("/all")
-    public List<GoalInvitationDto> getInvitations(@RequestBody InvitationFilterDto dto) {
+    public List<GoalInvitationDto> getInvitations(@RequestBody GoalInvitationFilterDto dto) {
         return service.getInvitationsWithFilters(dto);
     }
 }

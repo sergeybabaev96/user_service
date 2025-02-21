@@ -1,4 +1,4 @@
-package school.faang.user_service.entity.goal;
+package school.faang.user_service.enums.goal;
 
 public enum GoalStatus {
     ACTIVE,
