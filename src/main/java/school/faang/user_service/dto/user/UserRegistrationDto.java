@@ -13,5 +13,6 @@ public class UserRegistrationDto {
         private String username;
         private String email;
         private String password;
+        private String telegramUsername;
         private Long countryId;
 }

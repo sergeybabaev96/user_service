@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,6 +43,13 @@ public class UserController {
         return ResponseEntity.ok(userDto);
     }
 
+    @PutMapping("/updateTelegramUserId")
+    UserDto updateTelegramUserId(@RequestParam String telegramUsername,
+                                 @RequestParam String telegramChatId) {
+        User user = userService.updateTelegramData(telegramUsername, telegramChatId);
+        return userMapper.toDto(user);
+    }
+
     @PostMapping("/list")
     public ResponseEntity<List<UserDto>> getUsersByIds(@RequestBody List<UserDto> users) {
         List<User> userList = userMapper.toUserList(users);
@@ -64,7 +72,8 @@ public class UserController {
                 userRegistrationDto.getUsername(),
                 userRegistrationDto.getEmail(),
                 userRegistrationDto.getPassword(),
-                userRegistrationDto.getCountryId()
+                userRegistrationDto.getCountryId(),
+                userRegistrationDto.getTelegramUsername()
         );
 
         UserRegistrationDto responseDto = userMapper.toRegistrationDto(registeredUser);

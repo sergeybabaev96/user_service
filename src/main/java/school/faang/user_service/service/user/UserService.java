@@ -14,12 +14,14 @@ import school.faang.user_service.dto.avatar.AvatarType;
 import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
+import school.faang.user_service.entity.contact.PreferredContact;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.event.EventStatus;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.CountryRepository;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.repository.contact.ContactPreferenceRepository;
 import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.MentorshipService;
@@ -58,6 +60,13 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException(String.format(USER_NOT_FOUND, id)));
     }
 
+    private void chooseNotificationMethode(Long userId, PreferredContact preferredContact) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException(String.format(USER_NOT_FOUND, userId)));
+        user.setPreference(preferredContact);
+        userRepository.save(user);
+    }
+
     public List<User> getUsersByIds(List<User> users) {
         List<Long> userIds = users.stream()
                 .map(User::getId)
@@ -79,7 +88,7 @@ public class UserService {
     }
 
     @Transactional
-    public User registerUser(String username, String email, String password, Long countryId) {
+    public User registerUser(String username, String email, String password, Long countryId, String telegramUsername) {
         Country country = countryRepository.findById(countryId)
                 .orElseThrow(() -> new IllegalArgumentException("Country not found with id: " + countryId));
 
@@ -88,6 +97,7 @@ public class UserService {
                 .email(email)
                 .password(password)
                 .country(country)
+                .telegramUsername(telegramUsername)
                 .active(true)
                 .experience(0)
                 .build();
@@ -213,5 +223,12 @@ public class UserService {
                 .map(userMapper::toDto)
                 .toList();
         return new PageImpl<>(userDos, pageable, userRepository.countByIdIn(ids));
+    }
+
+    public User updateTelegramData(String telegramUsername, String telegramChatId) {
+        User user = userRepository.findByTelegramUsername(telegramUsername).orElseThrow(
+                () -> new IllegalArgumentException(String.format(USER_NOT_FOUND, telegramChatId)));
+        user.setTelegramChatId(telegramChatId);
+        return userRepository.save(user);
     }
 }

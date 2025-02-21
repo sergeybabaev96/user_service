@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import school.faang.user_service.entity.User;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -39,4 +40,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByIdIn(List<Long> ids, Pageable pageable);
 
     long countByIdIn(List<Long> ids);
+
+    Optional<User> findByTelegramUsername(String username);
 }
