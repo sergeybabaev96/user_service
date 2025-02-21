@@ -118,6 +118,7 @@ public class SubscriptionService {
         logger.info("Succeed of unfollowing user!");
     }
 
+    @Transactional(readOnly = true)
     public boolean isFollow(long followerId, long followeeId) {
         return subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
     }
