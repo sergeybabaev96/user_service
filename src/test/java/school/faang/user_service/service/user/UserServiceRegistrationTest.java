@@ -87,6 +87,7 @@ class UserServiceRegistrationTest {
                 .password(password)
                 .country(country)
                 .active(true)
+                .telegramUsername(telegramUserName)
                 .experience(0)
                 .build();
 
