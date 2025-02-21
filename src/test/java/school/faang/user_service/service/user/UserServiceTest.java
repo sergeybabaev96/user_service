@@ -132,6 +132,6 @@ public class UserServiceTest {
 
         userService.deactivateUser(1L);
 
-        Mockito.verify(mentorshipService, Mockito.times(1)).stopMentorship(userListSizeOne.get(0));
+        Mockito.verify(mentorshipService, Mockito.times(1)).stopMentorship(userListSizeOne.get(0).getId());
     }
 }

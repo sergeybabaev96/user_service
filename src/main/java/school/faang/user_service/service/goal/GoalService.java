@@ -14,6 +14,5 @@ public class GoalService {
     }
 
     public void deleteGoal(Long goalId) {
-        goalRepository.deleteById(0L);
     }
 }

@@ -9,7 +9,6 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,24 +21,26 @@ public class MentorshipService {
     @Autowired
     private GoalRepository goalRepository;
 
+    @Autowired
+    private MentorshipRepository mentorshipRepository;
+
     /**
      * - deletes mentees from mentor
      * - changes mentee_id of goals created by mentor
      * to id of first user associated with the goal.
-     * @param userToDeactivate - mentor who is being deactivated
+     *
+     * @param userToDeactivateId - mentor who is being deactivated
      */
-    public void stopMentorship(User userToDeactivate) {
-        List<Goal> goalsControlledByMentor = goalRepository.findGoalsByMentorId(userToDeactivate.getId());
-        for(Goal goal : goalsControlledByMentor) {
+    public void stopMentorship(Long userToDeactivateId) {
+        List<Goal> goalsControlledByMentor = goalRepository.findGoalsByMentorId(userToDeactivateId);
+        for (Goal goal : goalsControlledByMentor) {
             List<User> usersOfGoal = goalRepository.findUsersByGoalIdHql(goal.getId());
             goal.setMentor(usersOfGoal.get(0));
-            log.debug("Goal \"{}\" has changed mentor_id: old Id={} , new Id=\"{}\"", goal.getDescription(), userToDeactivate.getId(), usersOfGoal.get(0).getId() );
+            log.debug("Goal \"{}\" has changed mentor_id: old Id={} , new Id=\"{}\"", goal.getDescription(), userToDeactivateId, usersOfGoal.get(0).getId());
         }
         goalRepository.saveAll(goalsControlledByMentor);
 
-        List<User> mentees = new ArrayList<>();
-        userToDeactivate.setMentees(mentees);
-        userRepository.save(userToDeactivate);
-        log.debug("Mentor {} mentees number after deactivation={}",userToDeactivate.getUsername(), userToDeactivate.getMentees().size());
+        mentorshipRepository.deleteByMentorId(userToDeactivateId);
+        log.debug("Deleting mentees for mentor with mentor_id={}", userToDeactivateId);
     }
 }
