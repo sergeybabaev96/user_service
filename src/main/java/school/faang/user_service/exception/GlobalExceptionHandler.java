@@ -1,5 +1,6 @@
 package school.faang.user_service.exception;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;

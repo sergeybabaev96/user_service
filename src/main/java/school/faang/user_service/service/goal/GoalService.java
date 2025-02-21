@@ -1,5 +1,6 @@
 package school.faang.user_service.service.goal;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -13,8 +14,7 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
-import school.faang.user_service.exception.BadRequestException;
-import school.faang.user_service.exception.ResourceNotFoundException;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filters.goal.GoalFilter;
 import school.faang.user_service.mapper.GoalMapper;
 import school.faang.user_service.repository.adapter.GoalRepositoryAdapter;
@@ -40,38 +40,38 @@ public class GoalService {
   public GoalDTO createGoal(Long userId, GoalDTO goalDTO) {
     validateGoal(goalDTO);
 
-    if (goalRepository.countActiveGoalsPerUser(userId) > MAX_ACTIVE_GOAL) {
-      throw new BadRequestException("User have more than " + MAX_ACTIVE_GOAL + " active goals");
+        if (goalRepository.countActiveGoalsPerUser(userId) > MAX_ACTIVE_GOAL) {
+            throw new DataValidationException("User have more than " + MAX_ACTIVE_GOAL + " active goals");
+        }
+        Goal goal = goalMapper.toEntity(goalDTO);
+        if (goalDTO.getParentId() != null) {
+            Goal parent = goalRepositoryAdapter.getById(goalDTO.getParentId());
+            goal.setParent(parent);
+        }
+        if (goalDTO.getMentorId() != null) {
+            User mentor = userRepositoryAdapter.getById(userId);
+            goal.setMentor(mentor);
+        }
+        goal.setStatus(GoalStatus.ACTIVE);
+        User user = userRepositoryAdapter.getById(userId);
+        goal.addUser(user);
+        List<Skill> skills = skillRepositoryAdapter.findAllById(goalDTO.getSkillToAchieveIds());
+        skills.forEach(goal::addSkill);
+        return goalMapper.toDto(goalRepository.save(goal));
     }
-    Goal goal = goalMapper.toEntity(goalDTO);
-    if (goalDTO.getParentId() != null) {
-      Goal parent = goalRepositoryAdapter.getById(goalDTO.getParentId());
-      goal.setParent(parent);
-    }
-    if (goalDTO.getMentorId() != null) {
-      User mentor = userRepositoryAdapter.getById(userId);
-      goal.setMentor(mentor);
-    }
-    goal.setStatus(GoalStatus.ACTIVE);
-    User user = userRepositoryAdapter.getById(userId);
-    goal.addUser(user);
-    List<Skill> skills = skillRepositoryAdapter.findAllById(goalDTO.getSkillToAchieveIds());
-    skills.forEach(goal::addSkill);
-    return goalMapper.toDto(goalRepository.save(goal));
-  }
 
   @Transactional
   public GoalDTO updateGoal(Long goalId, GoalDTO goalDTO) {
     validateGoal(goalDTO);
     Goal goal = goalRepositoryAdapter.getById(goalId);
 
-    if (goal.getStatus() == GoalStatus.COMPLETED) {
-      throw new BadRequestException("This goal is already completed");
-    }
-    goal.setTitle(goalDTO.getTitle());
-    goal.setDescription(goalDTO.getDescription());
-    goal.setDeadline(goalDTO.getDeadline());
-    updateSkills(goal, goalDTO.getSkillToAchieveIds());
+        if (goal.getStatus() == GoalStatus.COMPLETED) {
+            throw new DataValidationException("This goal is already completed");
+        }
+        goal.setTitle(goalDTO.getTitle());
+        goal.setDescription(goalDTO.getDescription());
+        goal.setDeadline(goalDTO.getDeadline());
+        updateSkills(goal, goalDTO.getSkillToAchieveIds());
 
     if (goalDTO.getStatus() != null
         && Objects.equals(goalDTO.getStatus(), GoalStatus.COMPLETED.name())) {
@@ -131,9 +131,12 @@ public class GoalService {
     newSkills.forEach(goal::addSkill);
   }
 
-  private void validateGoal(GoalDTO goalDTO) {
-    if (!skillRepositoryAdapter.skillsExist(goalDTO.getSkillToAchieveIds())) {
-      throw new ResourceNotFoundException("Unable to find skills");
+    private void validateGoal(GoalDTO goalDTO) {
+        if (!skillRepositoryAdapter.skillsExist(goalDTO.getSkillToAchieveIds())) {
+            throw new EntityNotFoundException("Unable to find skills");
+        }
+
     }
-  }
+
+
 }
