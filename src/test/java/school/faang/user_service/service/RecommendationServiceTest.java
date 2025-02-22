@@ -67,6 +67,7 @@ class RecommendationServiceTest {
     private LocalDateTime minusSevenMonth;
     private UserSkillGuarantee firstUserSkillGuarantee;
     private UserSkillGuarantee secondUserSkillGuarantee;
+    private List recommendations;
     private boolean exist = true;
 
     @BeforeEach
