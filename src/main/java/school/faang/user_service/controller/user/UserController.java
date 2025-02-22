@@ -34,9 +34,9 @@ public class UserController {
         return userMapper.toDtoList(users);
     }
 
-    @PostMapping("/users/ordered")
-    public List<UserDto> getOrderedUsers(@RequestBody List<Long> ids) {
-        List<User> users = userService.getUsersByIdsOrdered(ids);
+    @PostMapping("/users/batch-get")
+    public List<UserDto> getUsersByIdsInGivenOrder(@RequestBody List<Long> ids) {
+        List<User> users = userService.getUsersByIdsInGivenOrder(ids);
         return userMapper.toDtoList(users);
     }
 }

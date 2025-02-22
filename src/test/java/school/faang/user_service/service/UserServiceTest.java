@@ -91,7 +91,7 @@ class UserServiceTest {
         List<User> testOrderedUsers = List.of(testUser3, testUser, testUser2);
         Mockito.when(userRepository.findAllById(orderedIds)).thenReturn(testUsers);
 
-        List<User> result = userService.getUsersByIdsOrdered(orderedIds);
+        List<User> result = userService.getUsersByIdsInGivenOrder(orderedIds);
 
         Assertions.assertEquals(testOrderedUsers.get(0).getId(), result.get(0).getId());
         Assertions.assertEquals(testOrderedUsers.get(1).getId(), result.get(1).getId());

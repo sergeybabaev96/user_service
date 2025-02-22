@@ -22,21 +22,20 @@ public class UserService {
     private final UserRepository userRepository;
 
     @UserProfileViewed
-    @Transactional
+    @Transactional(readOnly = true)
     public User getUser(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException(String.format("User with id #%d not found", id)));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<User> getUsers(List<Long> ids) {
         log.info("Getting Users with ids {}", ids);
         return userRepository.findAllById(ids);
     }
 
-    @Transactional
-    public List<User> getUsersByIdsOrdered(List<Long> ids) {
-        log.info("Getting Ordered Users with ids {}", ids);
+    @Transactional(readOnly = true)
+    public List<User> getUsersByIdsInGivenOrder(List<Long> ids) {
         List<User> users = userRepository.findAllById(ids);
 
         Map<Long, User> userMap = users.stream()

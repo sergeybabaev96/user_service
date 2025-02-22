@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.kafka.UserProfileViewedDto;
 
@@ -20,7 +19,6 @@ public class KafkaProducer {
     @Value("${user-profile-viewed.topic-name}")
     String userProfileViewedTopicName;
 
-    @Async
     public void sendMessage(Long viewerId, Long profileOwnerId) {
         String uniqueKey = UUID.randomUUID().toString();
         UserProfileViewedDto dto = new UserProfileViewedDto(viewerId, profileOwnerId, LocalDateTime.now());
