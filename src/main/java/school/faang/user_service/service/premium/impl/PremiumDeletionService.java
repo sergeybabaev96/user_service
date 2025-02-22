@@ -18,7 +18,8 @@ public class PremiumDeletionService {
     @Transactional
     public void deletePremiumsInBatch(List<Premium> batch) {
         try {
-            premiumRepository.deleteAllByIdsInBatch(batch.stream().map(Premium::getId).toList());
+            List<Long> expiredPremiumList = batch.stream().map(Premium::getId).toList();
+            premiumRepository.deleteAllByIdsInBatch(expiredPremiumList);
             log.info("Deleted {} premium accounts", batch.size());
         } catch (Exception e) {
             log.error("Error occurred while deleting the batch: {}", e.getMessage(), e);

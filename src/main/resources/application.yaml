@@ -63,7 +63,7 @@ user-service:
   recommendation-request:
     min-month: 6
 
-job:
+remove-premium-job:
   batch-size: 100
   thread-pool-size: 3
-  removePremiumCron: 0 1 0 ? * MON
+  remove-premium-cron: 0 1 0 ? * MON

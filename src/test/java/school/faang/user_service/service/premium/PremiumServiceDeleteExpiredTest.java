@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import school.faang.user_service.config.JobProperties;
+import school.faang.user_service.config.RemoveExpiredPremiumJobProperties;
 import school.faang.user_service.entity.premium.Premium;
 import school.faang.user_service.repository.premium.PremiumRepository;
 import school.faang.user_service.service.premium.impl.PremiumDeletionService;
@@ -18,7 +18,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class PremiumServiceDeleteExpiredTest {
@@ -29,7 +34,7 @@ public class PremiumServiceDeleteExpiredTest {
     private PremiumDeletionService premiumDeletionService;
 
     @Spy
-    private JobProperties jobProperties;
+    private RemoveExpiredPremiumJobProperties removeExpiredPremiumJobProperties;
 
     @InjectMocks
     private PremiumServiceImpl premiumService;
@@ -38,8 +43,8 @@ public class PremiumServiceDeleteExpiredTest {
 
     @BeforeEach
     void setUp() {
-        jobProperties.setBatchSize(2);
-        jobProperties.setThreadPoolSize(2);
+        removeExpiredPremiumJobProperties.setBatchSize(2);
+        removeExpiredPremiumJobProperties.setThreadPoolSize(2);
         expiredPremiums = new ArrayList<>();
         for (long i = 1; i <= 5; i++) {
             expiredPremiums.add(Premium.builder()

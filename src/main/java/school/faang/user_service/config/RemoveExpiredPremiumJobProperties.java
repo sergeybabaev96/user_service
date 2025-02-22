@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "job")
-public class JobProperties {
+@ConfigurationProperties(prefix = "remove-premium-job")
+public class RemoveExpiredPremiumJobProperties {
     private Integer batchSize;
     private Integer threadPoolSize;
 }
