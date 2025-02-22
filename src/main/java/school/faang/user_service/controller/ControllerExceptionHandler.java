@@ -100,6 +100,11 @@ public class ControllerExceptionHandler {
     public ErrorResponse handleServiceNotAvailableException(ServiceNotAvailableException e) {
         return new ErrorResponse(e.getMessage());
     }
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleUserNotFoundException(UserNotFoundException e) {
+        return new ErrorResponse(e.getMessage());
+    }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(PaymentException.class)

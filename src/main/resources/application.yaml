@@ -62,4 +62,3 @@ user-service:
       priority: 2
   recommendation-request:
     min-month: 6
-    
