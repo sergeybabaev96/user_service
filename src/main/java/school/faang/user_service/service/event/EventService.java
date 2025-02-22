@@ -24,4 +24,5 @@ public interface EventService {
 
     Event findByIdOrThrow(long eventId);
 
+    void banUsers(List<Long> userIdsToBan);
 }
