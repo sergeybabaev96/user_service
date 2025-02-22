@@ -3,6 +3,7 @@ package school.faang.user_service.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import school.faang.user_service.dto.skill.SkillCandidateDto;
 import school.faang.user_service.dto.skill.SkillCreateDto;
@@ -16,7 +17,7 @@ import java.util.List;
 public class SkillController {
     private final SkillService skillService;
 
-    public SkillReadDto create(@Valid @RequestBody SkillCreateDto skill) {
+    public SkillReadDto create(@Validated @RequestBody SkillCreateDto skill) {
         return skillService.create(skill);
     }
 

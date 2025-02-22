@@ -14,10 +14,10 @@ import school.faang.user_service.entity.promotion.PromotionPlan;
 @AllArgsConstructor
 @NoArgsConstructor
 public class  BuyPromotionDto {
-    @NotBlank
+    @NotBlank(message = "Поле способа оплаты не может быть пустым")
     private String paymentMethod;
-    @Positive
+    @Positive(message = "Поле Id должно быть положительным числом")
     private long userId;
-    @NotNull
+    @NotNull(message = "Поле не может равняться нулю")
     private PromotionPlan plan;
 }

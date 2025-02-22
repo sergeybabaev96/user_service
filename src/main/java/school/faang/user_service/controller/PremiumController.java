@@ -1,7 +1,7 @@
 package school.faang.user_service.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +19,7 @@ public class PremiumController {
     private final PremiumService premiumService;
 
     @PostMapping
-    private OrderDto buyPremium(@RequestBody @Valid BuyPremiumDto dto) {
+    private OrderDto buyPremium(@RequestBody @Validated BuyPremiumDto dto) {
         return premiumService.buyPremium(dto.userId(), PremiumPlan.fromDays(dto.days()), dto.paymentMethod());
     }
 
