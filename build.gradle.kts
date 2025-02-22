@@ -70,6 +70,7 @@ dependencies {
     /**
      * Tests
      */
+    testImplementation("com.h2database:h2")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -122,11 +123,6 @@ tasks.jacocoTestReport {
         csv.required.set(false)
         html.required.set(true)
         html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
-    }
-    doLast {
-        val reportDir = layout.buildDirectory.dir("jacocoHtml")
-        val reportUrl = "file:///${reportDir.get()}/index.html".replace("\\", "/")
-        println("Отчет по покрытию кода доступен по ссылке: $reportUrl")
     }
 }
 
