@@ -14,6 +14,7 @@ import school.faang.user_service.mapper.SkillCandidateMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
+import school.faang.user_service.service.rating.annotation.RatingChanging;
 import school.faang.user_service.utility.validator.SkillValidator;
 
 import java.util.Collections;
