@@ -53,7 +53,6 @@ import java.util.stream.Collectors;
 import static school.faang.user_service.config.KafkaConstants.PAYMENT_PROMOTION_TOPIC;
 import static school.faang.user_service.config.KafkaConstants.USER_KEY;
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -257,9 +256,10 @@ public class UserService {
         return userMapper.toUserNotificationDto(user);
     }
 
+    @Transactional
     public void banUser(Long userId) {
         User user = getUserById(userId);
-        user.setIsBanned(true);
+        user.setBanned(true);
         userRepository.save(user);
         log.info("User {} has been banned", userId);
     }

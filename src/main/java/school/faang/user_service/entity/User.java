@@ -168,5 +168,5 @@ public class User {
     private Premium premium;
 
     @Column(name = "is_banned")
-    private Boolean isBanned = false;
+    private boolean isBanned;
 }
