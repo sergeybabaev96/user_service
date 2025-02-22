@@ -7,14 +7,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.filter.Filter;
 import school.faang.user_service.dto.user.UserDto;
-import school.faang.user_service.filter.user.UserFilterDto;
 import school.faang.user_service.dto.user.UserRegisterDto;
 import school.faang.user_service.dto.user.UserResponseRegisterDto;
 import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
+import school.faang.user_service.filter.Filter;
+import school.faang.user_service.filter.user.UserFilterDto;
 import school.faang.user_service.mapper.user.UserMapper;
 import school.faang.user_service.repository.CountryRepository;
 import school.faang.user_service.repository.user.UserRepository;
@@ -72,10 +72,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(
-                String.format("User with id = %d not found", id)
-        ));
-        return userMapper.toDto(user);
+        return userRepository.findById(id)
+                .map(userMapper::toDto)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("User with id = %d not found", id)
+                ));
     }
 
     private User saveUser(User user, Pair<String, String> avatars) {
