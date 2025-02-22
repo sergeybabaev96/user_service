@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class ProfileViewEventPublisher {
-    @Value("${spring.channel.profile-view}")
+    @Value("${spring.channels.profile-view}")
     private String profileViewChannel;
 
     private final RedisTemplate<String, Object> redisTemplate;
