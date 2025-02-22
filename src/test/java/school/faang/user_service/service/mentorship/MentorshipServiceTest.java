@@ -8,13 +8,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.controller.mentorship.MentorshipController;
 import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.repository.mentorship.MentorshipRepository;
+import school.faang.user_service.service.mentorship.impl.MentorshipServiceImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -23,8 +25,14 @@ class MentorshipServiceTest {
     @Mock
     private MentorshipService mentorshipService;
 
+    @Mock
+    private MentorshipRepository mentorshipRepository;
+
     @InjectMocks
     private MentorshipController mentorshipController;
+
+    @InjectMocks
+    private MentorshipServiceImpl mentorshipServiceImpl;
 
     private List<UserDto> users = null;
     private List<UserDto> mentees = new ArrayList<>();
@@ -103,4 +111,11 @@ class MentorshipServiceTest {
         assertEquals(1, response.size());
     }
 
+    @Test
+    public void testDeactivationInvocation() {
+        long userId = 1;
+        mentorshipServiceImpl.deactivateMentorship(userId);
+
+        verify(mentorshipRepository).deactivateMentorship(userId);
+    }
 }

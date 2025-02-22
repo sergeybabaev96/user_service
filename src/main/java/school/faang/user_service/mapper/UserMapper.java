@@ -1,5 +1,6 @@
 package school.faang.user_service.mapper;
 
+
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.NullValueCheckStrategy;

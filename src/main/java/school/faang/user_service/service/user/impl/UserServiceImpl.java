@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.TariffDto;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.user.GetUserRequest;
@@ -12,6 +13,7 @@ import school.faang.user_service.dto.user.UserFilter;
 import school.faang.user_service.entity.Tariff;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.BusinessException;
+import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.TariffMapper;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
@@ -75,5 +77,16 @@ public class UserServiceImpl implements UserService {
 
     private User findById(Long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(String.format("User with id %s not found", userId)));
+    }
+
+    @Transactional
+    @Override
+    public UserDto deactivateUser(long userId) {
+        User user = userRepository
+                .findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
+        user.setActive(false);
+        userRepository.save(user);
+
+        return userMapper.toDto(user);
     }
 }

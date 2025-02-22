@@ -14,4 +14,6 @@ public interface MentorshipService {
 
     void deleteMentor(long menteeId, long mentorId);
 
+    void deactivateMentorship(long userId);
+
 }

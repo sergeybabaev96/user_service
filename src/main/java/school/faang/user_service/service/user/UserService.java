@@ -14,4 +14,5 @@ public interface UserService {
 
     List<UserDto> findUsersByFilter(GetUserRequest request);
 
+    UserDto deactivateUser(long userId);
 }

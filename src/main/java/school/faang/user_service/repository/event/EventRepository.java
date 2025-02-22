@@ -1,6 +1,7 @@
 package school.faang.user_service.repository.event;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import school.faang.user_service.entity.event.Event;
 
@@ -20,6 +21,13 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             WHERE ue.user_id = :userId
             """)
     List<Event> findParticipatedEventsByUserId(long userId);
+
+    @Query(nativeQuery = true, value = """
+            DELETE FROM user_event
+            WHERE event_id in ?1
+            """)
+    @Modifying
+    void deleteUserParticipationByEventId(List<Long> eventIdList);
 
     @Query(nativeQuery = true, value = """
                     SELECT e.*
