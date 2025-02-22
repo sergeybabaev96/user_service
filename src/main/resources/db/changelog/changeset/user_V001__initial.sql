@@ -1,9 +1,9 @@
-CREATE TABLE country (
+CREATE TABLE IF NOT EXISTS country (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     title varchar(64) UNIQUE NOT NULL
 );
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     username varchar(64) UNIQUE NOT NULL,
     password varchar(128) NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE users (
     CONSTRAINT fk_country_id FOREIGN KEY (country_id) REFERENCES country (id)
 );
 
-CREATE TABLE subscription (
+CREATE TABLE IF NOT EXISTS subscription (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     follower_id bigint NOT NULL,
     followee_id bigint NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE subscription (
     CONSTRAINT fk_followee_id FOREIGN KEY (followee_id) REFERENCES users (id)
 );
 
-CREATE TABLE mentorship (
+CREATE TABLE IF NOT EXISTS mentorship (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     mentor_id bigint NOT NULL,
     mentee_id bigint NOT NULL,
@@ -42,7 +42,7 @@ CREATE TABLE mentorship (
     CONSTRAINT fk_mentee_id FOREIGN KEY (mentee_id) REFERENCES users (id)
 );
 
-CREATE TABLE mentorship_request (
+CREATE TABLE IF NOT EXISTS mentorship_request (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     description varchar(4096) NOT NULL,
     requester_id bigint NOT NULL,
@@ -56,14 +56,14 @@ CREATE TABLE mentorship_request (
     CONSTRAINT fk_mentor_req_id FOREIGN KEY (receiver_id) REFERENCES users (id)
 );
 
-CREATE TABLE skill (
+CREATE TABLE IF NOT EXISTS skill (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     title varchar(64) UNIQUE NOT NULL,
     created_at timestamptz DEFAULT current_timestamp,
     updated_at timestamptz DEFAULT current_timestamp
 );
 
-CREATE TABLE user_skill (
+CREATE TABLE IF NOT EXISTS user_skill (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     user_id bigint NOT NULL,
     skill_id bigint NOT NULL,
@@ -74,7 +74,7 @@ CREATE TABLE user_skill (
     CONSTRAINT fk_skill_user_id FOREIGN KEY (skill_id) REFERENCES skill (id)
 );
 
-CREATE TABLE user_skill_guarantee (
+CREATE TABLE IF NOT EXISTS user_skill_guarantee (
   id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
   user_id BIGINT NOT NULL,
   skill_id BIGINT NOT NULL,
@@ -85,7 +85,7 @@ CREATE TABLE user_skill_guarantee (
   CONSTRAINT fk_user_skill_guarantee_guarantor FOREIGN KEY (guarantor_id) REFERENCES users (id)
 );
 
-CREATE TABLE recommendation (
+CREATE TABLE IF NOT EXISTS recommendation (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     content varchar(4096) NOT NULL,
     author_id bigint NOT NULL,
@@ -97,7 +97,7 @@ CREATE TABLE recommendation (
     CONSTRAINT fk_receiver_id FOREIGN KEY (receiver_id) REFERENCES users (id)
 );
 
-CREATE TABLE skill_offer (
+CREATE TABLE IF NOT EXISTS skill_offer (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     skill_id bigint NOT NULL,
     recommendation_id bigint NOT NULL,
@@ -106,7 +106,7 @@ CREATE TABLE skill_offer (
     CONSTRAINT fk_recommendation_skill_id FOREIGN KEY (recommendation_id) REFERENCES recommendation (id) ON DELETE CASCADE
 );
 
-CREATE TABLE recommendation_request (
+CREATE TABLE IF NOT EXISTS recommendation_request (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     message varchar(4096) NOT NULL,
     requester_id bigint NOT NULL,
@@ -122,7 +122,7 @@ CREATE TABLE recommendation_request (
     CONSTRAINT fk_recommendation_req_id FOREIGN KEY (recommendation_id) REFERENCES recommendation (id) ON DELETE CASCADE
 );
 
-CREATE TABLE skill_request (
+CREATE TABLE IF NOT EXISTS skill_request (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     request_id bigint NOT NULL,
     skill_id bigint NOT NULL,
@@ -131,7 +131,7 @@ CREATE TABLE skill_request (
     CONSTRAINT fk_skill_request_id FOREIGN KEY (skill_id) REFERENCES skill (id)
 );
 
-CREATE TABLE contact (
+CREATE TABLE IF NOT EXISTS contact (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     user_id bigint NOT NULL,
     contact varchar(128) NOT NULL UNIQUE,
@@ -140,7 +140,7 @@ CREATE TABLE contact (
     CONSTRAINT fk_contact_owner_id FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-CREATE TABLE project_subscription (
+CREATE TABLE IF NOT EXISTS project_subscription (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     project_id bigint NOT NULL,
     follower_id bigint NOT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE project_subscription (
     CONSTRAINT fk_project_follower_id FOREIGN KEY (follower_id) REFERENCES users (id)
 );
 
-CREATE TABLE event (
+CREATE TABLE IF NOT EXISTS event (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     title varchar(64) NOT NULL,
     description varchar(4096) NOT NULL,
@@ -167,7 +167,7 @@ CREATE TABLE event (
     CONSTRAINT fk_event_owner_id FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-CREATE TABLE event_skill (
+CREATE TABLE IF NOT EXISTS event_skill (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     event_id bigint NOT NULL,
     skill_id bigint NOT NULL,
@@ -176,7 +176,7 @@ CREATE TABLE event_skill (
     CONSTRAINT fk_skill_event_id FOREIGN KEY (skill_id) REFERENCES skill (id)
 );
 
-CREATE TABLE user_event (
+CREATE TABLE IF NOT EXISTS user_event (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     user_id bigint NOT NULL,
     event_id bigint NOT NULL,
@@ -185,7 +185,7 @@ CREATE TABLE user_event (
     CONSTRAINT fk_event_user_id FOREIGN KEY (event_id) REFERENCES event (id)
 );
 
-CREATE TABLE rating (
+CREATE TABLE IF NOT EXISTS rating (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     user_id bigint NOT NULL,
     event_id bigint NOT NULL,

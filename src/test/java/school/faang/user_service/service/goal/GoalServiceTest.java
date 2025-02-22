@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import school.faang.user_service.dto.GoalCompletedEvent;
 import school.faang.user_service.dto.goal.CreateGoalRequest;
 import school.faang.user_service.dto.goal.GoalFilterDto;
 import school.faang.user_service.dto.goal.GoalResponse;
@@ -18,9 +19,11 @@ import school.faang.user_service.dto.goal.UpdateGoalRequest;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
+import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.exception.SkillNotFoundException;
 import school.faang.user_service.exception.UserGoalLimitExceededException;
 import school.faang.user_service.mapper.GoalMapper;
+import school.faang.user_service.messaging.GoalCompletedEventPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
@@ -37,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -56,6 +60,9 @@ class GoalServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private GoalCompletedEventPublisher goalCompletedEventPublisher;
 
     @Spy
     private GoalMapper goalMapper = Mappers.getMapper(GoalMapper.class);
@@ -145,6 +152,38 @@ class GoalServiceTest {
 
         assertThrows(EntityNotFoundException.class, () -> goalService.updateGoal(updateGoalRequest));
     }
+
+    @Test
+    void updateGoal_ShouldPublishEventWhenStatusChangedToCompleted() {
+        long goalId = 1L;
+        UpdateGoalRequest updateGoalRequest = UpdateGoalRequest.builder()
+                .id(goalId)
+                .title("Updated Goal")
+                .description("New Description")
+                .build();
+
+        Goal goal = new Goal();
+        goal.setId(goalId);
+        goal.setStatus(GoalStatus.ACTIVE);
+        User user1 = User.builder().id(100L).build();
+        User user2 = User.builder().id(200L).build();
+        goal.setUsers(List.of(user1, user2));
+        goal.setSkillsToAchieve(Collections.emptyList());
+        when(goalRepository.findById(goalId)).thenReturn(Optional.of(goal));
+        doAnswer(invocation -> {
+            Goal updatedGoal = invocation.getArgument(1);
+            updatedGoal.setStatus(GoalStatus.COMPLETED);
+            return null;
+        }).when(goalMapper).updateEntityFromDto(any(UpdateGoalRequest.class), eq(goal));
+
+        when(goalRepository.save(any(Goal.class))).thenReturn(goal);
+        goalService.updateGoal(updateGoalRequest);
+        verify(goalCompletedEventPublisher, times(1))
+                .publish(eq(new GoalCompletedEvent(user1.getId(), goal.getId())));
+        verify(goalCompletedEventPublisher, times(1))
+                .publish(eq(new GoalCompletedEvent(user2.getId(), goal.getId())));
+    }
+
 
     @Test
     void deleteGoal_Success() {

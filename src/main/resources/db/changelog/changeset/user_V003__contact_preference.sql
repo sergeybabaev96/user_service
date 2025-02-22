@@ -1,4 +1,4 @@
-CREATE TABLE contact_preferences (
+CREATE TABLE IF NOT EXISTS contact_preferences (
     id bigint PRIMARY key GENERATED ALWAYS AS IDENTITY UNIQUE,
     user_id bigint NOT NULL,
     preference smallint NOT NULL,

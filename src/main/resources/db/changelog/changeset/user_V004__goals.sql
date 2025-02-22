@@ -1,4 +1,4 @@
-CREATE TABLE goal (
+CREATE TABLE IF NOT EXISTS goal (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     title varchar(64) NOT NULL,
     description varchar(4096) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE goal (
     CONSTRAINT fk_mentor_id FOREIGN KEY (mentor_id) REFERENCES users (id)
 );
 
-CREATE TABLE goal_invitation (
+CREATE TABLE IF NOT EXISTS goal_invitation (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
     goal_id bigint NOT NULL,
     inviter_id bigint NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE goal_invitation (
     CONSTRAINT fk_goal_id FOREIGN KEY (goal_id) REFERENCES goal (id)
 );
 
-CREATE TABLE user_goal (
+CREATE TABLE IF NOT EXISTS user_goal (
    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
    user_id bigint NOT NULL,
    goal_id bigint NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE user_goal (
    CONSTRAINT fk_goal_user_id FOREIGN KEY (goal_id) REFERENCES goal (id)
 );
 
-CREATE TABLE goal_skill (
+CREATE TABLE IF NOT EXISTS goal_skill (
    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
    goal_id bigint NOT NULL,
    skill_id bigint NOT NULL,
