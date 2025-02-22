@@ -1,13 +1,16 @@
 package school.faang.user_service.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.enums.RatingType;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.filter.userFilter.UserFilter;
+import school.faang.user_service.filter.user.UserFilter;
 import school.faang.user_service.repository.SubscriptionRepository;
+import school.faang.user_service.service.rating.annotation.RatingChanging;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -20,6 +23,8 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final List<UserFilter> userFilters;
 
+    @RatingChanging(ratingType = RatingType.SUBSCRIPTION_RATING)
+    @Transactional
     public void followUser(long followerId, long followeeId) {
         checkSameUsers(followerId, followeeId);
         checkExistFollower(followerId, followeeId);
@@ -27,12 +32,15 @@ public class SubscriptionService {
         subscriptionRepository.followUser(followerId, followeeId);
     }
 
+    @RatingChanging(ratingType = RatingType.SUBSCRIPTION_RATING, positiveAction = false)
+    @Transactional
     public void unfollowUser(long followerId, long followeeId) {
         checkSameUsers(followerId, followeeId);
         log.info("Unfollowing subscription (%d - %d)".formatted(followerId, followeeId));
         subscriptionRepository.unfollowUser(followerId, followeeId);
     }
 
+    @Transactional
     public List<User> getFollowers(long followerId, UserFilterDto filters) {
         Stream<User> allFollowers = subscriptionRepository.findByFollowerId(followerId);
         log.info("Followers by id {} and filters {}", followerId, filters);

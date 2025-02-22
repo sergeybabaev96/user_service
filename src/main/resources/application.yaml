@@ -8,7 +8,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -32,6 +32,12 @@ spring:
   web:
     locale: en_US
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+
 minio:
   s3:
     endpoint: http://localhost:9000
@@ -46,6 +52,10 @@ dicebear:
 
 avatar:
   bucketName: user-avatars
+  customAvatars: custom-user-avatars
+  maxImageSize: 5 * 1024 * 1024
+  maxLargeImageSideSize: 1080
+  maxSmallImageSideSize: 170
 
 server:
   port: 8080

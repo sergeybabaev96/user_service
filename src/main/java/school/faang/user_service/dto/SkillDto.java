@@ -1,7 +1,7 @@
 package school.faang.user_service.dto;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.List;
@@ -11,8 +11,8 @@ public class SkillDto {
 
     private Long id;
 
-    @NotEmpty(message = "title must not be empty")
-    @NotNull(message = "title must not be null")
+    @NotBlank(message = "title must not be null or empty")
+    @Size(max = 64)
     private String title;
     private List<Long> userId;
 }
