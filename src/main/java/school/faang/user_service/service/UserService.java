@@ -140,13 +140,11 @@ public class UserService {
         User user = userMapper.toEntity(request);
         user.setRatingPoints(0);
 
-        ContactPreference contactPreference = new ContactPreference();
-        contactPreference.setUser(user);
+        ContactPreference contactPreference = ContactPreference.builder().user(user).preference(PreferredContact.EMAIL).build();
         if (request.preferredContact() != null) {
             contactPreference.setPreference(request.preferredContact());
-        } else {
-            contactPreference.setPreference(PreferredContact.EMAIL);
         }
+
         user.setContactPreference(contactPreference);
 
         UserProfilePic userProfilePic = new UserProfilePic();
