@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -13,12 +14,16 @@ import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.repository.UserRepository;
+import org.mockito.Mockito.*;
 import school.faang.user_service.service.user.impl.UserServiceImpl;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -31,6 +36,25 @@ class UserServiceTest {
 
     @InjectMocks
     private UserServiceImpl userService;
+
+    @Test
+    public void testUserDeactivation() {
+        long userId = 1;
+        User mockedUser = User.builder()
+                .id(userId)
+                .username("rauanzn")
+                .phone("+7 777 777 77 77")
+                .email("rauanzn@gmail.com")
+                .active(true)
+                .build();
+        when(userRepository.findById(userId)).thenReturn(
+                Optional.of(mockedUser)
+        );
+
+        UserDto userDto = userService.deactivateUser(userId);
+        verify(userRepository, times(1)).save(mockedUser);
+        assertFalse(userDto.getActive());
+    }
 
     @Test
     void getUser_WhenUserExists_ReturnsUserDto() {
@@ -67,5 +91,4 @@ class UserServiceTest {
     private User createTestUser() {
         return User.builder().id(1L).username("Test User").build();
     }
-
 }
