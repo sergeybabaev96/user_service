@@ -52,6 +52,7 @@ public class SubscriptionService {
         log.info("Пользователь с id {} отписался от пользователя с id {}", followerId, followeeId);
     }
 
+    @Transactional
     public List<SubscriptionUserDto> getFollowers(long followeeId, UserFilterDto dto) {
         checkIdOnExist(followeeId);
         Stream<User> followers = subscriptionRepository.findByFolloweeId(followeeId);
@@ -63,6 +64,7 @@ public class SubscriptionService {
         return subscriptionRepository.findFollowersAmountByFolloweeId(followeeId);
     }
 
+    @Transactional
     public List<SubscriptionUserDto> getFollowing(long followerId, UserFilterDto dto) {
         checkIdOnExist(followerId);
         Stream<User> followers = subscriptionRepository.findByFollowerId(followerId);

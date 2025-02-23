@@ -3,10 +3,12 @@ package school.faang.user_service.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.subscription.SubscriptionUserDto;
 import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.event.FollowEvent;
 import school.faang.user_service.exception.BusinessException;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filters.user.UserFilter;
@@ -116,10 +118,16 @@ public class SubscriptionServiceTest {
         when(subscriptionRepository.existsByFollowerIdAndFolloweeId(FOLLOWER_ID, FOLLOWEE_ID))
                 .thenReturn(false);
 
+
         subscriptionService.followUser(FOLLOWER_ID, FOLLOWEE_ID);
 
+        ArgumentCaptor<FollowEvent> argumentCaptor = ArgumentCaptor.forClass(FollowEvent.class);
         verify(subscriptionRepository, times(1))
                 .followUser(FOLLOWER_ID, FOLLOWEE_ID);
+        verify(followMessagePublisher, times(1))
+                .publish(argumentCaptor.capture());
+        assertEquals(FOLLOWER_ID, argumentCaptor.getValue().getFollowerId());
+        assertEquals(FOLLOWEE_ID, argumentCaptor.getValue().getFolloweeId());
     }
 
     @Test

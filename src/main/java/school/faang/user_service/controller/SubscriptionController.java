@@ -32,22 +32,22 @@ public class SubscriptionController {
         subscriptionService.unfollowUser(userContext.getUserId(), followeeId);
     }
 
-    @GetMapping("/followers/{followeeId}")
+    @GetMapping("/{followeeId}/followers")
     private List<SubscriptionUserDto> getFollowers(UserFilterDto dto, @PathVariable long followeeId) {
         return subscriptionService.getFollowers(followeeId, dto);
     }
 
-    @GetMapping("/followers/{followeeId}/count")
+    @GetMapping("/{followeeId}/followers/count")
     private int getFollowersCount(@PathVariable long followeeId) {
         return subscriptionService.getFollowersCount(followeeId);
     }
 
-    @GetMapping("/following/{followerId}")
-    private List<SubscriptionUserDto> getFollowing(@PathVariable long followerId, UserFilterDto dto) {
+    @GetMapping("/{followerId}/following")
+    private List<SubscriptionUserDto> getFollowing(UserFilterDto dto, @PathVariable long followerId) {
         return subscriptionService.getFollowing(followerId, dto);
     }
 
-    @GetMapping("/following/{followerId}/count")
+    @GetMapping("/{followerId}/following/count")
     private int getFollowingCount(@PathVariable long followerId) {
         return subscriptionService.getFollowingCount(followerId);
     }
