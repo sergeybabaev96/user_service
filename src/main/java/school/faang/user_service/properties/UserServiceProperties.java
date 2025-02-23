@@ -17,6 +17,7 @@ import java.util.Map;
 @Setter
 public class UserServiceProperties {
 
+    private String analyticsTopic;
     private RecommendationRequestProperties recommendationRequest;
     private Map<String, TariffProperties> availableTariffs = new HashMap<>();
 
