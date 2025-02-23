@@ -1,5 +1,9 @@
 package school.faang.user_service.config.kafka;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,27 +15,34 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+@Getter
+@Setter
+@RequiredArgsConstructor
 @Configuration
 public class KafkaProducerConfig {
 
-    @Value(value = "${kafka.producer.bootstrap-servers}")
-    private String bootstrapAddress;
+    @Value(value = "${spring.kafka.bootstrap-servers}")
+    private List<String> bootstrapServers;
+
+    private final ObjectMapper objectMapper;
+
+    @Bean
+    public Map<String, Object> producerConfigs() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        return props;
+
+    }
 
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
-        Map<String, Object> configProps = new HashMap<>();
-        configProps.put(
-                ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                bootstrapAddress);
-        configProps.put(
-                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-                StringSerializer.class);
-        configProps.put(
-                ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                JsonSerializer.class);
-        return new DefaultKafkaProducerFactory<>(configProps);
+        JsonSerializer<Object> jsonSerializer = new JsonSerializer<>(objectMapper);
+        return new DefaultKafkaProducerFactory<>(producerConfigs(), new StringSerializer(), jsonSerializer);
     }
 
     @Bean
