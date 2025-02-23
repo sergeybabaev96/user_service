@@ -57,6 +57,21 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9090/realms/oauth
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:9090/realms/oauth
+            user-name-attribute: preferred_username
+        registration:
+          keycloak:
+            client-id: user-service
+            client-secret:
+
 server:
   port: ${SERVER_PORT:8080}
 

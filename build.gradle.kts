@@ -1,6 +1,3 @@
-import org.gradle.api.plugins.JavaPlugin
-import org.gradle.kotlin.dsl.*
-
 plugins {
     id("java")
     id("jacoco")
@@ -50,7 +47,11 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    testImplementation("org.springframework.security:spring-security-test")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
 
     /**
      * Database
