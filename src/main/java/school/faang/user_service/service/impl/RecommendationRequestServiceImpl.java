@@ -49,11 +49,9 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
         RecommendationRequest recommendationRequest = createRecommendationRequest(recommendationRequestDto);
         associateRecommendationRequestWithSkill(recommendationRequest.getId(),
                 recommendationRequestDto.getSkillIds());
-        RecommendationEventDto recommendationEventDto = new RecommendationEventDto(recommendationRequest.getId(),
-                recommendationRequest.getRequester().getId(),
+        recommendationPublisher.publish(new RecommendationEventDto(recommendationRequest.getRequester().getId(),
                 recommendationRequest.getReceiver().getId(),
-                recommendationRequest.getCreatedAt());
-        recommendationPublisher.publish(recommendationEventDto);
+                recommendationRequest.getCreatedAt()));
         return "Successfully completed";
     }
 
