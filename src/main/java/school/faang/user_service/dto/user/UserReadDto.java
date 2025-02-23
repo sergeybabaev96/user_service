@@ -10,4 +10,5 @@ public class UserReadDto{
     private String username;
     private String email;
     private boolean active;
+    private Long telegramChatId;
 }

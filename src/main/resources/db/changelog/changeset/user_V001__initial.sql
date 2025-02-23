@@ -9,7 +9,6 @@ CREATE TABLE users (
     password varchar(128) NOT NULL,
     email varchar(64) UNIQUE NOT NULL,
     phone varchar(32) UNIQUE,
-    telegram_chat_id varchar(64) UNIQUE,
     about_me varchar(4096),
     active boolean DEFAULT true NOT NULL,
     city varchar(64),
