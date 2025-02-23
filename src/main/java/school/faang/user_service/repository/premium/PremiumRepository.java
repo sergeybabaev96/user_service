@@ -1,5 +1,7 @@
 package school.faang.user_service.repository.premium;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 import school.faang.user_service.entity.premium.Premium;
 
@@ -11,4 +13,7 @@ public interface PremiumRepository extends CrudRepository<Premium, Long> {
     boolean existsByUserId(long userId);
 
     List<Premium> findAllByEndDateBefore(LocalDateTime endDate);
+
+    Page<Premium> findByEndDateBefore(LocalDateTime date, Pageable pageable);
+
 }

@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/user-service
+    url: jdbc:postgresql://localhost:5432/postgres
     username: user
     password: password
   jpa:
@@ -28,6 +28,7 @@ spring:
       host: localhost
       channel:
         follow: follow_channel
+        mentorship: mentorship_channel
 
 server:
   port: 8080
@@ -53,3 +54,39 @@ services:
   payment-service:
     host: localhost
     port: 9080
+
+premium:
+  schedule:
+    removal-cron: "0 0 0 * * SUN"
+  batch:
+    size: 1000
+
+task:
+  execution:
+    pool:
+      core-size: 4
+      max-size: 8
+      keep-alive: 60
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local
+
+---
+logging:
+  level:
+    root: info
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    root: info
+
