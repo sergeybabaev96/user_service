@@ -5,10 +5,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.dto.RequestMentorshipEvent;
 import school.faang.user_service.dto.mentorship.MentorshipRequestFilterDto;
 import school.faang.user_service.dto.mentorship.MentorshipRequestRequestDto;
 import school.faang.user_service.dto.mentorship.MentorshipRequestResponseDto;
@@ -19,6 +25,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.mentorship.MentorshipRequestFilter;
 import school.faang.user_service.mapper.MentorshipRequestResponseMapper;
+import school.faang.user_service.publisher.MentorshipAcceptedEventPublisher;
 import school.faang.user_service.repository.adapter.MentorshipRequestRepositoryAdapter;
 import school.faang.user_service.repository.adapter.UserRepositoryAdapter;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
@@ -36,6 +43,7 @@ public class MentorshipRequestService {
   private final UserRepositoryAdapter userRepositoryAdapter;
   private final List<MentorshipRequestFilter> mentorshipRequestFilters;
   private final MentorshipRequestResponseMapper mentorshipRequestResponseMapper;
+  private final MentorshipAcceptedEventPublisher mentorshipAcceptedEventPublisher;
 
   @Transactional
   public MentorshipRequestResponseDto requestMentorship(
@@ -87,7 +95,7 @@ public class MentorshipRequestService {
   }
 
   @Transactional
-  public MentorshipRequestResponseDto acceptRequest(long id) {
+  public MentorshipRequestResponseDto acceptRequest(long id) throws JsonProcessingException {
     MentorshipRequest mentorshipRequest = mentorshipRequestRepositoryAdapter.findById(id);
 
     User requester = mentorshipRequest.getRequester();
@@ -113,6 +121,11 @@ public class MentorshipRequestService {
     mentorshipRequest.setStatus(RequestStatus.ACCEPTED);
 
     log.info("Mentorship request with ID {} accepted", mentorshipRequest.getId());
+
+    RequestMentorshipEvent event = new RequestMentorshipEvent();
+    event.setMentorId(receiver.getId());
+    event.setMenteeId(requester.getId());
+    mentorshipAcceptedEventPublisher.publish(event);
 
     return mentorshipRequestResponseMapper.toDto(mentorshipRequest);
   }

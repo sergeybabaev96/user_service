@@ -1,6 +1,8 @@
 package school.faang.user_service.controller;
 
 import java.util.List;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,7 +50,7 @@ public class MentorshipRequestController {
   }
 
   @PatchMapping("/{id}/accept")
-  public ResponseEntity<MentorshipRequestResponseDto> acceptRequest(@PathVariable long id) {
+  public ResponseEntity<MentorshipRequestResponseDto> acceptRequest(@PathVariable long id) throws JsonProcessingException {
     return ResponseEntity.ok(mentorshipRequestService.acceptRequest(id));
   }
 

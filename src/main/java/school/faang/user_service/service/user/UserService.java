@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.entity.User;
@@ -53,4 +54,5 @@ public class UserService {
   public List<UserDto> getPremiumUsers() {
     return userRepository.findPremiumUsers().map(userMapper::toDto).toList();
   }
+
 }
