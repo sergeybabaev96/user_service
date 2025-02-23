@@ -77,4 +77,7 @@ public class Goal {
             inverseJoinColumns = @JoinColumn(name = "skill_id")
     )
     private List<Skill> skillsToAchieve;
+
+    public void setUsers(List<User> users) {
+    }
 }
