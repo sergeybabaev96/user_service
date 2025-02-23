@@ -14,4 +14,6 @@ public interface UserService {
     List<UserDto> getAllUsersByFilters(int pageNumber, int pageSize, UserFilterDto filters);
 
     List<UserDto> getPremiumUsersByFilters(int pageNumber, int pageSize, UserFilterDto filters);
+
+    UserDto getUserById(long id);
 }
