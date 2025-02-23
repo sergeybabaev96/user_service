@@ -12,7 +12,7 @@ import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.dto.user.UserReadDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.EntityNotFoundException;
-import school.faang.user_service.filter.UserFilter;
+import school.faang.user_service.filter.user.UserFilter;
 import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.repository.UserRepository;
 

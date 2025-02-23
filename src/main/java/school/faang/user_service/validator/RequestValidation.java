@@ -1,7 +1,6 @@
-package school.faang.user_service.validation;
+package school.faang.user_service.validator;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.RecommendationRequestDto;
 import school.faang.user_service.entity.Skill;

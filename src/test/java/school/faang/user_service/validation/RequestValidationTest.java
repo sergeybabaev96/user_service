@@ -14,6 +14,7 @@ import school.faang.user_service.exception.BusinessException;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
+import school.faang.user_service.validator.RequestValidation;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
