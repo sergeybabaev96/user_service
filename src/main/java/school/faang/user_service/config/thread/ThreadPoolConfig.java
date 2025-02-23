@@ -1,4 +1,4 @@
-package school.faang.user_service.config.context.ThreadConfig;
+package school.faang.user_service.config.thread;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

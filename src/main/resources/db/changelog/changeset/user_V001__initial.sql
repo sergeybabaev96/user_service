@@ -197,3 +197,29 @@ CREATE TABLE rating (
     CONSTRAINT fk_rater_id FOREIGN KEY (user_id) REFERENCES users (id),
     CONSTRAINT fk_event_rated_id FOREIGN KEY (event_id) REFERENCES event (id)
 );
+
+CREATE TYPE promotion_target AS ENUM ('BASIC', 'PREMIUM', 'ULTIMATE');
+
+CREATE TABLE promotion_plan (
+                                id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
+                                name VARCHAR(32) NOT NULL,
+                                impressions INT NOT NULL,
+                                cost NUMERIC(10, 2) NOT NULL,
+                                created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+                                updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE promotion (
+                           id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
+                           user_id BIGINT NOT NULL,
+                           target promotion_target NOT NULL,
+                           plan_id BIGINT NOT NULL,
+                           impressions_limit INT NOT NULL,
+                           current_impressions INT DEFAULT 0,
+                           is_active BOOLEAN DEFAULT FALSE,
+                           start_time TIMESTAMPTZ DEFAULT NULL,
+                           created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+                           updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+
+                           CONSTRAINT fk_plan_id FOREIGN KEY (plan_id) REFERENCES promotion_plan (id)
+);
