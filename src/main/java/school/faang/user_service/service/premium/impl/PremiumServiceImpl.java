@@ -3,7 +3,6 @@ package school.faang.user_service.service.premium.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.client.PaymentServiceFeignClient;
 import school.faang.user_service.common.PaymentStatus;
@@ -53,8 +52,8 @@ public class PremiumServiceImpl implements PremiumService {
         PaymentRequest paymentRequest = createPaymentRequest(premiumPeriod);
         PaymentResponse paymentResponse = sendPaymentRequest(paymentRequest);
 
-        if (!paymentResponse.status().equals(PaymentStatus.SUCCESS)) {
-            log.info("Payment failed: {}", paymentResponse.message());
+        if (!PaymentStatus.SUCCESS.equals(paymentResponse.status())) {
+            log.error("Payment failed: {}", paymentResponse.message());
             throw new PremiumInvalidDataException(String.format("Error from paymentService: %s", paymentResponse.message()));
         }
         Premium premium = savePremium(premiumPeriod, user);

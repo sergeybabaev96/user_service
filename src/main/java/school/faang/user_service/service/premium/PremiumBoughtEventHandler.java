@@ -23,14 +23,13 @@ public class PremiumBoughtEventHandler {
     @Async
     @EventListener
     public void handlePremiumAndSendToRedis(PremiumBoughtEvent event) {
-        RedisEvent redisEvent = RedisEvent.builder()
-                .type(PREMIUM_BOUGHT)
-                .data(Map.of("userId", event.getPremium().getUser().getId(),
-                        "amount", event.getPaymentResponse().amount(),
-                        "currency", event.getPaymentResponse().currency().name(),
-                        "premiumPeriod", event.getPremiumPeriod().name(),
-                        "startDate", event.getPremium().getStartDate().format(DateTimeFormatter.ISO_DATE_TIME)))
-                .build();
+        RedisEvent redisEvent = new RedisEvent();
+        redisEvent.setType(PREMIUM_BOUGHT);
+        redisEvent.setData(Map.of("userId", event.getPremium().getUser().getId(),
+                "amount", event.getPaymentResponse().amount(),
+                "currency", event.getPaymentResponse().currency().name(),
+                "premiumPeriod", event.getPremiumPeriod().name(),
+                "startDate", event.getPremium().getStartDate().format(DateTimeFormatter.ISO_DATE_TIME)));
         premiumBoughtEventPublisher.publish(redisEvent);
         log.info("Premium bought event send to Redis event: {}", redisEvent);
     }

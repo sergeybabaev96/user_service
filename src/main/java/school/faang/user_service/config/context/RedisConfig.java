@@ -47,7 +47,7 @@ public class RedisConfig {
     }
 
     @Bean
-    ChannelTopic topic(UserServiceProperties properties) {
+    public ChannelTopic topic(UserServiceProperties properties) {
         return new ChannelTopic(properties.getAnalyticsTopic());
     }
 }
