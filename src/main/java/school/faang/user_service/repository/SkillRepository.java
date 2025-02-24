@@ -53,14 +53,12 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
     @Modifying
     @Transactional
     @Query(nativeQuery = true, value = """
-    INSERT INTO skill_request (message, status, requester_id, receiver_id)
-    VALUES (:message, :status, :requesterId, :receiverId)
-    RETURNING *;
-    """)
+            INSERT INTO skill_request (message, status, requester_id, receiver_id)
+            VALUES (:message, :status, :requesterId, :receiverId)
+            RETURNING *;
+            """)
     SkillRequest create(@Param("message") String message,
                         @Param("status") String status,
                         @Param("requesterId") long requesterId,
                         @Param("receiverId") long receiverId);
-
-
 }
