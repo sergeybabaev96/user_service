@@ -34,5 +34,4 @@ public class PremiumRemoverTest {
         verify(premiumService, times(1)).defineExpirePremium();
         verify(premiumService, times(1)).removePremium(List.of(new Premium()));
     }
-
 }

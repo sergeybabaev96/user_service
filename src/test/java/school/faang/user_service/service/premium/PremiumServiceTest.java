@@ -138,5 +138,4 @@ class PremiumServiceTest {
 
         verify(premiumRepository, times(1)).deleteAll(testBatch);
     }
-
 }

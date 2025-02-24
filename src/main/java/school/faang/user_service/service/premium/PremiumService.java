@@ -56,6 +56,7 @@ public class PremiumService {
 
     @Async("executorService")
     public void removePremium(List<Premium> batches) {
+
         premiumRepository.deleteAll(batches);
     }
 
