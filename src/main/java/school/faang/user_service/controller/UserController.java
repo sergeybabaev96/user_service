@@ -1,5 +1,6 @@
 package school.faang.user_service.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -8,10 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.dto.UserRegisterRequest;
@@ -20,6 +18,7 @@ import school.faang.user_service.service.UserService;
 
 import java.util.List;
 
+@Tag(name = "User Controller")
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
@@ -59,5 +58,10 @@ public class UserController {
     @PostMapping
     public List<UserDto> getUsersByIds(@RequestBody @NotNull List<@Positive Long> ids) {
         return userService.getUsersByIds(ids);
+    }
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public void loadUsersFromCsv(@RequestParam MultipartFile file) {
+        userService.processCsvFile(file);
     }
 }
