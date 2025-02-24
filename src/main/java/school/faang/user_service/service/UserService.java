@@ -9,11 +9,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.client.PromotionServiceClient;
+import school.faang.user_service.config.kafka.KafkaTopics;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.dto.UserNotificationDto;
@@ -192,6 +194,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+
     @Transactional
     public void processCsvFile(MultipartFile csvFile) {
         try {
@@ -262,5 +265,11 @@ public class UserService {
         user.setBanned(true);
         userRepository.save(user);
         log.info("User {} has been banned", userId);
+    }
+
+    @KafkaListener(topics = KafkaTopics.USER_BAN_TOPIC, groupId = "${spring.kafka.consumer.group-id}")
+    @Transactional
+    public void listenUserBan(String userId) {
+        banUser(Long.parseLong(userId));
     }
 }
