@@ -21,22 +21,22 @@
     </appender>
 
     <springProfile name="dev">
-        <logger name="org.springframework" level="DEBUG" additivity="false">
+        <logger name="org.springframework" level="INFO" additivity="false">
             <appender-ref ref="CONSOLE" />
         </logger>
-        <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="DEBUG" additivity="false">
+        <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="INFO" additivity="false">
             <appender-ref ref="CONSOLE" />
         </logger>
-        <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+        <logger name="org.hibernate.SQL" level="INFO" additivity="false">
             <appender-ref ref="CONSOLE" />
         </logger>
-        <root level="DEBUG">
+        <root level="INFO">
             <appender-ref ref="CONSOLE" />
         </root>
     </springProfile>
 
     <springProfile name="prod">
-        <logger name="FILE_LOGGER" level="DEBUG" additivity="false">
+        <logger name="FILE_LOGGER" level="INFO" additivity="false">
             <appender-ref ref="FILE" />
         </logger>
         <logger name="org.springframework" level="INFO" additivity="false">

@@ -19,6 +19,7 @@ public class UserBanEventListener implements EventListener {
     @Override
     @KafkaListener(topics = "${spring.kafka.topics.user-ban-topic.name}", groupId = "${spring.kafka.consumer.group-id}")
     public void listenEvent(String jsonEvent) {
+        System.out.println("Listener invoked" + jsonEvent);
         try {
             UserBanEvent userBanEvent = objectMapper.readValue(jsonEvent, UserBanEvent.class);
             userService.setBannedField(userBanEvent.getUserId(), userBanEvent.isBanned());
