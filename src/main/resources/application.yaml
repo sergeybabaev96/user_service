@@ -21,6 +21,7 @@ spring:
       port: 6379
       host: localhost
       channel:
+        follower: user_follow_channel
         recommendation-channel: recommendation_channel
 
   #mvc:
@@ -51,4 +52,5 @@ payment-service:
 config:
   value:
     min.skill.offers: 3
+
 

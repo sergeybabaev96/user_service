@@ -3,16 +3,20 @@ package school.faang.user_service.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.dto.FollowerEventDto;
 import school.faang.user_service.dto.RecordsQuantityDto;
 import school.faang.user_service.dto.SubscriptionUserDto;
 import school.faang.user_service.dto.SubscriptionUserFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.SubscriptionUserMapper;
+import school.faang.user_service.publisher.FollowerEventPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.service.SubscriptionFilter;
 import school.faang.user_service.service.SubscriptionService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -26,7 +30,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final List<SubscriptionFilter> subscriptionFilters;
     private final SubscriptionUserMapper subscriptionUserMapper;
+    private final FollowerEventPublisher followerEventPublisher;
 
+    @Transactional
     public void followUser(long followerId, long followeeId) {
         if (subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
             log.error("User id={} already follow to the user id={}", followerId, followeeId);
@@ -34,6 +40,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         subscriptionRepository.followUser(followerId, followeeId);
         log.info("User id={} follow to the user id={}", followerId, followeeId);
+
+        FollowerEventDto followerEvent = new FollowerEventDto(followerId, followeeId, LocalDateTime.now());
+
+        followerEventPublisher.publish(followerEvent);
     }
 
     public void unfollowUser(long followerId, long followeeId) {
