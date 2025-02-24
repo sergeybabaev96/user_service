@@ -1,6 +1,7 @@
 package school.faang.user_service.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,6 +22,9 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    @Value("${security.oauth2.resource.jwk-set-uri}")
+    private String jwkSetUri;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -36,6 +40,14 @@ public class SecurityConfig {
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendError(401, "Unauthorized: " + authException.getMessage());
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.sendError(403, "Access Denied: " + accessDeniedException.getMessage());
+                        })
                 );
 
         return http.build();
@@ -44,7 +56,7 @@ public class SecurityConfig {
     @Bean
     public JwtDecoder jwtDecoder() {
         return NimbusJwtDecoder
-                .withJwkSetUri("http://localhost:9090/realms/Oauth/protocol/openid-connect/certs")
+                .withJwkSetUri(jwkSetUri)
                 .build();
     }
 
@@ -57,12 +69,14 @@ public class SecurityConfig {
             var authorities = jwtGrantedAuthoritiesConverter.convert(jwt);
             var roles = jwt.getClaimAsStringList("spring_sec_roles");
 
-            return Stream.concat(authorities.stream(),
-                    roles.stream()
+            return Stream.concat(
+                    authorities.stream(),
+                    roles != null ? roles.stream()
                             .filter(role -> role.startsWith("ROLE_"))
                             .map(SimpleGrantedAuthority::new)
-                            .map(GrantedAuthority.class::cast))
-                    .toList();
+                            .map(GrantedAuthority.class::cast)
+                            : Stream.empty()
+            ).toList();
         });
         return jwtAuthenticationConverter;
     }
