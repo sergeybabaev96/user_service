@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface UserService {
 
+    UserDto getUserById(long id);
+
     UserResponseRegisterDto registerUser(UserRegisterDto dto);
 
     List<UserDto> getAllUsersByFilters(int pageNumber, int pageSize, UserFilterDto filters);

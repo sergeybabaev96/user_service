@@ -11,6 +11,7 @@ import school.faang.user_service.entity.User;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
 
+    @Mapping(source = "contactPreference.preference", target = "preference")
     UserDto toDto(User user);
 
     User toEntity(UserRegisterDto userRegisterDto);

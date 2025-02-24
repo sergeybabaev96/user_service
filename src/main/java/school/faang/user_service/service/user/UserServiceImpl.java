@@ -31,6 +31,14 @@ public class UserServiceImpl implements UserService {
     private final List<Filter<User, UserFilterDto>> userFilters;
 
     @Override
+    public UserDto getUserById(long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(
+                String.format("User with id = %d not found", id)
+        ));
+        return userMapper.toDto(user);
+    }
+
+    @Override
     @Transactional
     public UserResponseRegisterDto registerUser(UserRegisterDto dto) {
         User user = userMapper.toEntity(dto);

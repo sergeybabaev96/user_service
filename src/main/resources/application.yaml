@@ -98,3 +98,7 @@ kafka:
   goal:
     completed:
       topic: goal_completed_topic
+
+  recommendation:
+    request:
+      topic: recommendation-request-topic

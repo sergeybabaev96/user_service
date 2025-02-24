@@ -201,7 +201,7 @@ public class PromotionPrepareData {
     }
 
     public static UserDto getUserDto() {
-        return new UserDto(1L, "user", "email", "phone");
+        return new UserDto(1L, "user", "email", "phone", null);
     }
 
     public static Event getEvent() {

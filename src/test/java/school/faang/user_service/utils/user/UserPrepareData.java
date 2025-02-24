@@ -36,6 +36,6 @@ public class UserPrepareData {
     }
 
     public static UserDto getUserDto() {
-        return new UserDto(1L, "username", "email", "phone");
+        return new UserDto(1L, "username", "email", "phone", null);
     }
 }
