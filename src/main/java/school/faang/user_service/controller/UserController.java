@@ -1,14 +1,16 @@
 package school.faang.user_service.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
+import school.faang.user_service.dto.notification.UserChatIdUpdateDto;
+import school.faang.user_service.dto.notification.UserNotificationDto;
 import school.faang.user_service.service.UserService;
 
 import java.util.List;
@@ -31,6 +33,16 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public UserDto getUser(@PathVariable long userId) {
-        return userService.findUserById(userId);
+        return userService.getUserById(userId);
+    }
+
+    @GetMapping("/{id}/notification")
+    public UserNotificationDto getUserNotificationDto(@PathVariable long id) {
+        return userService.getUserNotificationDtoById(id);
+    }
+
+    @PutMapping("/chat")
+    public UserNotificationDto updateUserChat(@RequestBody UserChatIdUpdateDto userChatIdUpdateDto) {
+        return userService.updateUserChatId(userChatIdUpdateDto);
     }
 }
