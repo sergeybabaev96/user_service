@@ -17,7 +17,6 @@ import school.faang.user_service.dto.BooleanResponse;
 import school.faang.user_service.dto.user.UserCreateDto;
 import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.dto.user.UserFilterDto;
-import school.faang.user_service.publisher.ProfileViewEventPublisher;
 import school.faang.user_service.service.UserService;
 
 import java.util.List;
@@ -28,12 +27,11 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final ProfileViewEventPublisher publisherService;
 
     @GetMapping("/profile/{userId}")
     public void viewProfile(@PathVariable long userId) {
         //код просмотра профиля
-        publisherService.publisherEvent(userId);
+        userService.viewProfile(userId);
     }
 
     @DeleteMapping("/{userId}")

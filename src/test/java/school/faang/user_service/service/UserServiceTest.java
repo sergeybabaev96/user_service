@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.dto.user.UserCreateDto;
 import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.dto.user.UserFilterDto;
@@ -12,6 +13,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.filters.user.UserFilter;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.mapper.UserMapperImpl;
+import school.faang.user_service.publisher.ProfileViewEventPublisher;
 import school.faang.user_service.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import school.faang.user_service.service.profilePicture.UserProfilePicService;
@@ -55,6 +57,8 @@ public class UserServiceTest {
     private CountryService countryService;
 
     private UserMapper userMapper;
+    private UserContext userContext;
+    private ProfileViewEventPublisher eventPublisher;
 
     @BeforeEach
     public void init() {
@@ -68,6 +72,9 @@ public class UserServiceTest {
         userValidator = mock(UserValidator.class);
         userProfilePicService = mock(UserProfilePicService.class);
         countryService = mock(CountryService.class);
+        userContext = mock(UserContext.class);
+        eventPublisher = mock(ProfileViewEventPublisher.class);
+
 
         userService = new UserService(
                 userRepository,
@@ -79,7 +86,9 @@ public class UserServiceTest {
                 passwordEncoder,
                 userValidator,
                 userProfilePicService,
-                countryService
+                countryService,
+                eventPublisher,
+                userContext
         );
 
         user = User.builder()
