@@ -34,7 +34,7 @@ public class MentorshipService {
     public void stopMentorship(Long userToDeactivateId) {
         List<Goal> goalsControlledByMentor = goalRepository.findGoalsByMentorId(userToDeactivateId);
         for (Goal goal : goalsControlledByMentor) {
-            List<User> usersOfGoal = goalRepository.findUsersByGoalIdHql(goal.getId());
+            List<User> usersOfGoal = goal.getUsers();
             goal.setMentor(usersOfGoal.get(0));
             log.debug("Goal \"{}\" has changed mentor_id: old Id={} , new Id=\"{}\"", goal.getDescription(), userToDeactivateId, usersOfGoal.get(0).getId());
         }
