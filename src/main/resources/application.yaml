@@ -51,9 +51,6 @@ spring:
       retries: 3
       enable-idempotence: true
       max-in-flight-requests-per-connection: 5
-    admin:
-      properties:
-        auto.create.topics.enable: true  #автоматическое создание топиков
     topics:
         recommendation_requests: 3
 
