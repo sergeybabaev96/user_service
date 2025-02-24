@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+import school.faang.user_service.dto.FollowerEventDto;
 
 @Component
 @RequiredArgsConstructor
@@ -16,7 +17,7 @@ public class FollowerEventPublisher {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
 
-    public void publish(Object event) {
+    public void publish(FollowerEventDto event) {
         String json;
         try {
             json = objectMapper.writeValueAsString(event);
