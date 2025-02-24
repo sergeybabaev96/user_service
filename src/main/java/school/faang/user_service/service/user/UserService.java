@@ -100,7 +100,6 @@ public class UserService {
     @Transactional
     public void setBannedField(long userId, boolean banned) {
         userRepository.setBannedField(userId, banned);
-        System.out.println("Field is set");
     }
 
     @Transactional
