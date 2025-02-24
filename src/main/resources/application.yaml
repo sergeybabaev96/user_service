@@ -38,6 +38,15 @@ spring:
       max-request-size: 5MB
 
 
+  config:
+    import: classpath:kafka-topics.yaml
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      retries: 3
+
 minio:
   s3:
     endpoint: http://localhost:9000

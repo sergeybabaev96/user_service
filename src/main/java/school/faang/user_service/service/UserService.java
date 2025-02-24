@@ -3,10 +3,17 @@ package school.faang.user_service.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.utility.aspect_annotations.UserProfileViewed;
+
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -14,24 +21,43 @@ import java.util.NoSuchElementException;
 public class UserService {
     private final UserRepository userRepository;
 
+    @UserProfileViewed
+    @Transactional(readOnly = true)
     public User getUser(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException(String.format("User with id #%d not found", id)));
     }
 
+    @Transactional(readOnly = true)
     public List<User> getUsers(List<Long> ids) {
         log.info("Getting Users with ids {}", ids);
         return userRepository.findAllById(ids);
     }
 
+    @Transactional(readOnly = true)
+    public List<User> getUsersByIdsInGivenOrder(List<Long> ids) {
+        List<User> users = userRepository.findAllById(ids);
+
+        Map<Long, User> userMap = users.stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+
+        return ids.stream()
+                .map(userMap::get)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    @Transactional
     public boolean isUserExistById(Long id) {
         return userRepository.existsById(id);
     }
 
+    @Transactional
     public void saveUser(User user) {
         userRepository.save(user);
     }
 
+    @Transactional
     public List<User> findAllUsers() {
         return userRepository.findAll();
     }
