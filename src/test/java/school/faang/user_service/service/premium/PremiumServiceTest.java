@@ -146,6 +146,7 @@ class PremiumServiceTest {
         verify(premiumRepository, never()).save(any());
         verify(premiumMapper, never()).toDto(any());
     }
+
     @Test
     void removeExpiredPremiums_noExpiredPremiums_shouldNotDeleteAnything() {
         // Мокаем вызов репозитория, возвращая пустой список (нет просроченных премиумов)
