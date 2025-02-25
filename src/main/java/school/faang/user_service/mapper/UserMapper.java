@@ -6,6 +6,7 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.UserNotificationDto;
 import school.faang.user_service.dto.UserRegisterRequest;
 import school.faang.user_service.dto.UserRegisterResponse;
 import school.faang.user_service.entity.Country;
@@ -34,4 +35,7 @@ public interface UserMapper {
     UserDto toDto(User entity);
 
     UserRegisterResponse toUserRegisterResponse(User user);
+
+    @Mapping(source = "contactPreference.preference", target = "preference")
+    UserNotificationDto toUserNotificationDto(User user);
 }

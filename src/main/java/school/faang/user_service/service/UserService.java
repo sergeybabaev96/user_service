@@ -15,12 +15,15 @@ import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.client.PromotionServiceClient;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
+import school.faang.user_service.dto.UserNotificationDto;
 import school.faang.user_service.dto.UserRegisterRequest;
 import school.faang.user_service.dto.UserRegisterResponse;
 import school.faang.user_service.dto.promotion.UserPromotionRequest;
 import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
+import school.faang.user_service.entity.contact.ContactPreference;
+import school.faang.user_service.entity.contact.PreferredContact;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.exception.MinioSaveException;
@@ -48,6 +51,7 @@ import java.util.stream.Collectors;
 
 import static school.faang.user_service.config.KafkaConstants.PAYMENT_PROMOTION_TOPIC;
 import static school.faang.user_service.config.KafkaConstants.USER_KEY;
+
 
 @Service
 @RequiredArgsConstructor
@@ -119,6 +123,7 @@ public class UserService {
                 .toList();
     }
 
+    @Transactional
     public UserRegisterResponse register(@Valid UserRegisterRequest request) {
         if (userRepository.existsByUsername(request.username())) {
             throw new UserAlreadyExistsException("username: " + request.username() + " is busy");
@@ -133,9 +138,19 @@ public class UserService {
         }
 
         User user = userMapper.toEntity(request);
+        user.setRatingPoints(0);
+
+        ContactPreference contactPreference = ContactPreference.builder().user(user).preference(PreferredContact.EMAIL).build();
+        if (request.preferredContact() != null) {
+            contactPreference.setPreference(request.preferredContact());
+        }
+
+        user.setContactPreference(contactPreference);
+
         UserProfilePic userProfilePic = new UserProfilePic();
         userProfilePic.setFileId(avatarId);
         user.setUserProfilePic(userProfilePic);
+
         userRepository.save(user);
 
         return userMapper.toUserRegisterResponse(user);
@@ -232,5 +247,11 @@ public class UserService {
                 person.getMajor() != null ? person.getMajor() : "N/A",
                 person.getEmployer() != null ? person.getEmployer() : "N/A"
         );
+    }
+
+    public UserNotificationDto getNotificationInfo(@NotNull @Positive Long userId) {
+        User user = getUserById(userId);
+
+        return userMapper.toUserNotificationDto(user);
     }
 }
