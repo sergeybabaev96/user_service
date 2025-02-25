@@ -18,6 +18,7 @@ spring:
     bootstrap-servers: localhost:9092
     consumer:
       group-id: user-group
+      auto-offset-reset: earliest
     topics:
       user-ban-topic:
         name: user_ban_topic
