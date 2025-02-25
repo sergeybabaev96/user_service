@@ -9,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.core.KafkaTemplate;
+import school.faang.user_service.dto.analytic.RecommendationAnalyticDto;
 import school.faang.user_service.dto.recommendation.CreateRecommendationRequest;
 import school.faang.user_service.dto.recommendation.CreateRecommendationResponse;
 import school.faang.user_service.dto.recommendation.UpdateRecommendationRequest;
@@ -29,8 +31,13 @@ import school.faang.user_service.validator.RecommendationValidator;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,6 +56,8 @@ public class RecommendationServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
+    private KafkaTemplate<String, RecommendationAnalyticDto> kafkaTemplate;
+    @Mock
     private UserSkillGuaranteeRepository userSkillGuaranteeRepository;
 
     @Mock
@@ -64,6 +73,7 @@ public class RecommendationServiceTest {
 
     @Test
     public void create_ShouldCreateRecommendationSuccessfully() {
+        String kafkaTopic = "recommendation-topic";
         User author = new User();
         User receiver = new User();
         author.setId(1L);
@@ -104,6 +114,8 @@ public class RecommendationServiceTest {
         when(skillOfferRepository.findById(2L))
                 .thenReturn(Optional.of(secondSkillOffer));
 
+        when(kafkaTemplate.send(any(), any())).thenReturn(mock(CompletableFuture.class));
+
         final CreateRecommendationResponse createResponse = recommendationService.create(createRequest);
 
         verify(recommendationValidator, times(1))
@@ -121,6 +133,8 @@ public class RecommendationServiceTest {
 
         verify(userSkillGuaranteeRepository, times(2))
                 .save(guaranteeCaptor.capture());
+
+        //verify(kafkaTemplate, times(1)).send(kafkaTopic, analyticDto);
 
         assertEquals(1L, createResponse.getId());
         assertEquals(1L, createResponse.getAuthorId());

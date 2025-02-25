@@ -58,3 +58,7 @@ payment-service:
 user:
   ban:
     kafka_topic: "user_ban"
+
+recommendation:
+  analytic:
+    recommendation-topic: "recommendation-topic"
