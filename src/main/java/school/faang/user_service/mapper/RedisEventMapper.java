@@ -1,13 +1,19 @@
 package school.faang.user_service.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import school.faang.user_service.dto.PremiumBoughtEvent;
+import school.faang.user_service.redis.event.PremiumBoughtRedisEvent;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @Mapper(componentModel = "spring")
 public interface RedisEventMapper {
+
+    @Mapping(target = "type", constant = "PremiumBought")
+    @Mapping(target = "data", expression = "java(toMap(event))")
+    PremiumBoughtRedisEvent toRedisEvent(PremiumBoughtEvent event);
 
     default Map<String, Object> toMap(PremiumBoughtEvent event) {
         return Map.of("userId", event.getPremium().getUser().getId(),

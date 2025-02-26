@@ -15,7 +15,6 @@ import school.faang.user_service.redis.event.PremiumBoughtRedisEvent;
 @Service
 @RequiredArgsConstructor
 public class PremiumBoughtEventHandler {
-    private static final String PREMIUM_BOUGHT = "PREMIUM_BOUGHT";
 
     private final RedisEventPublisher premiumBoughtEventPublisher;
     private final UserServiceProperties properties;
@@ -24,9 +23,7 @@ public class PremiumBoughtEventHandler {
     @Async
     @EventListener
     public void handlePremiumAndSendToRedis(PremiumBoughtEvent event) {
-        PremiumBoughtRedisEvent redisEvent = new PremiumBoughtRedisEvent();
-        redisEvent.setType(PREMIUM_BOUGHT);
-        redisEvent.setData(redisEventMapper.toMap(event));
+        PremiumBoughtRedisEvent redisEvent = redisEventMapper.toRedisEvent(event);
         premiumBoughtEventPublisher.publish(redisEvent, properties.getRedis().getBoughtPremiumTopic());
         log.info("Premium bought event send to Redis event: {}", redisEvent);
     }
