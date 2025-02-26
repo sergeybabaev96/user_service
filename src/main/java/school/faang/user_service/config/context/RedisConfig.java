@@ -48,6 +48,6 @@ public class RedisConfig {
 
     @Bean
     public ChannelTopic topic(UserServiceProperties properties) {
-        return new ChannelTopic(properties.getAnalyticsTopic());
+        return new ChannelTopic(properties.getRedis().getAnalyticsTopic());
     }
 }
