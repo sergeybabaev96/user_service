@@ -1,7 +1,6 @@
 package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +27,7 @@ import school.faang.user_service.validator.RecommendationValidator;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-@Slf4j
+
 @Service
 @RequiredArgsConstructor
 public class RecommendationService {
@@ -50,17 +49,14 @@ public class RecommendationService {
         Recommendation recommendation = recommendationMapper.fromCreateRequest(createRequest);
         recommendation.setAuthor(userRepository.getReferenceById(createRequest.getAuthorId()));
         recommendation.setReceiver(userRepository.getReferenceById(createRequest.getReceiverId()));
-        log.info("Recommendation created");
 
-        //recommendationValidator.validateRecommendation(recommendation);
-        //recommendationValidator.validateOfferedSkills(createRequest.getSkillIds());
-        log.info("Recommendation failed");
+        recommendationValidator.validateRecommendation(recommendation);
+        recommendationValidator.validateOfferedSkills(createRequest.getSkillIds());
 
         Long recommendationId = recommendationRepository.create(
                 recommendation.getAuthor().getId(),
                 recommendation.getReceiver().getId(),
                 recommendation.getContent());
-        log.info("Recommendation save");
 
         recommendation.setId(recommendationId);
 

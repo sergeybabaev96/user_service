@@ -1,10 +1,9 @@
 package school.faang.user_service.config;
 
 
-
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -22,6 +21,9 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
+    @Value("${spring.kafka.consumer.bootstrap-servers")
+    private String bootstrapServers;
+
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, Long> kafkaListenerContainerFactory(
             ConsumerFactory<String, Long> consumerFactory) {
@@ -36,19 +38,17 @@ public class KafkaConfig {
     @Bean
     public Map<String, Object> producerConfigs() {
         Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");  // Адрес твоего Kafka брокера
-        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);  // Сериализатор для ключа (если ключ - строка)
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         return configProps;
     }
 
-    // Создаём KafkaProducerFactory
     @Bean
     public ProducerFactory<String, RecommendationAnalyticDto> producerFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
 
-    // Создаём KafkaTemplate
     @Bean
     public KafkaTemplate<String, RecommendationAnalyticDto> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
