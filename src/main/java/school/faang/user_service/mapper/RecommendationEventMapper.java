@@ -1,20 +1,18 @@
 package school.faang.user_service.mapper;
 
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import school.faang.user_service.dto.RecommendationEvent;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
 
-import java.time.LocalDateTime;
+@Mapper(componentModel = "spring",
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+public interface RecommendationEventMapper {
 
-@Component
-public class RecommendationEventMapper {
-    public RecommendationEvent mapToRecommendationEvent(RecommendationDto recommendation) {
-        return RecommendationEvent.builder()
-                .recommendationId(recommendation.getId())
-                .authorId(recommendation.getAuthorId())
-                .receiverId(recommendation.getReceiverId())
-                .createdAt(recommendation.getCreatedAt() != null ? recommendation.getCreatedAt() : LocalDateTime.now())
-                .build();
-    }
+    @Mapping(target = "recommendationId", source = "id")
+    @Mapping(target = "authorId", source = "authorId")
+    @Mapping(target = "receiverId", source = "receiverId")
+    @Mapping(target = "createdAt", source = "createdAt", defaultExpression = "java(java.time.LocalDateTime.now())")
+    RecommendationEvent mapToRecommendationEvent(RecommendationDto recommendation);
 }
-
