@@ -39,7 +39,7 @@ public class UserServiceProperties {
     @Getter
     @Setter
     public static class RedisProperties {
-        private String analyticsTopic;
+        private String boughtPremiumTopic;
     }
 
     public List<TariffDto> getListAvailableTariffDtos() {

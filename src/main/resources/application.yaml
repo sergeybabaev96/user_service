@@ -47,7 +47,7 @@ payment-service:
 
 user-service:
   redis:
-    analytics-topic: "pubsub:bought-premium"
+    bought-premium-topic: "pubsub:bought-premium"
   api-version: /api/v1
   available-tariffs:
     super-user:

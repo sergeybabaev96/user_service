@@ -46,8 +46,8 @@ public class RedisConfig {
         return mapper;
     }
 
-    @Bean
+    @Bean("bought-premium-topic")
     public ChannelTopic topic(UserServiceProperties properties) {
-        return new ChannelTopic(properties.getRedis().getAnalyticsTopic());
+        return new ChannelTopic(properties.getRedis().getBoughtPremiumTopic());
     }
 }
