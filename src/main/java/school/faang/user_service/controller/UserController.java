@@ -1,35 +1,28 @@
-package school.faang.user_service.controller.user;
+package school.faang.user_service.controller;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import school.faang.user_service.dto.DeactivatedUserDto;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
-import school.faang.user_service.service.user.UserService;
-
-import java.util.List;
+import school.faang.user_service.service.UserService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/users")
+@RequestMapping("api/v1/users")
 public class UserController {
     private final UserService userService;
 
-    public List<UserDto> getPremiumUsers(UserFilterDto userFilterDto) {
-        if (userFilterDto == null) {
-            return userService.getPremiumUsers();
-        }
-        return userService.getPremiumUsers(userFilterDto);
-    }
-
     @GetMapping("/{userId}")
     public UserDto getUser(@PathVariable long userId) {
-        return userService.getUserById(userId);
+        return userService.getUser(userId);
     }
 
     @PostMapping
@@ -37,4 +30,16 @@ public class UserController {
         return userService.getUsersByIds(ids);
     }
 
+    @GetMapping("/premium")
+    public List<UserDto> getPremiumUsers(UserFilterDto userFilterDto) {
+        if (userFilterDto == null) {
+            return userService.getPremiumUsers();
+        }
+        return userService.getPremiumUsers(userFilterDto);
+    }
+
+    @PostMapping("/{id}/deactivate")
+    public ResponseEntity<DeactivatedUserDto> deactivateUser(@PathVariable long id) {
+        return ResponseEntity.ok(userService.deactivateUser(id));
+    }
 }

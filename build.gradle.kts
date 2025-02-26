@@ -121,6 +121,7 @@ tasks.named<Checkstyle>("checkstyleTest") {
     }
     classpath = files()
 }
+
 kotlin {
     jvmToolchain(17)
 }
@@ -139,11 +140,12 @@ spotless {
  */
 val jacocoIncludes = listOf(
     "**/controller/**",
-    "**/service/**",
-    "**/validation/**",
     "**/filter/**",
-    "**/mapper/**"
+    "**/mapper/**",
+    "**/service/**",
+    "**/validation/**"
 )
+
 val jacocoExcludes = listOf(
     "**/adapter/**",
     "**/client/**",
