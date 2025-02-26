@@ -12,7 +12,6 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import school.faang.user_service.properties.UserServiceProperties;
-import school.faang.user_service.redis.event.RedisEvent;
 
 @Configuration
 public class RedisConfig {
@@ -23,8 +22,8 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, RedisEvent> redisTemplate() {
-        RedisTemplate<String, RedisEvent> template = new RedisTemplate<>();
+    public RedisTemplate<String, Object> redisTemplate() {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper()));

@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.PremiumBoughtEvent;
 import school.faang.user_service.redis.PremiumBoughtEventPublisher;
-import school.faang.user_service.redis.event.RedisEvent;
+import school.faang.user_service.redis.event.PremiumBoughtRedisEvent;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
@@ -23,7 +23,7 @@ public class PremiumBoughtEventHandler {
     @Async
     @EventListener
     public void handlePremiumAndSendToRedis(PremiumBoughtEvent event) {
-        RedisEvent redisEvent = new RedisEvent();
+        PremiumBoughtRedisEvent redisEvent = new PremiumBoughtRedisEvent();
         redisEvent.setType(PREMIUM_BOUGHT);
         redisEvent.setData(Map.of("userId", event.getPremium().getUser().getId(),
                 "amount", event.getPaymentResponse().amount(),
