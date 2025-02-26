@@ -3,6 +3,8 @@ package school.faang.user_service.controller.recommendation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
+import school.faang.user_service.mapper.RecommendationEventMapper;
+import school.faang.user_service.queue.RecommendationEventPublisher;
 import school.faang.user_service.service.recommendation.RecommendationService;
 import school.faang.user_service.service.subscription.SubscriptionService;
 
@@ -14,10 +16,15 @@ import java.util.List;
 public class RecommendationController {
     private final RecommendationService recommendationService;
     private final SubscriptionService subscriptionService;
+    private final RecommendationEventPublisher recommendationEventPublisher;
+    private final RecommendationEventMapper recommendationEventMapper;
 
     @PostMapping(value = "/give")
     public RecommendationDto giveRecommendation(@RequestBody RecommendationDto recommendation) {
-        return recommendationService.create(recommendation);
+        RecommendationDto createdRecommendation = recommendationService.create(recommendation);
+        recommendationEventPublisher.publish(recommendationEventMapper.mapToRecommendationEvent(createdRecommendation));
+        return createdRecommendation;
+
     }
 
     @PutMapping(value = "/update")
