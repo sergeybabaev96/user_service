@@ -6,10 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import school.faang.user_service.dto.RecommendationEvent;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
-import school.faang.user_service.mapper.RecommendationEventMapper;
-import school.faang.user_service.queue.RecommendationEventPublisher;
 import school.faang.user_service.service.recommendation.RecommendationService;
 import school.faang.user_service.service.subscription.SubscriptionService;
 
@@ -29,11 +26,6 @@ public class RecommendationControllerTest {
     @Mock
     private SubscriptionService subscriptionService;
 
-    @Mock
-    private RecommendationEventPublisher recommendationEventPublisher;
-    @Mock
-    private RecommendationEventMapper recommendationEventMapper;
-
     @InjectMocks
     private RecommendationController recommendationController;
 
@@ -51,14 +43,7 @@ public class RecommendationControllerTest {
         createdDto.setReceiverId(2L);
         createdDto.setCreatedAt(LocalDateTime.now());
 
-        RecommendationEvent event = new RecommendationEvent();
-        event.setRecommendationId(1L);
-        event.setAuthorId(1L);
-        event.setReceiverId(2L);
-        event.setCreatedAt(createdDto.getCreatedAt());
-
         when(recommendationService.create(inputDto)).thenReturn(createdDto);
-        when(recommendationEventMapper.mapToRecommendationEvent(createdDto)).thenReturn(event);
 
         RecommendationDto result = recommendationController.giveRecommendation(inputDto);
 
@@ -70,8 +55,6 @@ public class RecommendationControllerTest {
         assertEquals(createdDto.getCreatedAt(), result.getCreatedAt());
 
         verify(recommendationService, times(1)).create(inputDto);
-        verify(recommendationEventMapper, times(1)).mapToRecommendationEvent(createdDto);
-        verify(recommendationEventPublisher, times(1)).publish(event);
     }
 
     @Test

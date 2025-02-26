@@ -11,11 +11,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import school.faang.user_service.dto.RecommendationEvent;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
 import school.faang.user_service.dto.recommendation.SkillOfferDto;
 import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.mapper.RecommendationEventMapper;
 import school.faang.user_service.mapper.RecommendationMapper;
+import school.faang.user_service.queue.RecommendationEventPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
@@ -28,8 +31,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RecommendationServiceTest {
@@ -59,6 +61,11 @@ class RecommendationServiceTest {
     @Spy
     private RecommendationMapper recommendationMapper;
 
+    @Mock
+    private RecommendationEventPublisher recommendationEventPublisher;
+    @Mock
+    private RecommendationEventMapper recommendationEventMapper;
+
     @Test
     void createRecommendation_WithBlankContent_ShouldThrowException() {
         RecommendationDto recommendationDto = createRecommendationDto(BLANK_CONTENT);
@@ -82,16 +89,19 @@ class RecommendationServiceTest {
     @Test
     void createRecommendation_WithValidData_ShouldSucceed() {
         RecommendationDto recommendationDto = prepareRecommendationWithSkills(true);
+        RecommendationEvent event = new RecommendationEvent();
         when(recommendationRepository.create(
                 recommendationDto.getAuthorId(),
                 recommendationDto.getReceiverId(),
                 recommendationDto.getContent()))
                 .thenReturn(TEST_ID);
+        when(recommendationEventMapper.mapToRecommendationEvent(recommendationDto)).thenReturn(event);
 
         RecommendationDto result = recommendationService.create(recommendationDto);
 
         assertNotNull(result);
         assertEquals(TEST_ID, result.getId());
+        verify(recommendationEventPublisher, times(1)).publish(event);
     }
 
     @Test
