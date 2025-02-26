@@ -24,7 +24,7 @@ spring:
       port: 6379
       host: localhost
       channel:
-        recommendation-event: recommendation_event
+        recommendation-channel: recommendation_channel
 
   cloud:
     openfeign:
