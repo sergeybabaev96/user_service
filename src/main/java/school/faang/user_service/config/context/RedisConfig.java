@@ -8,10 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import school.faang.user_service.properties.UserServiceProperties;
 
 @Configuration
 public class RedisConfig {
@@ -43,10 +41,5 @@ public class RedisConfig {
                 .withSetterVisibility(JsonAutoDetect.Visibility.NONE));
 
         return mapper;
-    }
-
-    @Bean("bought-premium-topic")
-    public ChannelTopic topic(UserServiceProperties properties) {
-        return new ChannelTopic(properties.getRedis().getBoughtPremiumTopic());
     }
 }

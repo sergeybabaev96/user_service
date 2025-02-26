@@ -6,7 +6,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.PremiumBoughtEvent;
-import school.faang.user_service.redis.PremiumBoughtEventPublisher;
+import school.faang.user_service.properties.UserServiceProperties;
+import school.faang.user_service.redis.RedisEventPublisher;
 import school.faang.user_service.redis.event.PremiumBoughtRedisEvent;
 
 import java.time.format.DateTimeFormatter;
@@ -18,7 +19,8 @@ import java.util.Map;
 public class PremiumBoughtEventHandler {
     private static final String PREMIUM_BOUGHT = "PREMIUM_BOUGHT";
 
-    private final PremiumBoughtEventPublisher premiumBoughtEventPublisher;
+    private final RedisEventPublisher premiumBoughtEventPublisher;
+    private final UserServiceProperties properties;
 
     @Async
     @EventListener
@@ -30,7 +32,7 @@ public class PremiumBoughtEventHandler {
                 "currency", event.getPaymentResponse().currency().name(),
                 "premiumPeriod", event.getPremiumPeriod().name(),
                 "startDate", event.getPremium().getStartDate().format(DateTimeFormatter.ISO_DATE_TIME)));
-        premiumBoughtEventPublisher.publish(redisEvent);
+        premiumBoughtEventPublisher.publish(redisEvent, properties.getRedis().getBoughtPremiumTopic());
         log.info("Premium bought event send to Redis event: {}", redisEvent);
     }
 }
