@@ -11,7 +11,7 @@ import java.util.Map;
 @Mapper(componentModel = "spring")
 public interface RedisEventMapper {
 
-    @Mapping(target = "type", constant = "PremiumBought")
+    @Mapping(target = "type", constant = "PREMIUM_BOUGHT")
     @Mapping(target = "data", expression = "java(toMap(event))")
     PremiumBoughtRedisEvent toRedisEvent(PremiumBoughtEvent event);
 
