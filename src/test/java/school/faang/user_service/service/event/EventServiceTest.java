@@ -263,7 +263,7 @@ class EventServiceTest {
 
         eventService.deletePastEvents();
 
-        verify(eventRepository, times(3)).deleteAllInBatch();
+        verify(eventRepository, times(3)).deleteAll(anyList());
     }
 
     private static @NotNull List<Event> getEventList() {
@@ -286,6 +286,6 @@ class EventServiceTest {
 
         eventService.deletePastEvents();
 
-        verify(eventRepository, never()).deleteAllInBatch(anyList());
+        verify(eventRepository, never()).deleteAll(anyList());
     }
 }
