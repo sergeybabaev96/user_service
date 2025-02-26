@@ -21,22 +21,16 @@ spring:
       port: 6379
       host: localhost
       channel:
-        follower: user_follow_channel
+        profile-view: profile_view
+        channelFollower: user_follow_channel
         recommendation-channel: recommendation_channel
-
-  #mvc:
-    #servlet:
-      #path: /api/v1
-
-redis:
-  topic:
-    user-profile-view: UserProfileView
 
 server:
   port: 8080
 
-  servlet:
-    context-path: /api/v1
+  mvc:
+    servlet:
+      path: /api/v1
 
 thread_pool:
   max_threads: 10
