@@ -23,7 +23,8 @@ public class RecommendationEventPublisher implements MessagePublisher<Recommenda
             String json = objectMapper.writeValueAsString(recommendationEventDto);
             redisTemplate.convertAndSend(redisRecommendationEventTopic, json);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(String.format("An error occurred while sending a message to the topic %s",
+                    redisRecommendationEventTopic), e);
         }
     }
 }
