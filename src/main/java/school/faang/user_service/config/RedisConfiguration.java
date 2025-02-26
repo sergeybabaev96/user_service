@@ -14,16 +14,12 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 @RequiredArgsConstructor
 public class RedisConfiguration {
-
-    @Value("${spring.data.redis.host}")
-    private String redisHost;
-
-    @Value("${spring.data.redis.port}")
-    private int redisPort;
+    private final RedisConfigurationProperties redisConfigurationProperties;
 
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
-        RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(redisHost, redisPort);
+        RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(redisConfigurationProperties
+                .getHost(), redisConfigurationProperties.getPort());
         return new JedisConnectionFactory(redisConfig);
     }
 
