@@ -22,9 +22,16 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findParticipatedEventsByUserId(long userId);
 
     @Query(nativeQuery = true, value = """
-            WITH deleted AS ( DELETE FROM event
-            WHERE end_date < NOW()
-            RETURNING * )
+            WITH to_delete AS (
+                SELECT * FROM event
+                WHERE end_date < NOW()
+                FOR UPDATE
+            ),
+            deleted AS (
+                DELETE FROM event
+                WHERE id IN (SELECT id FROM to_delete)
+                RETURNING *
+            )
             SELECT count(*) FROM deleted
             """)
     int deleteAllEndedInPast();
