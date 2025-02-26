@@ -75,3 +75,10 @@ payment-service:
 promotion-service:
   host: ${PROMOTION_SERVICE_HOST:localhost}
   port: ${PROMOTION_SERVICE_PORT:8089}
+
+premium:
+  schedule: "0 0 0 * * 1"
+  batch-size: 100
+
+thread-pool-config:
+  size: 5
