@@ -206,4 +206,14 @@ public class EventServiceTest {
         verify(builder).addPropertyNode("startTime");
         verify(nodeBuilder).addConstraintViolation();
     }
+
+    @Test
+    public void testClearEvents() {
+        when(eventRepository.deleteAllEndedInPast()).thenReturn(1);
+
+        int deletedEvents = eventService.clearEvents();
+
+        assertEquals(1, deletedEvents);
+        verify(eventRepository, times(1)).deleteAllEndedInPast();
+    }
 }

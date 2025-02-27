@@ -1,7 +1,9 @@
 package school.faang.user_service.service.event;
 
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.event.EventFilterDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.event.Event;
@@ -51,6 +53,11 @@ public class EventService {
                 .forEach(filter -> filter.apply(events, filters));
 
         return events.toList();
+    }
+
+    @Transactional
+    public int clearEvents() {
+        return eventRepository.deleteAllEndedInPast();
     }
 
     public void deleteEvent(Long id) {

@@ -78,6 +78,11 @@ premium:
     batch-size: 100
     thread-pool-size: 4
 
+event:
+  removal:
+    cron: "0 0 6 * * SAT"
+
+
 image:
   avatar:
     folder-name: users_avatars
