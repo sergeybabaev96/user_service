@@ -80,10 +80,10 @@ public class User {
     @Column(name = "banned")
     private Boolean banned;
 
-    @Column(name = "telegram_username", length = 64)
+    @Column(name = "telegram_username")
     private String telegramUsername;
 
-    @Column(name = "telegram_chat_id", length = 64)
+    @Column(name = "telegram_chat_id")
     private String telegramChatId;
 
     @CreationTimestamp
