@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
+import school.faang.user_service.dto.kafka.FollowUserEventDto;
 import school.faang.user_service.dto.kafka.UserProfileViewedDto;
 
 import java.time.LocalDateTime;
@@ -19,9 +20,18 @@ public class KafkaProducer {
     @Value("${user-profile-viewed.topic-name}")
     String userProfileViewedTopicName;
 
+    @Value(("${user-follows-user.topic-name}"))
+    String followUserTopic;
+
     public void sendMessage(Long viewerId, Long profileOwnerId) {
         String uniqueKey = UUID.randomUUID().toString();
         UserProfileViewedDto dto = new UserProfileViewedDto(viewerId, profileOwnerId, LocalDateTime.now());
         template.send(userProfileViewedTopicName, uniqueKey, dto);
+    }
+
+    public void sendFollowUserEvent(Long followerId, Long followeeId) {
+        String uniqueKey = UUID.randomUUID().toString();
+        FollowUserEventDto dto = new FollowUserEventDto(followerId, followeeId, LocalDateTime.now());
+        template.send(followUserTopic, uniqueKey, dto);
     }
 }
