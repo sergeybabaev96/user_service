@@ -5,6 +5,8 @@ import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,7 +26,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import school.faang.user_service.entity.contact.Contact;
-import school.faang.user_service.entity.contact.ContactPreference;
+import school.faang.user_service.entity.contact.PreferredContact;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalInvitation;
@@ -77,6 +79,12 @@ public class User {
 
     @Column(name = "banned")
     private Boolean banned;
+
+    @Column(name = "telegram_username")
+    private String telegramUsername;
+
+    @Column(name = "telegram_chat_id")
+    private String telegramChatId;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -156,10 +164,11 @@ public class User {
     })
     private UserProfilePic userProfilePic;
 
-    @OneToOne(mappedBy = "user")
-    private ContactPreference contactPreference;
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "preference")
+    private PreferredContact preference;
 
+    @Enumerated(EnumType.ORDINAL)
     @OneToOne(mappedBy = "user")
     private Premium premium;
-
 }

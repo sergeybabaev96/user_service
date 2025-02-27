@@ -74,6 +74,7 @@ class UserServiceRegistrationTest {
         String email = "jane.doe@example.com";
         String password = "password123";
         Long countryId = 1L;
+        String telegramUserName = "joe32";
 
         Country country = new Country();
         country.setId(countryId);
@@ -86,12 +87,13 @@ class UserServiceRegistrationTest {
                 .password(password)
                 .country(country)
                 .active(true)
+                .telegramUsername(telegramUserName)
                 .experience(0)
                 .build();
 
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        User registeredUser = userService.registerUser(username, email, password, countryId);
+        User registeredUser = userService.registerUser(username, email, password, countryId, telegramUserName);
 
         assertNotNull(registeredUser);
         assertEquals(username, registeredUser.getUsername());
@@ -110,12 +112,13 @@ class UserServiceRegistrationTest {
         String username = "jane_doe";
         String email = "jane.doe@example.com";
         String password = "password123";
+        String telegramUserName = "joe32";
         Long countryId = 1L;
 
         when(countryRepository.findById(countryId)).thenReturn(Optional.empty());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                userService.registerUser(username, email, password, countryId)
+                userService.registerUser(username, email, password, countryId, telegramUserName)
         );
 
         assertEquals("Country not found with id: " + countryId, exception.getMessage());
@@ -128,16 +131,18 @@ class UserServiceRegistrationTest {
         String username = "jane_doe";
         String email = "jane.doe@example.com";
         String password = "password123";
+        String telegramUserName = "joe32";
         Long countryId = 1L;
 
         Country country = new Country();
         country.setId(countryId);
 
         when(countryRepository.findById(countryId)).thenReturn(Optional.of(country));
-        when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException("Unique constraint violated"));
+        when(userRepository.save(any(User.class))).thenThrow(
+                new DataIntegrityViolationException("Unique constraint violated"));
 
         DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () ->
-                userService.registerUser(username, email, password, countryId)
+                userService.registerUser(username, email, password, countryId, telegramUserName)
         );
 
         assertEquals("Unique constraint violated", exception.getMessage());
