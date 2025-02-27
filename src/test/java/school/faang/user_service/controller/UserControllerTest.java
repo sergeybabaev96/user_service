@@ -14,11 +14,10 @@ import school.faang.user_service.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
-    @Mock
-    UserService userServiceMock;
     @InjectMocks
-    UserController userController;
-
+    private UserController userController;
+    @Mock
+    private UserService userServiceMock;
     private MultipartFile file;
 
     @BeforeEach
@@ -35,4 +34,14 @@ class UserControllerTest {
         userController.importUsers(file);
         Mockito.verify(userServiceMock, Mockito.times(1)).processPersonsFromFile(Mockito.any());
     }
+
+    @Test
+    @DisplayName("Test get user")
+    void getUser() {
+        Long userId = 1L;
+        userController.getUser(userId);
+        Mockito.verify(userServiceMock, Mockito.times(1)).getUser(userId);
+    }
 }
+
+

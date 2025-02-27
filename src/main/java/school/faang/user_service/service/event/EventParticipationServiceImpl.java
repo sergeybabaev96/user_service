@@ -11,7 +11,7 @@ import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.event.EventParticipationRepository;
-import school.faang.user_service.service.users.UsersService;
+import school.faang.user_service.service.UserService;
 
 import java.util.List;
 import java.util.Objects;
@@ -24,14 +24,14 @@ public class EventParticipationServiceImpl implements EventParticipationService 
 
     private final EventParticipationRepository eventParticipationRepository;
     private final EventService eventService;
-    private final UsersService usersService;
+    private final UserService userService;
     private final UserMapper userMapper;
 
     @Override
     public void registerParticipant(long eventId, long userId) {
         log.debug("Start to register user with id = {} to event with id = {}", userId, eventId);
         Event event = eventService.findByIdOrThrow(eventId);
-        User user = usersService.findByIdOrThrow(userId);
+        User user = userService.findByIdOrThrow(userId);
 
         if (isUserEventOwner(user, event)) {
             throw new DataValidationException(
@@ -52,7 +52,7 @@ public class EventParticipationServiceImpl implements EventParticipationService 
     public void unregisterParticipant(long eventId, long userId) {
         log.debug("Start to unregister user with id = {} from event with id = {}", userId, eventId);
         Event event = eventService.findByIdOrThrow(eventId);
-        User user = usersService.findByIdOrThrow(userId);
+        User user = userService.findByIdOrThrow(userId);
         if (!isUserRegisteredToEvent(user, event)) {
             throw new DataValidationException(
                     String.format("User with id = %d is not registered to event with id = %d", userId, eventId)

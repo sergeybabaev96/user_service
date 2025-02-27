@@ -7,15 +7,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import school.faang.user_service.config.context.UserContext;
+import school.faang.user_service.dto.user.UserResponseDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.events.UserProfileViewEvent;
+import school.faang.user_service.exception.EntityNotFoundException;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.pojo.Person;
+import school.faang.user_service.publisher.UserProfileViewEventPublisher;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.CountryService;
 import school.faang.user_service.service.UserService;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -31,7 +37,28 @@ public class UserServiceImpl implements UserService {
     private final CountryService countryService;
     private final CsvMapper csvMapper;
     private final ExecutorService executorService;
+    private final UserProfileViewEventPublisher userProfileViewEventPublisher;
+    private final UserContext userContext;
+
     private final Random random = new Random();
+
+    @Override
+    public User findByIdOrThrow(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User is not exists! id: " + userId));
+    }
+
+    @Override
+    public UserResponseDto getUser(Long userId) {
+        User user = findByIdOrThrow(userId);
+        UserResponseDto userDto = userMapper.toUserResponseDto(user);
+        Long visitorId = userContext.getUserId();
+        if (visitorId > 0) {
+            userProfileViewEventPublisher.publish(new UserProfileViewEvent(userId, visitorId, LocalDateTime.now()));
+        }
+        log.info("Profile of user {} was viewed", userDto.getUsername());
+        return userDto;
+    }
 
     @Override
     public void processPersonsFromFile(MultipartFile file) {
