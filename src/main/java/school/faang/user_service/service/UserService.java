@@ -1,5 +1,8 @@
 package school.faang.user_service.service;
 
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -8,20 +11,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.client.PromotionServiceClient;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
+import school.faang.user_service.dto.UserNotificationDto;
 import school.faang.user_service.dto.UserRegisterRequest;
 import school.faang.user_service.dto.UserRegisterResponse;
 import school.faang.user_service.dto.promotion.UserPromotionRequest;
+import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
+import school.faang.user_service.entity.contact.ContactPreference;
+import school.faang.user_service.entity.contact.PreferredContact;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.exception.MinioSaveException;
 import school.faang.user_service.exception.ResourceNotFoundException;
 import school.faang.user_service.exception.UserAlreadyExistsException;
 import school.faang.user_service.mapper.UserMapper;
+import school.faang.user_service.model.Person;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.event.EventService;
 import school.faang.user_service.service.external.AvatarService;
@@ -30,6 +39,9 @@ import school.faang.user_service.service.filter.UserFilter;
 import school.faang.user_service.service.goal.GoalService;
 import school.faang.user_service.util.ConverterUtil;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -56,6 +68,7 @@ public class UserService {
     private final AvatarService avatarService;
     private final MinioStorageService minioStorageService;
     private final List<UserFilter> userFilters;
+    private final CountryService countryService;
 
     public User findById(long id) {
         return userRepository.findById(id)
@@ -110,6 +123,7 @@ public class UserService {
                 .toList();
     }
 
+    @Transactional
     public UserRegisterResponse register(@Valid UserRegisterRequest request) {
         if (userRepository.existsByUsername(request.username())) {
             throw new UserAlreadyExistsException("username: " + request.username() + " is busy");
@@ -124,9 +138,19 @@ public class UserService {
         }
 
         User user = userMapper.toEntity(request);
+        user.setRatingPoints(0);
+
+        ContactPreference contactPreference = ContactPreference.builder().user(user).preference(PreferredContact.EMAIL).build();
+        if (request.preferredContact() != null) {
+            contactPreference.setPreference(request.preferredContact());
+        }
+
+        user.setContactPreference(contactPreference);
+
         UserProfilePic userProfilePic = new UserProfilePic();
         userProfilePic.setFileId(avatarId);
         user.setUserProfilePic(userProfilePic);
+
         userRepository.save(user);
 
         return userMapper.toUserRegisterResponse(user);
@@ -165,5 +189,69 @@ public class UserService {
                 .stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void processCsvFile(MultipartFile csvFile) {
+        try {
+            InputStream file = csvFile.getInputStream();
+            CsvMapper csvMapper = new CsvMapper();
+            CsvSchema schema = CsvSchema.emptySchema().withHeader();
+            MappingIterator<Person> mappingIterator = csvMapper.readerFor(Person.class)
+                    .with(schema)
+                    .readValues(file);
+            List<Person> people = mappingIterator.readAll();
+            List<User> users = people.stream()
+                    .filter(person -> !userRepository.existsByPhone(person.getPhone())
+                            && !userRepository.existsByEmail(person.getEmail()))
+                    .map(this::processPerson)
+                    .toList();
+            userRepository.saveAll(users);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Ошибка при чтении CSV файла", e);
+        }
+    }
+
+    private User processPerson(Person person) {
+        String username = generateUsername(person);
+        String password = generatePassword();
+        String personCountry = person.getCountry();
+        Country country = countryService.findOrCreateCountry(personCountry);
+        String aboutMe = generateAboutMe(person);
+        User user = userMapper.toEntity(person, username, password, country, aboutMe);
+        if (user.getRatingHistories() == null) {
+            user.setRatingHistories(new ArrayList<>());
+        }
+        return user;
+    }
+
+    private String generatePassword() {
+        return UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String generateUsername(Person person) {
+        StringBuilder username = new StringBuilder(person.getFirstName() + "." + person.getLastName());
+        int id = 0;
+        while (userRepository.existsByUsername(username.toString())) {
+            username.append(id++);
+        }
+        return username.toString();
+    }
+
+    private String generateAboutMe(Person person) {
+        return String.format(
+                "State: %s; Faculty: %s; Year of study: %s; Major: %s; Employer: %s",
+                person.getState() != null ? person.getState() : "N/A",
+                person.getFaculty() != null ? person.getFaculty() : "N/A",
+                person.getYearOfStudy() != null ? person.getYearOfStudy() : "N/A",
+                person.getMajor() != null ? person.getMajor() : "N/A",
+                person.getEmployer() != null ? person.getEmployer() : "N/A"
+        );
+    }
+
+    public UserNotificationDto getNotificationInfo(@NotNull @Positive Long userId) {
+        User user = getUserById(userId);
+
+        return userMapper.toUserNotificationDto(user);
     }
 }

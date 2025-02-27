@@ -13,6 +13,7 @@ import school.faang.user_service.dto.error.ErrorResponse;
 import school.faang.user_service.exception.*;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.rmi.ServerException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -59,12 +60,15 @@ public class ControllerExceptionHandler {
         return buildErrorMessage(exception, webRequest);
     }
 
-    @ExceptionHandler(value = {MinioSaveException.class, PaymentServiceException.class, PaymentPayException.class})
+    @ExceptionHandler(value = {
+            MinioSaveException.class,
+            PaymentServiceException.class,
+            PaymentPayException.class,
+            UncheckedIOException.class})
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleMinioSave(MinioSaveException exception, WebRequest webRequest) {
         return buildErrorMessage(exception, webRequest);
     }
-
 
     @ExceptionHandler(value = {RecommendationRequestCreatedException.class, 
                                RequestAlreadyProcessedException.class, 

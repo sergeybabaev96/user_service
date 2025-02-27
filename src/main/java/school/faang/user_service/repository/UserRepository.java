@@ -42,4 +42,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "SELECT u FROM User u WHERE u.ratingPoints < :minRating ORDER BY u.ratingPoints DESC LIMIT :limit")
     List<User> findTopByRatingBelowLimit(@Param("minRating") int minRating, @Param("limit") int limit);
 
+    boolean existsByPhone(String phone);
+
+    boolean existsByEmail(String email);
 }
