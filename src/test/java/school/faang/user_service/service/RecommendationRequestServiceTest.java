@@ -43,8 +43,6 @@ class RecommendationRequestServiceTest {
     @Mock
     private RecommendationRequestedEventPublisher eventPublisher;
 
-
-
     @BeforeEach
     void setUp() {
         recommendationRequestMapper = Mappers.getMapper(RecommendationRequestMapper.class);
@@ -122,7 +120,6 @@ class RecommendationRequestServiceTest {
 
         Mockito.verify(eventPublisher, times(1)).publishEvent(Mockito.eq(expectedEvent));
     }
-
 
     @Test
     void getRequest_ShouldReturnRequest() {
