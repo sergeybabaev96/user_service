@@ -19,7 +19,6 @@ public class ProfileViewEventPublisher {
     @Value("${user-profile-viewed.topic-name}")
     String userProfileViewedTopicName;
 
-    @Async
     public void sendMessage(Long viewerId, Long profileOwnerId) {
         String uniqueKey = UUID.randomUUID().toString();
         ProfileViewEventDto dto = ProfileViewEventDto.builder()
