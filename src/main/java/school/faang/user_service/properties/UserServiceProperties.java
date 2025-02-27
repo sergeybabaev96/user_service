@@ -17,7 +17,6 @@ import java.util.Map;
 @Setter
 public class UserServiceProperties {
 
-    private RedisProperties redis;
     private RecommendationRequestProperties recommendationRequest;
     private Map<String, TariffProperties> availableTariffs = new HashMap<>();
 
@@ -34,12 +33,6 @@ public class UserServiceProperties {
         private Integer priority;
         private BigDecimal price;
         private String currency;
-    }
-
-    @Getter
-    @Setter
-    public static class RedisProperties {
-        private String boughtPremiumTopic;
     }
 
     public List<TariffDto> getListAvailableTariffDtos() {
