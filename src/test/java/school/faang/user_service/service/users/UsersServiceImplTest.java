@@ -14,6 +14,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.publisher.UserProfileViewEventPublisher;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.user.UserServiceImpl;
 
 import java.util.Optional;
 
@@ -29,7 +30,7 @@ class UsersServiceImplTest {
     @Spy
     UserMapperImpl userMapper;
     @InjectMocks
-    private UsersServiceImpl usersService;
+    private UserServiceImpl userService;
 
     @BeforeEach
     void setUp() {
@@ -45,7 +46,7 @@ class UsersServiceImplTest {
         Mockito.when(userRepository.findById(visitedUserId)).thenReturn(Optional.ofNullable(user));
         Mockito.when(userContext.getUserId()).thenReturn(visitorUserId);
 
-        usersService.getUser(visitedUserId);
+        userService.getUser(visitedUserId);
 
         Mockito.verify(userProfileViewEventPublisher, Mockito.times(1))
                 .publish(Mockito.any());

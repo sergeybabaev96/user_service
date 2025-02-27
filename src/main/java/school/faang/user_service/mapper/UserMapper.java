@@ -9,23 +9,19 @@ import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.pojo.Person;
 
-import java.util.List;
-
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = MentorshipRequestMapper.class)
 public interface UserMapper {
-    User toUserEntity(UserDto userDto);
+
+    @Mapping(source = "contactPreference.preference", target = "preference")
+    UserResponseDto toUserResponseDto(User user);
 
     @Mapping(source = "user.id", target = "userId")
     UserDto toUserDto(User user);
-
-    User toUserEntity(UserDto userDto);
 
     @Mapping(target = "username", expression = "java(getUsername(person))")
     @Mapping(target = "country", expression = "java(getCountry(person))")
     @Mapping(target = "aboutMe", expression = "java(person.toString())")
     User toUserEntity(Person person);
-
-    List<User> toUserEntities(List<Person> persons);
 
     default String getUsername(Person person) {
         return person.getFirstName() + person.getLastName();
@@ -34,7 +30,6 @@ public interface UserMapper {
     default Country getCountry(Person person) {
         return Country.builder().title(person.getCountry()).build();
     }
-    @Mapping(source = "contactPreference.preference", target = "preference")
-    UserResponseDto toUserResponseDto(User user);
+
 
 }
