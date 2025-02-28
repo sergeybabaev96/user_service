@@ -5,19 +5,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import school.faang.user_service.config.AppConfig;
 import school.faang.user_service.dto.FollowingFeatureDto;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.UserWasNotFoundException;
-import school.faang.user_service.service.filter.UserFilter;
 import school.faang.user_service.mapper.UserFollowingMapper;
 import school.faang.user_service.rating.ActionType;
 import school.faang.user_service.rating.publisher.UserEventPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.filter.UserFilter;
 
 import java.util.List;
 import java.util.Objects;
@@ -117,6 +116,11 @@ public class SubscriptionService {
         userEventPublisher.publishEvent(ActionType.UNFOLLOW, followeeId);
 
         logger.info("Succeed of unfollowing user!");
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isFollow(long followerId, long followeeId) {
+        return subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
     }
 
     private void isFollowingUserNotFollower(long followerId, long followeeId) {
