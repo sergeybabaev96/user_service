@@ -1,4 +1,4 @@
-package school.faang.user_service.service.premium;
+package school.faang.user_service.service.handler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,9 +7,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.PremiumBoughtEvent;
-import school.faang.user_service.mapper.RedisEventMapper;
-import school.faang.user_service.properties.UserServiceProperties;
 import school.faang.user_service.redis.RedisEventPublisher;
+import school.faang.user_service.mapper.RedisEventMapper;
 import school.faang.user_service.redis.event.PremiumBoughtRedisEvent;
 
 @Slf4j

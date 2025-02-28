@@ -12,6 +12,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  servlet:
+    multipart:
+      file-size-threshold: 1024KB
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
@@ -48,6 +51,7 @@ payment-service:
 user-service:
   redis:
     bought-premium-topic: "pubsub:bought-premium"
+    profile_pic_channel: profile_pic_channel
   api-version: /api/v1
   available-tariffs:
     super-user:
@@ -64,6 +68,10 @@ user-service:
       priority: 2
   recommendation-request:
     min-month: 6
+  s3:
+    endpoint: http://127.0.0.1:9000
+    access-key: user
+    secret-key: password
 
 remove-premium-job:
   batch-size: 100

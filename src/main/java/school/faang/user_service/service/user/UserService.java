@@ -1,6 +1,7 @@
 package school.faang.user_service.service.user;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.dto.TariffDto;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.user.GetUserRequest;
@@ -15,4 +16,6 @@ public interface UserService {
     List<UserDto> findUsersByFilter(GetUserRequest request);
 
     UserDto deactivateUser(long userId);
+
+    void saveProfilePic(long userId, MultipartFile pic);
 }

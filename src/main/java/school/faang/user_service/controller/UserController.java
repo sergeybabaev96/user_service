@@ -4,6 +4,7 @@ package school.faang.user_service.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.dto.BuyTariffRequest;
 import school.faang.user_service.dto.TariffDto;
 import school.faang.user_service.dto.UserDto;
@@ -39,5 +40,10 @@ public class UserController {
     @GetMapping("/users")
     public List<UserDto> getUsers(@RequestBody GetUserRequest request) {
         return userService.findUsersByFilter(request);
+    }
+
+    @PostMapping("/upload-profile-pic")
+    public void uploadProfilePic(@RequestParam("user_id") long userId, @RequestParam("pic") MultipartFile pic) {
+        userService.saveProfilePic(userId, pic);
     }
 }
