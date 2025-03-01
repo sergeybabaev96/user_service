@@ -3,12 +3,7 @@ package school.faang.user_service.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
 public class ExecutorConfig {
@@ -19,24 +14,18 @@ public class ExecutorConfig {
     @Value("${scheduler.event-batch-size}")
     private int batchSize;
 
-
-    @Value("${scheduler.queue-capacity}")
-    private int queueCapacity;
-
     @Value("${scheduler.keep-alive-time}")
-    private long keepAliveTime;
+    private int keepAliveTime;
 
-    @Bean
-    public ExecutorService threadPool() {
+    @Bean(destroyMethod = "shutdown", name = "deletePastEvents")
+    public ThreadPoolTaskExecutor threadPool() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
-        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(queueCapacity);
-
-        return new ThreadPoolExecutor(
-                numThreads,
-                numThreads,
-                keepAliveTime,
-                TimeUnit.SECONDS,
-                queue,
-                new ThreadPoolExecutor.CallerRunsPolicy() );
+        executor.setCorePoolSize(numThreads);
+        executor.setMaxPoolSize(numThreads * 2);
+        executor.setKeepAliveSeconds(keepAliveTime);
+        executor.setThreadNamePrefix("deletePastEvents-thread-");
+        executor.initialize();
+        return executor;
     }
 }

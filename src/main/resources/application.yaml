@@ -73,7 +73,6 @@ scheduler:
   clear-events-cron: "0 0 0 * * *"  # at 00:00 every day
   event-batch-size: 10
   thread-pool-size: 4
-  queue-capacity: 1000
   keep-alive-time: 60
 
 
