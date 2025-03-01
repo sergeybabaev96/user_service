@@ -74,7 +74,8 @@ scheduler:
   event-batch-size: 10
   thread-pool-size: 4
   keep-alive-time: 60
-
+  cron:
+    premium-remove: 0 0 3 * * MON
 
 
 logging:
@@ -94,10 +95,6 @@ app:
 
 data:
   batch-size: 10
-
-scheduler:
-  cron:
-    premium-remove: 0 0 3 * * MON
 
 executor:
   pool-number: 5
