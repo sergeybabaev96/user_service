@@ -77,6 +77,12 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с ID " + userId + " не найден"));
 
+        long viewerId = userContext.getUserId();
+        if (viewerId != userId) {
+            ProfileViewEvent event = new ProfileViewEvent(viewerId, userId);
+            profileViewEventPublisher.publish(event);
+        }
+
         return userMapper.toDto(user);
     }
 
