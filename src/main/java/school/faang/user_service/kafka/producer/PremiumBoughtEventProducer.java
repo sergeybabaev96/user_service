@@ -14,7 +14,7 @@ public class PremiumBoughtEventProducer {
 
     private final KafkaTemplate<String, PremiumBoughtEvent> kafkaTemplate;
     @Value("${spring.kafka.topics.premium-bought}")
-    private String topic ;
+    private String topic;
 
     public void sendEvent(PremiumBoughtEvent event) {
         kafkaTemplate.send(topic, event);
