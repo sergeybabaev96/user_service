@@ -3,7 +3,7 @@ app:
     min_skill_offers: 3
     active_transaction: 5
     passive_transaction: 2
-    dicebear_url: "${DICEBEAR_URL: https://api.dicebear.com/9.x/adventurer/svg?seed={seed}}"
+    dicebear_url: "${DICEBEAR_URL:https://api.dicebear.com/9.x/adventurer/svg?seed={seed}}"
     avatar_file_size: 5242880
     avatar_bucket_name: user-avatars
     avatar_large_file_size: 1080
@@ -78,3 +78,10 @@ payment-service:
 promotion-service:
   host: ${PROMOTION_SERVICE_HOST:localhost}
   port: ${PROMOTION_SERVICE_PORT:8089}
+
+premium:
+  schedule: "0 0 0 * * 1"
+  batch-size: 100
+
+thread-pool-config:
+  size: 5

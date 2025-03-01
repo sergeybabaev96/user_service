@@ -33,6 +33,11 @@ public class SubscriptionController {
         return subscriptionService.getFollowers(followerId, userFilterDto);
     }
 
+    @GetMapping("/{followerId}/follow/{followeeId}")
+    public boolean isFollow(@PathVariable long followerId, @PathVariable long followeeId) {
+        return subscriptionService.isFollow(followeeId, followerId);
+    }
+
     @GetMapping("/followeesCount")
     public long getFollowingCount(@RequestParam long followeeId) {
         return subscriptionService.getFollowingCount(followeeId);

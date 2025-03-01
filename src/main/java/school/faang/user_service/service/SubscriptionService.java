@@ -122,6 +122,11 @@ public class SubscriptionService {
         log.info("Succeed of unfollowing user!");
     }
 
+    @Transactional(readOnly = true)
+    public boolean isFollow(long followerId, long followeeId) {
+        return subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
+    }
+
     private void isFollowingUserNotFollower(long followerId, long followeeId) {
         if (!findUserById(followerId).getFollowees().contains(findUserById(followeeId))) {
             log.error("The followerId is not following followeeId : {} -> {}", followerId, followeeId);
