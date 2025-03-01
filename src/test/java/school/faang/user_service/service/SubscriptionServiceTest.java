@@ -14,6 +14,7 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.UserWasNotFoundException;
 import school.faang.user_service.mapper.UserFollowingMapper;
 import school.faang.user_service.mapper.UserFollowingMapperImpl;
+import school.faang.user_service.rating.publisher.FollowerEventPublisher;
 import school.faang.user_service.rating.publisher.UserEventPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
@@ -34,6 +35,8 @@ class SubscriptionServiceTest {
     private UserRepository userRepository;
     @Mock
     private UserEventPublisher userEventPublisher;
+    @Mock
+    private FollowerEventPublisher followerEventPublisher;
     @Mock
     private SubscriptionRepository subscriptionRepository;
     @Mock
