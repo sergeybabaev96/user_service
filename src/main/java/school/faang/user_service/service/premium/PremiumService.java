@@ -1,7 +1,9 @@
 package school.faang.user_service.service.premium;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.payment_service.PaymentResponse;
@@ -48,6 +50,16 @@ public class PremiumService {
         return premiumRepository.findByUserIdAndStartDateAfterAndEndDateBefore(userId, now, now).isPresent();
     }
 
+    public List<Premium> defineExpirePremium() {
+        return premiumRepository.findAllByEndDateBefore(LocalDateTime.now());
+    }
+
+    @Async("executorService")
+    public void removePremium(List<Premium> batches) {
+
+        premiumRepository.deleteAll(batches);
+    }
+
     private void checkUserDoesntHavePremium(Long userId) {
         LocalDateTime currentTime = LocalDateTime.now();
 
@@ -69,9 +81,9 @@ public class PremiumService {
     private Premium createPremiumForUser(User user, PremiumPeriod period) {
         LocalDateTime currentTime = LocalDateTime.now();
         return Premium.builder()
-                .user(user)
-                .startDate(currentTime)
-                .endDate(currentTime.plusDays(period.getDays()))
-                .build();
+            .user(user)
+            .startDate(currentTime)
+            .endDate(currentTime.plusDays(period.getDays()))
+            .build();
     }
 }

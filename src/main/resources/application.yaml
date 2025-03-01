@@ -91,3 +91,13 @@ payment-service:
 
 app:
   max-active-goals: 3
+
+data:
+  batch-size: 10
+
+scheduler:
+  cron:
+    premium-remove: 0 0 3 * * MON
+
+executor:
+  pool-number: 5
