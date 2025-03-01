@@ -17,7 +17,6 @@ public class GoalInvitationValidation {
 
     private static final int MAX_GOAL_USERS = 3;
 
-    private final InvitationFilterDto filter = new InvitationFilterDto();
     private final UserService userService;
     private final GoalInvitationRepository goalInvitationRepository;
 
@@ -37,12 +36,12 @@ public class GoalInvitationValidation {
         goalExistsOrNot(id);
     }
 
-    private void userVerificationForSendingInvitation(GoalInvitationDto goalInvitationDto){
-        long inviterId = goalInvitationDto.getInviterId();
-        long invitedId = goalInvitationDto.getInvitedUserId();
+    private void userVerificationForSendingInvitation(GoalInvitationDto dto){
+        Long inviterId = dto.getInviterId();
+        Long invitedId = dto.getInvitedUserId();
 
-        if (inviterId == 0 || invitedId == 0 || inviterId == invitedId){
-            String generalMessage = "В приглашении " + goalInvitationDto.getId() +
+        if (inviterId == 0L || invitedId == 0L || inviterId.equals(invitedId)){
+            String generalMessage = "В приглашении " + dto.getId() +
                     " неверно указан приглашающий и приглашенный пользователь";
             throw new BusinessException(generalMessage);
         }
@@ -63,8 +62,7 @@ public class GoalInvitationValidation {
     }
 
     private void allowedNumberActiveGoals(Long id){
-        GoalInvitation goalInvitation = goalInvitationRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException("Объект не найден"));
+        GoalInvitation goalInvitation = findGoalInvitationById(id);
 
         Long idUser = userService.getUserById(goalInvitation.getInvited().getId()).getId();
 
@@ -79,8 +77,8 @@ public class GoalInvitationValidation {
     }
 
     private void invitedWorkingGoal(Long id){
-        GoalInvitation goalInvitation = goalInvitationRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException("Объект не найден"));
+        GoalInvitation goalInvitation = findGoalInvitationById(id);
+
         if (goalInvitation.getStatus().equals(RequestStatus.PENDING)){
             String message = "Пользователь " + goalInvitation.getInvited() + " уже работает с целью id: " + id;
             throw new BusinessException(message);
@@ -88,9 +86,14 @@ public class GoalInvitationValidation {
     }
 
     private void goalExistsOrNot(Long id){
-        if (goalInvitationRepository.existsById(id)){
+        if (!goalInvitationRepository.existsById(id)){
             String message = "Цель с id: " + id + " не найдена";
             throw new EntityNotFoundException(message);
         }
+    }
+
+    private GoalInvitation findGoalInvitationById(Long id){
+        return goalInvitationRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException("Объект не найден"));
     }
 }

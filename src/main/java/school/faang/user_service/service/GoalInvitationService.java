@@ -12,11 +12,9 @@ import school.faang.user_service.exception.EntityNotFoundException;
 import school.faang.user_service.mapper.GoalInvitationMapper;
 import school.faang.user_service.repository.goal.GoalInvitationRepository;
 import school.faang.user_service.validation.goal.GoalInvitationValidation;
-import school.faang.user_service.filter.Filter;
+import school.faang.user_service.filter.GoalInvitationFilter;
 
 import java.util.List;
-import java.util.stream.Stream;
-
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +23,7 @@ public class GoalInvitationService {
     private final GoalInvitationRepository goalInvitationRepository;
     private final GoalInvitationMapper goalInvitationMapper;
     private final GoalInvitationValidation validation;
-    private final List<Filter<GoalInvitation, InvitationFilterDto>> invitationFilter;
+    private final List<GoalInvitationFilter> invitationFilter;
     private final UserService userService;
     private final GoalService goalService;
 
@@ -44,28 +42,32 @@ public class GoalInvitationService {
         return goalInvitationMapper.toDto(goalInvitation);
     }
 
-    public void acceptGoalInvitation(Long id){
+    public GoalInvitationDto acceptGoalInvitation(Long id){
         validation.checkAcceptingInvitation(id);
-        decisionOnGoalInvitation(id, RequestStatus.ACCEPTED);
+        return decisionOnGoalInvitation(id, RequestStatus.ACCEPTED);
     }
 
-    public void rejectGoalInvitation(Long id){
+    public GoalInvitationDto rejectGoalInvitation(Long id){
         validation.checkRejectingInvitation(id);
-        decisionOnGoalInvitation(id, RequestStatus.REJECTED);
+        return decisionOnGoalInvitation(id, RequestStatus.REJECTED);
     }
 
     public List<GoalInvitationDto> getInvitations(InvitationFilterDto filters){
-        Stream<GoalInvitation> goalInvitation = goalInvitationRepository.findAll().stream();
-        invitationFilter.stream()
+        List<GoalInvitation> goalInvitation = goalInvitationRepository.findAll();
+
+        return invitationFilter.stream()
                 .filter(filter -> filter.isApplicable(filters))
-                .forEach(filter -> filter.apply(goalInvitation, filters));
-        return goalInvitation.map(goalInvitationMapper::toDto).toList();
+                .reduce(goalInvitation.stream(),
+                        (goalInvitationStream, filter) -> filter.apply(goalInvitationStream, filters),
+                        (list1, list2) -> list1)
+                .map(goalInvitationMapper::toDto).toList();
     }
 
-    private void decisionOnGoalInvitation(Long id, RequestStatus status){
+    private GoalInvitationDto decisionOnGoalInvitation(Long id, RequestStatus status){
         GoalInvitation goalInvitation = goalInvitationRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Объект не найден"));
         goalInvitation.setStatus(status);
         goalInvitationRepository.save(goalInvitation);
+        return goalInvitationMapper.toDto(goalInvitation);
     }
 }

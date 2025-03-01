@@ -18,12 +18,12 @@ public class GoalInvitationController {
         return goalInvitationService.createInvitation(dto);
     }
 
-    public void acceptGoalInvitation(Long id){
-        goalInvitationService.acceptGoalInvitation(id);
+    public GoalInvitationDto acceptGoalInvitation(Long id){
+        return goalInvitationService.acceptGoalInvitation(id);
     }
 
-    public void rejectGoalInvitation(Long id){
-        goalInvitationService.rejectGoalInvitation(id);
+    public GoalInvitationDto rejectGoalInvitation(Long id){
+        return goalInvitationService.rejectGoalInvitation(id);
     }
 
     public List<GoalInvitationDto> getInvitations(InvitationFilterDto filters){
