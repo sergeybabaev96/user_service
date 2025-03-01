@@ -194,7 +194,6 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-
     @Transactional
     public void processCsvFile(MultipartFile csvFile) {
         try {
@@ -261,9 +260,7 @@ public class UserService {
 
     @Transactional
     public void banUser(Long userId) {
-        User user = getUserById(userId);
-        user.setBanned(true);
-        userRepository.save(user);
+        userRepository.banUserById(userId);
         log.info("User {} has been banned", userId);
     }
 
