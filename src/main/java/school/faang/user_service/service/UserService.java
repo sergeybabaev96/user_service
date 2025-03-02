@@ -6,16 +6,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.config.context.UserContext;
+import school.faang.user_service.dto.event.ProfileViewEvent;
 import school.faang.user_service.dto.user.UserCreateDto;
 import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.filters.user.UserFilter;
 import school.faang.user_service.mapper.UserMapper;
+import school.faang.user_service.publisher.ProfileViewEventPublisher;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.profilePicture.UserProfilePicService;
 import school.faang.user_service.service.validator.UserValidator;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -33,6 +37,18 @@ public class UserService {
     private final UserValidator userValidator;
     private final UserProfilePicService userProfilePicService;
     private final CountryService countryService;
+    private final ProfileViewEventPublisher eventPublisher;
+    private final UserContext userContext;
+
+    public void viewProfile(long userId) {
+        var viewerId = userContext.getUserId();
+        var event = ProfileViewEvent.builder()
+                .receiverId(userId)
+                .actorId(viewerId)
+                .receivedAt(LocalDateTime.now())
+                .build();
+        eventPublisher.publisherEvent(event);
+    }
 
     @Transactional
     public void deactivateUser(Long userId) {
