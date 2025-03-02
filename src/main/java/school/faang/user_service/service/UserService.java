@@ -3,6 +3,7 @@ package school.faang.user_service.service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,9 +22,9 @@ import school.faang.user_service.service.validator.UserValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -78,11 +79,11 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с ID " + userId + " не найден"));
 
         long viewerId = userContext.getUserId();
-        if (viewerId != userId) {
+        if (viewerId != 0 && viewerId != userId) {
             ProfileViewEvent event = new ProfileViewEvent(viewerId, userId);
+            log.info("Отправляю Событие о просмотре профиля пользователя ID {} пользователем ID {}", userId, viewerId);
             profileViewEventPublisher.publish(event);
         }
-
         return userMapper.toDto(user);
     }
 
