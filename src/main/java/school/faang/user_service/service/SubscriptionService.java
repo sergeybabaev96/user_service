@@ -3,11 +3,11 @@ package school.faang.user_service.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.filter.UserFilter;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.SubscriptionRepository;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 @Service
 @RequiredArgsConstructor
@@ -31,11 +31,27 @@ public class SubscriptionService {
             throw new DataValidationException("The subscription has already been issued");
     }
 
-    public List<User> getFollowers(long targetId) {
-        return subscriptionRepository.findByFolloweeId(targetId).toList();
+    public List<User> getFollowers(long id) {
+        return subscriptionRepository.findByFolloweeId(id).toList();
     }
 
-    public List<User> getFollowers(long targetId, UserFilter filter) {
-        return subscriptionRepository.findByFolloweeId(targetId).filter(filter).toList();
+    public List<User> getFollowers(long id, Predicate<User> filter) {
+        return subscriptionRepository.findByFolloweeId(id).filter(filter).toList();
+    }
+
+    public long getFollowersCount(long id) {
+        return subscriptionRepository.findFolloweesAmountByFollowerId(id);
+    }
+
+    public List<User> getFollowing(long id) {
+        return subscriptionRepository.findByFollowerId(id).toList();
+    }
+
+    public List<User> getFollowing(long id, Predicate<User> filter) {
+        return subscriptionRepository.findByFollowerId(id).filter(filter).toList();
+    }
+
+    public long getFollowingCount(long id) {
+        return subscriptionRepository.findFolloweesAmountByFollowerId(id);
     }
 }
