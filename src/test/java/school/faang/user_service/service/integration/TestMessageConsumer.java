@@ -1,18 +1,18 @@
 package school.faang.user_service.service.integration;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.kafka.FollowUserEventDto;
 
-@Slf4j
 @Component
 public class TestMessageConsumer {
 
     private FollowUserEventDto payload;
 
+    @KafkaListener(topics = "user-follows-user", groupId = "test-group",
+            containerFactory = "kafkaListenerContainerFactory")
     public void receive(FollowUserEventDto message) {
         this.payload = message;
-//        log.info("Success received");
     }
 
     public FollowUserEventDto getPayload() {

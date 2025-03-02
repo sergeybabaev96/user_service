@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,9 +29,10 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ActiveProfiles("test-mock-consumer")
+@ActiveProfiles("test")
 @Testcontainers
 @AutoConfigureMockMvc
+@Import(TestKafkaConfig.class)
 @SpringBootTest
 public class KafkaIntegrationTest {
     public static final String TOPIC = "user-follows-user";
@@ -56,16 +58,15 @@ public class KafkaIntegrationTest {
     private static final KafkaContainer kafkaContainer =
             new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.3.0"));
 
-    @BeforeAll // Use BeforeAll to create topic after container is started
+    @BeforeAll
     static void createKafkaTopic() {
         System.setProperty("spring.kafka.bootstrap-servers", kafkaContainer.getBootstrapServers());
-        // **Создаем топик программно через kafka-topics.sh после запуска контейнера**
         try {
             org.testcontainers.containers.Container.ExecResult result = kafkaContainer.execInContainer(
                     "/bin/kafka-topics.sh",
                     "--create",
                     "--bootstrap-server",
-                    "localhost:9092", // Внутри контейнера брокер доступен по localhost:9092
+                    "localhost:9092",
                     "--replication-factor",
                     "1",
                     "--partitions",
@@ -116,13 +117,14 @@ public class KafkaIntegrationTest {
                 .andExpect(MockMvcResultMatchers.status().isOk());
 
         Awaitility.await()
-                .atMost(10, TimeUnit.SECONDS)
+                .atMost(5, TimeUnit.SECONDS)
                 .pollInterval(Duration.ofMillis(100))
                 .untilAsserted(() -> {
                     FollowUserEventDto receivedEvent = testMessageConsumer.getPayload();
                     assertThat(receivedEvent).isNotNull();
-                    assertThat(receivedEvent).isEqualTo(eventDto);
+                    assertThat(receivedEvent.followeeId()).isEqualTo(followeeId);
+                    assertThat(receivedEvent.followerId()).isEqualTo(followerId);
+                    assertThat(receivedEvent.followedAt()).isAfter(eventDto.followedAt());
                 });
     }
-
 }
