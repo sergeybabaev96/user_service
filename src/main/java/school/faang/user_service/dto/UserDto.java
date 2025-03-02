@@ -1,4 +1,3 @@
 package school.faang.user_service.dto;
 
-public class UserDto {
-}
+public record UserDto(Long id, String name, String email) {}
