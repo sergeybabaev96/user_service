@@ -10,7 +10,6 @@ import school.faang.user_service.publisher.EventPublisherAbstract;
 
 @Slf4j
 @Component
-
 public class FollowerEventPublisher extends EventPublisherAbstract<FollowerEvent> {
 
     private final Channels channels;
