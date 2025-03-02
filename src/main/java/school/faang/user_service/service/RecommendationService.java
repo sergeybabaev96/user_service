@@ -19,7 +19,7 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.UserSkillGuaranteeRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
-import school.faang.user_service.validator.RecommendationValidation;
+import school.faang.user_service.validator.RecommendationValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ public class RecommendationService {
 
     private final RecommendationRepository recommendationRepository;
     private final SkillRepository skillRepository;
-    private final RecommendationValidation recommendationValidation;
+    private final RecommendationValidator recommendationValidator;
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
     private final SkillOfferRepository skillOfferRepository;
 
@@ -42,9 +42,7 @@ public class RecommendationService {
 
     public RecommendationDto create(RecommendationDto recommendationDto) {
         try {
-            recommendationValidation.textAvailability(recommendationDto);
-            recommendationValidation.checkRecommendationInterval(recommendationDto);
-            recommendationValidation.checkingSkills(recommendationDto);
+            validation(recommendationDto);
             Long recommendationId = recommendationRepository.create(recommendationDto.getAuthorId(),
                     recommendationDto.getReceiverId(),
                     recommendationDto.getContent());
@@ -59,13 +57,14 @@ public class RecommendationService {
     }
 
     public RecommendationDto update(RecommendationDto recommendationDto) {
-        recommendationValidation.textAvailability(recommendationDto);
-        recommendationValidation.checkRecommendationInterval(recommendationDto);
-        recommendationValidation.checkingSkills(recommendationDto);
+        validation(recommendationDto);
         recommendationRepository.update(recommendationDto.getAuthorId(),
                 recommendationDto.getReceiverId(), recommendationDto.getContent());
         clearingSkills(recommendationDto);
-        return recommendationDto;
+        Recommendation updatedRecommendation = recommendationRepository
+                .findById(recommendationDto.getId()).orElseThrow(() ->
+                        new DataValidationException("Получатель отсутствует"));
+        return recommendationMapper.toDto(updatedRecommendation);
     }
 
     public void delete(long id) {
@@ -83,7 +82,6 @@ public class RecommendationService {
                 PageRequest.of(0, 1));
         return entityRecommendation.stream().map(page -> recommendationMapper.toDto(page)).toList();
     }
-
 
     public void addSkillOffers(RecommendationDto recommendationDto) {
         if (recommendationDto.getSkillOffers().isEmpty()) {
@@ -106,7 +104,7 @@ public class RecommendationService {
                 .collect(Collectors.toSet());
 
         for (Long id : skillForSave) {
-            if (existingSkillIds.contains(id)) continue; // Пропустить существующие скиллы
+            if (existingSkillIds.contains(id)) continue;
 
             Skill skill = skillRepository.findById(id)
                     .orElseThrow(() -> new DataValidationException("Скилл не найден"));
@@ -121,14 +119,14 @@ public class RecommendationService {
             skill.getGuarantees().add(guarantee);
             skillRepository.save(skill);
             newSkills.add(skill);
-            existingSkillIds.add(id); // Добавить в существующие, чтобы избежать дублей
+            existingSkillIds.add(id);
         }
 
         if (!newSkills.isEmpty()) {
             List<Skill> updatedSkills = new ArrayList<>(receiver.getSkills());
             updatedSkills.addAll(newSkills);
             receiver.setSkills(updatedSkills);
-            userRepository.save(receiver); // Сохранить 1 раз
+            userRepository.save(receiver);
         }
     }
 
@@ -171,5 +169,11 @@ public class RecommendationService {
             skillOfferRepository.create(skillOffers.getSkillId(), recommendation.getId());
         }
         getGuaranteedSkillIds(recommendation);
+    }
+
+    private void validation(RecommendationDto recommendationDto){
+        recommendationValidator.textAvailability(recommendationDto);
+        recommendationValidator.checkRecommendationInterval(recommendationDto);
+        recommendationValidator.checkingSkills(recommendationDto);
     }
 }

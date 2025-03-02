@@ -22,49 +22,53 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class RecommendationValidationTest {
+public class RecommendationValidatorTest {
+
+    private static final Long AUTOR_ID = 1L;
+    private static final Long RECIVER_ID = 2L;
+    private static final Long SKILL_ID_1 = 1L;
+    private static final Long SKILL_ID_2 = 2L;
+    private static final Long NON_EXISTENT_SKILL_ID = 4L;
+    private static final LocalDateTime OLD_DATE = LocalDateTime.of(2025, Month.FEBRUARY, 6,
+            21, 51, 48, 311_000_000);
 
     @Mock
     private RecommendationRepository recommendationRepository;
     @Mock
     private SkillRepository skillRepository;
     @InjectMocks
-    RecommendationValidation recommendationValidation;
+    private RecommendationValidator recommendationValidator;
 
     @Test
     public void testTextAvailabilityWithEmptyContentM1(){
         RecommendationDto recommendationDto = RecommendationDto.builder()
-                .authorId(1L).receiverId(2L).content("")
+                .authorId(AUTOR_ID).receiverId(RECIVER_ID).content("")
                 .build();
 
-        assertThrows(DataValidationException.class, () -> recommendationValidation.textAvailability(recommendationDto),
+        assertThrows(DataValidationException.class, () -> recommendationValidator.textAvailability(recommendationDto),
                 "Не отработал метод textAvailability - isEmpty()");
     }
 
     @Test
     public void testTextAvailabilityWithContentM1(){
         RecommendationDto recommendationDto = RecommendationDto.builder()
-                .authorId(1L).receiverId(2L).content("Контент")
+                .authorId(AUTOR_ID).receiverId(RECIVER_ID).content("Контент")
                 .build();
-        assertDoesNotThrow(() -> recommendationValidation.checkRecommendationInterval(recommendationDto));
+        assertDoesNotThrow(() -> recommendationValidator.textAvailability(recommendationDto));
     }
-
 
     @Test
     public void testCheckRecommendationIntervalBadTimeM2() {
         LocalDateTime newDate = LocalDateTime.of(2025, Month.FEBRUARY, 7,
                 21, 51, 48, 311_000_000);
-        LocalDateTime oldDate = LocalDateTime.of(2025, Month.FEBRUARY, 6,
-                21, 51, 48, 311_000_000);
-
         RecommendationDto dto = setRecommendationDto(newDate);
-        Recommendation lastRecommendation = setRecommendation(oldDate);
+        Recommendation lastRecommendation = setRecommendation(OLD_DATE);
 
-        when(recommendationRepository.findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(1L, 2L))
+        when(recommendationRepository.findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(AUTOR_ID, RECIVER_ID))
                 .thenReturn(Optional.of(lastRecommendation));
 
         assertThrows(DataValidationException.class,
-                () -> recommendationValidation.checkRecommendationInterval(dto)
+                () -> recommendationValidator.checkRecommendationInterval(dto)
         );
     }
 
@@ -72,45 +76,40 @@ public class RecommendationValidationTest {
     public void testCheckRecommendationIntervalGoodTimeM2() {
         LocalDateTime newDate = LocalDateTime.of(2033, Month.FEBRUARY, 7,
                 21, 51, 48, 311_000_000);
-        LocalDateTime oldDate = LocalDateTime.of(2025, Month.FEBRUARY, 6,
-                21, 51, 48, 311_000_000);
-
         RecommendationDto dto = setRecommendationDto(newDate);
-        Recommendation lastRecommendation = setRecommendation(oldDate);
+        Recommendation lastRecommendation = setRecommendation(OLD_DATE);
 
-        when(recommendationRepository.findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(1L, 2L))
+        when(recommendationRepository.findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(AUTOR_ID, RECIVER_ID))
                 .thenReturn(Optional.of(lastRecommendation));
 
-        assertDoesNotThrow(() -> recommendationValidation.checkRecommendationInterval(dto));
+        assertDoesNotThrow(() -> recommendationValidator.checkRecommendationInterval(dto));
     }
 
     @Test
     public void testCheckingSkillsAllSkillsExistReturnsTruesM3(){
-        RecommendationDto dto = createDto(List.of(1L, 2L));
+        RecommendationDto dto = createDto(List.of(SKILL_ID_1, SKILL_ID_2));
         List<Skill> existingSkills = List.of(
-                createSkill(1L),
-                createSkill(2L),
-                createSkill(3L)
+                createSkill(SKILL_ID_1),
+                createSkill(SKILL_ID_2)
         );
 
         when(skillRepository.findAll()).thenReturn(existingSkills);
 
-        assertTrue(recommendationValidation.checkingSkills(dto));
+        assertTrue(recommendationValidator.checkingSkills(dto));
     }
 
     @Test
     public void testCheckingSkillsSkillNotExistsThrowsExceptionM3(){
-        RecommendationDto dto = createDto(List.of(1L, 4L));
+        RecommendationDto dto = createDto(List.of(SKILL_ID_1, NON_EXISTENT_SKILL_ID));
         List<Skill> existingSkills = List.of(
-                createSkill(1L),
-                createSkill(2L),
-                createSkill(3L)
+                createSkill(SKILL_ID_1),
+                createSkill(SKILL_ID_2)
         );
 
         when(skillRepository.findAll()).thenReturn(existingSkills);
 
         assertThrows(DataValidationException.class,
-                () -> recommendationValidation.checkingSkills(dto)
+                () -> recommendationValidator.checkingSkills(dto)
         );
     }
 
@@ -118,22 +117,22 @@ public class RecommendationValidationTest {
     public void testCheckingSkillsEmptyRecommendedSkillsReturnsTrue() {
         RecommendationDto dto = createDto(List.of());
 
-        assertTrue(recommendationValidation.checkingSkills(dto));
+        assertTrue(recommendationValidator.checkingSkills(dto));
     }
 
     @Test
     public void testCheckingSkillsNoSkillsInDbThrowsException() {
-        RecommendationDto dto = createDto(List.of(1L, 4L));
+        RecommendationDto dto = createDto(List.of(SKILL_ID_1, NON_EXISTENT_SKILL_ID));
         List<Skill> existingSkills = List.of();
 
         when(skillRepository.findAll()).thenReturn(existingSkills);
 
-        assertThrows(DataValidationException.class, () -> recommendationValidation.checkingSkills(dto));
+        assertThrows(DataValidationException.class, () -> recommendationValidator.checkingSkills(dto));
     }
 
     private RecommendationDto setRecommendationDto(LocalDateTime newDate){
         return RecommendationDto.builder()
-                .authorId(1L).receiverId(2L).createdAt(newDate)
+                .authorId(AUTOR_ID).receiverId(RECIVER_ID).createdAt(newDate)
                 .build();
     }
 
@@ -145,7 +144,7 @@ public class RecommendationValidationTest {
 
     private RecommendationDto createDto(List<Long> skillIds) {
         List<SkillOfferDto> skillOffers = skillIds.stream()
-                .map(id -> SkillOfferDto.builder().id(id).build())
+                .map(id -> SkillOfferDto.builder().skillId(id).build())
                 .toList();
 
         return RecommendationDto.builder()

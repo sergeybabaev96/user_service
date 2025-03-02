@@ -18,7 +18,7 @@ import java.util.Optional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RecommendationValidation {
+public class RecommendationValidator {
 
     private static final Duration MIN_RECOMMENDATION_INTERVAL = Duration.ofDays(181);
     private final RecommendationRepository recommendationRepository;
@@ -47,7 +47,7 @@ public class RecommendationValidation {
 
     public boolean checkingSkills(RecommendationDto recommendationDto) {
         List<Long> recommendedSkills = recommendationDto.getSkillOffers().stream()
-                .map(SkillOfferDto::getId)
+                .map(SkillOfferDto::getSkillId)
                 .toList();
         List<Long> existingSkills = skillRepository.findAll().stream()
                 .map(Skill::getId)

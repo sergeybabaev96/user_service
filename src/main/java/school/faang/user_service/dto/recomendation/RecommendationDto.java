@@ -13,11 +13,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecommendationDto {
-    long id;
-    long authorId;
-    long receiverId;
-    String content;
-    List<SkillOfferDto> skillOffers;
-    LocalDateTime createdAt;
+    private long id;
+    private long authorId;
+    private long receiverId;
+    private String content;
+    private List<SkillOfferDto> skillOffers;
+    private LocalDateTime createdAt;
 }
 

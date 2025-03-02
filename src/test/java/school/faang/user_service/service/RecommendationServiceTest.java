@@ -26,7 +26,7 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.UserSkillGuaranteeRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
-import school.faang.user_service.validator.RecommendationValidation;
+import school.faang.user_service.validator.RecommendationValidator;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -51,7 +51,7 @@ public class RecommendationServiceTest {
     @Mock
     private SkillRepository skillRepository;
     @Mock
-    private RecommendationValidation recommendationValidation;
+    private RecommendationValidator recommendationValidator;
     @Mock
     private UserSkillGuaranteeRepository userSkillGuaranteeRepository;
     @Mock
@@ -64,7 +64,6 @@ public class RecommendationServiceTest {
     private ArgumentCaptor<Long> skillIdCaptor;
     @Captor
     private ArgumentCaptor<Long> recommendationIdCaptor;
-    private Logger log;
 
     static Stream<Arguments> skillOfferCases() {
         return Stream.of(
@@ -261,9 +260,9 @@ public class RecommendationServiceTest {
         when(userRepository.findById(dto.getAuthorId()))
                 .thenReturn(Optional.of(mockAuthor));
 
-        when(recommendationValidation.textAvailability(eq(dto))).thenReturn(true);
-        doNothing().when(recommendationValidation).checkRecommendationInterval(eq(dto));
-        when(recommendationValidation.checkingSkills(eq(dto))).thenReturn(true);
+        when(recommendationValidator.textAvailability(eq(dto))).thenReturn(true);
+        doNothing().when(recommendationValidator).checkRecommendationInterval(eq(dto));
+        when(recommendationValidator.checkingSkills(eq(dto))).thenReturn(true);
 
         doNothing().when(recommendationRepository)
                 .update(eq(dto.getAuthorId()), eq(dto.getReceiverId()), eq(dto.getContent()));
@@ -273,9 +272,9 @@ public class RecommendationServiceTest {
 
         verify(userRepository).findById(eq(dto.getReceiverId()));
         verify(userRepository).findById(eq(dto.getAuthorId()));
-        verify(recommendationValidation).textAvailability(eq(dto));
-        verify(recommendationValidation).checkRecommendationInterval(eq(dto));
-        verify(recommendationValidation).checkingSkills(eq(dto));
+        verify(recommendationValidator).textAvailability(eq(dto));
+        verify(recommendationValidator).checkRecommendationInterval(eq(dto));
+        verify(recommendationValidator).checkingSkills(eq(dto));
         verify(recommendationRepository).update(eq(dto.getAuthorId()), eq(dto.getReceiverId()), eq(dto.getContent()));
         verify(skillOfferRepository).deleteAllByRecommendationId(eq(dto.getId()));
         assertEquals(dto, result);

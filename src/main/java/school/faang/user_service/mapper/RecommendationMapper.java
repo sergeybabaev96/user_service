@@ -16,6 +16,4 @@ public interface RecommendationMapper {
     @Mapping(target = "author", ignore = true)
     @Mapping(target = "receiver", ignore = true)
     Recommendation toEntity(RecommendationDto recommendationDto);
-
-
 }
