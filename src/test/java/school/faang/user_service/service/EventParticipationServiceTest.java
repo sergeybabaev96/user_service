@@ -12,7 +12,7 @@ import school.faang.user_service.exception.BusinessException;
 import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventParticipationRepository;
-import school.faang.user_service.validation.ParticipantValidator;
+import school.faang.user_service.validator.ParticipantValidator;
 
 import java.util.List;
 

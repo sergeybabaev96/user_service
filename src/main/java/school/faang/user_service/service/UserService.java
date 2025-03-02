@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.dto.user.UserReadDto;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.filter.UserFilter;
+import school.faang.user_service.filter.user.UserFilter;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.entity.event.EventStatus;
 import school.faang.user_service.exception.EntityNotFoundException;

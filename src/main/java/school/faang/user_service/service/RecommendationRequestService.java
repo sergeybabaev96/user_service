@@ -15,11 +15,10 @@ import school.faang.user_service.filter.request.RecommendationRequestFilter;
 import school.faang.user_service.mapper.RecommendationRequestMapper;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 import school.faang.user_service.repository.recommendation.SkillRequestRepository;
-import school.faang.user_service.validation.RequestValidation;
+import school.faang.user_service.validator.RequestValidation;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor

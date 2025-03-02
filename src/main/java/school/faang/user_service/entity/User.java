@@ -59,6 +59,9 @@ public class User {
     @Column(name = "password", length = 128, nullable = false)
     private String password;
 
+    @Column(name = "telegram_chat_id", unique = true)
+    private Long telegramChatId;
+
     @Column(name = "active", nullable = false)
     private boolean active;
 
