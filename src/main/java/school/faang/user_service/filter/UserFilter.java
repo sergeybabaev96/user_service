@@ -1,4 +1,6 @@
-package school.faang.user_service.entity;
+package school.faang.user_service.filter;
+
+import school.faang.user_service.entity.User;
 
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
