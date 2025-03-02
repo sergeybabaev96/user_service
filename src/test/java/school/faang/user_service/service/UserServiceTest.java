@@ -13,7 +13,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.filters.user.UserFilter;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.mapper.UserMapperImpl;
-import school.faang.user_service.publisher.ProfileViewEventPublisher;
+import school.faang.user_service.publisher.profileview.ProfileViewEventPublisher;
 import school.faang.user_service.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import school.faang.user_service.service.profilePicture.UserProfilePicService;

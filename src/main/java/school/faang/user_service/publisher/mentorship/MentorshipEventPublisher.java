@@ -4,10 +4,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.event.MentorshipStartEvent;
-import school.faang.user_service.publisher.EventPublisher;
+import school.faang.user_service.publisher.AbstractEventPublisher;
 
 @Component
-public class MentorshipEventPublisher extends EventPublisher<MentorshipStartEvent> {
+public class MentorshipEventPublisher extends AbstractEventPublisher<MentorshipStartEvent> {
 
     public MentorshipEventPublisher(
             @Value("${spring.data.redis.channel.mentorship}") String channelTopic,

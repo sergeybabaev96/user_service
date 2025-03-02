@@ -5,10 +5,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 @RequiredArgsConstructor
 public abstract class AbstractEventPublisher<T> {
-    private final RedisTemplate<String, Object> redisTemplate;
     private final String channel;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-    public void publisherEvent(T event) {
+    public void publish(T event) {
         redisTemplate.convertAndSend(channel, event);
     }
 }
