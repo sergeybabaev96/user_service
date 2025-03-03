@@ -48,4 +48,13 @@ public class SubscriptionController {
 
         return subscriptionService.getFollowing(followeeId, filter);
     }
+
+    @GetMapping(value = "/follow-count")
+    private int getFollowingCount(long followerId) {
+        if (followerId <= 0) {
+            throw new DataValidationException("ID Пользователя должен быть положительным");
+        }
+
+        return subscriptionService.getFollowingCount(followerId);
+    }
 }
