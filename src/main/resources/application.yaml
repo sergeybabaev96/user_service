@@ -38,6 +38,20 @@ spring:
       max-request-size: 5MB
 
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      retries: 3
+
+config:
+  import: classpath:kafka-topics.yaml
+
+user-profile-viewed:
+  topic-name: "user-profile-viewed"
+
+
+
   config:
     import: classpath:kafka-topics.yaml
 
@@ -92,6 +106,16 @@ payment-service:
 
 app:
   max-active-goals: 3
+
+kafka:
+  producer:
+    bootstrap-servers: localhost:9092
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  topic:
+    name: profileViewEvent
+    group: profileViewEvent
 
 data:
   batch-size: 10
