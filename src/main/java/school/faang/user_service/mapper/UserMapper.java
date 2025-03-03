@@ -1,10 +1,7 @@
 package school.faang.user_service.mapper;
 
 
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.NullValueCheckStrategy;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
@@ -19,6 +16,8 @@ public interface UserMapper {
 
     User toEntity(UserDto dto);
 
+    @Mapping(target = "mentees", ignore = true)
+    @Mapping(target = "mentors", ignore = true)
     UserDto toDto(User user);
 
     List<UserDto> toDto(List<User> users);

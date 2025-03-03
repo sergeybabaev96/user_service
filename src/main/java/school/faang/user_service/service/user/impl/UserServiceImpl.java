@@ -6,8 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.dto.TariffDto;
 import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.queue.SearchAppearanceEvent;
 import school.faang.user_service.dto.user.GetUserRequest;
 import school.faang.user_service.dto.user.UserFilter;
 import school.faang.user_service.entity.Tariff;
@@ -16,10 +18,12 @@ import school.faang.user_service.exception.BusinessException;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.TariffMapper;
 import school.faang.user_service.mapper.UserMapper;
+import school.faang.user_service.queue.SearchAppearanceEventPublisher;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.tariff.TariffService;
 import school.faang.user_service.service.user.UserService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -32,6 +36,8 @@ public class UserServiceImpl implements UserService {
     private final TariffMapper tariffMapper;
     private final List<UserFilter> userFilters;
     private final TariffService tariffService;
+    private final SearchAppearanceEventPublisher searchAppearanceEventPublisher;
+    private final UserContext userContext;
 
     @Override
     public ResponseEntity<UserDto> getUser(long userId) {
@@ -58,6 +64,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> findUsersByFilter(GetUserRequest request) {
+        long requestUserId = userContext.getUserId();
         List<User> users = userRepository.findAllOrderByTariffAndLimit(request.getLimit(), request.getOffset());
 
         for (UserFilter userFilter : userFilters) {
@@ -71,6 +78,15 @@ public class UserServiceImpl implements UserService {
                 .forEach(user -> tariffService.decrementShows(user.getTariff().getId()));
 
         return users.stream()
+                .peek(user -> {
+                    searchAppearanceEventPublisher.publish(
+                            new SearchAppearanceEvent(
+                                    user.getId(),
+                                    requestUserId,
+                                    LocalDateTime.now()
+                            )
+                    );
+                })
                 .map(userMapper::toDto)
                 .toList();
     }

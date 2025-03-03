@@ -36,7 +36,7 @@ public class UserController {
         return userService.buyUserTariff(request.tariffDto(), request.id());
     }
 
-    @GetMapping("/users")
+    @PostMapping("/users")
     public List<UserDto> getUsers(@RequestBody GetUserRequest request) {
         return userService.findUsersByFilter(request);
     }
