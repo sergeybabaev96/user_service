@@ -1,6 +1,7 @@
 package school.faang.user_service.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,7 +40,7 @@ public class SubscriptionController {
         subscriptionService.unfollowUser(followerId, followeeId);
     }
 
-    @PostMapping(value = "/get-following")
+    @GetMapping(value = "/get-following")
     public List<UserDto> getFollowing(long followeeId, UserFilterDto filter) {
         if (followeeId <= 0) {
             throw new DataValidationException("ID Пользователя должен быть положительным");
