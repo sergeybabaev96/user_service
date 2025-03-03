@@ -23,4 +23,15 @@ public class SubscriptionController {
         }
         subscriptionService.followUser(followerId, followeeId);
     }
+
+    @PostMapping(value = "/unfollow")
+    public void unfollowUser(long followerId, long followeeId) {
+        if (followerId < 0 || followeeId < 0) {
+            throw new DataValidationException("ID пользователей должны быть положительными.");
+        }
+        if (followerId == followeeId) {
+            throw new DataValidationException("Нельзя отписаться на самого себя.");
+        }
+        subscriptionService.unfollowUser(followerId, followeeId);
+    }
 }
