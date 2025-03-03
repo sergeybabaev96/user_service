@@ -4,8 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.SubscriptionService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/subscribe")
@@ -33,5 +37,14 @@ public class SubscriptionController {
             throw new DataValidationException("Нельзя отписаться на самого себя.");
         }
         subscriptionService.unfollowUser(followerId, followeeId);
+    }
+
+    @PostMapping(value = "/get-following")
+    public List<UserDto> getFollowing(long followeeId, UserFilterDto filter) {
+        if (followeeId <= 0) {
+            throw new DataValidationException("ID Пользователя должен быть положительным");
+        }
+
+        return subscriptionService.getFollowing(followeeId, filter);
     }
 }
