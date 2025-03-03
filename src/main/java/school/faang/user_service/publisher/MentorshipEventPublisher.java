@@ -12,7 +12,7 @@ public class MentorshipEventPublisher extends MessagePublisher<MentorshipStartEv
 
     public MentorshipEventPublisher(
             RedisTemplate<String, Object> redisTemplate,
-            @Value("${spring.data.redis.channel.mentorship}") String channel
+            @Value("${spring.data.redis.channels.mentorship}") String channel
     ) {
         super(redisTemplate, channel);
     }

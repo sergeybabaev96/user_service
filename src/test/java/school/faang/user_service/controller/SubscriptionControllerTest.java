@@ -32,7 +32,7 @@ public class SubscriptionControllerTest extends BaseContextTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Value("${spring.data.redis.channel.follow}")
+    @Value("${spring.data.redis.channels.follow}")
     private String followChannel;
 
     private final long followeeId = 1L;

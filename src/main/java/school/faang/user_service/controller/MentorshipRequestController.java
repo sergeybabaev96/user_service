@@ -13,7 +13,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/mentorship")
 @RequiredArgsConstructor
-
 public class MentorshipRequestController {
     private final MentorshipRequestService mentorshipRequestService;
 

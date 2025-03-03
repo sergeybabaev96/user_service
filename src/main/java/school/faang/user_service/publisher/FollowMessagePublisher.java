@@ -9,7 +9,7 @@ import school.faang.user_service.event.FollowEvent;
 public class FollowMessagePublisher extends MessagePublisher<FollowEvent> {
     public FollowMessagePublisher(
             RedisTemplate<String, Object> redisTemplate,
-            @Value("${spring.data.redis.channel.follow}") String channel
+            @Value("${spring.data.redis.channels.follow}") String channel
     ) {
         super(redisTemplate, channel);
     }
