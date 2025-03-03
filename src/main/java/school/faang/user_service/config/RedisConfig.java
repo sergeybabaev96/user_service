@@ -1,9 +1,12 @@
 package school.faang.user_service.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,22 +22,21 @@ public class RedisConfig {
     private final RedisProperties redisProperties;
 
     @Bean
-    JedisConnectionFactory jedisConnectionFactory(RedisProperties redisProperties) {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName(redisProperties.getHost());
-        config.setPort(redisProperties.getPort());
-        return new JedisConnectionFactory(config);
+    public RedisConnectionFactory redisConnectionFactory() {
+        return new LettuceConnectionFactory();
     }
 
     @Bean
-    public RedisTemplate<String, Object> redisTemplate() {
-        final RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(jedisConnectionFactory(redisProperties));
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+    public RedisTemplate<String, Object> redisTemplate(ObjectMapper objectMapper) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
         template.afterPropertiesSet();
         return template;
     }
+}
+
 
     @Bean
     ChannelTopic topic() {

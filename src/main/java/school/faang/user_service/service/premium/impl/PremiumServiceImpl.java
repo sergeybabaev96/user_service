@@ -1,13 +1,15 @@
 package school.faang.user_service.service.premium.impl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.client.PaymentServiceFeignClient;
 import school.faang.user_service.common.PaymentStatus;
 import school.faang.user_service.common.PremiumPeriod;
 import school.faang.user_service.config.RemoveExpiredPremiumJobProperties;
 import school.faang.user_service.config.context.UserContext;
+import school.faang.user_service.dto.PremiumBoughtEvent;
 import school.faang.user_service.dto.PremiumDto;
 import school.faang.user_service.dto.payment.PaymentRequest;
 import school.faang.user_service.dto.payment.PaymentResponse;
@@ -28,7 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-@Log4j2
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PremiumServiceImpl implements PremiumService {
@@ -38,21 +40,27 @@ public class PremiumServiceImpl implements PremiumService {
     private final UserRepository userRepository;
     private final PremiumRepository premiumRepository;
     private final UserContext userContext;
+    private final ApplicationEventPublisher eventPublisher;
     private final RemoveExpiredPremiumJobProperties removeExpiredPremiumJobProperties;
 
     @Override
     public PremiumDto buyPremium(Integer days) {
+        log.info("Buying premium for {} days", days);
         PremiumPeriod premiumPeriod = PremiumPeriod.fromDays(days);
 
         User user = validateAndGetUser(userContext.getUserId());
         PaymentRequest paymentRequest = createPaymentRequest(premiumPeriod);
         PaymentResponse paymentResponse = sendPaymentRequest(paymentRequest);
 
-        if (paymentResponse.status().equals(PaymentStatus.SUCCESS)) {
-            Premium premium = savePremium(premiumPeriod, user);
-            return premiumMapper.toDto(premium);
+        if (!PaymentStatus.SUCCESS.equals(paymentResponse.status())) {
+            log.error("Payment failed: {}", paymentResponse.message());
+            throw new PremiumInvalidDataException(String.format("Error from paymentService: %s", paymentResponse.message()));
         }
-        throw new PremiumInvalidDataException(String.format("Error from paymentService: %s", paymentResponse.message()));
+        Premium premium = savePremium(premiumPeriod, user);
+
+        eventPublisher.publishEvent(new PremiumBoughtEvent(this, premiumPeriod, paymentRequest, paymentResponse, premium));
+        log.info("Premium bought successfully");
+        return premiumMapper.toDto(premium);
     }
 
     @Override
