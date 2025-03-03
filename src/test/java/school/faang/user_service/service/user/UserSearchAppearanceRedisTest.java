@@ -48,7 +48,7 @@ public class UserSearchAppearanceRedisTest extends BaseTest {
     }
 
     @Test
-    public void findUsersByFilterDecrementShows() {
+    public void findUserVerifyPublish() {
         when(userContext.getUserId()).thenReturn(1L);
         when(userRepository.findAllOrderByTariffAndLimit(1, 1))
                 .thenReturn(foundUsers);
