@@ -19,7 +19,7 @@ public class PremiumBoughtEventHandler {
     private final RedisEventPublisher premiumBoughtEventPublisher;
     private final RedisEventMapper redisEventMapper;
 
-    @Value("${user-service.redis.bought-premium-topic}")
+    @Value("${user-service.redis.channel.bought-premium-topic}")
     private String topic;
 
     @Async
