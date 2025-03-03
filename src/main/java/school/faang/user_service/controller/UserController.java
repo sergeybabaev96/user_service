@@ -29,6 +29,12 @@ public class UserController {
 
     private final UserService userService;
 
+    @GetMapping("/profile/{userId}")
+    public void viewProfile(@PathVariable long userId) {
+        //код просмотра профиля
+        userService.viewProfile(userId);
+    }
+
     @DeleteMapping("/{userId}")
     public void deactivateUser(@RequestParam @NotNull Long userId) {
         userService.deactivateUser(userId);
