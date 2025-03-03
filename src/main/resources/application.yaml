@@ -16,13 +16,6 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
-  data:
-    redis:
-      port: 6379
-      host: localhost
-      channel:
-        recommendation_event: recommendation_event_channel
-
 server:
   port: 8080
 
@@ -48,9 +41,13 @@ payment-service:
   url: localhost:9080/api
 
 user-service:
-  redis:
-    bought-premium-topic: "pubsub:bought-premium"
   api-version: /api/v1
+  redis:
+    host: localhost
+    port: 6379
+    channel:
+      bought-premium-topic: "pubsub:bought-premium"
+      recommendation-event: "pubsub:recommendation-event-channel"
   available-tariffs:
     super-user:
       shows: 100

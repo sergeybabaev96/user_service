@@ -2,7 +2,6 @@ package school.faang.user_service.service.premium;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -19,9 +18,9 @@ public class PremiumBoughtEventHandler {
 
     private final RedisEventPublisher premiumBoughtEventPublisher;
     private final RedisEventMapper redisEventMapper;
+    private final UserServiceProperties properties;
 
-    @Value("${user-service.redis.bought-premium-topic}")
-    private String topic;
+    private final String topic = properties.getRedis().getChannel().getBoughtPremiumTopic();
 
     @Async
     @EventListener

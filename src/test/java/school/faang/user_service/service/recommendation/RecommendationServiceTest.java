@@ -18,7 +18,7 @@ import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.RecommendationEventMapper;
 import school.faang.user_service.mapper.RecommendationMapper;
-import school.faang.user_service.queue.RecommendationEventPublisher;
+import school.faang.user_service.queue.RedisPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
@@ -28,10 +28,15 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RecommendationServiceTest {
@@ -62,7 +67,7 @@ class RecommendationServiceTest {
     private RecommendationMapper recommendationMapper;
 
     @Mock
-    private RecommendationEventPublisher recommendationEventPublisher;
+    private RedisPublisher<RecommendationEvent> redisPublisher;
     @Mock
     private RecommendationEventMapper recommendationEventMapper;
 
@@ -101,7 +106,7 @@ class RecommendationServiceTest {
 
         assertNotNull(result);
         assertEquals(TEST_ID, result.getId());
-        verify(recommendationEventPublisher, times(1)).publish(event);
+        verify(redisPublisher, times(1)).publish(event);
     }
 
     @Test
