@@ -3,6 +3,9 @@ package school.faang.user_service.service.event;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.event.EventFiltersDto;
 import school.faang.user_service.entity.Skill;
@@ -14,6 +17,7 @@ import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.service.SkillService;
 import school.faang.user_service.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +33,9 @@ public class EventService {
     private final SkillService skillService;
     private final EventRepository eventRepository;
     private final List<EventFilter> eventFilters;
+
+    @Value("${scheduler.event-batch-size}")
+    private int batchSize;
 
     @Transactional
     public Event create(Event inputEvent, Long ownerId, List<Long> relatedSkillIds) {
@@ -64,6 +71,19 @@ public class EventService {
     public void deleteEvent(Long eventId) {
         log.info("Deleting Event id {}", eventId);
         eventRepository.deleteById(eventId);
+    }
+
+    @Transactional
+    public void deletePastEvents() {
+        var eventsToDelete = eventRepository.findAllByEndDateBefore(LocalDateTime.now());
+        ListUtils.partition(eventsToDelete, batchSize)
+                .forEach(this::deletePastEventsByBatches);
+    }
+
+    @Async("threadPool")
+    public void deletePastEventsByBatches(List<Event> subEventsToDelete) {
+        subEventsToDelete.forEach((event) -> log.info(" Deleting past event with ID : {}", event.getId()));
+        eventRepository.deleteAll(subEventsToDelete);
     }
 
     @Transactional
