@@ -2,6 +2,7 @@ package school.faang.user_service.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,8 +17,9 @@ import school.faang.user_service.service.SkillService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/skills")
+@RequestMapping("${domain.path}/skills")
 @RequiredArgsConstructor
+@Slf4j
 public class SkillController {
 
     private final SkillService skillService;
@@ -28,8 +30,8 @@ public class SkillController {
     }
 
     @GetMapping("/{userId}")
-    public void getUserSkills(@PathVariable long userId) {
-        skillService.getUserSkills(userId);
+    public List<SkillDto> getUserSkills(@PathVariable long userId) {
+        return skillService.getUserSkills(userId);
     }
 
     @GetMapping("/offered")
@@ -39,16 +41,8 @@ public class SkillController {
 
     @PostMapping("/acquire")
     public SkillDto acquireSkillFromOffers(@RequestParam long skillId, @RequestParam long userId) {
-//        System.out.println("Received skillId: " + skillId + ", userId: " + userId);
-
         SkillDto result = skillService.acquireSkillFromOffers(skillId, userId);
-
-        if (result == null) {
-            System.out.println("Error: acquireSkillFromOffers returned null");
-        } else {
-            System.out.println("Successfully acquired skill: " + result);
-        }
-
+        log.info("Successfully acquired skill: {}", result);
         return result;
     }
 }

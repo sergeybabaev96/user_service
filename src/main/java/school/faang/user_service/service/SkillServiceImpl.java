@@ -25,13 +25,14 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class SkillServiceImpl implements SkillService {
+
+    private static final int MIN_SKILL_OFFERS = 3;
+
     private final SkillRepository skillRepository;
     private final SkillMapper skillMapper;
     private final SkillOfferRepository skillOfferRepository;
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
     private final UserRepository userRepository;
-
-    private final int MIN_SKILL_OFFERS = 3;
 
     public SkillDto create(SkillDto skillDto) {
         if (skillRepository.existsByTitle(skillDto.getTitle())) {
@@ -54,7 +55,6 @@ public class SkillServiceImpl implements SkillService {
     }
 
     public List<SkillCandidateDto> getOfferedSkills(long userId) {
-
         List<Skill> skillsOfferedToUser = skillRepository.findSkillsOfferedToUser(userId);
         Map<Skill, Long> skillOffersCount = skillsOfferedToUser.stream()
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
@@ -71,7 +71,6 @@ public class SkillServiceImpl implements SkillService {
 
     @Transactional
     public SkillDto acquireSkillFromOffers(long skillId, long userId) {
-
         Optional<Skill> existingSkill = skillRepository.findUserSkill(skillId, userId);
         if (existingSkill.isPresent()) {
             throw new DataValidateException(String.format("User %d already has the skill %d.", userId, skillId));
