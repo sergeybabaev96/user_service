@@ -17,5 +17,5 @@ public interface UserService {
 
     UserDto deactivateUser(long userId);
 
-    void saveProfilePic(long userId, MultipartFile pic);
+    void saveProfilePic(long userId, MultipartFile avatar);
 }

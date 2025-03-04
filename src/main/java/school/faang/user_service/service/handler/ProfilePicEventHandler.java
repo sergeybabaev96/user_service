@@ -5,13 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.ProfilePicEvent;
 import school.faang.user_service.mapper.RedisEventMapper;
 import school.faang.user_service.redis.MessagePublisher;
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
 public class ProfilePicEventHandler {
     private final MessagePublisher publisher;

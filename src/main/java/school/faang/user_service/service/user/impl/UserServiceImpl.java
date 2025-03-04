@@ -20,7 +20,6 @@ import school.faang.user_service.exception.BusinessException;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.TariffMapper;
 import school.faang.user_service.mapper.UserMapper;
-import school.faang.user_service.properties.UserServiceProperties;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.s3.S3Service;
 import school.faang.user_service.service.tariff.TariffService;
@@ -43,6 +42,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<UserDto> getUser(long userId) {
+        log.info("Get user by id: {}", userId);
         return userRepository.findById(userId)
                 .map(userMapper::toDto)
                 .map(ResponseEntity::ok)
@@ -99,11 +99,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void saveProfilePic(long userId, MultipartFile pic) {
+    public void saveProfilePic(long userId, MultipartFile avatar) {
         log.info("Save profile pic for user with id: {}", userId);
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        String key = s3Service.uploadFile(pic);
+        String key = s3Service.uploadFile(avatar);
         updateUserProfilePic(user, key);
         eventPublisher.publishEvent(new ProfilePicEvent(this, key, user));
     }

@@ -43,7 +43,7 @@ public class UserController {
     }
 
     @PostMapping("/upload-profile-pic")
-    public void uploadProfilePic(@RequestParam("user_id") long userId, @RequestParam("pic") MultipartFile pic) {
-        userService.saveProfilePic(userId, pic);
+    public void uploadProfilePic(@RequestParam("user_id") long userId, @RequestParam("avatar") MultipartFile avatar) {
+        userService.saveProfilePic(userId, avatar);
     }
 }

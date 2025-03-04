@@ -44,7 +44,6 @@ public class S3ServiceImpl implements S3Service {
     }
 
     private PutObjectRequest getPutObjectRequest(MultipartFile file, String key) {
-
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(file.getSize());
         metadata.setContentType(file.getContentType());
