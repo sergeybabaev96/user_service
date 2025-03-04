@@ -6,8 +6,10 @@ import school.faang.user_service.repository.SkillRepository;
 
 @Service
 @RequiredArgsConstructor
-public class SkillService {
+public class SkillService  {
     private final SkillRepository skillRepository;
-    
 
+    public boolean existsById(Long skillId) {
+        return skillRepository.existsById(skillId);
+    }
 }

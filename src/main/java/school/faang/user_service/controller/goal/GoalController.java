@@ -17,4 +17,7 @@ public class GoalController {
         return goalService.createGoal(userId, goalDto);
     }
 
+    public GoalDto updateeGoal(Long goalId, GoalDto goal) {
+        GoalDtoValidator.validateGoalDto(goal);
+    }
 }
