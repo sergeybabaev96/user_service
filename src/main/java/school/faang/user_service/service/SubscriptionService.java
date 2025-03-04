@@ -70,6 +70,10 @@ public class SubscriptionService {
         int experienceMin = filter.getExperienceMin();
         int experienceMax = filter.getExperienceMax();
 
+        if (experienceMax > experienceMin) {
+            throw new DataValidationException("ExperienceMax не может быть больше ExperienceMin");
+        }
+
         boolean isMatchByName = true;
         if (namePattern != null && !namePattern.isBlank()) {
             isMatchByName = user.getUsername().equals(namePattern);
