@@ -21,7 +21,7 @@ public class GoalService {
     private final SkillService skillService;
 
     public GoalDto createGoal(Long userId, GoalDto goalDto) {
-        log.info("Создание новой цели для пользователя с идентификатором: {}", userId);
+        log.info("cоздание новой цели для пользователя с идентификатором: {}", userId);
 
         // Проверка на наличие количество навыков
         if (goalRepository.countActiveGoalsPerUser(userId) >= MAX_ACTIVE_GOALS_PER_USER) {
