@@ -13,9 +13,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SkillController {
     private final SkillService skillService;
+    private final SkillValidator skillValidator;
 
     public SkillDto create(SkillDto skillDto) {
-        SkillValidator.validateSkillDto(skillDto);
+        skillValidator.validateSkillDto(skillDto);
         return skillService.create(skillDto);
     }
 
@@ -25,5 +26,9 @@ public class SkillController {
 
     public List<SkillCandidateDto> getOfferedSkills(long userId) {
         return skillService.getOfferedSkills(userId);
+    }
+
+    public SkillDto acquireSkillFromOffers(long skillId, long userId) {
+        return skillService.acquireSkillFromOffers(skillId, userId);
     }
 }

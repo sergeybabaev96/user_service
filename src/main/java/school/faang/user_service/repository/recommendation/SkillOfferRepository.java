@@ -2,10 +2,12 @@ package school.faang.user_service.repository.recommendation;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 import school.faang.user_service.entity.recommendation.SkillOffer;
 
 import java.util.List;
 
+@Repository
 public interface SkillOfferRepository extends CrudRepository<SkillOffer, Long> {
 
     @Query(nativeQuery = true, value = "INSERT INTO skill_offer (skill_id, recommendation_id) VALUES (?1, ?2) returning id")
