@@ -13,7 +13,6 @@ public class RecommendationController {
 
     public RecommendationDto giveRecommendation(RecommendationDto recommendation) {
         ValidationUtils.validateRecommendation(recommendation);
-        recommendationService.create(recommendation);
-        return recommendation;
+        return recommendationService.create(recommendation);
     }
 }
