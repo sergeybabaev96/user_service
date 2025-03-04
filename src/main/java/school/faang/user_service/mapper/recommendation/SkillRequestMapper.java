@@ -4,6 +4,7 @@ import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
+import school.faang.user_service.dto.recommendation.SkillRequestDto;
 import school.faang.user_service.entity.recommendation.SkillRequest;
 
 @Mapper(

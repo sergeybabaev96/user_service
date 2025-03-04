@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
+import school.faang.user_service.dto.recommendation.RejectionDto;
 import school.faang.user_service.dto.recommendation.RequestFilterDto;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.Skill;
@@ -33,7 +35,7 @@ public class RecommendationRequestService {
     private final List<RecommendationRequestFilter> recommendationRequestFilters;
 
     public RecommendationRequestDto create(@NotNull RecommendationRequestDto recommendationRequestDto) {
-        log.info("Создание запроса рекомендаций от пользователя с id {} для пользователя с id {}",
+        log.info("Creating a recommendations request from user with id {} for user with id {}",
                 recommendationRequestDto.getReceiverId(), recommendationRequestDto.getRequesterId());
 
         userValidator.validateUser(recommendationRequestDto.getRequesterId());
@@ -44,7 +46,8 @@ public class RecommendationRequestService {
         RecommendationRequest request = recommendationRequestMapper.toEntity(recommendationRequestDto);
 
         RecommendationRequest finalRequest = request;
-        List<SkillRequest> skillRequest = recommendationRequestDto.getSkillRequests().stream().map(skillRequestDto -> {
+        List<SkillRequest> skillRequest = recommendationRequestDto.getSkillRequests().stream()
+                .map(skillRequestDto -> {
             Skill skill = getSkill(skillRequestDto.getSkillId());
             return SkillRequest.builder().request(finalRequest).skill(skill).build();
         }).toList();
@@ -52,7 +55,7 @@ public class RecommendationRequestService {
         request.setSkills(skillRequest);
 
         request = recommendationRequestRepository.save(request);
-        log.info("Запрос рекомендации с id {} успешно сохранен", request.getId());
+        log.info("Recommendation request with id {} successfully saved", request.getId());
         return recommendationRequestMapper.toDto(request);
     }
 
@@ -60,13 +63,13 @@ public class RecommendationRequestService {
         Stream<RecommendationRequest> recommendationRequests = recommendationRequestRepository.findAll().stream();
         recommendationRequestFilters.stream().filter(filter -> filter.isApplicable(requestFilter)).forEach(filter ->
                 filter.apply(recommendationRequests, requestFilter));
-        log.info("Получение списка запросов рекомендаций после фильтрации");
+        log.info("Getting a list of recommendation requests after filtering");
         return recommendationRequestMapper.toDtoList(recommendationRequests.toList());
     }
 
     public RecommendationRequestDto getRequest(long id) {
         RecommendationRequest entity = recommendationRequestRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException("Запрос с " + id + " не найден"));
+                new EntityNotFoundException("Request with " + id + " not found"));
 
         return recommendationRequestMapper.toDto(entity);
     }
@@ -77,14 +80,14 @@ public class RecommendationRequestService {
         recommendationRequest.setStatus(RequestStatus.REJECTED);
         recommendationRequest.setRejectionReason(rejectionDto.getReason());
         recommendationRequestRepository.save(recommendationRequest);
-        log.info("Запрос рекомендации с id {} был отклонен", id);
+        log.info("Recommendation request with id {} was rejected", id);
         return recommendationRequestMapper.toDto(recommendationRequest);
     }
 
     private Skill getSkill(Long skillId) {
         return skillRepository.findById(skillId).orElseThrow(() -> {
-            log.warn("Навык с id {} не найден", skillId);
-            return new NoSuchElementException(String.format("Нет навыка с id = %d", skillId));
+            log.warn("Skill with id {} not found", skillId);
+            return new NoSuchElementException(String.format("There is no skill with id = %d", skillId));
         });
     }
 
