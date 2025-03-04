@@ -117,7 +117,6 @@ class RecommendationRequestServiceTest {
                 receiver.getId(),
                 savedRequest.getId() // ID сохранённого запроса
         );
-
         Mockito.verify(eventPublisher, times(1)).publishEvent(Mockito.eq(expectedEvent));
     }
 
