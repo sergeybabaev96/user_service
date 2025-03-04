@@ -11,6 +11,7 @@ import school.faang.user_service.repository.recommendation.SkillOfferDto;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +52,9 @@ public class RecommendationService {
                                             .filter(existedSkill -> existedSkill.getSkillId() == skillId)
                                             .findFirst()
                                             .isEmpty())
-                                    .map(skillId -> skillRepository.findById(skillId).get().getTitle())
+                                    .map(skillRepository::findById)
+                                    .filter(Optional::isPresent)
+                                    .map(x -> x.get().getTitle())
                                     .toList())));
         }
 
