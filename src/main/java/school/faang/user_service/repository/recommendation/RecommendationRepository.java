@@ -24,6 +24,12 @@ public interface RecommendationRepository extends CrudRepository<Recommendation,
     @Modifying
     void update(long authorId, long receiverId, String content);
 
+    @Query(nativeQuery = true, value = """
+            SELECT * FROM recommendation r
+            WHERE r.author_id = :authorId and r.updated_at = (select MAX(r1.updated_at) from recommendation r1 )
+            """)
+    Optional<Recommendation> findLastRecommendationByAuthorId(long authorId);
+
     Page<Recommendation> findAllByReceiverId(long receiverId, Pageable pageable);
 
     Page<Recommendation> findAllByAuthorId(long authorId, Pageable pageable);
