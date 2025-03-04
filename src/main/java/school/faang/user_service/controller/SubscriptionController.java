@@ -31,7 +31,7 @@ public class SubscriptionController {
 
     @PostMapping(value = "/unfollow")
     public void unfollowUser(long followerId, long followeeId) {
-        if (followerId < 0 || followeeId < 0) {
+        if (followerId <= 0 || followeeId <= 0) {
             throw new DataValidationException("ID пользователей должны быть положительными.");
         }
         if (followerId == followeeId) {
