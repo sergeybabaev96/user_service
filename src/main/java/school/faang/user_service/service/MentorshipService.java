@@ -76,8 +76,10 @@ public class MentorshipService {
         userRepository.save(user);
     }
 
-    private List<MentorshipResponseDto> getMentorshipList(long userId, Function<User, List<User>> relationshipFunction) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+    private List<MentorshipResponseDto> getMentorshipList(
+            long userId, Function<User, List<User>> relationshipFunction) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new IllegalArgumentException("User not found"));
         List<User> mentorshipList = relationshipFunction.apply(user);
         if (mentorshipList == null) {
             mentorshipList = new ArrayList<>();
