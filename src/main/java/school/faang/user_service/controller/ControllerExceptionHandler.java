@@ -9,6 +9,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import school.faang.user_service.common.Currency;
 import school.faang.user_service.dto.ErrorResponse;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @ControllerAdvice
+@ResponseBody
 public class ControllerExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(EntityNotFoundException.class)
