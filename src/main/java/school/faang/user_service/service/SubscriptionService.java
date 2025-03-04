@@ -39,7 +39,7 @@ public class SubscriptionService {
     }
 
     public List<UserDto> getFollowing(long followeeId, UserFilterDto filter) {
-        return subscriptionRepository.findByFolloweeId(followeeId)
+        return subscriptionRepository.findByFollowerId(followeeId)
                 .filter(user -> filterUserByUserFilter(user, filter))
                 .map(this::userToUserDto)
                 .toList();
