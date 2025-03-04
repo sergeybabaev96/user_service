@@ -56,6 +56,10 @@ public class SubscriptionService {
                 .toList();
     }
 
+    public int getFollowersCount(long followeeId) {
+        return subscriptionRepository.findFollowersAmountByFolloweeId(followeeId);
+    }
+
     private boolean filterUserByUserFilter(User user, UserFilterDto filter) {
         if (filter == null) {
             return true;
