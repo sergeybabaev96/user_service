@@ -8,6 +8,7 @@ import school.faang.user_service.repository.UserRepository;
 @Component
 @RequiredArgsConstructor
 public class UserValidator {
+
     private final UserRepository userRepository;
 
     public void checkUserExistsById(Long id) {
