@@ -19,5 +19,6 @@ public class GoalController {
 
     public GoalDto updateeGoal(Long goalId, GoalDto goal) {
         GoalDtoValidator.validateGoalDto(goal);
+        return goal;
     }
 }
