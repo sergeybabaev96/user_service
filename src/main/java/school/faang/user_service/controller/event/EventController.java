@@ -9,7 +9,7 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.event.EventService;
 
 @RestController
-@RequestMapping("api/v1/event")
+@RequestMapping("/event")
 public class EventController {
     private final EventService eventService;
 
