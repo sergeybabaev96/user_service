@@ -25,7 +25,6 @@ public class EventController {
             eventService.create(eventDTO);
             return eventDTO;
         } catch (DataValidationException e) {
-
             throw new DataValidationException(e.getMessage());
         }
     }
