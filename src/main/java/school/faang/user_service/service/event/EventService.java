@@ -44,13 +44,8 @@ public class EventService {
         }
     }
 
-    /**
-     *
-     * eventOwner пользователь из event, получаем из базы, чтобы сравнить скиллы для создания event-a
-     *
-     */
-
     public EventDTO create(EventDTO event) {
+        //eventOwner пользователь из event, получаем из базы, чтобы сравнить скиллы для создания event-a
         User eventOwner = userRepository.findById(event.getOwnerId())
                 .orElseThrow(() -> new DataValidationException("Owner not found"));
         //преобразуем навыки пользователя в их id, для дальнейшего сравнения
