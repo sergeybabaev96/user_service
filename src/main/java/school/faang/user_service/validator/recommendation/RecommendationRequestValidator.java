@@ -3,8 +3,9 @@ package school.faang.user_service.validator.recommendation;
 import com.sun.jdi.request.DuplicateRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.common.DataValidationException;
 import org.springframework.stereotype.Component;
+import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
+import school.faang.user_service.dto.recommendation.SkillRequestDto;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.exception.recommendation.ErrorMessage;
@@ -31,14 +32,14 @@ public class RecommendationRequestValidator {
 
     public RecommendationRequest validateRecommendationFromBd(Long id) {
         return recommendationRequestRepository.findById(id).orElseThrow(() -> {
-            log.error("Запроса рекомендации с id {} не найден", id);
-            return new NoSuchElementException(String.format("Нет запроса на рекомендацию с id = %d", id));
+            log.error("RecommendationRequest with id {} not found", id);
+            return new NoSuchElementException(String.format("There isn't recommendationRequest with id = %d", id));
         });
     }
 
     public void checkRequestsStatus(Long id, RequestStatus status) {
         if (!status.equals(RequestStatus.PENDING)) {
-            log.error("Запрос с ID {}  имеет статус {}. Операция не разрешена.", id, status);
+            log.error("Request with ID {}  has the status {}. Operation is not allowed.", id, status);
             throw new RequestStatusException(ErrorMessage.REQUEST_STATUS, id, status);
         }
     }
@@ -50,14 +51,14 @@ public class RecommendationRequestValidator {
                 .ifPresent(existingRequest -> {
                     if (existingRequest.getCreatedAt().isAfter(LocalDateTime.now().
                             minusMonths(MONTHS_AFTER_PREVIOUS_RECOMMENDATION))) {
-                        log.error("Не удалось создать запрос: превышен лимит времени для запрашивающей стороны {} " +
-                                        "для запроса рекомендации для получателя {} ({} месяцев).",
+                        log.error("Request creation failed: Time limit exceeded for requester {} to " +
+                                        "request recommendation for receiver {} ({} months).",
                                 recommendationRequestDto.getRequesterId(),
                                 recommendationRequestDto.getReceiverId(),
                                 MONTHS_AFTER_PREVIOUS_RECOMMENDATION);
                         throw new DuplicateRequestException(
-                                String.format("Уже существует ожидающий запрос, созданный менее %d месяцев назад " +
-                                                "запрашивающим %s для получателя %s.",
+                                String.format("There is already a pending request created less than %d months ago " +
+                                                "by requester %s for receiver %s.",
                                         MONTHS_AFTER_PREVIOUS_RECOMMENDATION,
                                         recommendationRequestDto.getRequesterId(),
                                         recommendationRequestDto.getReceiverId()));
@@ -68,8 +69,8 @@ public class RecommendationRequestValidator {
     private void checkIfOfferedSkillsExist(RecommendationRequestDto recommendationRequestDto) {
         List<SkillRequestDto> skillRequestDtoList = recommendationRequestDto.getSkillRequests();
         if (skillRequestDtoList == null || skillRequestDtoList.isEmpty()) {
-            log.warn("Не найдено предложений по навыкам для создания рекомендаций.");
-            throw new NoSuchElementException("Не найдено предложений по навыкам для создания рекомендаций.");
+            log.warn("No skill offers found for recommendation creation.");
+            throw new NoSuchElementException("No skill offers found for recommendation creation.");
         }
 
         List<String> skillTitlesList = skillRequestDtoList.stream()
@@ -80,7 +81,7 @@ public class RecommendationRequestValidator {
             if (!skillRepository.existsByTitle(skillTitle)) {
                 log.error("Skill with title '{}' does not exist in the system. Recommendation creation failed.",
                         skillTitle);
-                throw new DataValidationException(String.format(ErrorMessage.SKILL_NOT_EXIST, skillTitle));
+                throw new NoSuchElementException(String.format(ErrorMessage.SKILL_NOT_EXIST, skillTitle));
             }
         }
     }
