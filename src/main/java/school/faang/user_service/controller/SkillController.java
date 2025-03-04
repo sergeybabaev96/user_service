@@ -6,6 +6,8 @@ import school.faang.user_service.dto.skill.SkillDto;
 import school.faang.user_service.service.SkillService;
 import school.faang.user_service.validator.SkillValidator;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 public class SkillController {
@@ -14,5 +16,9 @@ public class SkillController {
     public SkillDto create(SkillDto skill) {
         SkillValidator.validateSkill(skill);
         return skillService.create(skill);
+    }
+
+    public List<SkillDto> getUserSkills(long userId) {
+        return skillService.getUserSkills(userId);
     }
 }
