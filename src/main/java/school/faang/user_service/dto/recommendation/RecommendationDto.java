@@ -1,7 +1,6 @@
 package school.faang.user_service.dto.recommendation;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

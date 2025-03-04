@@ -34,14 +34,8 @@ public interface SkillOfferRepository extends CrudRepository<SkillOffer, Long> {
             """)
     List<SkillOffer> findAllByUserId(long userId);
 
-    @Query(value = """
-            SELECT DISTINCT skill_id FROM SkillOffer
-            """)
-    List<Long> findAllSkillIds();
-
     @Query(nativeQuery = true, value = """
-            INSERT INTO SkillOffer ()
-            VALUES (id, user, skill, guarantor)
+            SELECT DISTINCT * FROM skill_offer
             """)
-    void saveSkillOffers();
+    List<SkillOffer> findAllSkillOffers();
 }
