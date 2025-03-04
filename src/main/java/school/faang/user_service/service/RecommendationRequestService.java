@@ -35,6 +35,10 @@ public class RecommendationRequestService {
         if (existingRequest.isPresent()) {
             throw new IllegalStateException("Recommendation request already sent within the last 6 months.");
         }
+        //Также в методе нужно проверить, что запрашиваемые скиллы существуют в базе данных.
+        //
+        //После всех проверок вызвать метода create из RecommendationRequestRepository для создания запроса.
+        // Также нужно отдельно сохранить все запрашиваемые скиллы в таблицу skill_request, для этого используйте метод create класса SkillRequestRepository
 
         RecommendationRequest request = recommendationRequestMapper.toRecommendationRequest(dto);
         request.setRequester(requester); // Устанавливаем запрашивающего
