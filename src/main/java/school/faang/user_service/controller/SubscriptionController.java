@@ -50,7 +50,7 @@ public class SubscriptionController {
     }
 
     @GetMapping(value = "/follow-count")
-    private int getFollowingCount(long followerId) {
+    public int getFollowingCount(long followerId) {
         if (followerId <= 0) {
             throw new DataValidationException("ID Пользователя должен быть положительным");
         }
