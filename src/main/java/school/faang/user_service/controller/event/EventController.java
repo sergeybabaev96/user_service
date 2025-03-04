@@ -21,14 +21,14 @@ public class EventController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<EventDTO> create(EventDTO eventDTO) {
+    public EventDTO create(EventDTO eventDTO) {
         try {
             eventService.isValid(eventDTO);
+            eventService.create(eventDTO);
+            return eventDTO;
         } catch (DataValidationException e) {
+
             throw new DataValidationException(e.getMessage());
         }
-
-
-        return new ResponseEntity<EventDTO>(eventDTO, HttpStatus.CREATED);
     }
 }
