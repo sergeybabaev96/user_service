@@ -148,7 +148,8 @@ class MentorshipServiceTest {
 
         Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () ->
                 mentorshipService.deleteMentee(1L, 99L));
-        Assertions.assertEquals("Mentee not found in user's mentee list", exception.getMessage());
+        Assertions.assertEquals("Mentee not found in user's mentee list",
+                exception.getMessage());
     }
 
     @Test
@@ -179,6 +180,7 @@ class MentorshipServiceTest {
         Exception exception = Assertions.assertThrows(IllegalArgumentException.class,
                 () -> mentorshipService.deleteMentor(1L, 99L));
 
-        Assertions.assertEquals("Mentor not found in user's mentors list", exception.getMessage());
+        Assertions.assertEquals("Mentor not found in user's mentors list",
+                exception.getMessage());
     }
 }
