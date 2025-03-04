@@ -54,7 +54,6 @@ public class RecommendationService {
     }
 
     public List<RecommendationDto> getAllUserRecommendations(long receiverId) {
-
         Page<Recommendation> recommendations = recommendationRepository
                 .findAllByReceiverId(receiverId, Pageable.unpaged());
 
