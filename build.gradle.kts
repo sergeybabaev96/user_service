@@ -7,6 +7,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.0"
     id("org.jsonschema2pojo") version "1.2.1"
     kotlin("jvm")
+    id("jacoco")
 }
 
 group = "faang.school"
@@ -110,7 +111,6 @@ tasks.test {
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
-
     reports {
         xml.required.set(true)
         csv.required.set(false)
@@ -160,8 +160,3 @@ val jacocoExclude = listOf(
     "**/repository/**",
     "**/UserServiceApplication**"
 )
-
-
-
-
-
