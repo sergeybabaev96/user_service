@@ -1,4 +1,4 @@
-package school.faang.user_service.mentorshipTest;
+package school.faang.user_service.mentorship_test;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +25,7 @@ import java.util.Optional;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class MentorshipServiceTest {
     @InjectMocks
@@ -43,14 +44,13 @@ class MentorshipServiceTest {
         user = new User();
         user.setId(1L);
         user.setUsername("User1");
-        List<User> mentees = new ArrayList<>();
-        List<User> mentors = new ArrayList<>();
         User user2 = new User();
         user2.setId(2L);
         user2.setUsername("User2");
         User user3 = new User();
         user3.setId(3L);
         user3.setUsername("User3");
+        List<User> mentees = new ArrayList<>();
         mentees.add(user2);
         mentees.add(user3);
         User user4 = new User();
@@ -59,6 +59,7 @@ class MentorshipServiceTest {
         User user5 = new User();
         user5.setId(5L);
         user5.setUsername("User5");
+        List<User> mentors = new ArrayList<>();
         mentors.add(user4);
         mentors.add(user5);
         user.setMentees(mentees);
