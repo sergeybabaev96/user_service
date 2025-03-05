@@ -50,4 +50,7 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
 
     void addSkillToGoal(Long skillId, Long id);
 
+    void removeSkillsFromGoal(Long id);
+
+    void addSkillToUser(Long id, Long skillId);
 }

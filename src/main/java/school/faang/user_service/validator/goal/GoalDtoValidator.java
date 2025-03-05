@@ -1,7 +1,6 @@
 package school.faang.user_service.validator.goal;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.validator.constraints.CodePointLength;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.goal.GoalDto;
 
@@ -18,7 +17,5 @@ public class GoalDtoValidator {
             log.error("Description отсутствует в goal DTO для пользователя с ID {}", userId);
             throw new IllegalArgumentException("Описание цели не может быть пустым");
         }
-
-
     }
 }

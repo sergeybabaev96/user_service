@@ -12,4 +12,5 @@ public class SkillService  {
     public boolean existsById(Long skillId) {
         return skillRepository.existsById(skillId);
     }
+
 }

@@ -7,10 +7,11 @@ import school.faang.user_service.entity.goal.Goal;
 
 @Mapper(componentModel = "spring")
 public interface GoalMapper {
-
+    @Mapping(source = "parent.id", target = "parentId")
     GoalDto toDto(Goal goal);
 
     @Mapping(target = "parent", ignore = true)
-    Goal toEntity(GoalDto goalDto);
-
+    @Mapping(target = "id", ignore = true)
+    @Mapping(source = "skillIds", target = "skills")
+    Goal dtoToEntity(GoalDto goalDto);
 }
