@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.config.redis.Channels;
-import school.faang.user_service.dto.FollowerEvent;
+import school.faang.user_service.events.FollowerEvent;
 import school.faang.user_service.publisher.EventPublisherAbstract;
 
 @Slf4j
@@ -15,8 +15,8 @@ public class FollowerEventPublisher extends EventPublisherAbstract<FollowerEvent
     private final Channels channels;
 
     public FollowerEventPublisher(RedisTemplate<String, Object> redisTemplate,
-                                        ObjectMapper objectMapper,
-                                        Channels channels) {
+                                  ObjectMapper objectMapper,
+                                  Channels channels) {
         super(redisTemplate, objectMapper);
         this.channels = channels;
     }
