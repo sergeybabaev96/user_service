@@ -6,6 +6,7 @@ import org.webjars.NotFoundException;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.dto.recommendation.RejectionDto;
 import school.faang.user_service.dto.recommendation.RequestFilterDto;
+import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.filter.recommendation.RecommendationRequestFilter;
@@ -42,7 +43,6 @@ public class RecommendationRequestService {
         }
 
         RecommendationRequest request = recommendationRequestMapper.toRecommendationRequest(dto);
-
         recommendationRequestRepository.create(requester.getId()
                 , request.getReceiver().getId(), request.getMessage());
 
@@ -65,11 +65,17 @@ public class RecommendationRequestService {
         return recommendationRequestStream
                 .map(recommendationRequestMapper::toRecommendationRequestDto)
                 .toList();
-
     }
 
     public RecommendationRequestDto rejectRequest(long id, RejectionDto rejection) {
-        return null;
+        RecommendationRequest request = recommendationRequestRepository.findById(id).orElseThrow(()
+                -> new NotFoundException("Recommendation request with ID " + id + " not found"));
+        if (request.getStatus().equals(RequestStatus.PENDING)) {
+            request.setStatus(RequestStatus.REJECTED);
+            request.setRejectionReason(rejection.getReason());
+            recommendationRequestRepository.save(request);
+        }
+        return recommendationRequestMapper.toRecommendationRequestDto(request);
     }
 
 }
