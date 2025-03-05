@@ -1,6 +1,7 @@
 package school.faang.user_service.validator.recommendation;
 
 import com.sun.jdi.request.DuplicateRequestException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,6 @@ import school.faang.user_service.repository.recommendation.RecommendationRequest
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Slf4j
 @Component
@@ -33,7 +33,7 @@ public class RecommendationRequestValidator {
     public RecommendationRequest validateRecommendationFromBd(Long id) {
         return recommendationRequestRepository.findById(id).orElseThrow(() -> {
             log.error("RecommendationRequest with id {} not found", id);
-            return new NoSuchElementException(String.format("There isn't recommendationRequest with id = %d", id));
+            return new EntityNotFoundException(String.format("There isn't recommendationRequest with id = %d", id));
         });
     }
 
@@ -70,7 +70,7 @@ public class RecommendationRequestValidator {
         List<SkillRequestDto> skillRequestDtoList = recommendationRequestDto.getSkillRequests();
         if (skillRequestDtoList == null || skillRequestDtoList.isEmpty()) {
             log.warn("No skill offers found for recommendation creation.");
-            throw new NoSuchElementException("No skill offers found for recommendation creation.");
+            throw new EntityNotFoundException("No skill offers found for recommendation creation.");
         }
 
         List<String> skillTitlesList = skillRequestDtoList.stream()
@@ -81,7 +81,7 @@ public class RecommendationRequestValidator {
             if (!skillRepository.existsByTitle(skillTitle)) {
                 log.error("Skill with title '{}' does not exist in the system. Recommendation creation failed.",
                         skillTitle);
-                throw new NoSuchElementException(String.format(ErrorMessage.SKILL_NOT_EXIST, skillTitle));
+                throw new EntityNotFoundException(String.format(ErrorMessage.SKILL_NOT_EXIST, skillTitle));
             }
         }
     }

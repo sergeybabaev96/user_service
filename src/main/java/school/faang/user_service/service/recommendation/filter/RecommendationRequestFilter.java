@@ -11,6 +11,6 @@ import java.util.stream.Stream;
 public interface RecommendationRequestFilter {
     boolean isApplicable(RequestFilterDto requestFilterDto);
 
-    List<RecommendationRequest> apply(Stream<RecommendationRequest> recommendationRequests,
+     List<RecommendationRequest> apply(Stream<RecommendationRequest> recommendationRequests,
                                       RequestFilterDto requestFilterDto);
 }

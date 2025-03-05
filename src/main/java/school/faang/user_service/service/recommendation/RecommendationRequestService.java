@@ -20,7 +20,6 @@ import school.faang.user_service.validator.recommendation.RecommendationRequestV
 import school.faang.user_service.validator.user.UserValidator;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 @Service
@@ -87,7 +86,7 @@ public class RecommendationRequestService {
     private Skill getSkill(Long skillId) {
         return skillRepository.findById(skillId).orElseThrow(() -> {
             log.warn("Skill with id {} not found", skillId);
-            return new NoSuchElementException(String.format("There is no skill with id = %d", skillId));
+            return new EntityNotFoundException(String.format("There is no skill with id = %d", skillId));
         });
     }
 
