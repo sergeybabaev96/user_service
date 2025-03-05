@@ -1,14 +1,10 @@
 package school.faang.user_service.repository.recommendation;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-@RequiredArgsConstructor
+@Data
 public class SkillOfferDto {
-    private long Id;
+    private long id;
     private long skillId;
     private long recommendationId;
 }
