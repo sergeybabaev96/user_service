@@ -33,6 +33,10 @@ public class RecommendationController {
         return recommendationService.getAllUserRecommendations(receiverId);
     }
 
+    public List<RecommendationDto> getAllGivenRecommendations(long authorId) {
+        return recommendationService.getAllGivenRecommendations(authorId);
+    }
+
     private static void validateRecommendation(RecommendationDto recommendation) {
         if (recommendation.getContent().isBlank()) {
             throw new DataValidationException("Рекомендация должна содержать текст");

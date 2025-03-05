@@ -3,7 +3,9 @@ package school.faang.user_service.service;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.recommendation.Recommendation;
@@ -20,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 @Service
@@ -27,6 +30,7 @@ import java.util.stream.IntStream;
 public class RecommendationService {
     private static final int RECOMMENDATION_MIN_DISTANCE_MONTHS = 6;
     private static final int PAGE_SIZE = 100;
+    private static final Pageable initialPageRequest = PageRequest.of(0, PAGE_SIZE);
 
     private final SkillOfferService skillOfferService;
     private final RecommendationRepository recommendationRepository;
@@ -82,29 +86,37 @@ public class RecommendationService {
     }
 
     public List<RecommendationDto> getAllUserRecommendations(long receiverId) {
-        var pageRequest = PageRequest.of(0, PAGE_SIZE);
+        return getRecommendationDtos(
+                pageRequest -> recommendationRepository.findAllByReceiverId(receiverId, pageRequest));
+    }
 
-        List<RecommendationDto> receiverRecommendations = new ArrayList<>();
+    public List<RecommendationDto> getAllGivenRecommendations(long authorId) {
+        return getRecommendationDtos(
+                pageRequest -> recommendationRepository.findAllByAuthorId(authorId, pageRequest));
+    }
 
-        var page = recommendationRepository.findAllByReceiverId(receiverId, pageRequest);
+    private List<RecommendationDto> getRecommendationDtos(Function<Pageable, Page<Recommendation>> pageFetcher) {
+        List<RecommendationDto> recommendationDtos = new ArrayList<>();
+
+        var page = pageFetcher.apply(initialPageRequest);
         if (page.isEmpty()) {
-            return receiverRecommendations;
+            return recommendationDtos;
         }
 
-        receiverRecommendations.addAll(page.map(this::toRecommendationDto).toList());
+        recommendationDtos.addAll(page.map(this::toRecommendationDto).toList());
         IntStream.range(1, page.getTotalPages())
-                .forEach(pageIndex -> processRecommendationsPage(receiverId, pageIndex, receiverRecommendations));
+                .forEach(pageIndex -> processRecommendationsPage(pageIndex, recommendationDtos, pageFetcher));
 
-        return receiverRecommendations;
+        return recommendationDtos;
     }
 
     private void processRecommendationsPage(
-            long receiverId,
             int pageIndex,
-            List<RecommendationDto> receiverRecommendations) {
+            List<RecommendationDto> recommendationDtos,
+            Function<Pageable, Page<Recommendation>> pageFetcher) {
         var pageRequest = PageRequest.of(pageIndex, PAGE_SIZE);
-        var page = recommendationRepository.findAllByReceiverId(receiverId, pageRequest);
-        receiverRecommendations.addAll(page.map(this::toRecommendationDto).toList());
+        var page = pageFetcher.apply(pageRequest);
+        recommendationDtos.addAll(page.map(this::toRecommendationDto).toList());
     }
 
     @NotNull
