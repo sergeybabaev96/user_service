@@ -18,11 +18,11 @@ public class GoalInvitationService {
     private final GoalService goalService;
     private final GoalInvitationMapper goalInvitationMapper;
 
-    public void createInvitation(GoalInvitationDto goalInvitationDto) {
+    public GoalInvitationDto createInvitation(GoalInvitationDto goalInvitationDto) {
         GoalInvitation goalInvitation = goalInvitationMapper.toEntity(goalInvitationDto);
         validateFields(goalInvitationDto, goalInvitation);
 
-        goalInvitationRepository.save(goalInvitation);
+        return goalInvitationMapper.toDto(goalInvitationRepository.save(goalInvitation));
     }
 
     private void validateFields(GoalInvitationDto goalInvitationDto, GoalInvitation goalInvitation) {

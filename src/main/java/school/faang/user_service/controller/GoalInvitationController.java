@@ -1,10 +1,8 @@
 package school.faang.user_service.controller;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,10 +18,10 @@ public class GoalInvitationController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<HttpStatus> createInvitation(@RequestBody GoalInvitationDto goalInvitationDto) {
-        service.createInvitation(goalInvitationDto);
+    public ResponseEntity<GoalInvitationDto> createInvitation(@RequestBody GoalInvitationDto goalInvitationDto) {
+        GoalInvitationDto createdDto = service.createInvitation(goalInvitationDto);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdDto);
     }
 
 }
