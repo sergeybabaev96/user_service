@@ -35,4 +35,8 @@ public class EventController {
         EventDtoValidator.validate(event);
         return eventService.updateEvent(event);
     }
+
+    public List<EventDto> getOwnedEvents(long userId) {
+        return eventService.getOwnedEvents(userId);
+    }
 }

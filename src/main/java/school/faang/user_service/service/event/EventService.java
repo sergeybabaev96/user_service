@@ -94,4 +94,12 @@ public class EventService {
 
         return eventMapper.toDto(existingEvent);
     }
+
+    public List<EventDto> getOwnedEvents(long userId) {
+        List<Event> events = eventRepository.findAllByUserId(userId);
+
+        return events.stream()
+                .map(eventMapper::toDto)
+                .collect(Collectors.toList());
+    }
 }
