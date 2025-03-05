@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapperImpl;
-import school.faang.user_service.publisher.UserProfileViewEventPublisher;
+import school.faang.user_service.publisher.userprofileview.UserProfileViewEventPublisher;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.user.UserServiceImpl;
 

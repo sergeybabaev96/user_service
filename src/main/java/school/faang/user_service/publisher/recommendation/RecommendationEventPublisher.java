@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.config.redis.Channels;
-import school.faang.user_service.dto.RecommendationEvent;
+import school.faang.user_service.events.RecommendationEvent;
 import school.faang.user_service.publisher.EventPublisherAbstract;
 
 @Component

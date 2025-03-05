@@ -24,6 +24,8 @@ spring:
         profile-view: profile_view
         follower: user_follow_channel
         recommendation-channel: recommendation_channel
+        achievement-channel: achievement_channel
+        follower-channel: follower_channel
 
 server:
   port: 8080

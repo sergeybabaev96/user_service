@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import school.faang.user_service.config.redis.Channels;
-import school.faang.user_service.dto.RecommendationEvent;
+import school.faang.user_service.events.RecommendationEvent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
