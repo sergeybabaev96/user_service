@@ -13,6 +13,7 @@ import school.faang.user_service.publisher.EventPublisherAbstract;
 public class FollowerEventPublisher extends EventPublisherAbstract<FollowerEvent> {
 
     private final Channels channels;
+
     public FollowerEventPublisher(RedisTemplate<String, Object> redisTemplate,
                                         ObjectMapper objectMapper,
                                         Channels channels) {
