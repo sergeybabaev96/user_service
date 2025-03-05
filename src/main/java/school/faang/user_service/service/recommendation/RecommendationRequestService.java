@@ -12,6 +12,7 @@ import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.entity.recommendation.SkillRequest;
+import school.faang.user_service.exception.recommendation.ErrorMessage;
 import school.faang.user_service.mapper.recommendation.RecommendationRequestMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
@@ -47,9 +48,9 @@ public class RecommendationRequestService {
         RecommendationRequest finalRequest = request;
         List<SkillRequest> skillRequest = recommendationRequestDto.getSkillRequests().stream()
                 .map(skillRequestDto -> {
-            Skill skill = getSkill(skillRequestDto.getSkillId());
-            return SkillRequest.builder().request(finalRequest).skill(skill).build();
-        }).toList();
+                    Skill skill = getSkill(skillRequestDto.getSkillId());
+                    return SkillRequest.builder().request(finalRequest).skill(skill).build();
+                }).toList();
 
         request.setSkills(skillRequest);
 
@@ -68,7 +69,7 @@ public class RecommendationRequestService {
 
     public RecommendationRequestDto getRequest(long id) {
         RecommendationRequest entity = recommendationRequestRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException("Request with " + id + " not found"));
+                new EntityNotFoundException(String.format(ErrorMessage.REQUEST_NOT_FOUND, id)));
 
         return recommendationRequestMapper.toDto(entity);
     }
@@ -78,15 +79,21 @@ public class RecommendationRequestService {
         recommendationRequestValidator.checkRequestsStatus(id, recommendationRequest.getStatus());
         recommendationRequest.setStatus(RequestStatus.REJECTED);
         recommendationRequest.setRejectionReason(rejectionDto.getReason());
-        recommendationRequestRepository.save(recommendationRequest);
-        log.info("Recommendation request with id {} was rejected", id);
+        try {
+            recommendationRequestRepository.save(recommendationRequest);
+            log.info("Recommendation request with id {} was rejected", id);
+        } catch (Exception e) {
+            log.error("Failed to save rejected recommendation request with id {}", id, e);
+            throw new RuntimeException("Failed to reject recommendation request", e);
+        }
+
         return recommendationRequestMapper.toDto(recommendationRequest);
     }
 
     private Skill getSkill(Long skillId) {
         return skillRepository.findById(skillId).orElseThrow(() -> {
             log.warn("Skill with id {} not found", skillId);
-            return new EntityNotFoundException(String.format("There is no skill with id = %d", skillId));
+            return new EntityNotFoundException(String.format(ErrorMessage.SKILL_NOT_FOUND, skillId));
         });
     }
 
