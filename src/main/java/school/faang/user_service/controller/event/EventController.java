@@ -13,8 +13,10 @@ public class EventController {
 
     public EventDto create(EventDto event) {
         EventDtoValidator.validate(event);
-
         return eventService.create(event);
     }
 
+    public EventDto getEvent(long eventId) {
+        return eventService.getEvent(eventId);
+    }
 }

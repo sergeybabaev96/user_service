@@ -23,7 +23,9 @@ public class EventService {
 
     public EventDto create(EventDto eventDto) {
         User owner = userRepository.findById(eventDto.getOwnerId())
-                .orElseThrow(() -> new DataValidationException("User with id " + eventDto.getOwnerId() + " not found"));
+                .orElseThrow(() -> new DataValidationException(
+                        String.format("User with id %s not found", eventDto.getOwnerId()))
+                );
 
         Set<Long> userSkillIds = owner.getSkills().stream()
                 .map(Skill::getId)
@@ -40,5 +42,13 @@ public class EventService {
         entity = eventRepository.save(entity);
 
         return eventMapper.toDto(entity);
+    }
+
+    public EventDto getEvent(long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new DataValidationException(
+                        String.format("Event with id %s not found", eventId))
+                );
+        return eventMapper.toDto(event);
     }
 }
