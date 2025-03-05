@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -62,14 +61,16 @@ public class GlobalControllerAdvice {
     private void logging(LoggingLevel level, String errorMessage) {
         level.command.accept(errorMessage);
     }
-}
 
-@Slf4j
-enum LoggingLevel {
-    INFO(log::info), DEBUG(log::debug), WARN(log::warn), ERROR(log::error);
+    public enum LoggingLevel {
+        INFO(log::info), DEBUG(log::debug), WARN(log::warn), ERROR(log::error);
 
-    final Consumer<String> command;
-    LoggingLevel(Consumer<String> command) {
-        this.command = command;
+        final Consumer<String> command;
+        LoggingLevel(Consumer<String> command) {
+            this.command = command;
+        }
     }
 }
+
+
+
