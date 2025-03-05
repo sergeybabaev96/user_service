@@ -9,11 +9,12 @@ import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.EventFilterDto;
 import school.faang.user_service.mapper.EventMapper;
+import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
+import school.faang.user_service.validator.EventDtoValidator;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -21,24 +22,11 @@ import java.util.stream.Collectors;
 public class EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final SkillRepository skillRepository;
     private final EventMapper eventMapper;
 
     public EventDto create(EventDto eventDto) {
-        User owner = userRepository.findById(eventDto.getOwnerId())
-                .orElseThrow(() -> new DataValidationException(
-                        String.format("User with id %s not found", eventDto.getOwnerId()))
-                );
-
-        Set<Long> userSkillIds = owner.getSkills().stream()
-                .map(Skill::getId)
-                .collect(Collectors.toSet());
-
-        Set<Long> requiredSkillIds = Set.copyOf(eventDto.getRelatedSkills());
-
-        if (!userSkillIds.containsAll(requiredSkillIds)) {
-            throw new DataValidationException("User does not have the required skills to create this event");
-        }
-
+        User owner = EventDtoValidator.validateOwnerAndSkills(eventDto, userRepository);
         Event entity = eventMapper.toEntity(eventDto);
         entity.setOwner(owner);
         entity = eventRepository.save(entity);
@@ -76,5 +64,34 @@ public class EventService {
                         String.format("Event with id %s not found", eventId))
                 );
         eventRepository.delete(event);
+    }
+
+    public EventDto updateEvent(EventDto eventDto) {
+        Event existingEvent = eventRepository.findById(eventDto.getId())
+                .orElseThrow(() -> new DataValidationException(
+                        String.format("Event with id %s not found", eventDto.getId()))
+                );
+
+        EventDtoValidator.validateOwnerAndSkills(eventDto, userRepository);
+
+        existingEvent.setTitle(eventDto.getTitle());
+        existingEvent.setStartDate(eventDto.getStartDate());
+        existingEvent.setEndDate(eventDto.getEndDate());
+        existingEvent.setDescription(eventDto.getDescription());
+        existingEvent.setLocation(eventDto.getLocation());
+        existingEvent.setMaxAttendees(eventDto.getMaxAttendees());
+        existingEvent.setType(eventDto.getEventType());
+        existingEvent.setStatus(eventDto.getEventStatus());
+
+        List<Skill> skills = skillRepository.findAllById(eventDto.getRelatedSkills());
+        if (skills.size() != eventDto.getRelatedSkills().size()) {
+            throw new DataValidationException("Some skills do not exist!");
+        }
+
+        existingEvent.setRelatedSkills(skills);
+
+        existingEvent = eventRepository.save(existingEvent);
+
+        return eventMapper.toDto(existingEvent);
     }
 }

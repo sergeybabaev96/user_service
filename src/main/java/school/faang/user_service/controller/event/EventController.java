@@ -30,4 +30,9 @@ public class EventController {
     public void deleteEvent(long eventId) {
         eventService.deleteEvent(eventId);
     }
+
+    public EventDto updateEvent(EventDto event) {
+        EventDtoValidator.validate(event);
+        return eventService.updateEvent(event);
+    }
 }
