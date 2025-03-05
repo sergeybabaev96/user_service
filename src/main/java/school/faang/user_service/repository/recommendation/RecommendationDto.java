@@ -2,11 +2,13 @@ package school.faang.user_service.repository.recommendation;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
+@Setter
 @RequiredArgsConstructor
 public class RecommendationDto {
     private Long id;
