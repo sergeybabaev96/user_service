@@ -2,10 +2,10 @@ package school.faang.user_service.dto;
 
 import lombok.Builder;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import school.faang.user_service.entity.UserProfilePic;
+import school.faang.user_service.entity.contact.PreferredContact;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,6 +27,7 @@ public class UserDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private UserProfilePic userProfilePic;
+    private PreferredContact preference;
 
     private List<UserDto> mentees;
     private List<UserDto> mentors;

@@ -19,11 +19,20 @@ public class UserServiceProperties {
 
     private RecommendationRequestProperties recommendationRequest;
     private Map<String, TariffProperties> availableTariffs = new HashMap<>();
+    private S3Properties s3;
 
     @Getter
     @Setter
     public static class RecommendationRequestProperties {
         private int minMonth;
+    }
+
+    @Getter
+    @Setter
+    public static class S3Properties {
+        private String endpoint;
+        private String accessKey;
+        private String secretKey;
     }
 
     @Data
