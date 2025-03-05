@@ -4,8 +4,11 @@ import org.mapstruct.Mapper;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.dto.goal.GoalDto;
 
+import java.util.List;
+
 @Mapper
 public interface GoalMapper {
-    GoalDto goalToGoalDto(Goal goal);
     Goal goalDtoToGoal(GoalDto goalDto);
+
+    List<GoalDto> goalListToGoalDtoList(List<Goal> goalList);
 }
