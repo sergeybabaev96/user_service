@@ -102,4 +102,12 @@ public class EventService {
                 .map(eventMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public List<EventDto> getParticipatedEvents(long userId) {
+        List<Event> events = eventRepository.findParticipatedEventsByUserId(userId);
+
+        return events.stream()
+                .map(eventMapper::toDto)
+                .collect(Collectors.toList());
+    }
 }
