@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.dto.recommendation.RejectionDto;
 import school.faang.user_service.dto.recommendation.RequestFilterDto;
-import school.faang.user_service.service.RecommendationRequestService;
+import school.faang.user_service.service.recommendation.RecommendationRequestService;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public class RecommendationRequestController {
     private final RecommendationRequestService recommendationRequestService;
 
 
-    public RecommendationRequestDto requestRecommendation(RecommendationRequestDto recommendationRequest){
+    public RecommendationRequestDto requestRecommendation(RecommendationRequestDto recommendationRequest) {
         if (recommendationRequest.getMessage() == null || recommendationRequest.getMessage().trim().isEmpty()) {
             throw new IllegalArgumentException("Recommendation message cannot be null or empty.");
         }
@@ -23,15 +23,15 @@ public class RecommendationRequestController {
         return recommendationRequest;
     }
 
-    public List<RecommendationRequestDto> getRecommendationRequests(RequestFilterDto filter){
+    public List<RecommendationRequestDto> getRecommendationRequests(RequestFilterDto filter) {
         return recommendationRequestService.getRequest(filter);
     }
 
-    public RecommendationRequestDto getRecommendationRequest(long id){
+    public RecommendationRequestDto getRecommendationRequest(long id) {
         return recommendationRequestService.getRequest(id);
     }
 
-    public RecommendationRequestDto rejectRequest(long id, RejectionDto rejection){
+    public RecommendationRequestDto rejectRequest(long id, RejectionDto rejection) {
         return recommendationRequestService.rejectRequest(id, rejection);
 
     }

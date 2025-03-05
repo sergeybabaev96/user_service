@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.recommendation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +13,7 @@ import school.faang.user_service.filter.recommendation.RecommendationRequestFilt
 import school.faang.user_service.mapper.RecommendationRequestMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
+import school.faang.user_service.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,15 +25,14 @@ import java.util.stream.Stream;
 public class RecommendationRequestService {
     private final RecommendationRequestRepository recommendationRequestRepository;
     private final RecommendationRequestMapper recommendationRequestMapper;
-    private final UserRepository userRepository;
     private final List<RecommendationRequestFilter> filters;
+    private final UserService userService;
+    private final SkillRequestService skillRequestService;
 
     public RecommendationRequestDto create(RecommendationRequestDto dto) {
-        User requester = userRepository.findById(dto.getRequesterId())
-                .orElseThrow(() -> new NotFoundException("Requester with ID " + dto.getRequesterId() + " not found"));
+        User requester = userService.getUserById(dto.getRequesterId());
+        User receiver = userService.getUserById(dto.getReceiverId());
 
-        User receiver = userRepository.findById(dto.getReceiverId())
-                .orElseThrow(() -> new NotFoundException("Receiver with ID " + dto.getReceiverId() + " not found"));
 
         LocalDateTime sixMonthsAgo = LocalDateTime.now().minusMonths(6);
         Optional<RecommendationRequest> existingRequest = recommendationRequestRepository
@@ -41,10 +41,9 @@ public class RecommendationRequestService {
         if (existingRequest.isPresent()) {
             throw new IllegalStateException("Recommendation request already sent within the last 6 months.");
         }
-
-        RecommendationRequest request = recommendationRequestMapper.toRecommendationRequest(dto);
-        recommendationRequestRepository.create(requester.getId()
-                , request.getReceiver().getId(), request.getMessage());
+        RecommendationRequest request = recommendationRequestRepository
+                .create(requester.getId(), receiver.getId(), dto.getMessage());
+        request.setSkills(skillRequestService.findByIds(dto.getSkillsId()));
 
         return recommendationRequestMapper.toRecommendationRequestDto(request);
     }
