@@ -6,19 +6,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import school.faang.user_service.dto.MentorshipRequestDto;
+import school.faang.user_service.dto.MentorshipRequestFilterDto;
 import school.faang.user_service.dto.MentorshipResponseDto;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.mapper.MentorshipRequestMapperImpl;
+import school.faang.user_service.publisher.MentorshipOfferedEventPublisher;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 import school.faang.user_service.service.filter.AuthorFilter;
 import school.faang.user_service.service.filter.DescriptionFilter;
 import school.faang.user_service.service.filter.ReceiverFilter;
 import school.faang.user_service.service.filter.RequestFilter;
-import school.faang.user_service.dto.MentorshipRequestFilterDto;
 import school.faang.user_service.service.filter.StatusFilter;
 import school.faang.user_service.service.impl.MentorshipRequestServiceImpl;
 
@@ -36,6 +37,7 @@ public class MentorshipRequestServiceTest {
     StatusFilter statusFilterMock;
     List<RequestFilter> filters;
     MentorshipRequestService mentorshipRequestService;
+    MentorshipOfferedEventPublisher mentorshipOfferedEventPublisher;
     UserDto user1;
     UserDto user2;
 
@@ -50,12 +52,13 @@ public class MentorshipRequestServiceTest {
         descriptionFilterMock = Mockito.spy(DescriptionFilter.class);
         receiverFilterMock = Mockito.spy(ReceiverFilter.class);
         statusFilterMock = Mockito.spy(StatusFilter.class);
+        mentorshipOfferedEventPublisher = Mockito.mock(MentorshipOfferedEventPublisher.class);
 
         filters = List.of(authorFilterMock, descriptionFilterMock, receiverFilterMock, statusFilterMock);
 
         mentorshipRequestService =
                 new MentorshipRequestServiceImpl(mentorshipRequestRepositoryMock, userRepositoryMock,
-                        mentorshipRequestMapperSpy, filters);
+                        mentorshipRequestMapperSpy, filters, mentorshipOfferedEventPublisher);
         user1 = UserDto.builder()
                 .userId(1L)
                 .build();
@@ -173,8 +176,9 @@ public class MentorshipRequestServiceTest {
         Mockito.when(userRepositoryMock.findById(receiverId)).thenReturn(Optional.of(receiverUser));
 
         mentorshipRequestService.requestMentorship(requestDto);
+
         Mockito.verify(mentorshipRequestRepositoryMock, Mockito.times(1))
-                .create(requesterId, receiverId, "description");
+                .create("description", requesterId, receiverId);
     }
 
     @Test

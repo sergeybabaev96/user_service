@@ -44,9 +44,8 @@ public class MentorshipRequestServiceImpl implements MentorshipRequestService {
 
         MentorshipRequest mentorshipRequest = mentorshipRequestRepository.create(mentorshipRequestDto.description(),
                 mentorshipRequestDto.requester().getUserId(),
-                mentorshipRequestDto.receiver().getUserId(),
-                mentorshipRequestDto.status().ordinal(),
-                mentorshipRequestDto.rejectionReason());
+                mentorshipRequestDto.receiver().getUserId()
+        );
 
         MentorshipOfferedEvent mentorshipOfferedEvent =
                 mapper.toMentorshipOfferedEvent(mentorshipRequestDto, mentorshipRequest);
