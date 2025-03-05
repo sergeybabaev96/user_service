@@ -72,6 +72,10 @@ public class RecommendationService {
         return recommendation;
     }
 
+    public void delete(long id) {
+        recommendationRepository.deleteById(id);
+    }
+
     private void validateRecommendation(RecommendationDto recommendation) {
         var lastAuthorRecommendation = recommendationRepository.findLastRecommendationByAuthorId(
                 recommendation.getAuthorId());

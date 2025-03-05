@@ -23,6 +23,10 @@ public class RecommendationController {
         return recommendationService.update(recommendation);
     }
 
+    public void deleteRecommendation(long id) {
+        recommendationService.delete(id);
+    }
+
     private static void validateRecommendation(RecommendationDto recommendation) {
         if (recommendation.getContent().isBlank()) {
             throw new DataValidationException("Рекомендация должна содержать текст");
