@@ -1,9 +1,9 @@
 package school.faang.user_service.service.event;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.event.EventDTO;
-import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidationException;
@@ -11,59 +11,78 @@ import school.faang.user_service.mapper.event.EventMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 
-import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @Service
 public class EventService {
 
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final EventMapper eventMapper;
+    private final EventUtil eventUtil;
 
     @Autowired
-    public EventService(EventRepository eventRepository1, UserRepository userRepository, EventMapper eventMapper) {
+    public EventService(EventRepository eventRepository1, UserRepository userRepository, EventMapper eventMapper, EventUtil eventUtil) {
         this.eventRepository = eventRepository1;
         this.userRepository = userRepository;
         this.eventMapper = eventMapper;
-    }
-    // Валидатор: событие != null, название не пустое, пользователь != null, дата начала >= сегодня
-    public void isValid(EventDTO event) {
-        LocalDate today = LocalDate.now();
-        if (event == null) {
-            throw new DataValidationException("Event is null");
-        }
-        if (event.getTitle().isBlank()) {
-            throw new DataValidationException("Title is blank");
-        }
-        if (event.getOwnerId() == null) {
-            throw new DataValidationException("Owner id is null");
-        }
-        if (event.getStartDate().toLocalDate().isBefore(today)){
-            throw new DataValidationException("Start date is before today");
-        }
+        this.eventUtil = eventUtil;
     }
 
     public EventDTO create(EventDTO event) {
-        //eventOwner пользователь из event, получаем из базы, чтобы сравнить скиллы для создания event-a
-        User eventOwner = userRepository.findById(event.getOwnerId())
-                .orElseThrow(() -> new DataValidationException("Owner not found"));
-        //преобразуем навыки пользователя в их id, для дальнейшего сравнения
-        List<Long> ownerSkillsIDs = eventOwner.getSkills().stream()
-                .map(Skill::getId)
-                .toList();
-        //Проверяем, есть ли в навыках пользователя навык, который связан с объявленными навыками события
-        boolean matchSkills =  event.getRelatedSkills().stream()
-                .anyMatch(ownerSkillsIDs::contains);
-
-        if (!eventOwner.getSkills().isEmpty() && matchSkills) {
+        if (eventUtil.isValid(event) && eventUtil.checkOwnerSkills(event)) {
             Event entityEvent = eventMapper.eventDTOToEvent(event);
-            //убеждаемся что владелец точно установился для формирования правильных связей.
-            entityEvent.setOwner(eventOwner);
+            //убеждаемся что владелец точно установился для формирования правильных связей в БД.
+            entityEvent.setOwner(userRepository.findById(event.getOwnerId())
+                    .orElseThrow(() -> new DataValidationException("Owner not found")));
             eventRepository.save(entityEvent);
             return eventMapper.eventToEventDTO(entityEvent);
         } else {
             throw new DataValidationException("Skills are empty or not match");
         }
+    }
+
+    public EventDTO getById(Long id) {
+        return eventMapper.eventToEventDTO(eventRepository.findById(id)
+                .orElseThrow(() -> new DataValidationException("Event not found")));
+    }
+
+    public EventDTO update(Long eventId, EventDTO event) {
+        // Получаем существующее событие
+        Event updatedEvent = eventRepository.findById(eventId)
+                .orElseThrow(() -> new DataValidationException("Event not found"));
+        // Проверяем, что переданный DTO действительно соответствует обновляемой сущности
+        if (!eventId.equals(event.getId())) {
+            throw new DataValidationException("Mismatched event ID");
+        }
+        User eventOwner = userRepository.findById(event.getOwnerId())
+                .orElseThrow(() -> new DataValidationException("Owner not found"));
+        if (!eventUtil.checkOwnerSkills(event) || !eventUtil.isValid(event)) {
+            throw new DataValidationException("Skills are empty or not match");
+        }
+        // Используем маппер для обновления существующего объекта
+        eventMapper.updateEventFromDTO(event, updatedEvent);
+        // Устанавливаем владельца, так как маппер его игнорирует
+        updatedEvent.setOwner(eventOwner);
+        // Сохраняем обновленное событие
+        eventRepository.save(updatedEvent);
+        return eventMapper.eventToEventDTO(updatedEvent);
+    }
+
+    public void delete(Long id) {
+        var wasDeletedEvent = eventRepository.findById(id).orElseThrow(()
+                -> new DataValidationException("Event not found"));
+        log.info("Event deleted: {}", wasDeletedEvent);
+        eventRepository.delete(wasDeletedEvent);
+    }
+
+    public List<EventDTO> getOwnedEvents(Long ownerId) {
+        List<Event> userEvents = eventRepository.findAllByUserId(ownerId);
+        return eventMapper.eventsToEventDTOs(userEvents);
+    }
+    public List<EventDTO> getParticipatedEvents(Long userId) {
+        List<Event> userEvents = eventRepository.findParticipatedEventsByUserId(userId);
+        return eventMapper.eventsToEventDTOs(userEvents);
     }
 }

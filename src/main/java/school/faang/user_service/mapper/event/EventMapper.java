@@ -2,6 +2,7 @@ package school.faang.user_service.mapper.event;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import school.faang.user_service.dto.event.EventDTO;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.event.Event;
@@ -27,6 +28,14 @@ public interface EventMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Event eventDTOToEvent(EventDTO eventDTO);
+
+    @Mapping(target = "id", ignore = true) // Игнорируем изменение ID
+    @Mapping(target = "owner", ignore = true) // Владелец устанавливается отдельно
+    @Mapping(target = "attendees", ignore = true)
+    @Mapping(target = "ratings", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    void updateEventFromDTO(EventDTO source, @MappingTarget Event target);
 
     List<EventDTO> eventsToEventDTOs(List<Event> events);
 
