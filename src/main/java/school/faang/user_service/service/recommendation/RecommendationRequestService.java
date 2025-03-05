@@ -3,7 +3,6 @@ package school.faang.user_service.service.recommendation;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.dto.recommendation.RejectionDto;
@@ -34,7 +33,7 @@ public class RecommendationRequestService {
     private final SkillRepository skillRepository;
     private final List<RecommendationRequestFilter> recommendationRequestFilters;
 
-    public RecommendationRequestDto create(@NotNull RecommendationRequestDto recommendationRequestDto) {
+    public RecommendationRequestDto create(RecommendationRequestDto recommendationRequestDto) {
         log.info("Creating a recommendations request from user with id {} for user with id {}",
                 recommendationRequestDto.getReceiverId(), recommendationRequestDto.getRequesterId());
 
@@ -74,7 +73,7 @@ public class RecommendationRequestService {
         return recommendationRequestMapper.toDto(entity);
     }
 
-    public RecommendationRequestDto rejectRequest(Long id, @NotNull RejectionDto rejectionDto) {
+    public RecommendationRequestDto rejectRequest(Long id, RejectionDto rejectionDto) {
         RecommendationRequest recommendationRequest = recommendationRequestValidator.validateRecommendationFromBd(id);
         recommendationRequestValidator.checkRequestsStatus(id, recommendationRequest.getStatus());
         recommendationRequest.setStatus(RequestStatus.REJECTED);
