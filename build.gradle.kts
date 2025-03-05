@@ -93,3 +93,4 @@ tasks.bootJar {
 kotlin {
     jvmToolchain(17)
 }
+

@@ -20,7 +20,7 @@ public class SkillRequestService {
     }
 
     public List<SkillRequest> findByIds(List<Long> skillsIds) {
-        return  repository.findBySkillIdIn(skillsIds);
+        return repository.findBySkillIdIn(skillsIds);
     }
 
 }
