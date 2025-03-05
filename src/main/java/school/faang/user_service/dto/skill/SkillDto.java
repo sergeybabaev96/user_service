@@ -6,6 +6,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class SkillDto {
-    Long id;
-    String title;
+    private Long id;
+    private String title;
 }

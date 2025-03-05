@@ -54,13 +54,13 @@ public class SkillService {
             Skill skillUser = skillRepository.findUserSkill(skillId, userId).orElse(null);
 
             if (skillOffers.size() >= MIN_SKILL_OFFERS) {
-               skillRepository.assignSkillToUser(skillId, userId);
-               skillOffers.forEach(skillOffer ->
-                   userSkillGuaranteeService.save(UserSkillGuarantee.builder()
-                           .user(skillOffer.getRecommendation().getReceiver())
-                           .skill(skillUser)
-                           .guarantor(skillOffer.getRecommendation().getAuthor())
-                           .build()));
+                skillRepository.assignSkillToUser(skillId, userId);
+                skillOffers.forEach(skillOffer ->
+                    userSkillGuaranteeService.save(UserSkillGuarantee.builder()
+                            .user(skillOffer.getRecommendation().getReceiver())
+                            .skill(skillUser)
+                            .guarantor(skillOffer.getRecommendation().getAuthor())
+                            .build()));
             }
 
             return skillRepository.findUserSkill(skillId, userId)
