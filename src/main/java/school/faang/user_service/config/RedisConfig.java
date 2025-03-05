@@ -35,7 +35,7 @@ public class RedisConfig {
     }
 
     @Bean
-    ChannelTopic recommendationEventTopic() {
+    public ChannelTopic recommendationEventTopic() {
         return new ChannelTopic(properties.getRedis().getChannel().getRecommendationEvent());
     }
 }

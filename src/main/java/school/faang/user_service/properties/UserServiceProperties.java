@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@ConfigurationProperties(prefix = "user-service")
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "user-service")
@@ -66,6 +65,7 @@ public class UserServiceProperties {
         @Data
         public static class Channel {
             private String boughtPremiumTopic;
+            private String profilePicChannel;
             private String recommendationEvent;
         }
     }
