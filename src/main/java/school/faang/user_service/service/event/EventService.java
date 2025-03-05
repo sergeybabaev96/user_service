@@ -7,10 +7,12 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.filter.EventFilterDto;
 import school.faang.user_service.mapper.EventMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -66,5 +68,13 @@ public class EventService {
                 .filter(event -> filter.getEventStatus() == null || event.getStatus().equals(filter.getEventStatus()))
                 .map(eventMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    public void deleteEvent(long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new DataValidationException(
+                        String.format("Event with id %s not found", eventId))
+                );
+        eventRepository.delete(event);
     }
 }

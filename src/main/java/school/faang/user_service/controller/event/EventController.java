@@ -6,6 +6,7 @@ import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.filter.EventFilterDto;
 import school.faang.user_service.service.event.EventService;
 import school.faang.user_service.validator.EventDtoValidator;
+
 import java.util.List;
 
 @RestController
@@ -26,4 +27,7 @@ public class EventController {
         return eventService.getEventsByFilter(filter);
     }
 
+    public void deleteEvent(long eventId) {
+        eventService.deleteEvent(eventId);
+    }
 }
