@@ -2,7 +2,8 @@ package school.faang.user_service.dto;
 
 import java.time.LocalTime;
 
-public record WorkScheduleDto(long id
+public record WorkScheduleDto(
+        long id
         , LocalTime startTime
         , LocalTime endTime
         , LocalTime startLunch
