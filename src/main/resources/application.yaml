@@ -24,13 +24,14 @@ spring:
         profile-view: profile_view
         follower: user_follow_channel
         recommendation-channel: recommendation_channel
-
-server:
-  port: 8080
+        recommendation-mentorship-offered: recommendation_mentorship_offered
 
   mvc:
     servlet:
       path: /api/v1
+
+server:
+  port: 8080
 
 thread_pool:
   max_threads: 10

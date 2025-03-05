@@ -1,20 +1,23 @@
 package school.faang.user_service.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.MentorshipRequestDto;
+import school.faang.user_service.dto.MentorshipRequestFilterDto;
 import school.faang.user_service.dto.MentorshipResponseDto;
 import school.faang.user_service.dto.RejectionDto;
+import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.events.MentorshipOfferedEvent;
+import school.faang.user_service.mapper.MentorshipRequestMapper;
+import school.faang.user_service.publisher.MentorshipOfferedEventPublisher;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 import school.faang.user_service.service.MentorshipRequestService;
 import school.faang.user_service.service.filter.RequestFilter;
-import school.faang.user_service.dto.MentorshipRequestFilterDto;
-import school.faang.user_service.entity.MentorshipRequest;
-import school.faang.user_service.mapper.MentorshipRequestMapper;
-import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,15 +33,25 @@ public class MentorshipRequestServiceImpl implements MentorshipRequestService {
     private final UserRepository userRepository;
     private final MentorshipRequestMapper mapper;
     private final List<RequestFilter> requestFilters;
+    private final MentorshipOfferedEventPublisher mentorshipOfferedEventPublisher;
 
+    @Transactional
     @Override
     public MentorshipResponseDto requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
         log.info("MentorshipRequestServiceImpl: method #requestMentorship started with data: {}", mentorshipRequestDto);
+
         validateRequest(mentorshipRequestDto);
-        MentorshipRequest mentorshipRequest = mentorshipRequestRepository.create(
+
+        MentorshipRequest mentorshipRequest = mentorshipRequestRepository.create(mentorshipRequestDto.description(),
                 mentorshipRequestDto.requester().getUserId(),
                 mentorshipRequestDto.receiver().getUserId(),
-                mentorshipRequestDto.description());
+                mentorshipRequestDto.status().ordinal(),
+                mentorshipRequestDto.rejectionReason());
+
+        MentorshipOfferedEvent mentorshipOfferedEvent =
+                mapper.toMentorshipOfferedEvent(mentorshipRequestDto, mentorshipRequest);
+
+        mentorshipOfferedEventPublisher.publish(mentorshipOfferedEvent);
         return mapper.toMentorshipResponseDto(mentorshipRequest);
     }
 
@@ -94,12 +107,12 @@ public class MentorshipRequestServiceImpl implements MentorshipRequestService {
         User requester = userRepository.findById(mentorshipRequestDto.requester().getUserId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         String.format("There is no requester with id = %s in database",
-                        mentorshipRequestDto.requester().getUserId()))
+                                mentorshipRequestDto.requester().getUserId()))
                 );
         User receiver = userRepository.findById(mentorshipRequestDto.receiver().getUserId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         String.format("There is no receiver with id = %s in database",
-                        mentorshipRequestDto.requester().getUserId())));
+                                mentorshipRequestDto.requester().getUserId())));
         MentorshipRequest lastMentorshipRequest = mentorshipRequestRepository.findLatestRequest(
                 requester.getId(), receiver.getId()).orElse(null);
         if (!Objects.isNull(lastMentorshipRequest)) {
