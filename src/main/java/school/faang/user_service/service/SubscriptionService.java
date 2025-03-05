@@ -11,6 +11,7 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.SubscriptionRepository;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -39,10 +40,18 @@ public class SubscriptionService {
     }
 
     public List<UserDto> getFollowing(long followeeId, UserFilterDto filter) {
-        return subscriptionRepository.findByFollowerId(followeeId)
-                .filter(user -> filterUserByUserFilter(user, filter))
-                .map(this::userToUserDto)
-                .toList();
+        Stream<User> userStream = subscriptionRepository.findByFollowerId(followeeId);
+
+        if (filter == null) {
+            return userStream
+                    .map(this::userToUserDto)
+                    .toList();
+        } else {
+            return userStream
+                    .filter(user -> filterUserByUserFilter(user, filter))
+                    .map(this::userToUserDto)
+                    .toList();
+        }
     }
 
     public int getFollowingCount(long followerId) {
@@ -50,10 +59,16 @@ public class SubscriptionService {
     }
 
     public List<UserDto> getFollowers(long followeeId, UserFilterDto filter) {
-        return subscriptionRepository.findByFolloweeId(followeeId)
-                .filter(user -> filterUserByUserFilter(user, filter))
-                .map(this::userToUserDto)
-                .toList();
+        Stream<User> userStream = subscriptionRepository.findByFolloweeId(followeeId);
+
+        if (filter == null) {
+            return userStream.map(this::userToUserDto).toList();
+        } else {
+            return userStream
+                    .filter(user -> filterUserByUserFilter(user, filter))
+                    .map(this::userToUserDto)
+                    .toList();
+        }
     }
 
     public int getFollowersCount(long followeeId) {
@@ -61,16 +76,12 @@ public class SubscriptionService {
     }
 
     private boolean filterUserByUserFilter(User user, UserFilterDto filter) {
-        if (filter == null) {
-            return true;
-        }
-
         String namePattern = filter.getNamePattern();
         String phonePattern = filter.getPhonePattern();
         int experienceMin = filter.getExperienceMin();
         int experienceMax = filter.getExperienceMax();
 
-        if (experienceMax > experienceMin) {
+        if (experienceMax < experienceMin) {
             throw new DataValidationException("ExperienceMax не может быть больше ExperienceMin");
         }
 
