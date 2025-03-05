@@ -1,8 +1,12 @@
 package school.faang.user_service.service;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.entity.Skill;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserSkillGuaranteeRepository;
 import school.faang.user_service.repository.recommendation.RecommendationDto;
@@ -11,6 +15,7 @@ import school.faang.user_service.repository.recommendation.SkillOfferDto;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,8 +27,30 @@ public class RecommendationService {
     private final SkillOfferRepository skillOfferRepository;
     private final SkillRepository skillRepository;
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
+    private final RecommendationMapper recommendationMapper;
 
-    public RecommendationDto create(RecommendationDto recommendation) {
+    public RecommendationDto create(@NotNull RecommendationDto recommendation) {
+        validateRecommendation(recommendation);
+
+        var receiverSkills = skillRepository.findAllByUserId(recommendation.getReceiverId());
+        recommendation.getSkillOffers()
+                .forEach(dto -> createSkillOffer(recommendation, dto, receiverSkills));
+
+        var recommendationId = recommendationRepository.create(
+                recommendation.getAuthorId(),
+                recommendation.getReceiverId(),
+                recommendation.getContent());
+
+        var createdRecommendation = recommendationRepository.findById(recommendationId);
+
+        if (createdRecommendation.isEmpty()) {
+            throw new DataRetrievalFailureException("Не удалось получить созданную рекомендацию");
+        }
+
+        return recommendationMapper.toDto(createdRecommendation.get());
+    }
+
+    private void validateRecommendation(RecommendationDto recommendation) {
         var lastAuthorRecommendation = recommendationRepository.findLastRecommendationByAuthorId(
                 recommendation.getAuthorId());
 
@@ -57,31 +84,23 @@ public class RecommendationService {
                                     .map(x -> x.get().getTitle())
                                     .toList())));
         }
+    }
 
-        var receiverSkills = skillRepository.findAllByUserId(recommendation.getReceiverId());
+    private void createSkillOffer(
+            RecommendationDto recommendation,
+            SkillOfferDto skillOffer,
+            List<Skill> receiverSkills) {
+        var existedSkill = receiverSkills.stream()
+                .filter(x -> x.getId() == skillOffer.getSkillId())
+                .findFirst();
+        if (existedSkill.isPresent()
+                && userSkillGuaranteeRepository.findByGuarantorId(recommendation.getAuthorId()).isEmpty()) {
+            userSkillGuaranteeRepository.create(
+                    recommendation.getReceiverId(),
+                    skillOffer.getSkillId(),
+                    recommendation.getAuthorId());
+        }
 
-        recommendation.getSkillOffers()
-                .forEach(dto ->
-                {
-                    var existedSkill = receiverSkills.stream()
-                            .filter(x -> x.getId() == dto.getSkillId())
-                            .findFirst();
-                    if (existedSkill.isPresent()
-                            && userSkillGuaranteeRepository.findByGuarantorId(recommendation.getAuthorId()).isEmpty()) {
-                        userSkillGuaranteeRepository.create(
-                                recommendation.getReceiverId(),
-                                dto.getSkillId(),
-                                recommendation.getAuthorId());
-                    }
-
-                    skillOfferRepository.create(dto.getSkillId(), recommendation.getId());
-                });
-
-        recommendationRepository.create(
-                recommendation.getAuthorId(),
-                recommendation.getReceiverId(),
-                recommendation.getContent());
-
-        return recommendation;
+        skillOfferRepository.create(skillOffer.getSkillId(), recommendation.getId());
     }
 }
