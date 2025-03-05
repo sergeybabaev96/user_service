@@ -82,7 +82,7 @@ public class SubscriptionService {
         int experienceMax = filter.getExperienceMax();
 
         if (experienceMax < experienceMin) {
-            throw new DataValidationException("ExperienceMax не может быть больше ExperienceMin");
+            throw new DataValidationException("ExperienceMin не может быть больше ExperienceMax");
         }
 
         boolean isMatchByName = true;
