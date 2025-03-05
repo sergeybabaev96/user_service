@@ -165,6 +165,6 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Career> career;
 
-    @OneToOne(mappedBy = "user")
-    private WorkSchedule workSchedule;
+    @OneToMany(mappedBy = "user")
+    private List<WorkSchedule> workSchedule;
 }
