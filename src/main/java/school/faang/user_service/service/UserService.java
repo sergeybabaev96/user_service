@@ -264,7 +264,7 @@ public class UserService {
         log.info("User {} has been banned", userId);
     }
 
-    @KafkaListener(topics = KafkaTopics.USER_BAN_TOPIC, groupId = "${spring.kafka.consumer.group-id}")
+    @KafkaListener(topics = KafkaTopics.USER_BAN_TOPIC)
     @Transactional
     public void listenUserBan(String userId) {
         banUser(Long.parseLong(userId));
