@@ -3,7 +3,7 @@ package school.faang.user_service.service.recommendation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.RecommendationEvent;
+import school.faang.user_service.events.RecommendationEvent;
 import school.faang.user_service.dto.RecommendationRequestDto;
 import school.faang.user_service.dto.RecommendationRequestRcvDto;
 import school.faang.user_service.dto.RejectionDto;

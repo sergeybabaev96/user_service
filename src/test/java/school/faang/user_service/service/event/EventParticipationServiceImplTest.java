@@ -17,7 +17,7 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.EntityNotFoundException;
 import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.repository.event.EventParticipationRepository;
-import school.faang.user_service.service.users.UsersService;
+import school.faang.user_service.service.UserService;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ class EventParticipationServiceImplTest {
     @Mock
     private EventService eventServiceMock;
     @Mock
-    private UsersService usersServiceMock;
+    private UserService userServiceMock;
     @Spy
     private UserMapperImpl userMapperMock;
 
@@ -70,7 +70,7 @@ class EventParticipationServiceImplTest {
     void registerParticipantIfUserIsEventOwnerThenThrowDataValidationException() {
         Mockito.when(eventServiceMock.findByIdOrThrow(event.getId()))
                 .thenReturn(event);
-        Mockito.when(usersServiceMock.findByIdOrThrow(eventOwner.getId()))
+        Mockito.when(userServiceMock.findByIdOrThrow(eventOwner.getId()))
                 .thenReturn(eventOwner);
 
         Assertions.assertThrows(
@@ -82,7 +82,7 @@ class EventParticipationServiceImplTest {
     void registerParticipantIfUserAlreadyRegisteredThenThrowDataValidationException() {
         Mockito.when(eventServiceMock.findByIdOrThrow(event.getId()))
                 .thenReturn(event);
-        Mockito.when(usersServiceMock.findByIdOrThrow(registeredUser.getId()))
+        Mockito.when(userServiceMock.findByIdOrThrow(registeredUser.getId()))
                 .thenReturn(registeredUser);
         Mockito.when(eventParticipationRepositoryMock.isUserRegisteredToEvent(event.getId(), registeredUser.getId()))
                 .thenReturn(Boolean.TRUE);
@@ -96,7 +96,7 @@ class EventParticipationServiceImplTest {
     void registerParticipant() {
         Mockito.when(eventServiceMock.findByIdOrThrow(event.getId()))
                 .thenReturn(event);
-        Mockito.when(usersServiceMock.findByIdOrThrow(unregisteredUser.getId()))
+        Mockito.when(userServiceMock.findByIdOrThrow(unregisteredUser.getId()))
                 .thenReturn(unregisteredUser);
         Mockito.when(eventParticipationRepositoryMock.isUserRegisteredToEvent(event.getId(), unregisteredUser.getId()))
                 .thenReturn(Boolean.FALSE);
@@ -105,7 +105,7 @@ class EventParticipationServiceImplTest {
 
         Mockito.verify(eventServiceMock, Mockito.times(1))
                 .findByIdOrThrow(event.getId());
-        Mockito.verify(usersServiceMock, Mockito.times(1))
+        Mockito.verify(userServiceMock, Mockito.times(1))
                 .findByIdOrThrow(unregisteredUser.getId());
         Mockito.verify(eventParticipationRepositoryMock, Mockito.times(1))
                 .isUserRegisteredToEvent(event.getId(), unregisteredUser.getId());
@@ -126,7 +126,7 @@ class EventParticipationServiceImplTest {
     void unregisterParticipantIfUserIsNotRegisteredThenThrowDataValidationException() {
         Mockito.when(eventServiceMock.findByIdOrThrow(event.getId()))
                 .thenReturn(event);
-        Mockito.when(usersServiceMock.findByIdOrThrow(unregisteredUser.getId()))
+        Mockito.when(userServiceMock.findByIdOrThrow(unregisteredUser.getId()))
                 .thenReturn(unregisteredUser);
         Mockito.when(eventParticipationRepositoryMock.isUserRegisteredToEvent(event.getId(), unregisteredUser.getId()))
                 .thenReturn(Boolean.FALSE);
@@ -140,7 +140,7 @@ class EventParticipationServiceImplTest {
     void unregisterParticipant() {
         Mockito.when(eventServiceMock.findByIdOrThrow(event.getId()))
                 .thenReturn(event);
-        Mockito.when(usersServiceMock.findByIdOrThrow(registeredUser.getId()))
+        Mockito.when(userServiceMock.findByIdOrThrow(registeredUser.getId()))
                 .thenReturn(registeredUser);
         Mockito.when(eventParticipationRepositoryMock.isUserRegisteredToEvent(event.getId(), registeredUser.getId()))
                 .thenReturn(Boolean.TRUE);
@@ -149,7 +149,7 @@ class EventParticipationServiceImplTest {
 
         Mockito.verify(eventServiceMock, Mockito.times(1))
                 .findByIdOrThrow(event.getId());
-        Mockito.verify(usersServiceMock, Mockito.times(1))
+        Mockito.verify(userServiceMock, Mockito.times(1))
                 .findByIdOrThrow(registeredUser.getId());
         Mockito.verify(eventParticipationRepositoryMock, Mockito.times(1))
                 .isUserRegisteredToEvent(event.getId(), registeredUser.getId());
@@ -215,7 +215,7 @@ class EventParticipationServiceImplTest {
     }
 
     private void testMissedUser(long userId) {
-        Mockito.when(usersServiceMock.findByIdOrThrow(userId))
+        Mockito.when(userServiceMock.findByIdOrThrow(userId))
                 .thenThrow(new EntityNotFoundException("User is not exists! id: " + userId));
 
         Assertions.assertThrows(

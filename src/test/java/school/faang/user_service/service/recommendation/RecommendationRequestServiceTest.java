@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import school.faang.user_service.dto.RecommendationEvent;
+import school.faang.user_service.events.RecommendationEvent;
 import school.faang.user_service.dto.RecommendationRequestDto;
 import school.faang.user_service.dto.RecommendationRequestRcvDto;
 import school.faang.user_service.dto.RejectionDto;

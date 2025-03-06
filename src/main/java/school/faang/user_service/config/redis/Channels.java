@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "spring.data.redis.channel")
 public class Channels {
     private String recommendationChannel;
+    private String achievementChannel;
+    private String followerChannel;
+    private String profileView;
     private String userBanChannel;
-    private String userBanChannelTest;
 }
