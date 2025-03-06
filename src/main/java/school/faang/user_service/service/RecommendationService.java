@@ -13,6 +13,7 @@ import school.faang.user_service.repository.recommendation.RecommendationReposit
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import school.faang.user_service.utils.ValidationRecommendationUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -25,7 +26,9 @@ public class RecommendationService {
 
     public RecommendationDto create(RecommendationDto recommendationDto) {
         Recommendation recommendation = recommendationMapper.toEntity(recommendationDto);
-        List<SkillOffer> allSkillOffers = skillOfferRepository.findAllSkillOffers();
+        Iterable<SkillOffer> skillOffersIterable = skillOfferRepository.findAll();
+        List<SkillOffer> allSkillOffers = new ArrayList<>();
+        skillOffersIterable.forEach(allSkillOffers::add);
 
         ValidationRecommendationUtils.validateRecommendation(recommendationDto);
         ValidationRecommendationUtils.validateRecommendationDate(recommendationDto);
