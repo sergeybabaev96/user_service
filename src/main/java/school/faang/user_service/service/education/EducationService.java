@@ -1,6 +1,8 @@
 package school.faang.user_service.service.education;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.EducationDto;
 import school.faang.user_service.entity.Education;
@@ -16,15 +18,19 @@ import java.time.Year;
 @Service
 @RequiredArgsConstructor
 public class EducationService {
+    private static final Logger LOG = LoggerFactory.getLogger(EducationService.class);
+
     private final UserRepository userRepository;
     private final EducationRepository educationRepository;
     private final EducationMapper educationMapper;
 
     public EducationDto addEducation(long userId, EducationDto educationDto) {
+        LOG.info("Adding education for user with id: {}", userId);
+
         validateYearFrom(educationDto.getYearFrom());
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new DataValidationException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Education education = educationMapper.toEducation(educationDto);
         education.setUser(user);
@@ -34,6 +40,8 @@ public class EducationService {
     }
 
     public EducationDto updateEducation(long userId, EducationDto educationDto) {
+        LOG.info("Updating education with id: {} for user with id: {}", educationDto.getId(), userId);
+
         validateYearFrom(educationDto.getYearFrom());
 
         Education education = educationRepository.findById(educationDto.getId())
@@ -51,6 +59,8 @@ public class EducationService {
     }
 
     public EducationDto getById(long educationId) {
+        LOG.info("Fetching education with id: {}", educationId);
+
         Education education = educationRepository.findById(educationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Education not found"));
 
