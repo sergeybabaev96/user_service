@@ -4,15 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
 import school.faang.user_service.service.RecommendationService;
-import school.faang.user_service.utils.ValidationUtils;
 
 @RequiredArgsConstructor
 @Controller
 public class RecommendationController {
     private final RecommendationService recommendationService;
 
-    public RecommendationDto giveRecommendation(RecommendationDto recommendation) {
-        ValidationUtils.validateRecommendation(recommendation);
-        return recommendationService.create(recommendation);
+    public RecommendationDto giveRecommendation(RecommendationDto recommendationDto) {
+        return recommendationService.create(recommendationDto);
     }
 }
