@@ -11,10 +11,8 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.filter.recommendation.RecommendationRequestFilter;
 import school.faang.user_service.mapper.RecommendationRequestMapper;
-import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 import school.faang.user_service.service.UserService;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -30,8 +28,8 @@ public class RecommendationRequestService {
     private final SkillRequestService skillRequestService;
 
     public RecommendationRequestDto create(RecommendationRequestDto dto) {
-        User requester = userService.getUserById(dto.getRequesterId());
-        User receiver = userService.getUserById(dto.getReceiverId());
+        User requester = userService.getUserById(dto.requesterId());
+        User receiver = userService.getUserById(dto.receiverId());
 
 
         LocalDateTime sixMonthsAgo = LocalDateTime.now().minusMonths(6);
@@ -42,8 +40,8 @@ public class RecommendationRequestService {
             throw new IllegalStateException("Recommendation request already sent within the last 6 months.");
         }
         RecommendationRequest request = recommendationRequestRepository
-                .create(requester.getId(), receiver.getId(), dto.getMessage());
-        request.setSkills(skillRequestService.findByIds(dto.getSkillsId()));
+                .create(requester.getId(), receiver.getId(), dto.message());
+        request.setSkills(skillRequestService.findByIds(dto.skillsId()));
 
         return recommendationRequestMapper.toRecommendationRequestDto(request);
     }
@@ -71,7 +69,7 @@ public class RecommendationRequestService {
                 -> new NotFoundException("Recommendation request with ID " + id + " not found"));
         if (request.getStatus().equals(RequestStatus.PENDING)) {
             request.setStatus(RequestStatus.REJECTED);
-            request.setRejectionReason(rejection.getReason());
+            request.setRejectionReason(rejection.reason());
             recommendationRequestRepository.save(request);
         }
         return recommendationRequestMapper.toRecommendationRequestDto(request);

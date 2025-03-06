@@ -12,7 +12,7 @@ public class RecommendationRequestStatusFilter implements RecommendationRequestF
 
     @Override
     public boolean isApplicable(RequestFilterDto dto) {
-        return dto.getStatus() != null;
+        return dto.status() != null;
     }
 
     @Override
@@ -20,6 +20,6 @@ public class RecommendationRequestStatusFilter implements RecommendationRequestF
                                                RequestFilterDto dto) {
         return recommendationRequestStream
                 .filter(recommendationRequest
-                        -> recommendationRequest.getStatus().equals(dto.getStatus()));
+                        -> recommendationRequest.getStatus().equals(dto.status()));
     }
 }

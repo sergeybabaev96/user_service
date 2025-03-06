@@ -3,16 +3,16 @@ package school.faang.user_service.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
-import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.entity.recommendation.SkillRequest;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface RecommendationRequestMapper {
 
+    @Mapping(target = "rejectionReason", ignore = true)
+    @Mapping(target = "recommendation", ignore = true)
     @Mapping(target = "skills", ignore = true)
     @Mapping(target = "requester", ignore = true)
     @Mapping(target = "receiver", ignore = true)
