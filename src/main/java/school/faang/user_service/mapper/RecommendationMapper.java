@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
 import school.faang.user_service.dto.recommendation.SkillOfferDto;
+import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.entity.recommendation.SkillOffer;
@@ -17,6 +18,8 @@ public interface RecommendationMapper {
     @Mapping(target = "author", source = "authorId", qualifiedByName = "mapIdToUser")
     @Mapping(target = "receiver", source = "receiverId", qualifiedByName = "mapIdToUser")
     @Mapping(target = "skillOffers", source = "skillOffersDto")
+    @Mapping(target = "request", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     Recommendation toEntity(RecommendationDto recommendationDto);
 
     @Mapping(target = "authorId", source = "author.id")
@@ -24,41 +27,30 @@ public interface RecommendationMapper {
     @Mapping(target = "skillOffersDto", source = "skillOffers")
     RecommendationDto toDto(Recommendation recommendation);
 
-    default List<SkillOffer> mapSkillOfferDtosToSkillOffers(List<SkillOfferDto> skillOfferDtos) {
-        if (skillOfferDtos == null) {
-            return null;
-        }
-        return skillOfferDtos.stream()
-                .map(dto -> {
-                    SkillOffer skillOffer = new SkillOffer();
-                    skillOffer.setId(dto.getId());
-                    skillOffer.getSkill().setId(dto.getSkillDto().getId());
-                    return skillOffer;
-                })
-                .toList();
-    }
+    @Mapping(target = "skill", source = "skillId", qualifiedByName = "mapIdToSkill")
+    @Mapping(target = "recommendation", ignore = true)
+    List<SkillOffer> toEntityList(List<SkillOfferDto> skillOfferDtos);
 
-    default List<SkillOfferDto> mapSkillOffersToSkillOfferDtos(List<SkillOffer> skillOffers) {
-        if (skillOffers == null) {
-            return null;
-        }
-        return skillOffers.stream()
-                .map(skillOffer -> {
-                    SkillOfferDto dto = new SkillOfferDto();
-                    dto.setId(skillOffer.getId());
-                    dto.getSkillDto().setId(skillOffer.getSkill().getId());
-                    return dto;
-                })
-                .toList();
-    }
+    @Mapping(target = "skillId", source = "skill.id")
+    List<SkillOfferDto> toDtoList(List<SkillOffer> skillOffers);
 
     @Named("mapIdToUser")
-    default User mapAuthorIdToUser(Long id) {
+    default User mapIdToUser(Long id) {
         if (id == null) {
             return null;
         }
         User user = new User();
         user.setId(id);
         return user;
+    }
+
+    @Named("mapIdToSkill")
+    default Skill mapIdToSkill(Long id) {
+        if (id == null) {
+            return null;
+        }
+        Skill skill = new Skill();
+        skill.setId(id);
+        return skill;
     }
 }

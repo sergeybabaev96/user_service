@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class SkillOfferDto {
     private Long id;
-    private SkillDto skillDto;
+    private Long skillId;
 }
