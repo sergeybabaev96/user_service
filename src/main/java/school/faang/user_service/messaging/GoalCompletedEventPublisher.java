@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.GoalCompletedEvent;
@@ -13,14 +14,16 @@ import school.faang.user_service.dto.GoalCompletedEvent;
 @Slf4j
 public class GoalCompletedEventPublisher {
 
-    private static final String GOAL_COMPLETED_TOPIC = "goal_completed";
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    @Value("${topics.goal-completed}")
+    private String goalCompletedTopic;
+
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
     public void publish(GoalCompletedEvent event) {
         try {
             String message = objectMapper.writeValueAsString(event);
-            kafkaTemplate.send(GOAL_COMPLETED_TOPIC, message);
+            kafkaTemplate.send(goalCompletedTopic, message);
             log.info("Published GoalCompletedEvent: {}", message);
         } catch (JsonProcessingException e) {
             log.error("Error serializing GoalCompletedEvent: {}", e.getMessage());
