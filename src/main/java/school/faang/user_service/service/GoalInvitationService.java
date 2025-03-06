@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.goal.GoalInvitationDto;
+import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalInvitation;
@@ -23,11 +24,9 @@ public class GoalInvitationService {
     private final GoalService goalService;
     private final GoalInvitationMapper goalInvitationMapper;
 
-    public void acceptGoalInvitation(long id) {
-        GoalInvitation goalInvitation = findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("GaolInvitation with id = " + id + " does not exist"));
-        Goal goal = goalService.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Goal with id = " + id + " does not exist"));
+    public GoalInvitation acceptGoalInvitation(long id) {
+        GoalInvitation goalInvitation = checkExistingGoal(id);
+        Goal goal = goalInvitation.getGoal();
         User invitedUser = goalInvitation.getInvited();
 
         List<Goal> goals = invitedUser.getGoals();
@@ -40,13 +39,29 @@ public class GoalInvitationService {
 
         goals.add(goal);
         userSevice.save(invitedUser);
+
+        goalInvitation.setStatus(RequestStatus.ACCEPTED);
+        return repository.save(goalInvitation);
     }
 
+    public GoalInvitation rejectGoalInvitation(long id) {
+        GoalInvitation goalInvitation = checkExistingGoal(id);
+        goalInvitation.setStatus(RequestStatus.REJECTED);
+        return repository.save(goalInvitation);
+    }
+
+    private GoalInvitation checkExistingGoal(long id) {
+        GoalInvitation goalInvitation = findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("GaolInvitation with id = " + id + " does not exist"));
+        goalService.findById(goalInvitation.getGoal().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Goal with id = " + id + " does not exist"));
+
+        return goalInvitation;
+    }
 
     public Optional<GoalInvitation> findById(Long id) {
         return repository.findById(id);
     }
-
 
     public GoalInvitationDto createInvitation(GoalInvitationDto goalInvitationDto) {
         GoalInvitation goalInvitation = goalInvitationMapper.toEntity(goalInvitationDto);
