@@ -25,19 +25,19 @@ public class RecommendationService {
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
 
     public RecommendationDto create(RecommendationDto recommendationDto) {
-        Recommendation recommendation = recommendationMapper.toEntity(recommendationDto);
+        Recommendation recommendation = recommendationMapper.toRecommendation(recommendationDto);
         Iterable<SkillOffer> skillOffersIterable = skillOfferRepository.findAll();
         List<SkillOffer> allSkillOffers = new ArrayList<>();
         skillOffersIterable.forEach(allSkillOffers::add);
 
-        ValidationRecommendationUtils.validateRecommendation(recommendationDto);
+        ValidationRecommendationUtils.validateRecommendationContent(recommendationDto);
         ValidationRecommendationUtils.validateRecommendationDate(recommendationDto);
         ValidationRecommendationUtils.validateSkills(recommendationDto, allSkillOffers);
 
         createInSkillOfferRepository(recommendation);
         addGuarantee(recommendation);
         createInRecommendationRepository(recommendation);
-        return recommendationMapper.toDto(recommendation);
+        return recommendationMapper.toRecommendationDto(recommendation);
     }
 
     private void createInSkillOfferRepository(Recommendation recommendation) {
