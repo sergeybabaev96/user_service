@@ -5,5 +5,3 @@ public record GoalInvitationDto(
         Long invitedUserId,
         Long goalId) {
 }
-
-;

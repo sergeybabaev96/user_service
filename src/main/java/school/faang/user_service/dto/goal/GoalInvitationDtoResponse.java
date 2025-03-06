@@ -9,5 +9,3 @@ public record GoalInvitationDtoResponse(
         Long goalId,
         RequestStatus status) {
 }
-
-;

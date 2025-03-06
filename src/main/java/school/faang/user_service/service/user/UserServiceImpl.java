@@ -16,8 +16,7 @@ import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.pojo.Person;
 import school.faang.user_service.publisher.userprofileview.UserProfileViewEventPublisher;
 import school.faang.user_service.repository.UserRepository;
-import school.faang.user_service.service.CountryService;
-import school.faang.user_service.service.UserService;
+import school.faang.user_service.service.country.CountryService;
 
 import java.io.IOException;
 import java.io.InputStream;

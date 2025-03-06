@@ -3,9 +3,9 @@ package school.faang.user_service.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
-import school.faang.user_service.dto.MentorshipRequestDto;
-import school.faang.user_service.dto.MentorshipResponseDto;
-import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
+import school.faang.user_service.dto.mentorship.MentorshipResponseDto;
+import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.User;
 

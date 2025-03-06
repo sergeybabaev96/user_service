@@ -13,24 +13,18 @@ import java.util.List;
 public record EventRequestDto(
         @NotBlank
         String title,
-
         @NotNull
         LocalDateTime startDate,
-
         LocalDateTime endDate,
-
         @NotNull
         Long ownerId,
-
         @NotBlank
         String description,
-
         List<Long> relatedSkillsIds,
         String location,
         int maxAttendees,
-
         @NotNull
         EventType eventType,
-
         @NotNull
-        EventStatus eventStatus) {}
+        EventStatus eventStatus) {
+}

@@ -9,5 +9,3 @@ public record InvitationFilterDto(
         Long invitedId,
         RequestStatus status) {
 }
-
-;
