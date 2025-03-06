@@ -4,9 +4,11 @@ import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,5 +42,19 @@ public class EventDtoValidator {
         }
 
         return owner;
+    }
+
+    public static List<Skill> validateAndGetRelatedSkills(EventDto eventDto, SkillRepository skillRepository) {
+        if (eventDto.getRelatedSkills() == null || eventDto.getRelatedSkills().isEmpty()) {
+            return List.of();
+        }
+
+        List<Skill> skills = skillRepository.findAllById(eventDto.getRelatedSkills());
+
+        if (skills.size() != eventDto.getRelatedSkills().size()) {
+            throw new DataValidationException("Some skills do not exist!");
+        }
+
+        return skills;
     }
 }

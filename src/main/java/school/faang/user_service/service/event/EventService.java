@@ -73,23 +73,9 @@ public class EventService {
                 );
 
         EventDtoValidator.validateOwnerAndSkills(eventDto, userRepository);
+        existingEvent.setRelatedSkills(EventDtoValidator.validateAndGetRelatedSkills(eventDto, skillRepository));
 
-        existingEvent.setTitle(eventDto.getTitle());
-        existingEvent.setStartDate(eventDto.getStartDate());
-        existingEvent.setEndDate(eventDto.getEndDate());
-        existingEvent.setDescription(eventDto.getDescription());
-        existingEvent.setLocation(eventDto.getLocation());
-        existingEvent.setMaxAttendees(eventDto.getMaxAttendees());
-        existingEvent.setType(eventDto.getEventType());
-        existingEvent.setStatus(eventDto.getEventStatus());
-
-        List<Skill> skills = skillRepository.findAllById(eventDto.getRelatedSkills());
-        if (skills.size() != eventDto.getRelatedSkills().size()) {
-            throw new DataValidationException("Some skills do not exist!");
-        }
-
-        existingEvent.setRelatedSkills(skills);
-
+        eventMapper.updateEventFormDto(eventDto, existingEvent);
         existingEvent = eventRepository.save(existingEvent);
 
         return eventMapper.toDto(existingEvent);
