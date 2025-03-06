@@ -42,8 +42,4 @@ public class SkillController {
         return skillService.acquireSkillFromOffers(skillId, userId);
     }
 
-    @GetMapping("/all-skills")
-    public List<SkillDto> getAllSkills() {
-        return skillService.getAllSkills();
-    }
 }

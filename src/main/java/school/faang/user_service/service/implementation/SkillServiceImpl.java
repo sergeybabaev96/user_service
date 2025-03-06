@@ -86,16 +86,6 @@ public class SkillServiceImpl implements SkillService {
         return skillMapper.toDto(skill);
     }
 
-
-    @Override
-    public List<SkillDto> getAllSkills() {
-        List<Skill> skills = skillRepository.findAll();
-
-        return skills.stream()
-                .map(skillMapper::toDto)
-                .toList();
-    }
-
     private void validateSkill(SkillDto skillDto) {
         if (Objects.isNull(skillDto) || Objects.isNull(skillDto.getTitle()) || skillDto.getTitle().trim().isEmpty()) {
             throw new DataValidationException("Skill title is empty");

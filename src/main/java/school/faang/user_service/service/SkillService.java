@@ -15,5 +15,4 @@ public interface SkillService {
 
     SkillDto acquireSkillFromOffers(Long skillId, Long userId);
 
-    List<SkillDto> getAllSkills();
 }
