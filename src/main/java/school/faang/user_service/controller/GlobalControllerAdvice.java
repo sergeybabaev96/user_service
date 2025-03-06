@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -43,7 +44,12 @@ public class GlobalControllerAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public Map.Entry<String, String> otherExceptionHandler(Exception e) {
-        Map.Entry<String, String> error = Map.entry(e.getCause().toString(), e.getMessage());
+        String cause = "Unknown";
+        if (null != e.getCause()) {
+            cause = e.getCause().toString();
+        }
+
+        Map.Entry<String, String> error = Map.entry(cause, e.getMessage());
 
         logging(LoggingLevel.ERROR, error);
         return error;
