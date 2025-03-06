@@ -28,12 +28,6 @@ import java.util.stream.IntStream;
 @Service
 @RequiredArgsConstructor
 public class RecommendationService {
-    private static final int RECOMMENDATION_MIN_DISTANCE_MONTHS = 6;
-
-    @Value("${pageSize}")
-    private int pageSize;
-    private final Pageable initialPageRequest = PageRequest.of(0, pageSize);
-
     private final SkillOfferService skillOfferService;
     private final RecommendationRepository recommendationRepository;
     private final SkillRepository skillRepository;
@@ -41,6 +35,12 @@ public class RecommendationService {
 
     private final RecommendationMapper recommendationMapper;
     private final SkillOfferMapper skillOfferMapper;
+
+    @Value("${recommendationMinDistanceMonths}")
+    private int recommendationMinDistanceMonths;
+
+    @Value("${pageSize}")
+    private int pageSize;
 
     public RecommendationDto create(@NotNull RecommendationDto recommendation) {
         validateRecommendation(recommendation);
@@ -102,7 +102,7 @@ public class RecommendationService {
     private List<RecommendationDto> getRecommendationDTOs(Function<Pageable, Page<Recommendation>> pageFetcher) {
         List<RecommendationDto> recommendationDTOs = new ArrayList<>();
 
-        var page = pageFetcher.apply(initialPageRequest);
+        var page = pageFetcher.apply(getInitialPageRequest());
         if (page.isEmpty()) {
             return recommendationDTOs;
         }
@@ -142,11 +142,11 @@ public class RecommendationService {
 
         if (lastAuthorRecommendation.isPresent()
                 && LocalDateTime.now()
-                .minusMonths(RECOMMENDATION_MIN_DISTANCE_MONTHS)
+                .minusMonths(recommendationMinDistanceMonths)
                 .isAfter(lastAuthorRecommendation.get().getUpdatedAt())) {
             throw new DataValidationException(String.format(
                     "Less than %d months have passed since the last recommendation",
-                    RECOMMENDATION_MIN_DISTANCE_MONTHS));
+                    recommendationMinDistanceMonths));
         }
 
         validateSkillOffers(recommendation);
@@ -195,5 +195,9 @@ public class RecommendationService {
         var skillOffer = skillOfferService.findById(skillOfferId);
 
         return skillOfferMapper.toDto(skillOffer);
+    }
+
+    private Pageable getInitialPageRequest() {
+        return PageRequest.of(0, pageSize);
     }
 }
