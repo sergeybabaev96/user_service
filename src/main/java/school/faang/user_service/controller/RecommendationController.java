@@ -11,6 +11,6 @@ public class RecommendationController {
     private final RecommendationService recommendationService;
 
     public RecommendationDto updateRecommendation(RecommendationDto recommendationDto) {
-//        return recommendationService.update(RecommendationDto recommendation);
+        return recommendationService.update(recommendationDto);
     }
 }

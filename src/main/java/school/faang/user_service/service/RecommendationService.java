@@ -1,19 +1,50 @@
 package school.faang.user_service.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.recommendation.RecommendationDto;
+import school.faang.user_service.entity.recommendation.Recommendation;
+import school.faang.user_service.entity.recommendation.SkillOffer;
+import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
+import school.faang.user_service.utils.ValidationRecommendationUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@RequiredArgsConstructor
 @Service
 public class RecommendationService {
-    RecommendationRepository recommendationRepository;
-    SkillOfferRepository skillOfferRepository;
+    private final RecommendationRepository recommendationRepository;
+    private final SkillOfferRepository skillOfferRepository;
+    private final RecommendationMapper mapper;
 
-    @Autowired
-    public RecommendationService(RecommendationRepository recommendationRepository,
-                                 SkillOfferRepository skillOfferRepository) {
-        this.recommendationRepository = recommendationRepository;
-        this.skillOfferRepository = skillOfferRepository;
+    public RecommendationDto update(RecommendationDto recommendationDto) {
+        Recommendation recommendation = mapper.toEntity(recommendationDto);
+        Iterable<SkillOffer> skillOffersIterable = skillOfferRepository.findAll();
+        List<SkillOffer> allSkillOffers = new ArrayList<>();
+        skillOffersIterable.forEach(allSkillOffers::add);
+
+        ValidationRecommendationUtils.validateRecommendationContent(recommendationDto);
+        ValidationRecommendationUtils.validateRecommendationDate(recommendationDto);
+        ValidationRecommendationUtils.validateSkills(recommendationDto, allSkillOffers);
+
+        updateRecommendation(recommendation);
+        return recommendationDto;
+    }
+
+    private void updateRecommendation(Recommendation recommendation) {
+        Long authorId = recommendation.getAuthor().getId();
+        Long receiverId = recommendation.getReceiver().getId();
+        String content = recommendation.getContent();
+        if (authorId == null) {
+             throw new DataValidationException("Author id can't be null");
+        } else if (receiverId == null) {
+            throw new DataValidationException("Author id can't be null");
+        }
+
+        recommendationRepository.update(authorId, receiverId, content);
     }
 }
