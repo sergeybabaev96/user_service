@@ -15,23 +15,12 @@ import school.faang.user_service.queue.SearchAppearanceEventPublisher;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class SearchAppearanceEventPublisherImpl implements SearchAppearanceEventPublisher {
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final ChannelTopic filterUserChannelTopic;
+    private final @FilterUserChannelQualifier ChannelTopic filterUserChannelTopic;
     private final ObjectMapper objectMapper;
-
-    @Autowired
-    public SearchAppearanceEventPublisherImpl(
-            RedisTemplate<String, Object> redisTemplate,
-            @FilterUserChannelQualifier ChannelTopic filterUserChannelTopic,
-            @Qualifier("objectMapper") ObjectMapper objectMapper) {
-        this.redisTemplate = redisTemplate;
-        this.filterUserChannelTopic = filterUserChannelTopic;
-        this.objectMapper = objectMapper;
-    }
-
-
 
     @Override
     public void publish(SearchAppearanceEvent searchAppearanceEvent) {

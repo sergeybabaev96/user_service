@@ -17,7 +17,6 @@ import school.faang.user_service.config.qualifiers.FilterUserChannelQualifier;
 @Configuration
 public class RedisConfig {
 
-
     @Value("${spring.data.redis.host}")
     private String host;
 
@@ -25,7 +24,7 @@ public class RedisConfig {
     private int port;
 
     @Bean
-    JedisConnectionFactory jedisConnectionFactory() {
+    public JedisConnectionFactory jedisConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
         config.setHostName(host);
         config.setPort(port);
@@ -44,7 +43,7 @@ public class RedisConfig {
 
     @Bean
     @FilterUserChannelQualifier
-    ChannelTopic topic() {
+    public ChannelTopic topic() {
         return new ChannelTopic("filter_user_channel");
     }
 }
