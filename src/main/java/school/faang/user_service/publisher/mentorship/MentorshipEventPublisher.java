@@ -10,7 +10,7 @@ import school.faang.user_service.publisher.AbstractEventPublisher;
 public class MentorshipEventPublisher extends AbstractEventPublisher<MentorshipStartEvent> {
 
     public MentorshipEventPublisher(
-            @Value("${spring.data.redis.channel.mentorship}") String channelTopic,
+            @Value("${spring.data.redis.channels.mentorship}") String channelTopic,
             RedisTemplate<String, Object> redisTemplate
     ) {
         super(channelTopic, redisTemplate);
