@@ -13,7 +13,11 @@ public class MentorshipController {
 
     private final MentorshipService mentorshipService;
 
-    public List<UserDto> getMentees(Long userId) {
-       return mentorshipService.getMentees(userId);
+    public List<UserDto> getMentees(long userId) {
+        return mentorshipService.getMentees(userId);
+    }
+
+    public List<UserDto> getMentors(long userid) {
+        return mentorshipService.getMentors(userid);
     }
 }
