@@ -26,7 +26,7 @@ public class EducationService {
             throw new DataValidationException("Год должен быть меньше текущего.");
         }
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Пользователь не найден."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("Пользователь не найден."));
 
         Education education = educationMapper.toEducation(educationDto);
         education.setUser(user);
