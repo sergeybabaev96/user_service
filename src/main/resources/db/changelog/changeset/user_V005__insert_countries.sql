@@ -3,5 +3,4 @@ VALUES
     ('United States'),
     ('United Kingdom'),
     ('Australia'),
-    ('France')
-    ON CONFLICT (title) DO NOTHING;
+    ('France');

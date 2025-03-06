@@ -4,7 +4,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.GoalCompletedEvent;
 import school.faang.user_service.dto.goal.CreateGoalRequest;
 import school.faang.user_service.dto.goal.GoalFilterDto;
 import school.faang.user_service.dto.goal.GoalResponse;
@@ -16,7 +15,6 @@ import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.exception.SkillNotFoundException;
 import school.faang.user_service.exception.UserGoalLimitExceededException;
 import school.faang.user_service.mapper.GoalMapper;
-import school.faang.user_service.messaging.GoalCompletedEventPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
@@ -38,7 +36,6 @@ public class GoalService {
     private final UserRepository userRepository;
     private final GoalMapper goalMapper;
     private final List<GoalFilter> filters;
-    private final GoalCompletedEventPublisher goalCompletedEventPublisher;
 
     @Transactional
     public GoalResponse createGoal(long userId, CreateGoalRequest goalDto) {
@@ -68,10 +65,6 @@ public class GoalService {
             goal.getSkillsToAchieve().forEach(skill ->
                     skill.getUsers().forEach(user -> skillRepository.assignSkillToUser(skill.getId(), user.getId()))
             );
-
-            for (User user : goal.getUsers()) {
-                goalCompletedEventPublisher.publish(new GoalCompletedEvent(user.getId(), goal.getId()));
-            }
         }
 
         goal = goalRepository.save(goal);
