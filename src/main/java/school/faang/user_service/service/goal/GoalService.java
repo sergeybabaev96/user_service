@@ -80,12 +80,23 @@ public class GoalService {
     private void assignSkillsToParticipants(Goal goal, List<Long> skillIds) {
         List<User> participants = goalRepository.findUsersByGoalId(goal.getId());
 
-        participants.forEach(participant -> skillIds.forEach(skillId ->
-                goalRepository.addSkillToUser(participant.getId(), skillId)));
+        for (User participant : participants) {
+            for (Long skillId : skillIds) {
+                goalRepository.addSkillToGoal(skillId, participant.getId());
+            }
+        }
     }
 
     private void updateSkillsForGoal(Goal goal, List<Long> newSkillIds) {
         goalRepository.removeSkillsFromGoal(goal.getId());
         newSkillIds.forEach(skillId -> goalRepository.addSkillToGoal(skillId, goal.getId()));
+    }
+
+    private void deleteGoal(long goalId) {
+        goalValidator.validateGoal(goalId);
+
+        goalRepository.removeSkillsFromGoal(goalId);
+        goalRepository.deleteById(goalId);
+        
     }
 }
