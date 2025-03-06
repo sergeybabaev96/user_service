@@ -13,7 +13,7 @@ public class SkillOfferService {
 
     public SkillOffer findById(long skillId) {
         return skillOfferRepository.findById(skillId)
-                .orElseThrow(() -> new DataRetrievalFailureException("Не удалось получить предложение скилла"));
+                .orElseThrow(() -> new DataRetrievalFailureException("Skill offer is not found"));
     }
 
     public void deleteAllByRecommendationId(long recommendationId) {

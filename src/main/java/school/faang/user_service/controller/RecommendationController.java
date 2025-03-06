@@ -39,7 +39,7 @@ public class RecommendationController {
 
     private static void validateRecommendation(RecommendationDto recommendation) {
         if (recommendation.getContent().isBlank()) {
-            throw new DataValidationException("Рекомендация должна содержать текст");
+            throw new DataValidationException("Recommendation's content is required");
         }
     }
 }

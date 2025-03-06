@@ -53,7 +53,7 @@ public class RecommendationService {
                 recommendation.getContent());
 
         var createdRecommendation = recommendationRepository.findById(recommendationId)
-                .orElseThrow(() -> new DataRetrievalFailureException("Не удалось получить созданную рекомендацию"));
+                .orElseThrow(() -> new DataRetrievalFailureException("Recommendation is not found"));
 
         recommendationMapper.update(recommendation, createdRecommendation);
 
@@ -140,7 +140,7 @@ public class RecommendationService {
                 .minusMonths(RECOMMENDATION_MIN_DISTANCE_MONTHS)
                 .isAfter(lastAuthorRecommendation.get().getUpdatedAt())) {
             throw new DataValidationException(String.format(
-                    "С момента прошлой рекомендации прошло меньше %s месяцев",
+                    "Less than %d months have passed since the last recommendation",
                     RECOMMENDATION_MIN_DISTANCE_MONTHS));
         }
 
@@ -150,7 +150,7 @@ public class RecommendationService {
                 .toList();
         if (existedSkillsInRecommendation.size() != recommendation.getSkillOffers().stream().distinct().count()) {
             throw new DataValidationException(String.format(
-                    "Навыки %s не зарегистрированы в системе",
+                    "Skills %s are not registered",
                     String.join(
                             ", ",
                             recommendation.getSkillOffers()
