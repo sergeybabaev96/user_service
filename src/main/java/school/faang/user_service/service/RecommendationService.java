@@ -22,10 +22,10 @@ public class RecommendationService {
     private final RecommendationRepository recommendationRepository;
     private final SkillOfferRepository skillOfferRepository;
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
-    private final RecommendationMapper mapper;
+    private final RecommendationMapper recommendationMapper;
 
     public RecommendationDto update(RecommendationDto recommendationDto) {
-        Recommendation recommendation = mapper.toEntity(recommendationDto);
+        Recommendation recommendation = recommendationMapper.toRecommendation(recommendationDto);
         Iterable<SkillOffer> skillOffersIterable = skillOfferRepository.findAll();
         List<SkillOffer> allSkillOffers = new ArrayList<>();
         skillOffersIterable.forEach(allSkillOffers::add);
@@ -36,7 +36,7 @@ public class RecommendationService {
 
         updateRecommendation(recommendation);
         deleteAllAndCreate(recommendation);
-        return mapper.toDto(recommendation);
+        return recommendationMapper.toRecommendationDto(recommendation);
     }
 
     private void deleteAllAndCreate(Recommendation recommendation) {
