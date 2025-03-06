@@ -4,12 +4,15 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.RecommendationEvent;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
 import school.faang.user_service.dto.recommendation.SkillOfferDto;
 import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.mapper.RecommendationEventMapper;
 import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.mapper.UserSkillGuaranteeMapper;
+import school.faang.user_service.queue.RedisPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
@@ -29,6 +32,8 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final SkillRepository skillRepository;
     private final UserSkillGuaranteeMapper userSkillGuaranteeMapper;
     private final RecommendationMapper recommendationMapper;
+    private final RedisPublisher<RecommendationEvent> recommendationEventPublisher;
+    private final RecommendationEventMapper recommendationEventMapper;
 
     @Override
     public RecommendationDto create(RecommendationDto recommendation) {
@@ -40,6 +45,7 @@ public class RecommendationServiceImpl implements RecommendationService {
                 recommendation.getContent());
         recommendation.setId(recommendationId);
         saveSkillOffers(recommendation);
+        recommendationEventPublisher.publish(recommendationEventMapper.mapToRecommendationEvent(recommendation));
 
         return recommendation;
     }

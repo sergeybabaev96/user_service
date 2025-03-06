@@ -12,14 +12,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@ConfigurationProperties(prefix = "user-service")
 @Getter
 @Setter
+@ConfigurationProperties(prefix = "user-service")
 public class UserServiceProperties {
 
     private RecommendationRequestProperties recommendationRequest;
     private Map<String, TariffProperties> availableTariffs = new HashMap<>();
     private S3Properties s3;
+    private UserServiceProperties.Redis redis = new UserServiceProperties.Redis();
 
     @Getter
     @Setter
@@ -53,5 +54,19 @@ public class UserServiceProperties {
                         .plan(entry.getKey())
                         .build())
                 .toList();
+    }
+
+    @Data
+    public static class Redis {
+        private String host;
+        private Integer port;
+        private Channel channel;
+
+        @Data
+        public static class Channel {
+            private String boughtPremiumTopic;
+            private String profilePicChannel;
+            private String recommendationEvent;
+        }
     }
 }

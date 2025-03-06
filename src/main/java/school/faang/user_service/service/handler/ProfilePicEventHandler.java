@@ -15,16 +15,16 @@ import school.faang.user_service.redis.MessagePublisher;
 @RequiredArgsConstructor
 public class ProfilePicEventHandler {
     private final MessagePublisher publisher;
-    private final RedisEventMapper mapper;
+    private final RedisEventMapper redisEventMapper;
 
-    @Value("${user-service.redis.profile-pic-channel}")
+    @Value("${user-service.redis.channel.profile-pic-channel}")
     private String topic;
 
     @EventListener
     @Async
     public void handleProfilePicUpload(ProfilePicEvent event) {
         log.info("Handling profile pic upload event");
-        publisher.publish(mapper.toRedisEvent(event), topic);
+        publisher.publish(redisEventMapper.toRedisEvent(event), topic);
         log.info("Profile pic upload event sent to Redis");
     }
 }

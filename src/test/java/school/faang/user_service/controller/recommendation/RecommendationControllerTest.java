@@ -10,6 +10,7 @@ import school.faang.user_service.dto.recommendation.RecommendationDto;
 import school.faang.user_service.service.recommendation.RecommendationService;
 import school.faang.user_service.service.subscription.SubscriptionService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,14 +33,28 @@ public class RecommendationControllerTest {
     void testGiveRecommendation() {
         RecommendationDto inputDto = new RecommendationDto();
         inputDto.setContent("Test recommendation");
+        inputDto.setAuthorId(1L);
+        inputDto.setReceiverId(2L);
 
-        when(recommendationService.create(inputDto)).thenReturn(inputDto);
+        RecommendationDto createdDto = new RecommendationDto();
+        createdDto.setId(1L);
+        createdDto.setContent("Test recommendation");
+        createdDto.setAuthorId(1L);
+        createdDto.setReceiverId(2L);
+        createdDto.setCreatedAt(LocalDateTime.now());
+
+        when(recommendationService.create(inputDto)).thenReturn(createdDto);
 
         RecommendationDto result = recommendationController.giveRecommendation(inputDto);
 
         assertNotNull(result);
-        assertEquals(inputDto.getContent(), result.getContent());
-        verify(recommendationService).create(inputDto);
+        assertEquals(createdDto.getId(), result.getId());
+        assertEquals(createdDto.getContent(), result.getContent());
+        assertEquals(createdDto.getAuthorId(), result.getAuthorId());
+        assertEquals(createdDto.getReceiverId(), result.getReceiverId());
+        assertEquals(createdDto.getCreatedAt(), result.getCreatedAt());
+
+        verify(recommendationService, times(1)).create(inputDto);
     }
 
     @Test

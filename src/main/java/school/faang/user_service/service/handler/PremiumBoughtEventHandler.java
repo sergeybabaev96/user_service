@@ -7,8 +7,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.PremiumBoughtEvent;
-import school.faang.user_service.redis.RedisEventPublisher;
 import school.faang.user_service.mapper.RedisEventMapper;
+import school.faang.user_service.redis.RedisEventPublisher;
 import school.faang.user_service.redis.event.PremiumBoughtRedisEvent;
 
 @Slf4j
@@ -19,7 +19,7 @@ public class PremiumBoughtEventHandler {
     private final RedisEventPublisher premiumBoughtEventPublisher;
     private final RedisEventMapper redisEventMapper;
 
-    @Value("${user-service.redis.bought-premium-topic}")
+    @Value("${user-service.redis.channel.bought-premium-topic}")
     private String topic;
 
     @Async
