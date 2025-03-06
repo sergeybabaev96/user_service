@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,6 +16,7 @@ import school.faang.user_service.repository.UserRepository;
 @SpringBootApplication
 @EnableFeignClients("school.faang.user_service.client")
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceApplication implements CommandLineRunner {
 
     private final UserRepository userRepository;
@@ -33,11 +35,12 @@ public class UserServiceApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (userRepository.existsById(1L)
-                && userRepository.existsById(10L)) {
-            System.out.println("EXISTS");
+        if (!(userRepository.existsById(12L)
+                && userRepository.existsById(10L))) {
+            log.info("DO NOT EXISTS");
         } else {
-            System.out.println("DO NOT EXISTS");
+            log.info("EXISTS");
         }
+
     }
 }

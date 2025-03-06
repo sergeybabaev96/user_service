@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
 import school.faang.user_service.dto.mentorship.RejectionDto;
-import school.faang.user_service.dto.mentorship.RequestFilterDro;
+import school.faang.user_service.dto.mentorship.RequestFilterDto;
 import school.faang.user_service.service.MentorshipRequestService;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -21,28 +23,27 @@ public class MentorshipRequestController {
         mentorshipRequestService.requestMentorship(mentorshipRequestDto);
     }
 
-
-    public void getRequests(RequestFilterDro filter) {
-
-        mentorshipRequestService.getRequests(filter);
+    public List<MentorshipRequestDto> getRequests(RequestFilterDto filter) {
+        return mentorshipRequestService.getRequests(filter);
     }
 
-    public void acceptRequest(long id) {
-        //id - конкретный реквест
-
-        mentorshipRequestService.acceptRequest(id);
+    public void acceptRequest(long mentorshipRequestId) {
+        mentorshipRequestService.acceptRequest(mentorshipRequestId);
     }
-
-    public void rejectRequest(long id, RejectionDto rejection) {
-        mentorshipRequestService.rejectRequest(id, rejection);
 
         /*
         В методе нужно найти нужный запрос в базе, если его нет,
         выкинуть исключение. Сменить статус запроса на REJECTED и
         указать причину отклонения. Для этого использовать поле reason из RejectionDto.
         */
+    public void rejectRequest(long mentorshipRequestId, RejectionDto rejection) {
+        mentorshipRequestService.rejectRequest(mentorshipRequestId, rejection);
     }
 
+
+
+
+    /**************************************************************************************/
     private void validateMentorshipRequest(MentorshipRequestDto mentorshipRequestDto) {
         String desc = mentorshipRequestDto.getDescription();
         if (desc.isBlank()) {
