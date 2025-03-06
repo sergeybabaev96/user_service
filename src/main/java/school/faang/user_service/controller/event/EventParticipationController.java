@@ -3,6 +3,7 @@ package school.faang.user_service.controller.event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,7 @@ public class EventParticipationController {
 
     private final EventParticipationService eventParticipationService;
 
+    @Transactional
     @PostMapping("/{eventId}/register/{userId}")
     public ResponseEntity<String> registerParticipant(@PathVariable Long eventId, @PathVariable Long userId) {
         validateId(userId);
@@ -30,6 +32,7 @@ public class EventParticipationController {
         return ResponseEntity.ok("User with id %s registered for event with id %s".formatted(userId, eventId));
     }
 
+    @Transactional
     @DeleteMapping("/{eventId}/unregister/{userId}")
     public ResponseEntity<String> unregisterParticipant(@PathVariable Long eventId, @PathVariable Long userId) {
         validateId(userId);
@@ -46,7 +49,7 @@ public class EventParticipationController {
     }
 
     @GetMapping("/{eventId}/participants/count")
-    public ResponseEntity<Integer> getParticipantCount(Long eventId) {
+    public ResponseEntity<Integer> getParticipantCount(@PathVariable Long eventId) {
         validateId(eventId);
         int countParticipants = eventParticipationService.getParticipantCount(eventId);
         return ResponseEntity.ok(countParticipants);
