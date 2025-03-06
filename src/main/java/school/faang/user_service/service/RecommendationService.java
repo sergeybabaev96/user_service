@@ -71,6 +71,7 @@ public class RecommendationService {
                 userSkillGuarantee.setUser(recommendation.getReceiver());
                 userSkillGuarantee.setSkill(skillOfferOfRecommendation.getSkill());
                 userSkillGuarantee.setGuarantor(recommendation.getAuthor());
+                skillOfferOfRecommendation.getSkill().setGuarantees(List.of(userSkillGuarantee));
                 userSkillGuaranteeRepository.save(userSkillGuarantee);
             }
         }
