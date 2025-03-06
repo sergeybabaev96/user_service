@@ -2,17 +2,21 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.entity.User;
+import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.mapper.UserFilterMapper;
+import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.SubscriptionRepository;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 @Service
 @RequiredArgsConstructor
 public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
+    private final UserFilterMapper userFilterMapper;
+    private final UserMapper userMapper;
 
     public void followUser(long followerId, long targetId) {
         ensureSubscriptionStateValidation(followerId, targetId, false);
@@ -31,24 +35,22 @@ public class SubscriptionService {
             throw new DataValidationException("The subscription has already been issued");
     }
 
-    public List<User> getFollowers(long id) {
-        return subscriptionRepository.findByFolloweeId(id).toList();
+    public List<UserDto> getFollowers(long id, UserFilterDto filterDto) {
+        return subscriptionRepository.findByFolloweeId(id)
+                .filter(userFilterMapper.toEntity(filterDto))
+                .map(userMapper::toDto)
+                .toList();
     }
 
-    public List<User> getFollowers(long id, Predicate<User> filter) {
-        return subscriptionRepository.findByFolloweeId(id).filter(filter).toList();
+    public List<UserDto> getFollowing(long id, UserFilterDto filterDto) {
+        return subscriptionRepository.findByFollowerId(id)
+                .filter(userFilterMapper.toEntity(filterDto))
+                .map(userMapper::toDto)
+                .toList();
     }
 
     public long getFollowersCount(long id) {
         return subscriptionRepository.findFolloweesAmountByFollowerId(id);
-    }
-
-    public List<User> getFollowing(long id) {
-        return subscriptionRepository.findByFollowerId(id).toList();
-    }
-
-    public List<User> getFollowing(long id, Predicate<User> filter) {
-        return subscriptionRepository.findByFollowerId(id).filter(filter).toList();
     }
 
     public long getFollowingCount(long id) {

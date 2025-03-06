@@ -7,4 +7,6 @@ import school.faang.user_service.filter.UserFilterByNamePhoneExperience;
 @Mapper
 public interface UserFilterMapper {
     UserFilterByNamePhoneExperience toEntity(UserFilterDto dto);
+
+    UserFilterDto toDto(UserFilterByNamePhoneExperience entity);
 }

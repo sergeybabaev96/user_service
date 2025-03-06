@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
-import school.faang.user_service.mapper.UserFilterMapper;
-import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.service.SubscriptionService;
 
 import java.util.List;
@@ -14,18 +12,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SubscriptionController {
     private final SubscriptionService subscriptionService;
-    private final UserFilterMapper userFilterMapper;
-    private final UserMapper userMapper;
 
-    public void followUser(long followerId, long targetId) {
-        subscriptionService.followUser(followerId, targetId);
+    public void followUser(long followerId, long followeeId) {
+        subscriptionService.followUser(followerId, followeeId);
+    }
+
+    public void unfollowUser(long followerId, long followeeId) {
+        subscriptionService.unfollowUser(followerId, followeeId);
     }
 
     public List<UserDto> getFollowers(long id, UserFilterDto filter) {
-        return subscriptionService.getFollowers(id, userFilterMapper.toEntity(filter))
-                .stream()
-                .map(userMapper::toDto)
-                .toList();
+        return subscriptionService.getFollowers(id, filter);
+    }
+
+    public List<UserDto> getFollowing(long id, UserFilterDto filter) {
+        return subscriptionService.getFollowing(id, filter);
     }
 
     public long getFollowersCount(long id) {
