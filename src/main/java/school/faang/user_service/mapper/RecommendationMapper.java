@@ -19,19 +19,19 @@ public interface RecommendationMapper {
     @Mapping(target = "skillOffers", source = "skillOffersDto")
     @Mapping(target = "request", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    Recommendation toEntity(RecommendationDto recommendationDto);
+    Recommendation toRecommendation(RecommendationDto recommendationDto);
 
     @Mapping(target = "authorId", source = "author.id")
     @Mapping(target = "receiverId", source = "receiver.id")
     @Mapping(target = "skillOffersDto", source = "skillOffers")
-    RecommendationDto toDto(Recommendation recommendation);
+    RecommendationDto toRecommendationDto(Recommendation recommendation);
 
     @Mapping(target = "skill", source = "skillId")
     @Mapping(target = "recommendation", ignore = true)
-    List<SkillOffer> toEntityList(List<SkillOfferDto> skillOfferDtos);
+    List<SkillOffer> toSkillOfferList(List<SkillOfferDto> skillOfferDtos);
 
     @Mapping(target = "skillId", source = "skill.id")
-    List<SkillOfferDto> toDtoList(List<SkillOffer> skillOffers);
+    List<SkillOfferDto> toSkillOfferDtoList(List<SkillOffer> skillOffers);
 
     default User mapIdToUser(Long id) {
         if (id == null) {
