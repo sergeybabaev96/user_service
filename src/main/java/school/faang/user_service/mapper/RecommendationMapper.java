@@ -15,8 +15,8 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface RecommendationMapper {
 
-    @Mapping(target = "author", source = "authorId", qualifiedByName = "mapIdToUser")
-    @Mapping(target = "receiver", source = "receiverId", qualifiedByName = "mapIdToUser")
+    @Mapping(target = "author", source = "authorId")
+    @Mapping(target = "receiver", source = "receiverId")
     @Mapping(target = "skillOffers", source = "skillOffersDto")
     @Mapping(target = "request", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -27,14 +27,13 @@ public interface RecommendationMapper {
     @Mapping(target = "skillOffersDto", source = "skillOffers")
     RecommendationDto toDto(Recommendation recommendation);
 
-    @Mapping(target = "skill", source = "skillId", qualifiedByName = "mapIdToSkill")
+    @Mapping(target = "skill", source = "skillId")
     @Mapping(target = "recommendation", ignore = true)
     List<SkillOffer> toEntityList(List<SkillOfferDto> skillOfferDtos);
 
     @Mapping(target = "skillId", source = "skill.id")
     List<SkillOfferDto> toDtoList(List<SkillOffer> skillOffers);
 
-    @Named("mapIdToUser")
     default User mapIdToUser(Long id) {
         if (id == null) {
             return null;
@@ -44,7 +43,6 @@ public interface RecommendationMapper {
         return user;
     }
 
-    @Named("mapIdToSkill")
     default Skill mapIdToSkill(Long id) {
         if (id == null) {
             return null;
