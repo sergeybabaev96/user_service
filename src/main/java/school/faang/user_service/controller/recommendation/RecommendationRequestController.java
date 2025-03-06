@@ -19,7 +19,7 @@ import school.faang.user_service.service.recommendation.RecommendationRequestSer
 import java.util.List;
 
 @RestController
-@RequestMapping("recommendations")
+@RequestMapping("/recommendations")
 @RequiredArgsConstructor
 public class RecommendationRequestController {
     private final RecommendationRequestService recommendationRequestService;
@@ -31,7 +31,7 @@ public class RecommendationRequestController {
         return recommendationRequestService.requestRecommendation(recommendationRequest);
     }
 
-    @GetMapping("/with-filters")
+    @GetMapping("/filters")
     @ResponseStatus(HttpStatus.OK)
     public List<RecommendationRequestDto> getRecommendationRequests(@ModelAttribute RequestFilterDto filter) {
         return recommendationRequestService.getRecommendationRequests(filter);

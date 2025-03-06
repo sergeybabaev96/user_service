@@ -17,7 +17,6 @@ import school.faang.user_service.repository.recommendation.RecommendationRequest
 import school.faang.user_service.repository.recommendation.SkillRequestRepository;
 import school.faang.user_service.validator.recommendation.RequestValidation;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -36,8 +35,6 @@ public class RecommendationRequestService {
 
         requestValidation.validateRequest(recommendationRequest);
         recommendationRequest.setStatus(RequestStatus.PENDING);
-        recommendationRequest.setCreatedAt(LocalDateTime.now());
-        recommendationRequest.setUpdatedAt(LocalDateTime.now());
 
         return create(recommendationRequest);
     }
@@ -62,12 +59,15 @@ public class RecommendationRequestService {
     }
 
     public List<RecommendationRequestDto> getRecommendationRequests(RequestFilterDto filters) {
-        List<RecommendationRequest> requests = recommendationRequestRepository.findAll();
-        return recommendationRequestFilters.stream()
-                .filter(filter -> filter.isApplicable(filters))
-                .reduce(requests.stream(),
-                        (requestStream, filter) -> filter.apply(requestStream, filters),
-                        Stream::concat)
+        Stream<RecommendationRequest> requestStream = recommendationRequestRepository.findAll().stream();
+
+        for (RecommendationRequestFilter filter : recommendationRequestFilters) {
+            if (filter.isApplicable(filters)) {
+                requestStream = filter.apply(requestStream, filters);
+            }
+        }
+
+        return requestStream
                 .map(recommendationRequestMapper::toDto)
                 .toList();
     }
@@ -87,15 +87,13 @@ public class RecommendationRequestService {
 
     @Transactional
     public RecommendationRequestDto rejectRequest(long id, RejectionDto rejection) {
-        RecommendationRequest request = recommendationRequestRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Recommendation request not found"));
+        RecommendationRequest request = findRequestById(id);
         if (request.getStatus() != RequestStatus.PENDING) {
             throw new IllegalStateException("Cannot reject a non pending request");
         }
 
         request.setStatus(RequestStatus.REJECTED);
         request.setRejectionReason(rejection.getReason());
-        request.setUpdatedAt(LocalDateTime.now());
         request = recommendationRequestRepository.save(request);
         return recommendationRequestMapper.toDto(request);
     }

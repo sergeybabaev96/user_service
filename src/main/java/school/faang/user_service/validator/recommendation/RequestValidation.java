@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.repository.SkillRepository;
-import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
+import school.faang.user_service.validator.user.UserValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,9 +18,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RequestValidation {
     private static final int SIX_MONTH_RECOMMENDATION_LIMIT = 6;
-    private final UserRepository userRepository;
     private final SkillRepository skillRepository;
     private final RecommendationRequestRepository requestRepository;
+    private final UserValidator userValidator;
 
     public List<Skill> validateRequest(RecommendationRequestDto dto) {
 
@@ -32,10 +32,8 @@ public class RequestValidation {
             throw new IllegalArgumentException("Validation error: message is empty or null. DTO: " + dto);
         }
 
-        if (!userRepository.existsById(dto.getRequesterId()) || !userRepository.existsById(dto.getReceiverId())) {
-            throw new IllegalArgumentException("Validation error: One or two users do not exist. RequesterId: "
-                    + dto.getRequesterId() + ". ReceiverId: " + dto.getReceiverId());
-        }
+        userValidator.checkUserExistsById(dto.getReceiverId());
+        userValidator.checkUserExistsById(dto.getRequesterId());
 
         if (requestRepository.findLatestPendingRequest(dto.getRequesterId(), dto.getReceiverId())
                 .filter(request -> request.getCreatedAt().isAfter(LocalDateTime.now()
