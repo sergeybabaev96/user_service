@@ -13,9 +13,11 @@ import school.faang.user_service.filter.goal.GoalInvitationFilter;
 import school.faang.user_service.mapper.goal.GoalInvitationMapper;
 import school.faang.user_service.repository.goal.GoalInvitationRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 @Service
 @AllArgsConstructor
@@ -54,7 +56,23 @@ public class GoalInvitationService {
 
     public List<GoalInvitation> getInvitations(InvitationFilterIDto filter) {
         List<GoalInvitation> goalInvitations = repository.findAll();
-        return GoalInvitationFilter.filter(goalInvitations, filter);
+
+        List<Predicate<GoalInvitation>> predicates = new ArrayList<>();
+
+        if (filter.getInviterId() != null) {
+            predicates.add(goalInvitation -> goalInvitation.getInviter() != null
+                    && goalInvitation.getInviter().getId().equals(filter.getInviterId()));
+        }
+        if (filter.getInvitedId() != null) {
+            predicates.add(goalInvitation -> goalInvitation.getInvited() != null
+                    && goalInvitation.getInvited().getId().equals(filter.getInvitedId()));
+        }
+        if (filter.getStatus() != null) {
+            predicates.add(goalInvitation -> goalInvitation.getStatus() != null
+                    && goalInvitation.getStatus().equals(filter.getStatus()));
+        }
+
+        return GoalInvitationFilter.filter(goalInvitations, predicates);
     }
 
     private GoalInvitation checkExistingGoal(long id) {
