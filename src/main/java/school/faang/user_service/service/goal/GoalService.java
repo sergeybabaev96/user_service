@@ -1,22 +1,26 @@
 package school.faang.user_service.service.goal;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.constants.goal.GoalConstants;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.SearchGoalDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
+import school.faang.user_service.exception.goal.GoalAlreadyCompletedException;
+import school.faang.user_service.exception.skill.SkillLimitExceededException;
 import school.faang.user_service.filter.goal.GoalFilter;
 import school.faang.user_service.mapper.goal.GoalMapper;
+import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
-import school.faang.user_service.validation.goal.GoalValidation;
-import school.faang.user_service.validation.skill.SkillValidation;
-import school.faang.user_service.validation.user.UserValidation;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -27,33 +31,31 @@ import java.util.stream.Stream;
 public class GoalService {
     private final GoalRepository goalRepository;
     private final UserRepository userRepository;
+    private final SkillRepository skillRepository;
     private final GoalMapper goalMapper;
-    private final GoalValidation goalValidation;
-    private final UserValidation userValidation;
-    private final SkillValidation skillValidation;
     private final List<GoalFilter> goalFilters;
 
     public void createGoal(Long userId, Goal goal) {
-        userValidation.validateByExistsUserOnId(userId);
-        goalValidation.validateByCountGoals(userId);
-        skillValidation.validateByExistsGoalSkills(goal);
+        validateByExistsUserOnId(userId);
+        validateByCountGoals(userId);
+        validateByExistsGoalSkills(goal);
         goalRepository.save(goal);
         log.info("User {} accepted new goal {}", userId, goal.getTitle());
     }
 
     public void deleteGoal(Long goalId) {
-        goalValidation.validateByExistsGoalOnId(goalId);
+        validateByExistsGoalOnId(goalId);
         goalRepository.deleteById(goalId);
         log.info("{} goal deleted", goalId);
     }
 
     public void updateGoal(Long goalId, GoalDto goal) {
-        goalValidation.validateByExistsGoalOnId(goalId);
+        validateByExistsGoalOnId(goalId);
         Optional<Goal> goalOnId = goalRepository.findById(goalId);
-        goalValidation.validateByExistsGoal(goalOnId);
-        goalValidation.validateByCompletionStatus(goalOnId);
-        Goal goalEntity = goalMapper.goalDtoToGoal(goal);
-        skillValidation.validateByExistsGoalSkills(goalEntity);
+        validateByExistsGoal(goalOnId);
+        validateByCompletionStatus(goalOnId);
+        Goal goalEntity = goalMapper.goalDtoToGoal(goal, getSkillsByIds(goal.skillIds()));
+        validateByExistsGoalSkills(goalEntity);
         goalRepository.save(goalEntity);
         log.info("{} goal updated", goalId);
         if (goalEntity.getStatus() == GoalStatus.COMPLETED) {
@@ -73,14 +75,14 @@ public class GoalService {
     }
 
     public List<GoalDto> findSubtasksByGoalId(Long goalId, SearchGoalDto searchGoalDto) {
-        goalValidation.validateByExistsGoalOnId(goalId);
+        validateByExistsGoalOnId(goalId);
         Stream<Goal> goals = goalRepository.findByParent(goalId);
         Stream<Goal> filteredGoals = applyFiltersOnGoals(goals, searchGoalDto);
         return goalMapper.goalListToGoalDtoList(filteredGoals.toList());
     }
 
     public List<GoalDto> getGoalsByUserId(Long userId, SearchGoalDto searchGoalDto) {
-        userValidation.validateByExistsUserOnId(userId);
+        validateByExistsUserOnId(userId);
         Stream<Goal> goals = goalRepository.findGoalsByUserId(userId);
         Stream<Goal> filteredGoals = applyFiltersOnGoals(goals, searchGoalDto);
         return goalMapper.goalListToGoalDtoList(filteredGoals.toList());
@@ -94,5 +96,54 @@ public class GoalService {
         }
         log.info("Success applying filters");
         return goals;
+    }
+
+    private void validateByCountGoals(Long userId) {
+        if (goalRepository.findGoalsByUserId(userId).count() == GoalConstants.MAX_COUNT_GOALS_PER_USER) {
+            throw new SkillLimitExceededException(
+                    "There can be no more than " + GoalConstants.MAX_COUNT_GOALS_PER_USER + " goals.");
+        }
+    }
+
+    private void validateByExistsGoal(Optional<Goal> goal) {
+        if (goal.isEmpty()) {
+            throw new EntityNotFoundException("Goal not found");
+        }
+    }
+
+    private void validateByCompletionStatus(Optional<Goal> goal) {
+        if (goal.isPresent() && goal.get().getStatus() == GoalStatus.COMPLETED) {
+            throw new GoalAlreadyCompletedException("Goal is already completed");
+        }
+    }
+
+    private void validateByExistsGoalOnId(Long goalId) {
+        if (!goalRepository.existsById(goalId)) {
+            throw new EntityNotFoundException("Goal not found");
+        }
+    }
+
+    private void validateByExistsGoalSkills(Goal goal) {
+        boolean isContained = new HashSet<>(goal.getSkillsToAchieve()).containsAll(skillRepository.findAll());
+        if (!isContained) {
+            throw new IllegalArgumentException("Goal contains non-existent skills");
+        }
+    }
+
+    private void validateByExistsUserOnId(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException("User not found");
+        }
+    }
+
+    private List<Skill> getSkillsByIds(List<Long> skillIds) {
+        if (skillIds == null) {
+            return Collections.emptyList();
+        }
+        return skillIds.stream()
+                .map(skillRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
     }
 }

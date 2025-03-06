@@ -6,7 +6,6 @@ import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.SearchGoalDto;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.service.goal.GoalService;
-import school.faang.user_service.validation.goal.GoalValidation;
 
 import java.util.List;
 
@@ -14,10 +13,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GoalController {
     private final GoalService goalService;
-    private final GoalValidation goalValidation;
 
     public void createGoal(Long userId, Goal goal) {
-        goalValidation.validateByTitle(goal.getTitle());
+        validateByTitle(goal.getTitle());
         goalService.createGoal(userId, goal);
     }
 
@@ -26,7 +24,7 @@ public class GoalController {
     }
 
     public void updateGoal(Long goalId, GoalDto goal) {
-        goalValidation.validateByTitle(goal.title());
+        validateByTitle(goal.title());
         goalService.updateGoal(goalId, goal);
     }
 
@@ -36,5 +34,11 @@ public class GoalController {
 
     public List<GoalDto> getGoalsByUserId(Long userId, SearchGoalDto searchGoalDto) {
         return goalService.getGoalsByUserId(userId, searchGoalDto);
+    }
+
+    private void validateByTitle(String title) {
+        if (title.isBlank()) {
+            throw new IllegalArgumentException("Goal hasn't title");
+        }
     }
 }
