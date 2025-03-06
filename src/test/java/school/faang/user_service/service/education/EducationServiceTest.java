@@ -10,6 +10,7 @@ import school.faang.user_service.dto.EducationDto;
 import school.faang.user_service.entity.Education;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.exception.ResourceNotFoundException;
 import school.faang.user_service.mapper.EducationMapper;
 import school.faang.user_service.repository.EducationRepository;
 import school.faang.user_service.repository.UserRepository;
@@ -126,6 +127,6 @@ class EducationServiceTest {
     void testGetById_EducationNotFound() {
         when(educationRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(DataValidationException.class, () -> educationService.getById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> educationService.getById(1L));
     }
 }
