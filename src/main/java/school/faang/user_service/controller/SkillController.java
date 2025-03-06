@@ -41,5 +41,4 @@ public class SkillController {
     public SkillDto acquireSkillFromOffers(@PathVariable("skillId") Long skillId, @PathVariable("userId") Long userId) {
         return skillService.acquireSkillFromOffers(skillId, userId);
     }
-
 }
