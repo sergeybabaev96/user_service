@@ -29,17 +29,17 @@ public class SubscriptionService {
             throw new DataValidationException("%d уже подписан на %d.", followerId, followeeId);
         } else {
             repository.followUser(followerId, followeeId);
-            log.info(String.format("Пользователь: %d подписался на пользователя: %d.", followerId, followeeId));
+            log.info("Пользователь: {} подписался на пользователя: {}.", followerId, followeeId);
         }
     }
 
     public void unfollowUser(long followerId, long followeeId) {
         repository.unfollowUser(followerId, followeeId);
-        log.info(String.format("Пользователь: %d отписался от пользователя: %d.", followerId, followeeId));
+        log.info("Пользователь: {} отписался от пользователя: {}.", followerId, followeeId);
     }
 
-    public List<UserDto> getFollowers(long followeedId, UserFilterDto filter) {
-        Stream<User> followersStream = repository.findByFolloweeId(followeedId);
+    public List<UserDto> getFollowers(long followeeId, UserFilterDto filter) {
+        Stream<User> followersStream = repository.findByFolloweeId(followeeId);
         return filterUsers(followersStream, filter)
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
