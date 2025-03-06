@@ -46,14 +46,7 @@ public class EventService {
         List<Event> events = eventRepository.findAll();
 
         return events.stream()
-                .filter(event -> filter.getTitle() == null || event.getTitle().toLowerCase().contains(filter.getTitle().toLowerCase()))
-                .filter(event -> filter.getStartDate() == null || !event.getStartDate().isBefore(filter.getStartDate()))
-                .filter(event -> filter.getEndDate() == null || !event.getEndDate().isAfter(filter.getEndDate()))
-                .filter(event -> filter.getLocation() == null || event.getLocation().equalsIgnoreCase(filter.getLocation()))
-                .filter(event -> filter.getMaxAttendees() == null || event.getMaxAttendees() <= filter.getMaxAttendees())
-                .filter(event -> filter.getOwnerId() == null || event.getOwner().getId().equals(filter.getOwnerId()))
-                .filter(event -> filter.getEventType() == null || event.getType().equals(filter.getEventType()))
-                .filter(event -> filter.getEventStatus() == null || event.getStatus().equals(filter.getEventStatus()))
+                .filter(filter::matches)
                 .map(eventMapper::toDto)
                 .collect(Collectors.toList());
     }
