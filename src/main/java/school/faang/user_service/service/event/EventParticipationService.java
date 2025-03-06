@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserDto;
-import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.event.EventParticipationRepository;
 import school.faang.user_service.validator.event.EventValidator;
@@ -26,34 +25,32 @@ public class EventParticipationService {
         validateDateById(eventId, userId);
 
         if (checkExistsByEventIdAndUserId(eventId, userId)) {
+            log.warn("User with id {} is already registered for the event with id {}", userId, eventId);
             throw new IllegalArgumentException("User is already registered for the event");
         }
 
         eventParticipationRepository.register(eventId, userId);
-        log.info("User registered for event");
     }
 
     public void unregisterParticipant(Long eventId, Long userId) {
         validateDateById(eventId, userId);
 
         if (!checkExistsByEventIdAndUserId(eventId, userId)) {
+            log.warn("User with id {} is not registered for the event with id {}", userId, eventId);
             throw new IllegalArgumentException("User is not registered for the event");
         }
 
         eventParticipationRepository.unregister(eventId, userId);
-        log.info("User unregister for event");
     }
 
     public List<UserDto> getParticipant(Long eventId) {
         eventValidator.checkEventExistsById(eventId);
-        log.info("List users participant for event");
         return userMapper.toListUserDto(eventParticipationRepository.findAllParticipantsByEventId(eventId));
     }
 
-    public void getParticipantCount(Long eventId) {
+    public Integer getParticipantCount(Long eventId) {
         eventValidator.checkEventExistsById(eventId);
-        int countParticipants = eventParticipationRepository.countParticipants(eventId);
-        log.info("Total {} event participants", countParticipants);
+        return eventParticipationRepository.countParticipants(eventId);
     }
 
     public void validateDateById(Long eventId, Long userId) {
