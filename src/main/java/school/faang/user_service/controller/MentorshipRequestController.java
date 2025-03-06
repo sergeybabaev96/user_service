@@ -38,6 +38,7 @@ public class MentorshipRequestController {
         */
     public void rejectRequest(long mentorshipRequestId, RejectionDto rejection) {
         mentorshipRequestService.rejectRequest(mentorshipRequestId, rejection);
+
     }
 
 

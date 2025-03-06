@@ -1,4 +1,10 @@
 package school.faang.user_service.dto.mentorship;
 
-public class    RejectionDto {
+import lombok.Data;
+
+@Data
+public class RejectionDto {
+    private Long requesterId;
+    private Long receiverId;
+    private String rejectionReason;;
 }
