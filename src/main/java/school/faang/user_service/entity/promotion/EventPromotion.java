@@ -2,8 +2,6 @@ package school.faang.user_service.entity.promotion;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,7 +38,6 @@ public class EventPromotion {
     @Column(name = "event_id", nullable = false)
     private Long eventId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "promotion_type", nullable = false)
-    private EventPromotionType promotionType;
+    @Column(name = "promotion_percentage", nullable = false)
+    private Integer percentage;
 }
