@@ -27,7 +27,7 @@ public interface RecommendationMapper {
     @Mapping(target = "skillOffersDto", source = "skillOffers")
     RecommendationDto toDto(Recommendation recommendation);
 
-    @Mapping(target = "skill", source = "skillId", qualifiedByName = "mapIdToSkill")
+    @Mapping(target = "skill", source = "skillId")
     @Mapping(target = "recommendation", ignore = true)
     List<SkillOffer> toEntityList(List<SkillOfferDto> skillOfferDtos);
 
@@ -43,7 +43,6 @@ public interface RecommendationMapper {
         return user;
     }
 
-    @Named("mapIdToSkill")
     default Skill mapIdToSkill(Long id) {
         if (id == null) {
             return null;
