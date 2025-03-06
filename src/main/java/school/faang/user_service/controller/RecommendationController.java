@@ -13,4 +13,8 @@ public class RecommendationController {
     public RecommendationDto updateRecommendation(RecommendationDto recommendationDto) {
         return recommendationService.update(recommendationDto);
     }
+
+    public void deleteRecommendation(Long id) {
+        recommendationService.delete(id);
+    }
 }

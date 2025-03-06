@@ -39,6 +39,10 @@ public class RecommendationService {
         return mapper.toDto(recommendation);
     }
 
+    public void delete(Long id) {
+        recommendationRepository.deleteById(id);
+    }
+
     private void deleteAllAndCreate(Recommendation recommendation) {
         List<SkillOffer> skillOffersOfReceiver =
                 skillOfferRepository.findAllByUserId(recommendation.getReceiver().getId());
