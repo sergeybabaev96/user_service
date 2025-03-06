@@ -11,7 +11,7 @@ public class ProfileViewEventPublisher extends AbstractEventPublisher<ProfileVie
     public ProfileViewEventPublisher(
             @Value("${spring.data.redis.channels.profile-view}") String channelTopic,
             RedisTemplate<String, Object> redisTemplate
-    ) {
+            ) {
         super(channelTopic, redisTemplate);
     }
 }
