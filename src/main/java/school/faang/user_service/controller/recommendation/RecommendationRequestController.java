@@ -1,12 +1,15 @@
 package school.faang.user_service.controller.recommendation;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.dto.recommendation.RejectionDto;
@@ -15,35 +18,34 @@ import school.faang.user_service.service.recommendation.RecommendationRequestSer
 
 import java.util.List;
 
-@Slf4j
 @RestController
+@RequestMapping("recommendations")
 @RequiredArgsConstructor
 public class RecommendationRequestController {
     private final RecommendationRequestService recommendationRequestService;
 
-    public RecommendationRequestDto requestRecommendation(
-            @Valid @RequestBody RecommendationRequestDto recommendationRequest) {
-        log.info("Received request to create recommendation: {}", recommendationRequest);
-        return recommendationRequestService.create(recommendationRequest);
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public RecommendationRequestDto requestRecommendation(@RequestBody RecommendationRequestDto recommendationRequest)
+    {
+        return recommendationRequestService.requestRecommendation(recommendationRequest);
     }
 
-    public List<RecommendationRequestDto> getRecommendationRequests(
-            @Valid @ModelAttribute RequestFilterDto filter) {
-        log.info("Received request to get recommendations with filter: {}", filter);
-        return recommendationRequestService.getRequests(filter);
+    @GetMapping("/with-filters")
+    @ResponseStatus(HttpStatus.OK)
+    public List<RecommendationRequestDto> getRecommendationRequests(@ModelAttribute RequestFilterDto filter) {
+        return recommendationRequestService.getRecommendationRequests(filter);
     }
 
-    public RecommendationRequestDto getRecommendationRequest(
-            @PathVariable @Positive Long id) {
-        log.info("Received request to get recommendation with id: {}", id);
-        return recommendationRequestService.getRequest(id);
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public RecommendationRequestDto getRecommendationRequest(@PathVariable long id) {
+        return recommendationRequestService.getRecommendationRequest(id);
     }
 
-    public RecommendationRequestDto rejectRequest(
-            @PathVariable @Positive Long id,
-            @Valid @RequestBody RejectionDto rejection) {
-        log.info("Received request to reject recommendation with id: {}", id);
+    @PutMapping("/{id}/reject")
+    @ResponseStatus(HttpStatus.OK)
+    public RecommendationRequestDto rejectRequest(@PathVariable long id, @RequestBody RejectionDto rejection) {
         return recommendationRequestService.rejectRequest(id, rejection);
     }
-
 }
