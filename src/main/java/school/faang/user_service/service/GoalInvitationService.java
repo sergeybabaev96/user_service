@@ -4,10 +4,12 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.goal.GoalInvitationDto;
+import school.faang.user_service.dto.goal.InvitationFilterIDto;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalInvitation;
+import school.faang.user_service.filter.goal.GoalInvitationFilter;
 import school.faang.user_service.mapper.goal.GoalInvitationMapper;
 import school.faang.user_service.repository.goal.GoalInvitationRepository;
 
@@ -48,6 +50,11 @@ public class GoalInvitationService {
         GoalInvitation goalInvitation = checkExistingGoal(id);
         goalInvitation.setStatus(RequestStatus.REJECTED);
         return repository.save(goalInvitation);
+    }
+
+    public List<GoalInvitation> getInvitations(InvitationFilterIDto filter) {
+        List<GoalInvitation> goalInvitations = repository.findAll();
+        return GoalInvitationFilter.filter(goalInvitations, filter);
     }
 
     private GoalInvitation checkExistingGoal(long id) {
