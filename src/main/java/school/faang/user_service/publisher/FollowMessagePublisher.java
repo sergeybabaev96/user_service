@@ -1,18 +1,15 @@
 package school.faang.user_service.publisher;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-import school.faang.user_service.dto.messaging.MentorshipStartEvent;
+import school.faang.user_service.event.FollowEvent;
 
-@Slf4j
 @Component
-public class MentorshipEventPublisher extends MessagePublisher<MentorshipStartEvent> {
-
-    public MentorshipEventPublisher(
+public class FollowMessagePublisher extends MessagePublisher<FollowEvent> {
+    public FollowMessagePublisher(
             RedisTemplate<String, Object> redisTemplate,
-            @Value("${spring.data.redis.channels.mentorship}") String channel
+            @Value("${spring.data.redis.channels.follow}") String channel
     ) {
         super(redisTemplate, channel);
     }

@@ -8,7 +8,7 @@ import school.faang.user_service.dto.event.ProfileViewEvent;
 @Service
 public class ProfileViewEventPublisher extends AbstractEventPublisher<ProfileViewEvent> {
     public ProfileViewEventPublisher(RedisTemplate<String, Object> redisTemplate,
-                                     @Value("${spring.channels.profile-view}") String channel) {
+                                     @Value("${spring.data.redis.channels.profile-view}") String channel) {
         super(redisTemplate, channel);
     }
 
