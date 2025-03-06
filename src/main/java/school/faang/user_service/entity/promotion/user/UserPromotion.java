@@ -1,4 +1,4 @@
-package school.faang.user_service.entity.promotion;
+package school.faang.user_service.entity.promotion.user;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,8 +19,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Data
-@Table(name = "event_promotion")
-public class EventPromotion {
+@Table(name = "user_promotion")
+public class UserPromotion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,8 +35,8 @@ public class EventPromotion {
     @Column(name = "end_date", columnDefinition = "TIMESTAMP", nullable = false)
     private LocalDateTime endDate;
 
-    @Column(name = "event_id", nullable = false)
-    private Long eventId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Column(name = "promotion_percentage", nullable = false)
     private Integer percentage;

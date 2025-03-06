@@ -1,4 +1,4 @@
-package school.faang.user_service.entity.promotion;
+package school.faang.user_service.entity.promotion.user;
 
 public enum UserPromotionType {
     TEN_PERCENT(10),

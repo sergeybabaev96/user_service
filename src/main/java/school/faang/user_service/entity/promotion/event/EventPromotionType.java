@@ -1,4 +1,4 @@
-package school.faang.user_service.entity.promotion;
+package school.faang.user_service.entity.promotion.event;
 
 public enum EventPromotionType {
     TEN_PERCENT(10),
