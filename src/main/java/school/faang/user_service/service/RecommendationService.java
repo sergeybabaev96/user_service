@@ -1,6 +1,7 @@
 package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,10 +25,10 @@ public class RecommendationService {
     private final RecommendationRepository recommendationRepository;
     private final SkillOfferRepository skillOfferRepository;
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
-    private final RecommendationMapper mapper;
+    private final RecommendationMapper recommendationMapper;
 
     public RecommendationDto update(RecommendationDto recommendationDto) {
-        Recommendation recommendation = mapper.toEntity(recommendationDto);
+        Recommendation recommendation = recommendationMapper.toRecommendation(recommendationDto);
         Iterable<SkillOffer> skillOffersIterable = skillOfferRepository.findAll();
         List<SkillOffer> allSkillOffers = new ArrayList<>();
         skillOffersIterable.forEach(allSkillOffers::add);
@@ -38,16 +39,20 @@ public class RecommendationService {
 
         updateRecommendation(recommendation);
         deleteAllAndCreate(recommendation);
-        return mapper.toDto(recommendation);
+        return recommendationMapper.toRecommendationDto(recommendation);
     }
 
     public void delete(Long id) {
         recommendationRepository.deleteById(id);
     }
 
-    public List<RecommendationDto> getAllGivenRecommendation(Long id) {
-        Pageable pageable = PageRequest.of(0, 10);
-        List<Recommendation> recommendations = recommendationRepository.findAllByAuthorId(id, pageable);
+    public List<RecommendationDto> getAllGivenRecommendation(Long authorId) {
+        Pageable pageable = PageRequest.of(0 , 10);
+        Page<Recommendation> recommendationPage = recommendationRepository.findAllByAuthorId(authorId, pageable);
+        List<Recommendation> recommendationList = recommendationPage.getContent();
+        return recommendationList.stream()
+                .map(recommendationMapper::toRecommendationDto)
+                .toList();
     }
 
     private void deleteAllAndCreate(Recommendation recommendation) {
