@@ -12,4 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class Channels {
     private String recommendationChannel;
     private String recommendationMentorshipOffered;
+    private String achievementChannel;
+    private String followerChannel;
+    private String profileView;
 }

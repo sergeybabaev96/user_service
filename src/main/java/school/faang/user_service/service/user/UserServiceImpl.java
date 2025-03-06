@@ -14,7 +14,7 @@ import school.faang.user_service.events.UserProfileViewEvent;
 import school.faang.user_service.exception.EntityNotFoundException;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.pojo.Person;
-import school.faang.user_service.publisher.UserProfileViewEventPublisher;
+import school.faang.user_service.publisher.userprofileview.UserProfileViewEventPublisher;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.CountryService;
 import school.faang.user_service.service.UserService;
@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto getUser(Long userId) {
         User user = findByIdOrThrow(userId);
         UserResponseDto userDto = userMapper.toUserResponseDto(user);
-        Long visitorId = userContext.getUserId();
+        long visitorId = userContext.getUserId();
         if (visitorId > 0) {
             userProfileViewEventPublisher.publish(new UserProfileViewEvent(userId, visitorId, LocalDateTime.now()));
         }
