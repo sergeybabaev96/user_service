@@ -47,8 +47,23 @@ public class RecommendationService {
     }
 
     public List<RecommendationDto> getAllGivenRecommendation(Long authorId) {
+        if (authorId == null) {
+            throw new DataValidationException("Id автора не может быть null");
+        }
         Pageable pageable = PageRequest.of(0 , 10);
         Page<Recommendation> recommendationPage = recommendationRepository.findAllByAuthorId(authorId, pageable);
+        List<Recommendation> recommendationList = recommendationPage.getContent();
+        return recommendationList.stream()
+                .map(recommendationMapper::toRecommendationDto)
+                .toList();
+    }
+
+    public List<RecommendationDto> getAllUserRecommendations(Long receiverId) {
+        if (receiverId == null) {
+            throw new DataValidationException("Id автора не может быть null");
+        }
+        Pageable pageable = PageRequest.of(0 , 10);
+        Page<Recommendation> recommendationPage = recommendationRepository.findAllByReceiverId(receiverId, pageable);
         List<Recommendation> recommendationList = recommendationPage.getContent();
         return recommendationList.stream()
                 .map(recommendationMapper::toRecommendationDto)
