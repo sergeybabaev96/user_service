@@ -38,7 +38,7 @@ public class RecommendationController {
     }
 
     private static void validateRecommendation(RecommendationDto recommendation) {
-        if (recommendation.getContent().isBlank()) {
+        if (recommendation.content().isBlank()) {
             throw new DataValidationException("Recommendation's content is required");
         }
     }

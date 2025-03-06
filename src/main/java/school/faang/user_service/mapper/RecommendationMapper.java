@@ -2,7 +2,6 @@ package school.faang.user_service.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.repository.recommendation.RecommendationDto;
 
@@ -19,9 +18,4 @@ public interface RecommendationMapper {
     @Mapping(target = "request", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Recommendation toEntity(RecommendationDto dto);
-
-    @Mapping(target = "authorId", source = "author.id")
-    @Mapping(target = "receiverId", source = "receiver.id")
-    @Mapping(target = "skillOffers", ignore = true)
-    void update(@MappingTarget RecommendationDto dto, Recommendation entity);
 }
