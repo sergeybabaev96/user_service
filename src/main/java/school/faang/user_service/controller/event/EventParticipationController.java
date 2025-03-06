@@ -2,23 +2,30 @@ package school.faang.user_service.controller.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.service.event.EventParticipationService;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/events")
 @Slf4j
 public class EventParticipationController {
 
     private final EventParticipationService eventParticipationService;
 
-    public void registerParticipant(Long eventId, Long userId) {
+    @PostMapping("/{eventId}/register/{userId}")
+    public ResponseEntity<String> registerParticipant(@PathVariable Long eventId, @PathVariable Long userId) {
         validateId(userId);
         validateId(eventId);
         eventParticipationService.registerParticipant(eventId, userId);
+        return ResponseEntity.ok("User registered for event");
     }
 
     public void unregisterParticipant(Long eventId, Long userId) {

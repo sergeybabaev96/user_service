@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.event.EventParticipationRepository;
 import school.faang.user_service.validator.event.EventValidator;
@@ -61,6 +62,7 @@ public class EventParticipationService {
     }
 
     public boolean checkExistsByEventIdAndUserId(Long eventId, Long userId) {
-        return eventParticipationRepository.existsByEventIdAndUserId(eventId, userId);
+        return eventParticipationRepository.findAllParticipantsByEventId(eventId).stream()
+                .anyMatch(user -> user.getId().equals(userId));
     }
 }
