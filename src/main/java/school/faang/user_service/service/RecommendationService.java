@@ -3,10 +3,12 @@ package school.faang.user_service.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
+import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.RecommendationMapper;
+import school.faang.user_service.repository.UserSkillGuaranteeRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import school.faang.user_service.utils.ValidationRecommendationUtils;
@@ -19,6 +21,7 @@ import java.util.List;
 public class RecommendationService {
     private final RecommendationRepository recommendationRepository;
     private final SkillOfferRepository skillOfferRepository;
+    private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
     private final RecommendationMapper mapper;
 
     public RecommendationDto update(RecommendationDto recommendationDto) {
@@ -32,7 +35,26 @@ public class RecommendationService {
         ValidationRecommendationUtils.validateSkills(recommendationDto, allSkillOffers);
 
         updateRecommendation(recommendation);
-        return recommendationDto;
+        deleteAllAndCreate(recommendation);
+        return mapper.toDto(recommendation);
+    }
+
+    private void deleteAllAndCreate(Recommendation recommendation) {
+        List<SkillOffer> skillOffersOfReceiver =
+                skillOfferRepository.findAllByUserId(recommendation.getReceiver().getId());
+
+        skillOfferRepository.deleteAllByRecommendationId(recommendation.getId());
+        for (SkillOffer skillOffer : recommendation.getSkillOffers()) {
+            skillOfferRepository.create(skillOffer.getSkill().getId(), recommendation.getId());
+            if (skillOffersOfReceiver.contains(skillOffer)) {
+                UserSkillGuarantee userSkillGuarantee = new UserSkillGuarantee();
+                userSkillGuarantee.setUser(recommendation.getReceiver());
+                userSkillGuarantee.setGuarantor(recommendation.getAuthor());
+                userSkillGuarantee.setSkill(skillOffer.getSkill());
+                skillOffer.getSkill().setGuarantees(List.of(userSkillGuarantee));
+                userSkillGuaranteeRepository.save(userSkillGuarantee);
+            }
+        }
     }
 
     private void updateRecommendation(Recommendation recommendation) {
