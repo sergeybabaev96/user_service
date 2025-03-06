@@ -15,6 +15,7 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.validation.goal.GoalValidation;
 import school.faang.user_service.validation.skill.SkillValidation;
+import school.faang.user_service.validation.user.UserValidation;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,10 +29,12 @@ public class GoalService {
     private final UserRepository userRepository;
     private final GoalMapper goalMapper;
     private final GoalValidation goalValidation;
+    private final UserValidation userValidation;
     private final SkillValidation skillValidation;
     private final List<GoalFilter> goalFilters;
 
     public void createGoal(Long userId, Goal goal) {
+        userValidation.validateByExistsUserOnId(userId);
         goalValidation.validateByCountGoals(userId);
         skillValidation.validateByExistsGoalSkills(goal);
         goalRepository.save(goal);
@@ -39,11 +42,13 @@ public class GoalService {
     }
 
     public void deleteGoal(Long goalId) {
+        goalValidation.validateByExistsGoalOnId(goalId);
         goalRepository.deleteById(goalId);
         log.info("{} goal deleted", goalId);
     }
 
     public void updateGoal(Long goalId, GoalDto goal) {
+        goalValidation.validateByExistsGoalOnId(goalId);
         Optional<Goal> goalOnId = goalRepository.findById(goalId);
         goalValidation.validateByExistsGoal(goalOnId);
         goalValidation.validateByCompletionStatus(goalOnId);
@@ -68,12 +73,14 @@ public class GoalService {
     }
 
     public List<GoalDto> findSubtasksByGoalId(Long goalId, SearchGoalDto searchGoalDto) {
+        goalValidation.validateByExistsGoalOnId(goalId);
         Stream<Goal> goals = goalRepository.findByParent(goalId);
         Stream<Goal> filteredGoals = applyFiltersOnGoals(goals, searchGoalDto);
         return goalMapper.goalListToGoalDtoList(filteredGoals.toList());
     }
 
     public List<GoalDto> getGoalsByUserId(Long userId, SearchGoalDto searchGoalDto) {
+        userValidation.validateByExistsUserOnId(userId);
         Stream<Goal> goals = goalRepository.findGoalsByUserId(userId);
         Stream<Goal> filteredGoals = applyFiltersOnGoals(goals, searchGoalDto);
         return goalMapper.goalListToGoalDtoList(filteredGoals.toList());
