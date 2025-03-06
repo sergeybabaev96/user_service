@@ -6,6 +6,7 @@ import school.faang.user_service.dto.EducationDto;
 import school.faang.user_service.entity.Education;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.exception.ResourceNotFoundException;
 import school.faang.user_service.mapper.EducationMapper;
 import school.faang.user_service.repository.EducationRepository;
 import school.faang.user_service.repository.UserRepository;
@@ -36,7 +37,7 @@ public class EducationService {
         validateYearFrom(educationDto.getYearFrom());
 
         Education education = educationRepository.findById(educationDto.getId())
-                .orElseThrow(() -> new DataValidationException("Education not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Education not found"));
 
         if (education.getUser().getId() != userId) {
             throw new DataValidationException("User can only update their own education");
@@ -51,7 +52,7 @@ public class EducationService {
 
     public EducationDto getById(long educationId) {
         Education education = educationRepository.findById(educationId)
-                .orElseThrow(() -> new DataValidationException("Education not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Education not found"));
 
         return educationMapper.toEducationDto(education);
     }

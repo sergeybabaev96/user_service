@@ -1,8 +1,8 @@
 package school.faang.user_service.dto;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class EducationDto {
     private long id;
     private Integer yearFrom;

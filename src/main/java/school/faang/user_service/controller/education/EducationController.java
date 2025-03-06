@@ -10,7 +10,6 @@ import school.faang.user_service.service.education.EducationService;
 public class EducationController {
     private final EducationService educationService;
 
-
     public EducationDto addEducation(long userId, EducationDto educationDto) {
         return educationService.addEducation(userId, educationDto);
     }
