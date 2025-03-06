@@ -8,8 +8,7 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import school.faang.user_service.subscriber.EventSubscriber;
-import school.faang.user_service.subscriber.RedisListenerRegistrationService;
+import school.faang.user_service.subscriber.EventListener;
 
 import java.util.List;
 
@@ -17,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RedisConfig {
     private final RedisProperties redisProperties;
-    private final List<EventSubscriber> eventSubscribers;
+    private final List<EventListener> eventListeners;
 
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
@@ -42,8 +41,8 @@ public class RedisConfig {
 
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(jedisConnectionFactory());
-        eventSubscribers.forEach(subscriber ->
-                registrationService.registerListener(container, subscriber, subscriber.getTopicName()));
+        eventListeners.forEach(subscriber ->
+                registrationService.registerListener(container, subscriber, subscriber.getChannelName()));
         return container;
     }
 }

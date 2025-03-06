@@ -1,5 +1,4 @@
-package school.faang.user_service.subscriber;
-
+package school.faang.user_service.config.redis;
 
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;

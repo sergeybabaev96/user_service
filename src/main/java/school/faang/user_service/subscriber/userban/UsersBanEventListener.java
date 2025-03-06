@@ -9,20 +9,21 @@ import school.faang.user_service.config.redis.Channels;
 import school.faang.user_service.dto.event.EventUsersBan;
 import school.faang.user_service.exception.MessageMappingException;
 import school.faang.user_service.service.event.EventService;
-import school.faang.user_service.subscriber.EventSubscriber;
+import school.faang.user_service.subscriber.EventListener;
 
 import java.io.IOException;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class UsersBanEventSubscriber implements EventSubscriber {
+public class UsersBanEventListener implements EventListener {
 
     private final ObjectMapper objectMapper;
     private final EventService eventService;
     private final Channels channels;
 
-    public String getTopicName() {
+    @Override
+    public String getChannelName() {
         return channels.getUserBanChannel();
     }
 
