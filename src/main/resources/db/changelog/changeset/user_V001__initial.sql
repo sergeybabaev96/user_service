@@ -201,7 +201,7 @@ CREATE TABLE rating (
 CREATE TYPE promotion_target AS ENUM ('BASIC', 'PREMIUM', 'ULTIMATE');
 
 CREATE TABLE promotion_plan (
-                                id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
+                                id SERIAL PRIMARY KEY,
                                 name VARCHAR(32) NOT NULL,
                                 impressions INT NOT NULL,
                                 cost NUMERIC(10, 2) NOT NULL,
@@ -210,7 +210,7 @@ CREATE TABLE promotion_plan (
 );
 
 CREATE TABLE promotion (
-                           id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
+                           id SERIAL PRIMARY KEY,
                            user_id BIGINT NOT NULL,
                            target promotion_target NOT NULL,
                            plan_id BIGINT NOT NULL,
