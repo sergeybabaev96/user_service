@@ -11,6 +11,7 @@ import school.faang.user_service.service.education.EducationService;
 public class EducationController {
     private final EducationService educationService;
 
+    @PostMapping
     public EducationDto addEducation(long userId, EducationDto educationDto) {
         EducationDto resultDto = new EducationDto();
 
