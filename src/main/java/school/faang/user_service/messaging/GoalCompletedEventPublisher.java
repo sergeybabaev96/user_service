@@ -14,7 +14,7 @@ import school.faang.user_service.dto.goal.GoalCompletedEvent;
 @Slf4j
 public class GoalCompletedEventPublisher {
 
-    @Value("${topics.goal-completed}")
+    @Value("${kafka.topics.goal-completed}")
     private String goalCompletedTopic;
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
