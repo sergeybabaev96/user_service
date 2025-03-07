@@ -38,11 +38,10 @@ public class EducationService {
         if (educationDto.getYearFrom() >= Year.now().getValue()) {
             throw new DataValidationException("Год должен быть меньше текущего.");
         }
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new DataValidationException("Пользователь не найден."));
 
         Education education = educationRepository.findById(educationDto.getId())
                 .orElseThrow(() -> new DataValidationException("Образование не найдено."));
+
         if (!education.getUser().getId().equals(userId)) {
             throw new DataValidationException("Нельзя обновлять данные другого пользователя");
         }
