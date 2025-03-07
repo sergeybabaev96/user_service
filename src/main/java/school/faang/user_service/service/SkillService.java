@@ -2,6 +2,7 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.skill.SkillCandidateDto;
 import school.faang.user_service.dto.skill.SkillDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.exception.DataValidationException;
@@ -30,5 +31,10 @@ public class SkillService {
     public List<SkillDto> getUserSkills(long userId) {
         List<Skill> skills = skillRepository.findAllByUserId(userId);
         return skills.stream().map(skillMapper::toDto).collect(Collectors.toList());
+    }
+
+    public List<SkillCandidateDto> getOfferedSkills(long userId){
+        List<Skill> skills = skillRepository.findSkillsOfferedToUser(userId);
+        return skills.stream().map(skillMapper::toSkillCandidateDto).collect(Collectors.toList());
     }
 }
