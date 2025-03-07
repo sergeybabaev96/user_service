@@ -21,9 +21,12 @@ public class EventParticipationService {
 
     public void registerParticipant(long eventId, long userId) {
         List<User> users = eventParticipationRepository.findAllParticipantsByEventId(eventId);
-        if (users == null || users.stream()
-                .noneMatch(user -> user.getId().equals(userId))) {
+
+        boolean isUserNotRegistered = users == null || users.stream()
+                .noneMatch(user -> user.getId().equals(userId));
+        if (isUserNotRegistered) {
             eventParticipationRepository.register(eventId, userId);
+            log.info("Пользователь {} успешно зарегистрирован на событие {}", userId, eventId);
         } else {
             throw new RuntimeException("Пользователь уже зарегистрирован на событие");
         }
@@ -31,12 +34,13 @@ public class EventParticipationService {
 
     public void unregisterParticipant(long eventId, long userId) {
         List<User> users = eventParticipationRepository.findAllParticipantsByEventId(eventId);
-        if (users.stream()
-                .anyMatch(user -> user.getId().equals(userId))) {
+        boolean isUserRegistered = users.stream()
+                .anyMatch(user -> user.getId().equals(userId));
+        if (isUserRegistered) {
             eventParticipationRepository.unregister(eventId, userId);
-            log.info("Пользователь {} успешно зарегистрирован на событие {}", userId, eventId);
+            log.info("Пользователь {} отменил регистрацию на событие {}", userId, eventId);
         } else {
-            throw new RuntimeException("Пользователь уже зарегистрирован на событие");
+            throw new RuntimeException("Пользователь не участвует в событии");
         }
     }
 
