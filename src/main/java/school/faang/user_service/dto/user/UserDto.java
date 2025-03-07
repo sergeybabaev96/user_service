@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 import lombok.NonNull;
+import school.faang.user_service.entity.contact.PreferredContact;
 
 @Builder
 public record UserDto(
@@ -14,6 +15,7 @@ public record UserDto(
         @Max(value = 64, message = "Имя не должно быть длиннее 64 символов")
         String username,
         @Email
-        String email
+        String email,
+        PreferredContact preference
 ) {
 }

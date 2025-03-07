@@ -1,14 +1,14 @@
-package school.faang.user_service.dto.event;
+package school.faang.user_service.event;
 
 import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Builder
 @Data
+@Builder
 public class ProfileViewEvent {
-    private Long receiverId;
-    private Long actorId;
+    private long receiverId;
+    private long actorId;
     private LocalDateTime receivedAt;
 }
