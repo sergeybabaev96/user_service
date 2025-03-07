@@ -5,16 +5,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.goal.GoalDto;
+import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.mapper.goal.GoalMapper;
+import school.faang.user_service.repository.SkillRepository;
+import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.skill.SkillService;
-import school.faang.user_service.validator.goal.GoalDtoValidator;
 import school.faang.user_service.validator.goal.GoalValidator;
 import school.faang.user_service.validator.skill.SkillValidator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -27,10 +30,12 @@ public class GoalService {
     private final SkillService skillService;
     private final GoalValidator goalValidator;
     private final SkillValidator skillValidator;
-    private final GoalDtoValidator goalDtoValidator;
+    private final SkillRepository skillRepository;
+    private final UserRepository userRepository;
+
 
     public GoalDto createGoal(Long userId, GoalDto goalDto) {
-        goalDtoValidator.validateGoalDto(goalDto, userId);
+        goalValidator.validateGoalDto(goalDto);
 
         goalValidator.validateCountGoals(goalRepository.countActiveGoalsPerUser(userId), userId);
 
@@ -60,32 +65,46 @@ public class GoalService {
         Goal existingGoal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new NotFoundException("Цель не найдена у id: " + goalId));
 
-        goalValidator.validate(goalDto);
         goalValidator.validateUpdateStatus(existingGoal, goalDto);
-        skillValidator.validate(goalDto.getSkillIds());
+        validation(goalDto);
 
-        Goal updatedGoal = goalMapper.dtoToEntity(goalDto);
-        updatedGoal.setId(existingGoal.getId());
+        goalDto.setStatus(GoalStatus.COMPLETED);
 
-        if (GoalStatus.COMPLETED.equals(goalDto.getStatus())) {
-            assignSkillsToParticipants(existingGoal, goalDto.getSkillIds());
+        List<User> users = new ArrayList<>();
+        for (Long userId : goalDto.getUsersId()) {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+            users.add(user);
         }
-
-        updateSkillsForGoal(existingGoal, goalDto.getSkillIds());
-
-        goalRepository.save(updatedGoal);
-        return goalDto;
-    }
-
-    private void assignSkillsToParticipants(Goal goal, List<Long> skillIds) {
-        List<User> participants = goalRepository.findUsersByGoalId(goal.getId());
-
-        for (User participant : participants) {
-            for (Long skillId : skillIds) {
-                goalRepository.addSkillToGoal(skillId, participant.getId());
+        List<Skill> skills = new ArrayList<>();
+        for (Long skillId : goalDto.getSkillIds()) {
+            Skill skill = skillRepository.findById(skillId)
+                    .orElseThrow(() -> new RuntimeException("Skill not found: " + skillId));
+            skills.add(skill);
+        }
+        for (User user : users) {
+            for (Skill skill : skills) {
+                user.getSkills().add(skill);
             }
         }
+
+        return goalDto;
+
     }
+
+    private void validation(GoalDto goalDto) {
+        GoalStatus goalStatus = goalDto.getStatus();
+        if (goalStatus != GoalStatus.ACTIVE) {
+            throw new RuntimeException("цель уже завершена");
+        }
+        List<Long> skillIds = goalDto.getSkillIds();
+        for (Long skillId : skillIds) {
+            skillRepository.findById(skillId)
+                    .orElseThrow(() -> new NotFoundException("скил не найден"));
+        }
+    }
+
+    ч
 
     private void updateSkillsForGoal(Goal goal, List<Long> newSkillIds) {
         goalRepository.removeSkillsFromGoal(goal.getId());
@@ -97,6 +116,6 @@ public class GoalService {
 
         goalRepository.removeSkillsFromGoal(goalId);
         goalRepository.deleteById(goalId);
-        
+
     }
 }

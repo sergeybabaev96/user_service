@@ -22,17 +22,14 @@ public class GoalValidator {
         }
     }
 
-    public void validate(GoalDto goalDto) {
-        if (goalDto == null) {
-            throw new BadRequestException("Цели не могут быть нулевыми");
+    public void validateGoalDto(GoalDto goalDto) {
+        if (goalDto == null || goalDto.getTitle() == null || goalDto.getTitle().isBlank()) {
+            log.error("Title отсутствует в goalDTO {}", goalDto);
+            throw new IllegalArgumentException("Заголовок цели не может быть пустым");
         }
-
-        if (goalDto.getTitle() == null || goalDto.getTitle().isEmpty()) {
-            throw new BadRequestException("Заголовок не может быть пустым");
-        }
-
-        if (goalDto.getSkillIds() != null && goalDto.getSkillIds().isEmpty()) {
-            throw new BadRequestException("Скиллы и Идентификаторы не могут быть пустыми");
+        if (goalDto.getDescription() == null || goalDto.getDescription().isBlank()) {
+            log.error("Description отсутствует в goalDTO {}", goalDto);
+            throw new IllegalArgumentException("Описание цели не может быть пустым");
         }
     }
 

@@ -11,17 +11,16 @@ import school.faang.user_service.validator.goal.GoalValidator;
 @Controller
 @RequiredArgsConstructor
 public class GoalController {
-    private final GoalDtoValidator goalDtoValidator;
     private final GoalService goalService;
     private final GoalValidator goalValidator;
 
     public GoalDto createGoal(Long userId, GoalDto goalDto) {
-        goalDtoValidator.validateGoalDto(goalDto, userId);
+        goalValidator.validateGoalDto(goalDto);
         return goalService.createGoal(userId, goalDto);
     }
 
     public GoalDto updateGoal(Long goalId, GoalDto goalDto) {
-        goalDtoValidator.validateGoalDto(goalDto, goalId);
+        goalValidator.validateGoalDto(goalDto);
         return goalService.updateGoal(goalId, goalDto);
     }
 

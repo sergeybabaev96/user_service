@@ -29,11 +29,6 @@ public class SkillValidator {
             return;
         }
 
-        List<Long> existingSkillIds = skillRepository.findAllById(skillIds)
-                .stream()
-                .map(Skill::getId)
-                .toList();
-
         if (!new HashSet<>(existingSkillIds).containsAll(skillIds)) {
             throw new BadRequestException("Некоторых навыков не существует");
         }
