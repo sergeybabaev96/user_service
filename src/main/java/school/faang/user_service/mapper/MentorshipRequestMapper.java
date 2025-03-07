@@ -3,6 +3,7 @@ package school.faang.user_service.mapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.springframework.beans.factory.annotation.Autowired;
 import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
 import school.faang.user_service.dto.mentorship.RejectionDto;
@@ -21,7 +22,8 @@ public abstract class MentorshipRequestMapper {
     public abstract MentorshipRequest toEntity(MentorshipRequestDto dto);
 
     @Mapping(target = "status", constant = "REJECTED")
-    public abstract void updateRequestFromDto(RejectionDto rejectionDto, MentorshipRequest mentorshipRequest);
+    public abstract MentorshipRequest updateRequestFromDto(RejectionDto rejectionDto,
+                                                           @MappingTarget MentorshipRequest mentorshipRequest);
 
     @Mapping(target = "requesterId", source = "requester.id")
     @Mapping(target = "receiverId", source = "receiver.id")
@@ -29,7 +31,7 @@ public abstract class MentorshipRequestMapper {
 
     protected User mapUserIdToUser(Long userId) {
         if (userId == null) {
-            return null;
+            throw new IllegalArgumentException("Requester cannot be null");
         }
         return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User with id " + userId + " not found"));

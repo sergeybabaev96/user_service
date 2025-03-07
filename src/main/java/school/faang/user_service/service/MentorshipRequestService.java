@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -32,26 +33,12 @@ public class MentorshipRequestService {
     private final MentorshipRequestMapper mentorshipRequestMapper;
     private final UserRepository userRepository;
 
-    /*
     @Transactional
     public void requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
-        validateMentorshipRequest(mentorshipRequestDto);
-
-        MentorshipRequest mentorshipRequest = mentorshipRequestMapper.toEntity(mentorshipRequestDto);
-
-        mentorshipRequestRepository.save(mentorshipRequest);
-    }*/
-
-    public void requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
 
         validateMentorshipRequest(mentorshipRequestDto);
-
-        MentorshipRequest mentorshipRequest = mentorshipRequestMapper.toEntity(mentorshipRequestDto);
-
-                mentorshipRequestRepository.create(
-                mentorshipRequestDto.getRequesterId(),
-                mentorshipRequestDto.getReceiverId(),
-                mentorshipRequestDto.getDescription());
+        MentorshipRequest request = mentorshipRequestMapper.toEntity(mentorshipRequestDto);
+        mentorshipRequestRepository.save(request);
     }
 
     private void validateMentorshipRequest(MentorshipRequestDto mentorshipRequestDto) {
@@ -79,69 +66,53 @@ public class MentorshipRequestService {
         }
     }
 
-        /*
-        Метод принимает объект класса RequestFilterDto - фильтры
-        здесь могут быть следующими: по описанию, по автору запроса,
-        по получателю запроса, по статусу запроса
-        Используйте метод для поиска всех запросов из класса
-        MentorshipRequestRepository, затем реализуйте систему
-        фильтрации и добавьте возможность применять фильтр.
-        */
-
     public List<MentorshipRequestDto> getRequests(RequestFilterDto filter) {
 
         Iterable<MentorshipRequest> mentorshipRequestIterable = mentorshipRequestRepository.findAll();
-
-        List<MentorshipRequest> mentorshipRequests = StreamSupport.stream(mentorshipRequestIterable.spliterator(), false)
+        List<MentorshipRequest> requests = StreamSupport.stream(mentorshipRequestIterable.spliterator(), false)
                 .filter(request -> {
                     boolean result = true;
                     if (filter.getDescription() != null) {
-                        result = result && request.getDescription().equals(filter.getDescription());
+                        result = result && request.getDescription() != null
+                                && request.getDescription().contains(filter.getDescription());
                     }
                     if (filter.getRequesterId() != null) {
-                        result = result && request.getRequester().getId().equals(filter.getRequesterId());
+                        result = result && request.getRequester() != null
+                                && request.getRequester().getId().equals(filter.getRequesterId());
                     }
                     if (filter.getReceiverId() != null) {
-                        result = result && request.getReceiver().getId().equals(filter.getReceiverId());
+                        result = result && request.getReceiver() != null
+                                && request.getReceiver().getId().equals(filter.getReceiverId());
                     }
                     if (filter.getStatus() != null) {
-                        result = result && request.getStatus().equals(filter.getStatus());
+                        result = result && request.getStatus() == filter.getStatus();
                     }
                     return result;
                 })
                 .toList();
 
-        // Преобразовать в DTO
-
-        return new ArrayList<MentorshipRequestDto>();
+        return requests.stream()
+                .map(mentorshipRequestMapper::toDto)
+                .collect(Collectors.toList());
     }
 
-    /*
-    В методе нужно найти нужный запрос в базе, если его нет, выкинуть исключение.
-    Если ментор еще не является ментором отправителя,
-    то добавить его в список менторов отправителя и
-    сменить статус запроса на ACCEPTED.
-    Если пользователь уже является ментором отправителя,
-    выбросить исключение с сообщением об этом
-    */
     @Transactional
     public void acceptRequest(long mentorshipRequestId) {
-
-        MentorshipRequest mentorshipRequest = mentorshipRequestRepository.findById(mentorshipRequestId)
+        MentorshipRequest request = mentorshipRequestRepository.findById(mentorshipRequestId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         String.format("Mentorship request with id %d not found", mentorshipRequestId)));
 
-        User requester = mentorshipRequest.getRequester();
-        User futureMentor = mentorshipRequest.getReceiver();
+        User requester = request.getRequester();
+        User futureMentor = request.getReceiver();
 
         if (!requester.getMentors().contains(futureMentor)) {
             requester.getMentors().add(futureMentor);
             futureMentor.getMentees().add(requester);
-            mentorshipRequest.setStatus(RequestStatus.ACCEPTED);
+            request.setStatus(RequestStatus.ACCEPTED);
 
             userRepository.save(requester);
             userRepository.save(futureMentor);
-            mentorshipRequestRepository.save(mentorshipRequest);
+            mentorshipRequestRepository.save(request);
         } else {
             throw new MentorshipAlreadyExistsException(
                     String.format("User %d is already a mentor for user %d",
@@ -151,11 +122,11 @@ public class MentorshipRequestService {
 
     @Transactional
     public void rejectRequest(long mentorshipRequestId, RejectionDto rejection) {
-        MentorshipRequest mentorshipRequest = mentorshipRequestRepository.findById(mentorshipRequestId)
+        MentorshipRequest request = mentorshipRequestRepository.findById(mentorshipRequestId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         String.format("Mentorship request with id %d not found", mentorshipRequestId)));
 
-        mentorshipRequestMapper.updateRequestFromDto(rejection, mentorshipRequest);
-        mentorshipRequestRepository.save(mentorshipRequest);
+        request = mentorshipRequestMapper.updateRequestFromDto(rejection, request);
+        mentorshipRequestRepository.save(request);
     }
 }

@@ -34,13 +34,5 @@ public class UserServiceApplication implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
-        if (!(userRepository.existsById(12L)
-                && userRepository.existsById(10L))) {
-            log.info("DO NOT EXISTS");
-        } else {
-            log.info("EXISTS");
-        }
-
-    }
+    public void run(String... args) throws Exception {}
 }
