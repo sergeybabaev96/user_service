@@ -143,7 +143,7 @@ public class RecommendationService {
         if (lastAuthorRecommendation.isPresent()
                 && LocalDateTime.now()
                 .minusMonths(recommendationMinDistanceMonths)
-                .isAfter(lastAuthorRecommendation.get().getUpdatedAt())) {
+                .isBefore(lastAuthorRecommendation.get().getUpdatedAt())) {
             throw new DataValidationException(String.format(
                     "Less than %d months have passed since the last recommendation",
                     recommendationMinDistanceMonths));
