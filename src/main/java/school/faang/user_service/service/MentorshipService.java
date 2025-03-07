@@ -40,13 +40,24 @@ public class MentorshipService {
         User mentor = mentorshipRepository.findById(mentorId)
                 .orElseThrow(() -> new RuntimeException("Mentor doesn't exists"));
 
-        boolean removed = mentor.getMentees().removeIf(mentee -> mentee.getId() == menteeId);
+        boolean removedMentee = mentor.getMentees().removeIf(mentee -> mentee.getId() == menteeId);
 
-        if (!removed) {
+        if (!removedMentee) {
             log.error("Mentee with id {} not found for mentor with id {} ", menteeId, mentorId);
             throw new RuntimeException("Mentee not found  for given mentor");
         }
 
         userRepository.save(mentor);
+    }
+
+    public void deleteMentor(long mentorId, long menteeId) {
+        User mentee = mentorshipRepository.findById(menteeId)
+                .orElseThrow(() -> new RuntimeException("Mentee doesn't exists"));
+
+        boolean removedMentor = mentee.getMentors().removeIf(mentor -> mentor.getId() == mentorId);
+
+        if (!removedMentor) {
+            log.error("Mentor with id {} not found for mentee with id {} ", mentorId, menteeId);
+        }
     }
 }
