@@ -18,6 +18,7 @@ public class SkillService {
 
     private final SkillRepository skillRepository;
     private final SkillMapper skillMapper;
+    private final int MIN_SKILL_OFFERS = 3;
 
     public SkillDto create(SkillDto skill) {
         if (skillRepository.existsByTitle(skill.getTitle())) {

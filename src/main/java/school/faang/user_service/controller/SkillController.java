@@ -6,7 +6,6 @@ import school.faang.user_service.dto.skill.SkillCandidateDto;
 import school.faang.user_service.dto.skill.SkillDto;
 import school.faang.user_service.service.SkillService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
