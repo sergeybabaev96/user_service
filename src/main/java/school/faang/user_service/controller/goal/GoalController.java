@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.SearchGoalDto;
-import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.service.goal.GoalService;
 
 import java.util.List;
@@ -14,8 +13,8 @@ import java.util.List;
 public class GoalController {
     private final GoalService goalService;
 
-    public void createGoal(Long userId, Goal goal) {
-        validateByTitle(goal.getTitle());
+    public void createGoal(Long userId, GoalDto goal) {
+        validateByTitle(goal.title());
         goalService.createGoal(userId, goal);
     }
 

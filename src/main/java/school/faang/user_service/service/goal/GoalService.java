@@ -35,12 +35,13 @@ public class GoalService {
     private final GoalMapper goalMapper;
     private final List<GoalFilter> goalFilters;
 
-    public void createGoal(Long userId, Goal goal) {
+    public void createGoal(Long userId, GoalDto goal) {
         validateByExistsUserOnId(userId);
         validateByCountGoals(userId);
-        validateByExistsGoalSkills(goal);
-        goalRepository.save(goal);
-        log.info("User {} accepted new goal {}", userId, goal.getTitle());
+        Goal goalEntity = goalMapper.goalDtoToGoal(goal, getSkillsByIds(goal.skillIds()));
+        validateByExistsGoalSkills(goalEntity);
+        goalRepository.save(goalEntity);
+        log.info("User {} accepted new goal {}", userId, goalEntity.getTitle());
     }
 
     public void deleteGoal(Long goalId) {
@@ -50,17 +51,17 @@ public class GoalService {
     }
 
     public void updateGoal(Long goalId, GoalDto goal) {
-        validateByExistsGoalOnId(goalId);
-        Optional<Goal> goalOnId = goalRepository.findById(goalId);
-        validateByExistsGoal(goalOnId);
-        validateByCompletionStatus(goalOnId);
-        Goal goalEntity = goalMapper.goalDtoToGoal(goal, getSkillsByIds(goal.skillIds()));
-        validateByExistsGoalSkills(goalEntity);
-        goalRepository.save(goalEntity);
+        Goal existingGoal = validateAndGetGoal(goalId);
+        validateByCompletionStatus(existingGoal);
+        Goal updatedGoal = goalMapper.goalDtoToGoal(goal, getSkillsByIds(goal.skillIds()));
+        updatedGoal.setId(existingGoal.getId());
+        validateByExistsGoalSkills(updatedGoal);
+        goalRepository.save(updatedGoal);
         log.info("{} goal updated", goalId);
-        if (goalEntity.getStatus() == GoalStatus.COMPLETED) {
+
+        if (updatedGoal.getStatus() == GoalStatus.COMPLETED) {
             List<User> users = goalRepository.findUsersByGoalId(goalId);
-            achieveSkillsByUsers(users, goalEntity);
+            achieveSkillsByUsers(users, updatedGoal);
         }
     }
 
@@ -105,14 +106,13 @@ public class GoalService {
         }
     }
 
-    private void validateByExistsGoal(Optional<Goal> goal) {
-        if (goal.isEmpty()) {
-            throw new EntityNotFoundException("Goal not found");
-        }
+    private Goal validateAndGetGoal(Long goalId) {
+        return goalRepository.findById(goalId)
+                .orElseThrow(() -> new EntityNotFoundException("Goal not found"));
     }
 
-    private void validateByCompletionStatus(Optional<Goal> goal) {
-        if (goal.isPresent() && goal.get().getStatus() == GoalStatus.COMPLETED) {
+    private void validateByCompletionStatus(Goal goal) {
+        if (goal.getStatus() == GoalStatus.COMPLETED) {
             throw new GoalAlreadyCompletedException("Goal is already completed");
         }
     }
