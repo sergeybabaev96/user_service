@@ -53,7 +53,8 @@ public class EducationService {
     }
 
     public EducationDto getById(long educationId) {
-        Education education = educationRepository.findById(educationId).orElseThrow(() -> new DataValidationException("Образование не найдено."));
+        Education education = educationRepository.findById(educationId)
+                .orElseThrow(() -> new DataValidationException("Образование не найдено."));
         return educationMapper.toEducationDto(education);
     }
 }
