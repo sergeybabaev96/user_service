@@ -17,4 +17,5 @@ public class NotificationEventStartEvent implements Event {
     private Long ownerId;
     private List<Long> userIds;
     private LocalDateTime startTime;
+    private String message;
 }

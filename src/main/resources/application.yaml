@@ -85,6 +85,19 @@ premium:
 event:
   removal:
     cron: "0 0 6 * * SAT"
+  start-notification:
+    cron: "0 */10 * * * *"
+    intervals:
+      - time: 1440
+        message: "Event starts in 1 day"
+      - time: 300
+        message: "Event starts in 5 hours"
+      - time: 60
+        message: "Event starts in 1 hour"
+      - time: 10
+        message: "Event starts in 10 minutes"
+
+
 
 
 image:

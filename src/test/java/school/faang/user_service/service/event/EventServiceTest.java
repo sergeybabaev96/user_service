@@ -216,4 +216,17 @@ public class EventServiceTest {
         assertEquals(1, deletedEvents);
         verify(eventRepository, times(1)).deleteAllEndedInPast();
     }
+
+    @Test
+    public void testGetEventsStartingAt() {
+        LocalDateTime startTime = LocalDateTime.now();
+        LocalDateTime doubleStartTime = startTime.plusMinutes(10);
+        List<Event> events = List.of(new Event());
+
+        when(eventRepository.findEventsByStartTime(startTime, doubleStartTime)).thenReturn(events);
+
+        List<Event> result = eventService.getEventsStartingAt(startTime, doubleStartTime);
+
+        assertEquals(events, result);
+    }
 }

@@ -9,6 +9,9 @@ import school.faang.user_service.model.events.NotificationEventStartEvent;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface EventStartMapper {
     @Mapping(source = "eventId", target = "eventId")
-    @Mapping(source = "UserIds", target = "userIds")
+    @Mapping(source = "userIds", target = "userIds")
+    @Mapping(source = "ownerId", target = "ownerId")
+    @Mapping(source = "startTime", target = "startTime")
+    @Mapping(source = "message", target = "message")
     NotificationEventStartEvent toNotificationEventStartEvent(EventStartDto dto);
 }
