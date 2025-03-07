@@ -53,17 +53,21 @@ public class EducationService {
 
     public EducationDto updateEducation(long userId, @NonNull EducationDto educationDto) throws DataValidationException {
         yearFromValidation(educationDto);
-
-        Education education = educationRepository.findById(educationDto.getId()).orElseThrow(() -> {
-            log.error("Ошибка: данные об образовании по ID {} не найдены", educationDto.getId());
-            return new DataValidationException("Education is not found");
-        });
+        Education education = educationMapper.toEducation(getById(educationDto.getId()));
 
         updateEducationValidation(userId, education.getUser().getId());
         Education updatedEducation = educationMapper.toEducation(educationDto);
         updatedEducation.getUser().setId(education.getUser().getId());
 
         return educationMapper.toEducationDto(educationRepository.save(updatedEducation));
+    }
+
+    public EducationDto getById(long educationId) throws DataValidationException {
+
+        Education education = educationRepository.findById(educationId).orElseThrow(() -> {
+            log.error("Ошибка: данные об образовании по ID {} не найдены", educationId);
+            return new DataValidationException("Education is not found");
+        });
     }
 
 
