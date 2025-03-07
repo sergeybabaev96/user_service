@@ -76,7 +76,7 @@ public class EventService {
     public void delete(Long id) {
         var wasDeletedEvent = eventRepository.findById(id).orElseThrow(()
                 -> new DataValidationException("Event not found"));
-        log.info("Event deleted: {}", wasDeletedEvent);
+        log.info("Event deleted ID: {}", wasDeletedEvent.getId());
         eventRepository.delete(wasDeletedEvent);
     }
 
