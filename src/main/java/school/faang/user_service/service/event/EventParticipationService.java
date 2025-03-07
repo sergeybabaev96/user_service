@@ -2,19 +2,23 @@ package school.faang.user_service.service.event;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exceptions.EventParticipationException;
+import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.event.EventParticipationRepository;
 
 import java.util.List;
 
 @Service
 public class EventParticipationService {
-    private EventParticipationRepository participationRepository;
+    private final EventParticipationRepository participationRepository;
+    private final UserMapper userMapper;
 
     @Autowired
-    public EventParticipationService(EventParticipationRepository participationRepository) {
+    public EventParticipationService(EventParticipationRepository participationRepository, UserMapper userMapper) {
         this.participationRepository = participationRepository;
+        this.userMapper = userMapper;
     }
 
     public void registerParticipant(long eventId, long userId) {
@@ -33,8 +37,9 @@ public class EventParticipationService {
         }
     }
 
-    public List<User> getParticipant(long eventId) {
-        return participationRepository.findAllParticipantsByEventId(eventId);
+    public List<UserDto> getParticipant(long eventId) {
+        List<User> participants = participationRepository.findAllParticipantsByEventId(eventId);
+        return userMapper.userToUserDtos(participants);
     }
 
     public long getParticipantsCount(long eventId) {
