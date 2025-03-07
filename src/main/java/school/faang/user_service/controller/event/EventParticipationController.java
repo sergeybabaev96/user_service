@@ -10,7 +10,6 @@ import school.faang.user_service.validator.IdValidator;
 public class EventParticipationController {
     private final EventParticipationService eventParticipationService;
 
-
     public void registerParticipant(long eventId, long userId) {
         IdValidator.validateId(eventId);
         IdValidator.validateId(userId);
