@@ -68,6 +68,8 @@ public class EducationService {
             log.error("Ошибка: данные об образовании по ID {} не найдены", educationId);
             return new DataValidationException("Education is not found");
         });
+
+        return educationMapper.toEducationDto(education);
     }
 
 
