@@ -13,11 +13,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class MentorshipService {
     private final MentorshipRepository mentorshipRepository;
     private final MentorshipMapper mentorshipMapper;
     private final UserRepository userRepository;
+
+    public MentorshipService(MentorshipRepository mentorshipRepository, MentorshipMapper mentorshipMapper, UserRepository userRepository) {
+        this.mentorshipRepository = mentorshipRepository;
+        this.mentorshipMapper = mentorshipMapper;
+        this.userRepository = userRepository;
+    }
 
     public List<MentorshipDto> getMentees(long mentorId) {
         List<User> mentees = mentorshipRepository.findAllMenteesByMentorId(mentorId);
