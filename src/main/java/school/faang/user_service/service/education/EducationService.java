@@ -26,7 +26,7 @@ public class EducationService {
             throw new DataValidationException("Год должен быть меньше текущего.");
         }
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("Пользователь не найден."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new DataValidationException("Пользователь не найден."));
 
         Education education = educationMapper.toEducation(educationDto);
         education.setUser(user);
@@ -38,7 +38,7 @@ public class EducationService {
         if (educationDto.getYearFrom() >= Year.now().getValue()) {
             throw new DataValidationException("Год должен быть меньше текущего.");
         }
-        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("Пользователь не найден."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new DataValidationException("Пользователь не найден."));
         Education education = educationMapper.toEducation(educationDto);
         education.setUser(user);
         education = educationRepository.save(education);
@@ -46,7 +46,7 @@ public class EducationService {
     }
 
     public EducationDto getById(long educationId) {
-        Education education = educationRepository.findById(educationId).orElseThrow(() -> new IllegalArgumentException("Образование не найдено."));
+        Education education = educationRepository.findById(educationId).orElseThrow(() -> new DataValidationException("Образование не найдено."));
         return educationMapper.toEducationDto(education);
     }
 }
