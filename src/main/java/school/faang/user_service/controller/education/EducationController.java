@@ -13,8 +13,6 @@ public class EducationController {
 
     @PostMapping
     public EducationDto addEducation(long userId, EducationDto educationDto) {
-        EducationDto resultDto = new EducationDto();
-
-        return resultDto;
+        return educationService.addEducation(userId, educationDto);
     }
 }
