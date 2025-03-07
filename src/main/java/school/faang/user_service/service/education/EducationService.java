@@ -35,9 +35,6 @@ public class EducationService {
     }
 
     public EducationDto updateEducation(long userId, EducationDto educationDto) {
-        if (educationDto.getYearFrom() >= Year.now().getValue()) {
-            throw new DataValidationException("Год должен быть меньше текущего.");
-        }
 
         Education education = educationRepository.findById(educationDto.getId())
                 .orElseThrow(() -> new DataValidationException("Образование не найдено."));
