@@ -16,15 +16,16 @@ public class EventParticipationService {
     private final UserMapper userMapper;
 
     public void registerParticipant(long eventId, long userId) {
-
-        if (eventParticipationRepository.checkUserEventRegistration(eventId, userId) > 0) {
+        List<User> participants = eventParticipationRepository.findAllParticipantsByEventId(eventId);
+        if (participants.stream().anyMatch(user -> user.getId() == userId)) {
             throw new IllegalStateException("User is already registered for this event.");
         }
         eventParticipationRepository.register(eventId, userId);
     }
 
     public void unregisterParticipant(long eventId, long userId) {
-        if (eventParticipationRepository.checkUserEventRegistration(eventId, userId) == 0) {
+        List<User> participants = eventParticipationRepository.findAllParticipantsByEventId(eventId);
+        if (!(participants.stream().anyMatch(user -> user.getId() == userId))) {
             throw new IllegalStateException("User is not registered for this event.");
         }
         eventParticipationRepository.unregister(eventId, userId);
