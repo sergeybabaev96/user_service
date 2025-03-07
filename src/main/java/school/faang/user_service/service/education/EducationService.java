@@ -60,9 +60,10 @@ public class EducationService {
         });
 
         updateEducationValidation(userId, education.getUser().getId());
+        Education updatedEducation = educationMapper.toEducation(educationDto);
+        updatedEducation.getUser().setId(education.getUser().getId());
 
-        return educationDto;
-
+        return educationMapper.toEducationDto(educationRepository.save(updatedEducation));
     }
 
 
