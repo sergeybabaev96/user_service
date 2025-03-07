@@ -25,8 +25,11 @@ public class SubscriptionService {
     private final List<UserFilter> userFilters;
 
     public void followUser(long followerId, long followeeId) {
+        if (followerId == followeeId) {
+            throw new DataValidationException("Нельзя подписаться на себя.");
+        }
         if (repository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
-            throw new DataValidationException("%d уже подписан на %d.", followerId, followeeId);
+            throw new DataValidationException("{} уже подписан на {}.", followerId, followeeId);
         } else {
             repository.followUser(followerId, followeeId);
             log.info("Пользователь: {} подписался на пользователя: {}.", followerId, followeeId);
@@ -34,8 +37,12 @@ public class SubscriptionService {
     }
 
     public void unfollowUser(long followerId, long followeeId) {
-        repository.unfollowUser(followerId, followeeId);
-        log.info("Пользователь: {} отписался от пользователя: {}.", followerId, followeeId);
+        if (followerId == followeeId) {
+            throw new DataValidationException("Нельзя отписаться от себя.");
+        } else {
+            repository.unfollowUser(followerId, followeeId);
+            log.info("Пользователь: {} отписался от пользователя: {}.", followerId, followeeId);
+        }
     }
 
     public List<UserDto> getFollowers(long followeeId, UserFilterDto filter) {
