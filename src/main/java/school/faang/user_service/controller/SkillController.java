@@ -9,7 +9,7 @@ import school.faang.user_service.service.SkillService;
 @RequiredArgsConstructor
 public class SkillController {
 
-    private final SkillService skillService;
+    private final SkillService skillService;// Это бин класса SkillService
 
     public SkillDto create(SkillDto skill) {
         validateSkill(skill);
@@ -21,5 +21,9 @@ public class SkillController {
         if (skill.getTitle() == null || skill.getTitle().isBlank()) {
             throw new IllegalArgumentException("Skill title cannot be empty");
         }
+    }
+
+    public void getUserSkills(long userId) {
+        skillService.getUserSkills(userId);
     }
 }

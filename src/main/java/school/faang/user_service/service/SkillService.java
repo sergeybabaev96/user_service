@@ -8,6 +8,9 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.SkillMapper;
 import school.faang.user_service.repository.SkillRepository;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class SkillService {
@@ -22,5 +25,10 @@ public class SkillService {
         Skill entity = skillMapper.toEntity(skill);
         entity = skillRepository.save(entity);
         return skillMapper.toDto(entity);
+    }
+
+    public List<SkillDto> getUserSkills(long userId) {
+        List<Skill> skills = skillRepository.findAllByUserId(userId);
+        return skills.stream().map(skillMapper::toDto).collect(Collectors.toList());
     }
 }
