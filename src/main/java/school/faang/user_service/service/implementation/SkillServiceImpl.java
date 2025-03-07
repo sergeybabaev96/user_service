@@ -87,7 +87,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
     private void validateSkill(SkillDto skillDto) {
-        if (Objects.isNull(skillDto) || Objects.isNull(skillDto.getTitle()) || skillDto.getTitle().trim().isEmpty()) {
+        if (Objects.isNull(skillDto) || Objects.isNull(skillDto.getTitle()) || skillDto.getTitle().isBlank()) {
             throw new DataValidationException("Skill title is empty");
         }
     }
