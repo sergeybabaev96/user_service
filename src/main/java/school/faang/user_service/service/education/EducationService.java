@@ -50,7 +50,7 @@ public class EducationService {
         education.setYearTo(educationDto.getYearTo());
         education.setInstitution(educationDto.getInstitution());
         education.setEducationLevel(educationDto.getEducationLevel());
-        education.setSpecialization(education.getSpecialization());
+        education.setSpecialization(educationDto.getSpecialization());
 
         education = educationRepository.save(education);
         return educationMapper.toEducationDto(education);
