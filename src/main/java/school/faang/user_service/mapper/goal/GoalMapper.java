@@ -1,4 +1,4 @@
-package school.faang.user_service.mapper;
+package school.faang.user_service.mapper.goal;
 
 
 import org.mapstruct.Mapper;
@@ -15,7 +15,7 @@ public interface GoalMapper {
 
     @Mapping(target = "parentId", source = "parent.id")
     @Mapping(target = "skillIds", source = "skillsToAchieve", expression = "java(skillsToIds(skillsToAchieve))")
-    @Mapping(target = ) //todo,добавить   private List<Long> usersId;
+   // @Mapping(target = ) //todo,добавить   private List<Long> usersId;
     GoalDto toDto(Goal goal);
 
     @Mapping(target = "parent.id", ignore = true)
