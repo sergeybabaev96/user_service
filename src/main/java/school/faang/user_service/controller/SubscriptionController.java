@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import school.faang.user_service.dto.UserDto;
-import school.faang.user_service.dto.UserFilterDto;
+import school.faang.user_service.dto.FollowerResponse;
+import school.faang.user_service.dto.UserFilterRequest;
 import school.faang.user_service.service.SubscriptionService;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class SubscriptionController {
     }
 
     @GetMapping(value = "/followers/my")
-    public List<UserDto> getFollowing(@NotNull @RequestParam Long followeeId, @RequestParam UserFilterDto filter) {
+    public List<FollowerResponse> getFollowing(@NotNull @RequestParam Long followeeId, @RequestParam UserFilterRequest filter) {
         return subscriptionService.getFollowing(followeeId, filter);
     }
 
@@ -41,7 +41,7 @@ public class SubscriptionController {
     }
 
     @GetMapping(value = "/followers/users/{id}")
-    public List<UserDto> getFollowers(@NotNull @PathVariable("id") Long id, @NotNull @RequestParam UserFilterDto filter) {
+    public List<FollowerResponse> getFollowers(@NotNull @PathVariable("id") Long id, @NotNull @RequestParam UserFilterRequest filter) {
         return subscriptionService.getFollowers(id, filter);
     }
 
