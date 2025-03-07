@@ -14,19 +14,22 @@ import java.util.Objects;
 public class GoalValidator {
     public void validateTitle(Goal goal) {
         if (goal.getTitle().isBlank()) {
-            log.error("Title can not be null or empty.", new IllegalArgumentException());
+            log.error("Title can not be null or empty.");
+            throw new IllegalArgumentException();
         }
     }
 
     public void validateSkillsToAchieve(Goal goal) {
         if (Objects.isNull(goal.getSkillsToAchieve()) || goal.getSkillsToAchieve().isEmpty()) {
-            log.error("Can not create goal without skills.", new IllegalArgumentException());
+            log.error("Can not create goal without skills.");
+            throw new IllegalArgumentException();
         }
     }
 
     public void validateSkillsExistInBase(List<Skill> goalSkills, List<Skill> existingSkills) {
         if (!new HashSet<>(existingSkills).containsAll(goalSkills)) {
-            log.error("Goal skills must be already exist.", new IllegalStateException());
+            log.error("Goal skills must be already exist.");
+            throw new IllegalStateException();
         }
     }
 }

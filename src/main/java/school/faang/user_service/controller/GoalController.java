@@ -49,14 +49,14 @@ public class GoalController {
 
     @GetMapping("/find-subtasks/{goalId}")
     public @ResponseBody ResponseEntity<List<GoalDto>>
-    findSubtasksByGoalId(@PathVariable long goalId, @RequestBody @NonNull SearchGoalDto searchGoalDto) {
+    findSubtasksByGoalId(@PathVariable long goalId, @NonNull SearchGoalDto searchGoalDto) {
         List<GoalDto> subtask = goalService.findSubtasksByGoalId(goalId, searchGoalDto);
         return new ResponseEntity<>(subtask, HttpStatus.OK);
     }
 
     @GetMapping("/find-goals-by-user/{userId}")
     public @ResponseBody ResponseEntity<List<GoalDto>>
-    getGoalsByUser(@PathVariable long userId, @RequestBody @NonNull SearchGoalDto searchGoalDto) {
+    getGoalsByUser(@PathVariable long userId, @NonNull SearchGoalDto searchGoalDto) {
         List<GoalDto> subtask = goalService.getGoalsByUser(userId, searchGoalDto);
         return new ResponseEntity<>(subtask, HttpStatus.OK);
     }

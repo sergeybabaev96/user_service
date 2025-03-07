@@ -40,7 +40,8 @@ public class GoalService {
         goalValidator.validateTitle(goal);
         goalValidator.validateSkillsToAchieve(goal);
         if (goalRepository.countActiveGoalsPerUser(userId) == ACTIVE_GOALS_COUNT) {
-            log.error("User can has only {} active goals.", ACTIVE_GOALS_COUNT, new IllegalStateException());
+            log.error("User can has only {} active goals.", ACTIVE_GOALS_COUNT);
+            throw new IllegalStateException();
         }
         checkSkillsExistByUserId(userId, goal);
         Long parentId = goal.getParent().getId() != null ? goal.getParent().getId() : 0L;
@@ -52,12 +53,14 @@ public class GoalService {
     public GoalDto updateGoal(Long goalId, GoalDto goalDto) {
         validateId(goalId);
         if (goalDto.getTitle().isBlank()) {
-            log.error("Title can not be null or empty.", new IllegalArgumentException());
+            log.error("Title can not be null or empty.");
+            throw new IllegalArgumentException();
         }
         Goal goalById = goalRepository.findById(goalId)
                 .orElseThrow(() -> new IllegalArgumentException("Goal not found."));
         if (goalById.getStatus().equals(GoalStatus.COMPLETED)) {
-            throw new RuntimeException("The goal status should not be completed during the update.");
+            log.error("The goal status should not be completed during the update.");
+            throw new RuntimeException();
         }
         Goal goal = goalMapper.toEntity(goalDto);
         goalValidator.validateSkillsToAchieve(goal);
@@ -77,17 +80,23 @@ public class GoalService {
 
     public GoalDto deleteGoal(long goalId) {
         Goal goalById = goalRepository.findById(goalId)
-                .orElseThrow(() -> new IllegalArgumentException("Goal not found."));
+                .orElseThrow(() -> {
+                    log.error("Goal not found.");
+                    return new IllegalArgumentException();
+                });
         goalRepository.deleteById(goalId);
         return goalMapper.toDto(goalById);
     }
 
     public List<GoalDto> findSubtasksByGoalId(long goalId, SearchGoalDto searchGoalDto) {
         Stream<Goal> subTasks = Optional.ofNullable(goalRepository.findByParent(goalId))
-                .orElseThrow(() -> new IllegalArgumentException("Subtasks not found."));
+                .orElseThrow(() -> {
+                    log.error("Subtasks not found.");
+                    return new IllegalArgumentException();
+                });
         for (GoalFilter goalFilter : goalFilters) {
             if (goalFilter.isApplicable(searchGoalDto)) {
-                goalFilter.apply(subTasks, searchGoalDto);
+                subTasks = goalFilter.apply(subTasks, searchGoalDto);
             }
         }
         return subTasks.map(goalMapper::toDto).toList();
@@ -95,10 +104,13 @@ public class GoalService {
 
     public List<GoalDto> getGoalsByUser(long userId, SearchGoalDto searchGoalDto) {
         Stream<Goal> goalsByUserId = Optional.ofNullable(goalRepository.findGoalsByUserId(userId))
-                .orElseThrow(() -> new IllegalArgumentException("Goals by user id not found."));
+                .orElseThrow(() -> {
+                    log.error("Goals by user id not found.");
+                    return new IllegalArgumentException();
+                });
         for (GoalFilter goalFilter : goalFilters) {
             if (goalFilter.isApplicable(searchGoalDto)) {
-                goalFilter.apply(goalsByUserId, searchGoalDto);
+                goalsByUserId = goalFilter.apply(goalsByUserId, searchGoalDto);
             }
         }
         return goalsByUserId.map(goalMapper::toDto).toList();
@@ -106,14 +118,18 @@ public class GoalService {
 
     private void validateId(Long id) {
         if (Objects.isNull(id)) {
-            log.error("Id can not be null.", new IllegalArgumentException());
+            log.error("Id can not be null.");
+            throw new IllegalArgumentException();
         }
     }
 
     private void checkSkillsExistByUserId(Long userId, Goal goal) {
         List<Skill> goalSkills = goal.getSkillsToAchieve();
         List<Skill> existingSkills = Optional.ofNullable(skillService.findSkillsByUserId(userId))
-                .orElseThrow(() -> new IllegalArgumentException("Skills not found for this user id."));
+                .orElseThrow(() -> {
+                    log.error("Skills not found for this user id.");
+                    return new IllegalArgumentException();
+                });
         goalValidator.validateSkillsExistInBase(goalSkills, existingSkills);
     }
 
@@ -128,7 +144,10 @@ public class GoalService {
     private void checkSkillsExistByGoalId(Long goalId, Goal goal) {
         List<Skill> goalSkills = goal.getSkillsToAchieve();
         List<Skill> existingSkills = Optional.ofNullable(skillService.findSkillsByGoalId(goalId))
-                .orElseThrow(() -> new IllegalArgumentException("Skills not found for this goal id."));
+                .orElseThrow(() -> {
+                    log.error("Skills not found for this goal id.");
+                    return new IllegalArgumentException();
+                });
         goalValidator.validateSkillsExistInBase(goalSkills, existingSkills);
     }
 
