@@ -56,12 +56,12 @@ public class EventParticipationService {
         return eventParticipationRepository.countParticipants(eventId);
     }
 
-    public void validateDateById(Long eventId, Long userId) {
+    private void validateDateById(Long eventId, Long userId) {
         userValidator.checkUserExistsById(userId);
         eventValidator.checkEventExistsById(eventId);
     }
 
-    public boolean checkExistsByEventIdAndUserId(Long eventId, Long userId) {
+    private boolean checkExistsByEventIdAndUserId(Long eventId, Long userId) {
         return eventParticipationRepository.findAllParticipantsByEventId(eventId).stream()
                 .anyMatch(user -> user.getId().equals(userId));
     }
