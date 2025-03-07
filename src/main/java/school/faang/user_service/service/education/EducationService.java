@@ -22,11 +22,22 @@ public class EducationService {
     private final EducationRepository educationRepository;
     private final EducationMapper educationMapper;
 
-    public EducationDto addEducation(long userId, @NonNull EducationDto educationDto) throws DataValidationException {
-
+    private static void yearFromValidation(@NonNull EducationDto educationDto) throws DataValidationException {
         if (educationDto.getYearFrom() > Year.now().getValue()) {
-            throw new DataValidationException("Год начала обучения не может быть меньше текущего года");
+            log.error("Ошибка: год начала обучения не может быть меньше текущего года");
+            throw new DataValidationException("The start date of studies is too early");
         }
+    }
+
+    private static void updateEducationValidation(long userId, long userIdInEntity) throws DataValidationException {
+        if (userId != userIdInEntity) {
+            log.error("Ошибка: пользователь с ID {} пытается обновить информацию по другому пользователю", userId);
+            throw new DataValidationException("User tried update other user's data");
+        }
+    }
+
+    public EducationDto addEducation(long userId, @NonNull EducationDto educationDto) throws DataValidationException {
+        yearFromValidation(educationDto);
 
         User user = userRepository.findById(userId).orElseThrow(() -> {
             log.error("Ошибка: пользователь с ID {} не найден", userId);
@@ -37,8 +48,22 @@ public class EducationService {
         education.getUser().setId(user.getId());
 
         Education updatedEducation = educationRepository.save(education);
-
         return educationMapper.toEducationDto(updatedEducation);
     }
+
+    public EducationDto updateEducation(long userId, @NonNull EducationDto educationDto) throws DataValidationException {
+        yearFromValidation(educationDto);
+
+        Education education = educationRepository.findById(educationDto.getId()).orElseThrow(() -> {
+            log.error("Ошибка: данные об образовании по ID {} не найдены", educationDto.getId());
+            return new DataValidationException("Education is not found");
+        });
+
+        updateEducationValidation(userId, education.getUser().getId());
+
+        return educationDto;
+
+    }
+
 
 }
