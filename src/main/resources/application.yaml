@@ -46,6 +46,8 @@ payment-service:
   url: localhost:9080/api
 
 user-service:
+  redis:
+    bought-premium-topic: "pubsub:bought-premium"
   api-version: /api/v1
   available-tariffs:
     super-user:
