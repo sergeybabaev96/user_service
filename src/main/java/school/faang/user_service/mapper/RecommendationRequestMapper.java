@@ -5,6 +5,8 @@ import org.mapstruct.Mapping;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.entity.recommendation.SkillRequest;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,9 +26,10 @@ public interface RecommendationRequestMapper {
     @Mapping(source = "receiver.id", target = "receiverId")
     RecommendationRequestDto toRecommendationRequestDto(RecommendationRequest recommendationRequest);
 
-
     default List<Long> mapSkillsToIds(List<SkillRequest> skills) {
         return skills != null ? skills.stream()
-                .map(SkillRequest::getId).collect(Collectors.toList()) : null;
+                .map(SkillRequest::getId)
+                .collect(Collectors.toList())
+                : Collections.emptyList();
     }
 }

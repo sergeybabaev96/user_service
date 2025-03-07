@@ -25,11 +25,11 @@ public class RecommendationRequestController {
     }
 
     public List<RecommendationRequestDto> getRecommendationRequests(RequestFilterDto filter) {
-        return recommendationRequestService.getRequest(filter);
+        return recommendationRequestService.getFilteredRecommendationRequests(filter);
     }
 
     public RecommendationRequestDto getRecommendationRequest(long id) {
-        return recommendationRequestService.getRequest(id);
+        return recommendationRequestService.getRecommendationRequestById(id);
     }
 
     public RecommendationRequestDto rejectRequest(long id, RejectionDto rejection) {

@@ -13,6 +13,7 @@ import school.faang.user_service.filter.recommendation.RecommendationRequestFilt
 import school.faang.user_service.mapper.RecommendationRequestMapper;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 import school.faang.user_service.service.UserService;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,9 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class RecommendationRequestService {
+
+    private static final LocalDateTime SIX_MONTHS_AGO = LocalDateTime.now().minusMonths(6);
+
     private final RecommendationRequestRepository recommendationRequestRepository;
     private final RecommendationRequestMapper recommendationRequestMapper;
     private final List<RecommendationRequestFilter> filters;
@@ -31,28 +35,26 @@ public class RecommendationRequestService {
         User requester = userService.getUserById(dto.requesterId());
         User receiver = userService.getUserById(dto.receiverId());
 
-
-        LocalDateTime sixMonthsAgo = LocalDateTime.now().minusMonths(6);
         Optional<RecommendationRequest> existingRequest = recommendationRequestRepository
-                .findByRequesterAndReceiverAndCreatedDateAfter(requester, receiver, sixMonthsAgo);
+                .findByRequesterAndReceiverAndCreatedDateAfter(requester, receiver, SIX_MONTHS_AGO);
 
         if (existingRequest.isPresent()) {
             throw new IllegalStateException("Recommendation request already sent within the last 6 months.");
         }
         RecommendationRequest request = recommendationRequestRepository
-                .create(requester.getId(), receiver.getId(), dto.message());
+                .create(dto.requesterId(), dto.receiverId(), dto.message());
         request.setSkills(skillRequestService.findByIds(dto.skillsId()));
 
         return recommendationRequestMapper.toRecommendationRequestDto(request);
     }
 
-    public RecommendationRequestDto getRequest(long id) {
+    public RecommendationRequestDto getRecommendationRequestById(long id) {
         return recommendationRequestRepository.findById(id)
                 .map(recommendationRequestMapper::toRecommendationRequestDto).orElseThrow(()
                         -> new NotFoundException("Recommendation request with ID " + id + " not found"));
     }
 
-    public List<RecommendationRequestDto> getRequest(RequestFilterDto dto) {
+    public List<RecommendationRequestDto> getFilteredRecommendationRequests(RequestFilterDto dto) {
         Stream<RecommendationRequest> recommendationRequestStream = recommendationRequestRepository.findAll().stream();
         for (RecommendationRequestFilter filter : filters) {
             if (filter.isApplicable(dto)) {
