@@ -4,7 +4,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,7 +35,7 @@ public class MentorshipRequestController {
             mentorshipRequestService.requestMentorship(mentorshipRequestDto);
             return ResponseEntity.ok("Request created successfully");
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage()); // 400
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -46,7 +45,7 @@ public class MentorshipRequestController {
             List<MentorshipRequestDto> requests = mentorshipRequestService.getRequests(filter);
             return ResponseEntity.ok(requests);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
@@ -56,9 +55,9 @@ public class MentorshipRequestController {
             mentorshipRequestService.acceptRequest(id);
             return ResponseEntity.ok("Request accepted");
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); // 404
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (MentorshipAlreadyExistsException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage()); // 409
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
 
@@ -68,7 +67,7 @@ public class MentorshipRequestController {
             mentorshipRequestService.rejectRequest(id, rejection);
             return ResponseEntity.ok("Request rejected");
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); // 404
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
