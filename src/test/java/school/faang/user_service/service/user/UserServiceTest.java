@@ -14,8 +14,6 @@ import org.springframework.data.util.Pair;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.dto.UserDto;
-import school.faang.user_service.dto.user.UserProfile;
-import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
 import school.faang.user_service.entity.event.Event;
@@ -28,8 +26,6 @@ import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.MentorshipService;
 import school.faang.user_service.service.s3.AvatarS3Service;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -38,14 +34,12 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -292,27 +286,5 @@ public class UserServiceTest {
 
         assertEquals(0, result.getTotalElements());
         assertEquals(userDtos, result.getContent());
-    }
-
-    @Test
-    void testGetUserProfile_UserExist() throws MalformedURLException {
-        user.setCountry(new Country());
-        URL avatarUrl = new URL("https://www.geeksforgeeks.org/variables-in-java/");
-        when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
-        when(userAvatarService.getUserAvatar(user)).thenReturn(avatarUrl);
-
-        UserProfile userProfile = userService.getUserProfile(userId);
-
-        assertNotNull(userProfile);
-        assertEquals(userId, userProfile.getUserId());
-    }
-
-    @Test
-    void testGetUserProfile_UserNotExist() {
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        assertThrows(IllegalArgumentException.class, () -> userService.getUserProfile(userId));
-
-        verifyNoInteractions(userAvatarService);
     }
 }

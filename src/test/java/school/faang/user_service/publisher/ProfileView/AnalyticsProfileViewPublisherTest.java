@@ -1,4 +1,4 @@
-package school.faang.user_service.publisher;
+package school.faang.user_service.publisher.ProfileView;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,12 +10,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import school.faang.user_service.config.context.UserContext;
-import school.faang.user_service.dto.user.UserProfile;
+import school.faang.user_service.entity.User;
 import school.faang.user_service.event.AnalyticsProfileViewEvent;
+import school.faang.user_service.publisher.AnalyticsProfileViewPublisher;
 import school.faang.user_service.service.user.UserService;
 
 import java.time.LocalDateTime;
@@ -39,16 +41,17 @@ class AnalyticsProfileViewPublisherTest {
     @Mock
     private UserContext userContext;
 
+    @Spy
+    private ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule());
+
     @InjectMocks
     private AnalyticsProfileViewPublisher analyticsProfileViewPublisher;
-
-    @Mock
-    private ObjectMapper objectMapper;
 
     @Captor
     private ArgumentCaptor<String> captor;
 
-    private UserProfile userProfile;
+    private User user;
 
     @BeforeEach
     void setUp() {
@@ -56,15 +59,14 @@ class AnalyticsProfileViewPublisherTest {
                 analyticsProfileViewPublisher,
                 "analyticsProfileViewTopic",
                 "analytics_profile_view_topic");
-        userProfile = UserProfile.builder()
-                .userId(123L)
+        user = User.builder()
+                .id(123L)
                 .build();
     }
 
     @Test
     void testPublishEvent_Success() throws JsonProcessingException {
         when(userContext.getUserId()).thenReturn(456L);
-        when(userService.userExists(456L)).thenReturn(true);
 
         AnalyticsProfileViewEvent event = AnalyticsProfileViewEvent.builder()
                 .userId(123L)
@@ -72,13 +74,12 @@ class AnalyticsProfileViewPublisherTest {
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        analyticsProfileViewPublisher.publishEvent(userProfile);
+        analyticsProfileViewPublisher.publishEvent(user);
 
         verify(kafkaTemplate).send(anyString(), captor.capture());
 
         String capturedJson = captor.getValue();
 
-        ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         AnalyticsProfileViewEvent capturedEvent = objectMapper.readValue(capturedJson, AnalyticsProfileViewEvent.class);
 
         assertNotNull(capturedEvent);
@@ -88,22 +89,10 @@ class AnalyticsProfileViewPublisherTest {
     }
 
     @Test
-    void testPublishEvent_UserExistsAndEqualIds() {
-        when(userContext.getUserId()).thenReturn(123L);
-        when(userService.userExists(123L)).thenReturn(true);
+    void testPublishEvent_UserEqualIds() {
+        when(userContext.getUserId()).thenReturn(user.getId());
 
-        analyticsProfileViewPublisher.publishEvent(userProfile);
-
-        verifyNoInteractions(kafkaTemplate);
-    }
-
-    @Test
-    void testPublishEvent_UserDoesNotExist() {
-
-        when(userContext.getUserId()).thenReturn(456L);
-        when(userService.userExists(456L)).thenReturn(false);
-
-        analyticsProfileViewPublisher.publishEvent(userProfile);
+        analyticsProfileViewPublisher.publishEvent(user);
 
         verifyNoInteractions(kafkaTemplate);
     }

@@ -12,10 +12,10 @@ import school.faang.user_service.annotation.PublishProfileViewEvent;
 import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.avatar.AvatarType;
-import school.faang.user_service.dto.user.UserProfile;
 import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
+import school.faang.user_service.entity.contact.PreferredContact;
 import school.faang.user_service.entity.contact.PreferredContact;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.event.EventStatus;
@@ -58,18 +58,15 @@ public class UserService {
         return userContext.getUserId();
     }
 
+    @PublishProfileViewEvent(events = AnalyticsProfileViewEvent.class)
+    @Transactional(readOnly = true)
     public User getUser(long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(String.format(USER_NOT_FOUND, id)));
     }
 
-    private void chooseNotificationMethode(Long userId, PreferredContact preferredContact) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException(String.format(USER_NOT_FOUND, userId)));
-        user.setPreference(preferredContact);
-        userRepository.save(user);
-    }
-
+    @PublishProfileViewEvent(events = AnalyticsProfileViewEvent.class)
+    @Transactional(readOnly = true)
     public List<User> getUsersByIds(List<User> users) {
         List<Long> userIds = users.stream()
                 .map(User::getId)
@@ -177,18 +174,11 @@ public class UserService {
         userRepository.save(currentUser);
     }
 
-    @PublishProfileViewEvent(events = AnalyticsProfileViewEvent.class)
-    @Transactional(readOnly = true)
-    public UserProfile getUserProfile(Long userId) {
-        User user = getUserById(userId);
-        return UserProfile.builder()
-                .userId(userId)
-                .username(user.getUsername())
-                .aboutMe(user.getAboutMe())
-                .country(user.getCountry().getTitle())
-                .experience(user.getExperience())
-                .avatarUrl(userAvatarService.getUserAvatar(user).toString())
-                .build();
+    private void chooseNotificationMethode(Long userId, PreferredContact preferredContact) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException(String.format(USER_NOT_FOUND, userId)));
+        user.setPreference(preferredContact);
+        userRepository.save(user);
     }
 
     private void deactivateUserDependencies(Long userId) {

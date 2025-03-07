@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.avatar.AvatarType;
-import school.faang.user_service.dto.user.UserProfile;
 import school.faang.user_service.dto.user.UserRegistrationDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapper;
@@ -123,11 +122,5 @@ public class UserController {
     @PostMapping("/page")
     public Page<UserDto> getUsersByIds(@RequestParam("ids") List<Long> ids, Pageable pageable) {
         return userService.getUsersByIds(ids, pageable);
-    }
-
-    @GetMapping("/{userId}/profile")
-    public ResponseEntity<UserProfile> getUserProfile(@PathVariable @Positive Long userId) {
-        UserProfile userProfile = userService.getUserProfile(userId);
-        return ResponseEntity.ok(userProfile);
     }
 }
