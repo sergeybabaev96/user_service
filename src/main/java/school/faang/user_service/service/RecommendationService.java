@@ -155,7 +155,7 @@ public class RecommendationService {
     private void validateSkillOffers(RecommendationDto recommendation) {
         var existedSkillsInRecommendation = recommendation.skillOffers()
                 .stream()
-                .filter(dto -> skillRepository.findById(dto.skillId()).isPresent())
+                .filter(dto -> skillRepository.existsById(dto.skillId()))
                 .toList();
         if (existedSkillsInRecommendation.size() != recommendation.skillOffers().stream().distinct().count()) {
             throw new DataValidationException(String.format(
