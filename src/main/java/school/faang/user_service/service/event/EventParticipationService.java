@@ -3,6 +3,7 @@ package school.faang.user_service.service.event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.event.EventParticipationRepository;
@@ -21,6 +22,7 @@ public class EventParticipationService {
     private final UserValidator userValidator;
     private final EventValidator eventValidator;
 
+    @Transactional
     public void registerParticipant(Long eventId, Long userId) {
         validateDateById(eventId, userId);
 
@@ -32,6 +34,7 @@ public class EventParticipationService {
         eventParticipationRepository.register(eventId, userId);
     }
 
+    @Transactional
     public void unregisterParticipant(Long eventId, Long userId) {
         validateDateById(eventId, userId);
 
