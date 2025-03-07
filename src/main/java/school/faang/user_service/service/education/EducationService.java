@@ -33,4 +33,20 @@ public class EducationService {
         education = educationRepository.save(education);
         return educationMapper.toEducationDto(education);
     }
+
+    public EducationDto updateEducation(long userId, EducationDto educationDto) {
+        if (educationDto.getYearFrom() >= Year.now().getValue()) {
+            throw new DataValidationException("Год должен быть меньше текущего.");
+        }
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("Пользователь не найден."));
+        Education education = educationMapper.toEducation(educationDto);
+        education.setUser(user);
+        education = educationRepository.save(education);
+        return educationMapper.toEducationDto(education);
+    }
+
+    public EducationDto getById(long educationId) {
+        Education education = educationRepository.findById(educationId).orElseThrow(() -> new IllegalArgumentException("Образование не найдено."));
+        return educationMapper.toEducationDto(education);
+    }
 }

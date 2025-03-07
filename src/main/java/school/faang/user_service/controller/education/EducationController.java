@@ -15,4 +15,13 @@ public class EducationController {
     public EducationDto addEducation(long userId, EducationDto educationDto) {
         return educationService.addEducation(userId, educationDto);
     }
+
+    @PostMapping
+    public EducationDto updateEducation(long userId, EducationDto educationDto) {
+        return educationService.updateEducation(userId, educationDto);
+    }
+
+    public EducationDto getById(long educationId) {
+        return educationService.getById(educationId);
+    }
 }
