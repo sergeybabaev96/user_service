@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.event.EventDTO;
+import school.faang.user_service.dto.event.EventFilterDTO;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidationException;
@@ -12,6 +13,7 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -20,18 +22,19 @@ public class EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final EventMapper eventMapper;
-    private final EventUtil eventUtil;
+    private final EventUtil eventUtil = new EventUtil();
 
     @Autowired
-    public EventService(EventRepository eventRepository1, UserRepository userRepository, EventMapper eventMapper, EventUtil eventUtil) {
+    public EventService(EventRepository eventRepository1, UserRepository userRepository, EventMapper eventMapper) {
         this.eventRepository = eventRepository1;
         this.userRepository = userRepository;
         this.eventMapper = eventMapper;
-        this.eventUtil = eventUtil;
     }
 
     public EventDTO create(EventDTO event) {
-        if (eventUtil.isValid(event) && eventUtil.checkOwnerSkills(event)) {
+        User eventOwner = userRepository.findById(event.getOwnerId())
+                .orElseThrow(() -> new DataValidationException("Owner not found"));
+        if (eventUtil.isValid(event) && eventUtil.checkOwnerSkills(eventOwner, event)) {
             Event entityEvent = eventMapper.eventDTOToEvent(event);
             //убеждаемся что владелец точно установился для формирования правильных связей в БД.
             entityEvent.setOwner(userRepository.findById(event.getOwnerId())
@@ -58,7 +61,7 @@ public class EventService {
         }
         User eventOwner = userRepository.findById(event.getOwnerId())
                 .orElseThrow(() -> new DataValidationException("Owner not found"));
-        if (!eventUtil.checkOwnerSkills(event) || !eventUtil.isValid(event)) {
+        if (!eventUtil.checkOwnerSkills(eventOwner, event) || !eventUtil.isValid(event)) {
             throw new DataValidationException("Skills are empty or not match");
         }
         // Используем маппер для обновления существующего объекта
@@ -84,5 +87,13 @@ public class EventService {
     public List<EventDTO> getParticipatedEvents(Long userId) {
         List<Event> userEvents = eventRepository.findParticipatedEventsByUserId(userId);
         return eventMapper.eventsToEventDTOs(userEvents);
+    }
+    public List<EventDTO> getEventsByFilter(EventFilterDTO filter) {
+        List<Event> eventsList = eventRepository.findAll();
+        Stream<EventDTO> filteredEventDTOs = eventMapper.eventsToEventDTOs(eventsList).stream()
+                .filter(eventDTO ->
+                        eventDTO.getLocation()
+                                .equals(filter.getLocation()));
+        return filteredEventDTOs.toList();
     }
 }

@@ -1,22 +1,13 @@
 package school.faang.user_service.service.event;
 
-import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.event.EventDTO;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.repository.UserRepository;
-
 import java.time.LocalDate;
 import java.util.List;
 
-@Component
 public class EventUtil {
-    private final UserRepository userRepository;
-
-    public EventUtil(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     public boolean isValid(EventDTO event) {
         LocalDate today = LocalDate.now();
@@ -35,9 +26,7 @@ public class EventUtil {
         return true;
     }
 
-    public boolean checkOwnerSkills(EventDTO event) {
-        User eventOwner = userRepository.findById(event.getOwnerId())
-                .orElseThrow(() -> new DataValidationException("Owner not found"));
+    public boolean checkOwnerSkills(User eventOwner, EventDTO event) {
         if (event.getRelatedSkills() != null) {
             //преобразуем навыки пользователя в их id, для дальнейшего сравнения
             List<Long> ownerSkillsIDs = eventOwner.getSkills().stream()
@@ -50,5 +39,4 @@ public class EventUtil {
             return false;
         }
     }
-
 }

@@ -3,6 +3,7 @@ package school.faang.user_service.controller.event;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import school.faang.user_service.dto.event.EventDTO;
+import school.faang.user_service.dto.event.EventFilterDTO;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.event.EventService;
 
@@ -48,5 +49,9 @@ public class EventController {
     @GetMapping("/participatedEvents/{userId}")
     public List<EventDTO> getParticipatedEvents(@PathVariable Long userId) {
         return eventService.getParticipatedEvents(userId);
+    }
+    @PostMapping("/filter")
+    public List<EventDTO> getEventsByFilter(@RequestBody EventFilterDTO filter) {
+        return eventService.getEventsByFilter(filter);
     }
 }
