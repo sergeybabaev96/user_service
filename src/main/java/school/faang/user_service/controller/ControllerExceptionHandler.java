@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import school.faang.user_service.common.Currency;
 import school.faang.user_service.dto.ErrorResponse;
 import school.faang.user_service.exception.*;
@@ -21,6 +22,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @ControllerAdvice
 public class ControllerExceptionHandler {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ErrorResponse handleEntityNotFoundException(MaxUploadSizeExceededException e) {
+        return new ErrorResponse("Превышен максимальный размер файла");
+    }
+
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(EntityNotFoundException.class)
     public ErrorResponse handleEntityNotFoundException(EntityNotFoundException e) {
