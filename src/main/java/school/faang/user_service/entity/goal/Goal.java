@@ -91,4 +91,9 @@ public class Goal {
             inverseJoinColumns = @JoinColumn(name = "skill_id")
     )
     private List<Skill> skillsToAchieve;
+
+    public Goal(Long parentId) {
+        this.parent = new Goal();
+        this.parent.setId(parentId);
+    }
 }

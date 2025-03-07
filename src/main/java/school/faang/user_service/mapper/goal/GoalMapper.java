@@ -21,8 +21,6 @@ public interface GoalMapper {
         if (parentId == null) {
             return null;
         }
-        Goal parent = new Goal();
-        parent.setId(parentId);
-        return parent;
+        return new Goal(parentId);
     }
 }

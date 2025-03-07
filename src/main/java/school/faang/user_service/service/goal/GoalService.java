@@ -47,11 +47,12 @@ public class GoalService {
     public void deleteGoal(Long goalId) {
         validateByExistsGoalOnId(goalId);
         goalRepository.deleteById(goalId);
-        log.info("{} goal deleted", goalId);
+        log.info("Goal with id: {} was deleted", goalId);
     }
 
     public void updateGoal(Long goalId, GoalDto goal) {
-        Goal existingGoal = validateAndGetGoal(goalId);
+        Goal existingGoal = goalRepository.findById(goalId)
+                .orElseThrow(() -> new EntityNotFoundException("Goal not found"));
         validateByCompletionStatus(existingGoal);
         Goal updatedGoal = goalMapper.goalDtoToGoal(goal, getSkillsByIds(goal.skillIds()));
         updatedGoal.setId(existingGoal.getId());
@@ -104,11 +105,6 @@ public class GoalService {
             throw new SkillLimitExceededException(
                     "There can be no more than " + GoalConstants.MAX_COUNT_GOALS_PER_USER + " goals.");
         }
-    }
-
-    private Goal validateAndGetGoal(Long goalId) {
-        return goalRepository.findById(goalId)
-                .orElseThrow(() -> new EntityNotFoundException("Goal not found"));
     }
 
     private void validateByCompletionStatus(Goal goal) {
