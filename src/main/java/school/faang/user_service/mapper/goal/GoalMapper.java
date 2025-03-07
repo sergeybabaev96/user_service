@@ -18,9 +18,6 @@ public interface GoalMapper {
     List<GoalDto> goalListToGoalDtoList(List<Goal> goalList);
 
     default Goal mapParent(Long parentId) {
-        if (parentId == null) {
-            return null;
-        }
-        return new Goal(parentId);
+        return parentId == null ? null : new Goal(parentId);
     }
 }

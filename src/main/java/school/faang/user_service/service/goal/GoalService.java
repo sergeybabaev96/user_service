@@ -78,16 +78,16 @@ public class GoalService {
 
     public List<GoalDto> findSubtasksByGoalId(Long goalId, SearchGoalDto searchGoalDto) {
         validateByExistsGoalOnId(goalId);
-        Stream<Goal> goals = goalRepository.findByParent(goalId);
-        Stream<Goal> filteredGoals = applyFiltersOnGoals(goals, searchGoalDto);
-        return goalMapper.goalListToGoalDtoList(filteredGoals.toList());
+        return goalMapper.goalListToGoalDtoList(applyFiltersOnGoals(
+                goalRepository.findByParent(goalId), searchGoalDto)
+                .toList());
     }
 
     public List<GoalDto> getGoalsByUserId(Long userId, SearchGoalDto searchGoalDto) {
         validateByExistsUserOnId(userId);
-        Stream<Goal> goals = goalRepository.findGoalsByUserId(userId);
-        Stream<Goal> filteredGoals = applyFiltersOnGoals(goals, searchGoalDto);
-        return goalMapper.goalListToGoalDtoList(filteredGoals.toList());
+        return goalMapper.goalListToGoalDtoList(applyFiltersOnGoals(
+                goalRepository.findGoalsByUserId(userId), searchGoalDto)
+                .toList());
     }
 
     private Stream<Goal> applyFiltersOnGoals(Stream<Goal> goals, SearchGoalDto searchGoalDto) {
