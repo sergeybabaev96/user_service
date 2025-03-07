@@ -18,7 +18,6 @@ public class SkillService {
 
     private final SkillRepository skillRepository;
     private final SkillMapper skillMapper;
-    private final int MIN_SKILL_OFFERS = 3;
 
     public SkillDto create(SkillDto skill) {
         if (skillRepository.existsByTitle(skill.getTitle())) {
@@ -34,7 +33,7 @@ public class SkillService {
         return skills.stream().map(skillMapper::toDto).collect(Collectors.toList());
     }
 
-    public List<SkillCandidateDto> getOfferedSkills(long userId){
+    public List<SkillCandidateDto> getOfferedSkills(long userId) {
         List<Skill> skills = skillRepository.findSkillsOfferedToUser(userId);
         return skills.stream().map(skillMapper::toSkillCandidateDto).collect(Collectors.toList());
     }

@@ -10,7 +10,6 @@ import school.faang.user_service.entity.Skill;
 public interface SkillMapper {
     SkillDto toDto(Skill skill);
 
-    SkillMapper INSTANCE = Mappers.getMapper(SkillMapper.class);
     Skill toEntity(SkillDto skillDto);
 
     SkillCandidateDto toSkillCandidateDto(Skill skill);
