@@ -13,7 +13,6 @@ import school.faang.user_service.repository.recommendation.RecommendationReposit
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import school.faang.user_service.utils.ValidationRecommendationUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -25,28 +24,31 @@ public class RecommendationService {
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
 
     public RecommendationDto create(RecommendationDto recommendationDto) {
+        ValidationRecommendationUtils.validateRecommendationContent(recommendationDto.getContent());
+        ValidationRecommendationUtils.validateSkills(recommendationDto, skillOfferRepository.findAllSkillOffers());
+
         Recommendation recommendation = recommendationMapper.toRecommendation(recommendationDto);
-        Iterable<SkillOffer> skillOffersIterable = skillOfferRepository.findAll();
-        List<SkillOffer> allSkillOffers = new ArrayList<>();
-        skillOffersIterable.forEach(allSkillOffers::add);
+        ValidationRecommendationUtils.validateRecommendationDate(recommendation);
 
-        ValidationRecommendationUtils.validateRecommendationContent(recommendationDto);
-        ValidationRecommendationUtils.validateRecommendationDate(recommendationDto);
-        ValidationRecommendationUtils.validateSkills(recommendationDto, allSkillOffers);
-
-        createInSkillOfferRepository(recommendation);
-        addGuarantee(recommendation);
+        createSkillOffer(recommendation);
         createInRecommendationRepository(recommendation);
         return recommendationMapper.toRecommendationDto(recommendation);
     }
 
-    private void createInSkillOfferRepository(Recommendation recommendation) {
+    private void createSkillOffer(Recommendation recommendation) {
+        List<SkillOffer> skillOfferListOfReceiver =
+                skillOfferRepository.findAllByUserId(recommendation.getReceiver().getId());
         List<SkillOffer> skillOffersOfRecommendation = recommendation.getSkillOffers();
         for (SkillOffer skillOffer : skillOffersOfRecommendation) {
-            if (skillOffer == null) {
-                throw new DataValidationException("Skill offer can't be null");
-            }
             skillOfferRepository.create(skillOffer.getSkill().getId(), recommendation.getId());
+            if (skillOfferListOfReceiver.contains(skillOffer)) {
+                UserSkillGuarantee userSkillGuarantee = new UserSkillGuarantee();
+                userSkillGuarantee.setUser(recommendation.getReceiver());
+                userSkillGuarantee.setSkill(skillOffer.getSkill());
+                userSkillGuarantee.setGuarantor(recommendation.getAuthor());
+                skillOffer.getSkill().setGuarantees(List.of(userSkillGuarantee));
+                userSkillGuaranteeRepository.save(userSkillGuarantee);
+            }
         }
     }
 
@@ -60,20 +62,5 @@ public class RecommendationService {
         }
         String content = recommendation.getContent();
         recommendationRepository.create(authorId, receiverId, content);
-    }
-
-    private void addGuarantee(Recommendation recommendation) {
-        List<SkillOffer> skillOfferListOfReceiver =
-                skillOfferRepository.findAllByUserId(recommendation.getReceiver().getId());
-        for (SkillOffer skillOfferOfRecommendation : recommendation.getSkillOffers()) {
-            if (skillOfferListOfReceiver.contains(skillOfferOfRecommendation)) {
-                UserSkillGuarantee userSkillGuarantee = new UserSkillGuarantee();
-                userSkillGuarantee.setUser(recommendation.getReceiver());
-                userSkillGuarantee.setSkill(skillOfferOfRecommendation.getSkill());
-                userSkillGuarantee.setGuarantor(recommendation.getAuthor());
-                skillOfferOfRecommendation.getSkill().setGuarantees(List.of(userSkillGuarantee));
-                userSkillGuaranteeRepository.save(userSkillGuarantee);
-            }
-        }
     }
 }
