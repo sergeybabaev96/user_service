@@ -20,4 +20,8 @@ public class MentorshipController {
     public List<UserDto> getMentors(long userid) {
         return mentorshipService.getMentors(userid);
     }
+
+    public void deleteMentee(long menteeId, long mentorId){
+        mentorshipService.deleteMentee(menteeId, mentorId);
+    }
 }
