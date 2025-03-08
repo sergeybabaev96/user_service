@@ -84,10 +84,12 @@ public class EventService {
         List<Event> userEvents = eventRepository.findAllByUserId(ownerId);
         return eventMapper.eventsToEventDTOs(userEvents);
     }
+
     public List<EventDTO> getParticipatedEvents(Long userId) {
         List<Event> userEvents = eventRepository.findParticipatedEventsByUserId(userId);
         return eventMapper.eventsToEventDTOs(userEvents);
     }
+
     public List<EventDTO> getEventsByFilter(EventFilterDTO filter) {
         List<Event> eventsList = eventRepository.findAll();
         Stream<EventDTO> filteredEventDTOs = eventMapper.eventsToEventDTOs(eventsList).stream()
