@@ -1,8 +1,8 @@
 package school.faang.user_service.service.education;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.EducationDto;
 import school.faang.user_service.entity.Education;
 import school.faang.user_service.entity.User;
@@ -20,7 +20,7 @@ public class EducationService {
     private final EducationRepository educationRepository;
     private final EducationMapper educationMapper;
 
-    @SneakyThrows
+    @Transactional
     public EducationDto addEducation(long userId, EducationDto educationDto) {
         if (educationDto.getYearFrom() >= Year.now().getValue()) {
             throw new DataValidationException("Год должен быть меньше текущего.");
@@ -34,7 +34,16 @@ public class EducationService {
         return educationMapper.toEducationDto(education);
     }
 
+    @Transactional
     public EducationDto updateEducation(long userId, EducationDto educationDto) {
+
+        if (educationDto == null) {
+            throw new DataValidationException("Данные об образовании не могут быть пустыми.");
+        }
+
+        if (educationDto.getYearFrom() < Year.now().getValue()) {
+            throw new DataValidationException("Год должен быть меньше текущего.");
+        }
 
         Education education = educationRepository.findById(educationDto.getId())
                 .orElseThrow(() -> new DataValidationException("Образование не найдено."));
@@ -50,9 +59,13 @@ public class EducationService {
 
         education = educationRepository.save(education);
         return educationMapper.toEducationDto(education);
+
     }
 
     public EducationDto getById(long educationId) {
+        if (educationId <= 0) {
+            throw new DataValidationException("Некорректный идентификатор образования.");
+        }
         Education education = educationRepository.findById(educationId)
                 .orElseThrow(() -> new DataValidationException("Образование не найдено."));
         return educationMapper.toEducationDto(education);
