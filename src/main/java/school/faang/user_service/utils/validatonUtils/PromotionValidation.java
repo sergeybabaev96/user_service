@@ -3,8 +3,8 @@ package school.faang.user_service.utils.validatonUtils;
 import lombok.extern.slf4j.Slf4j;
 import school.faang.user_service.dto.promotion.EventDto;
 import school.faang.user_service.dto.promotion.UserDto;
-import school.faang.user_service.service.promotion.EventPromotionType;
-import school.faang.user_service.service.promotion.UserPromotionType;
+import school.faang.user_service.service.promotion.event.EventPromotionType;
+import school.faang.user_service.service.promotion.user.UserPromotionType;
 
 import java.time.LocalDateTime;
 

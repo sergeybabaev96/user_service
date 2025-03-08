@@ -16,8 +16,9 @@ public interface EventPromotionRepository extends JpaRepository<EventPromotion, 
                 AND e.startDate = :startDate
                 AND e.endDate = :endDate
                 AND e.percentage = :percentage
+                AND e.feedRank = :feedRank
             """)
-    EventPromotion findSamePromotion(Long eventId, LocalDateTime startDate, LocalDateTime endDate, Integer percentage);
+    EventPromotion findSamePromotion(Long eventId, LocalDateTime startDate, LocalDateTime endDate, Integer percentage, Integer feedRank);
 
     @Query("""
             SELECT e
@@ -37,6 +38,6 @@ public interface EventPromotionRepository extends JpaRepository<EventPromotion, 
                 AND e.startDate = :startDate
                 AND e.endDate = :endDate
             """)
-    int updatePromotionPercentage(Long eventId, LocalDateTime startDate, LocalDateTime endDate, Integer percentage);
+    void updatePromotionPercentage(Long eventId, LocalDateTime startDate, LocalDateTime endDate, Integer percentage);
 
 }

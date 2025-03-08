@@ -1,5 +1,8 @@
-package school.faang.user_service.service.promotion;
+package school.faang.user_service.service.promotion.user;
 
+import lombok.Getter;
+
+@Getter
 public enum UserPromotionType {
     TEN_PERCENT_OF_USERS(10),
     TWENTY_FIVE_PERCENT_OF_USERS(25),
@@ -11,9 +14,5 @@ public enum UserPromotionType {
 
     UserPromotionType(int userPercentage) {
         this.userPercentage = userPercentage;
-    }
-
-    public int getUserPercentage() {
-        return userPercentage;
     }
 }

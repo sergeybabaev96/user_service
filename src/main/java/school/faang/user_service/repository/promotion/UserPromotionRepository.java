@@ -16,8 +16,9 @@ public interface UserPromotionRepository extends JpaRepository<UserPromotion, Lo
                 AND u.startDate = :startDate
                 AND u.endDate = :endDate
                 AND u.percentage = :percentage
+                AND u.feedRank = :feedRank
             """)
-    UserPromotion findSamePromotion(Long userId, LocalDateTime startDate, LocalDateTime endDate, Integer percentage);
+    UserPromotion findSamePromotion(Long userId, LocalDateTime startDate, LocalDateTime endDate, Integer percentage, Integer feedRank);
 
     @Query("""
             SELECT u
@@ -37,6 +38,6 @@ public interface UserPromotionRepository extends JpaRepository<UserPromotion, Lo
                 AND u.startDate = :startDate
                 AND u.endDate = :endDate
             """)
-    int updatePromotionPercentage(Long userId, LocalDateTime startDate, LocalDateTime endDate, Integer percentage);
+    void updatePromotionPercentage(Long userId, LocalDateTime startDate, LocalDateTime endDate, Integer percentage);
 
 }

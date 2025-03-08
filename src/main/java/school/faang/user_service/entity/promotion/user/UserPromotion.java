@@ -40,4 +40,7 @@ public class UserPromotion {
 
     @Column(name = "percentage", nullable = false)
     private Integer percentage;
+
+    @Column(name = "feed_rank", nullable = false)
+    private Integer feedRank;
 }
