@@ -11,6 +11,7 @@ import school.faang.user_service.repository.mentorship.MentorshipRequestReposito
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -77,5 +78,25 @@ public class MentorshipRequestService {
 
     private void validateMentorshipRequestDto(MentorshipRequestDto mentorshipRequestDto) {
         Objects.requireNonNull(mentorshipRequestDto, ERROR_NULL_DTO);
+    }
+    private final MentorshipRequestMapper mentorshipRequestMapper;
+
+    public List<MentorshipRequestDto> getRequests(MentorshipRequestDto filterRequest) {
+        List<MentorshipRequest> requests = new ArrayList<>();
+        mentorshipRequestRepository.findAll().forEach(requests::add);
+
+        return requests.stream()
+                .filter(reg ->
+                        filterRequest.getDescription() == null || reg.getDescription().contains(filterRequest.getDescription()))
+                .filter(reg ->
+                        filterRequest.getReceiverId() == null || reg.getReceiver().getId()
+                                .equals(filterRequest.getReceiverId()))
+                .filter(reg ->
+                        filterRequest.getRequesterId() == null || reg.getRequester().getId()
+                                .equals(filterRequest.getRequesterId()))
+                .filter(reg ->
+                        filterRequest.getStatus() == null || reg.getStatus().equals(filterRequest.getStatus()))
+                .map(mentorshipRequestMapper::toDto)
+                .toList();
     }
 }

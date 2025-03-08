@@ -20,4 +20,8 @@ public class MentorshipRequestController {
         mentorshipRequestService.requestMentorship(mentorshipRequestDto);
         log.info(END_MENTORSHIP_REQUEST, mentorshipRequestDto.getId());
     }
+
+    public void getRequests(MentorshipRequestDto filter) {
+        mentorshipRequestService.getRequests(filter);
+    }
 }
