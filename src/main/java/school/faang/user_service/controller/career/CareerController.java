@@ -1,35 +1,48 @@
 package school.faang.user_service.controller.career;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.CareerDto;
 import school.faang.user_service.service.career.CareerService;
 import school.faang.user_service.validation.CareerValidator;
 
-@Controller
+@RestController
 @RequestMapping("/careers")
 @RequiredArgsConstructor
 public class CareerController {
-    private CareerService careerService;
+    private final CareerService careerService;
 
-    @PostMapping("/{userId}")
-    public CareerDto addCareer(long userId, CareerDto careerDto) {
+    @PostMapping
+    public ResponseEntity<CareerDto> addCareer(
+            @RequestParam("userId") long userId,
+            @RequestBody CareerDto careerDto) {
         CareerValidator.validate(careerDto);
-       return careerService.addCareer(userId, careerDto);
+        CareerDto addCareer = careerService.addCareer(userId, careerDto);
+       return ResponseEntity.ok(addCareer);
     }
 
     @PutMapping("/{userId}")
-    public CareerDto updateCareer(long userId, CareerDto careerDto) {
+    public ResponseEntity<CareerDto> updateCareer(
+            @PathVariable long userId,
+            @RequestBody CareerDto careerDto) {
         CareerValidator.validate(careerDto);
-        return careerService.updateCareer(userId,careerDto);
+        CareerDto updateCareer = careerService.updateCareer(userId,careerDto);
+        return ResponseEntity.ok(updateCareer);
     }
 
     @GetMapping("/{careerId}")
-    public CareerDto getById(long careerId) {
-        return careerService.getById(careerId);
+    public ResponseEntity<CareerDto> getById(
+            @RequestParam("id") long careerId) {
+        CareerDto getById = careerService.getById(careerId);
+        return ResponseEntity.ok(getById);
     }
 }
