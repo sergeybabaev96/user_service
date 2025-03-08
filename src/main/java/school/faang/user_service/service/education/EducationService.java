@@ -49,4 +49,11 @@ public class EducationService {
         return educationMapper.toEducationDto(educationRepository.save(education));
     }
 
+    public EducationDto getById(long educationId) {
+        Education education = educationRepository
+                .findById(educationId)
+                .orElseThrow(() -> new DataValidationException(EDUCATION_NOT_FOUND));
+        return educationMapper.toEducationDto(education);
+    }
+
 }

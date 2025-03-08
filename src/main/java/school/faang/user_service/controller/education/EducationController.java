@@ -2,6 +2,7 @@ package school.faang.user_service.controller.education;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -35,4 +36,9 @@ public class EducationController {
         return ResponseEntity.ok(updatedEducation);
     }
 
+    @GetMapping
+    public ResponseEntity<EducationDto> getById(@RequestParam("id") long educationId) {
+        EducationDto educationDto = educationService.getById(educationId);
+        return ResponseEntity.ok(educationDto);
+    }
 }
