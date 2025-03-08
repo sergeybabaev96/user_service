@@ -25,24 +25,19 @@ public class SubscriptionService {
     private final List<UserFilter> userFilters;
 
     public void followUser(long followerId, long followeeId) {
-        if (followerId == followeeId) {
-            throw new DataValidationException("Нельзя подписаться на себя.");
-        }
-        if (repository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
-            throw new DataValidationException("{} уже подписан на {}.", followerId, followeeId);
-        } else {
-            repository.followUser(followerId, followeeId);
-            log.info("Пользователь: {} подписался на пользователя: {}.", followerId, followeeId);
-        }
+        isSelfAction(followerId, followeeId, "Нельзя подписаться на себя");
+        checkSubscribe(followerId, followeeId, false, "Вы уже подписаны на этого пользователя");
+        repository.followUser(followerId, followeeId);
+        log.info("Пользователь: {} подписался на пользователя: {}.", followerId, followeeId);
     }
 
     public void unfollowUser(long followerId, long followeeId) {
-        if (followerId == followeeId) {
-            throw new DataValidationException("Нельзя отписаться от себя.");
-        } else {
-            repository.unfollowUser(followerId, followeeId);
-            log.info("Пользователь: {} отписался от пользователя: {}.", followerId, followeeId);
-        }
+        isSelfAction(followerId, followeeId, "Нельзя отписаться от себя");
+        checkSubscribe(followerId, followeeId, true,
+                "Нельзя отписаться от пользователя, на которого вы не подписаны");
+        repository.unfollowUser(followerId, followeeId);
+        log.info("Пользователь: {} отписался от пользователя: {}.", followerId, followeeId);
+
     }
 
     public List<UserDto> getFollowers(long followeeId, UserFilterDto filter) {
@@ -81,5 +76,18 @@ public class SubscriptionService {
         }
 
         return users;
+    }
+
+    private void isSelfAction(long followerId, long followeeId, String errorMessage) {
+        if (followerId == followeeId) {
+            throw new DataValidationException(errorMessage);
+        }
+    }
+
+    private void checkSubscribe(long followerId, long followeeId, boolean shouldExist, String errorMessage) {
+        boolean isItSub = repository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
+        if (isItSub != shouldExist) {
+            throw new DataValidationException(errorMessage);
+        }
     }
 }
