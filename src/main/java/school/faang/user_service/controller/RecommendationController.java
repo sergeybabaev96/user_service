@@ -9,6 +9,7 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.RecommendationService;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  *  Класс отвечает  за обработку запросов пользователя и валидацию этих запросов
@@ -29,7 +30,7 @@ public class RecommendationController {
         return recommendationService.update(updated);
     }
 
-    private void deleteRecommendation(long recommendationId) {
+    public void deleteRecommendation(long recommendationId) {
         recommendationService.delete(recommendationId);
     }
 
@@ -43,6 +44,10 @@ public class RecommendationController {
 
 
     private void validationRecommendation(RecommendationDto recommendation) {
+        if (Objects.equals(recommendation.getAuthorId(), recommendation.getReceiverId())) {
+            log.error("authorId и receiverId не могут быть одинаковы");
+            throw new DataValidationException("Author and receiver can not be identical");
+        }
         if (recommendation.getContent() == null) {
             log.error("Рекомендация = null");
             throw new DataValidationException("Recommendation context cannot be null");
@@ -52,6 +57,4 @@ public class RecommendationController {
             throw new DataValidationException("Recommendation context cannot be empty");
         }
     }
-
-
 }

@@ -5,7 +5,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,6 +17,7 @@ import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.RecommendationMapper;
+import school.faang.user_service.mapper.SkillOfferMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
@@ -38,6 +38,7 @@ public class RecommendationService {
 
     private final UserRepository userRepository;
     private final RecommendationMapper recommendationMapper;
+    private final SkillOfferMapper skillOfferMapper;
     private final SkillRepository skillRepository;
 
     /**
@@ -57,7 +58,8 @@ public class RecommendationService {
         Recommendation recommendationEntity = recommendationMapper.toEntity(recommendation);
         recommendationEntity.setReceiver(user);
         recommendationEntity.setAuthor(author);
-        recommendationEntity.setSkillOffers(getSkillOffers(recommendation));
+        List<SkillOffer> skillOffers = SkillOffersToEntity(recommendation);
+        recommendationEntity.setSkillOffers(skillOffers);
         recommendationRepository.save(recommendationEntity);
         saveSkillsOffer(recommendation);
 
@@ -109,9 +111,9 @@ public class RecommendationService {
      */
     public List<RecommendationDto> getAllUserRecommendations(long receiverId) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
-        Page<Recommendation> recommendationPage =
-                recommendationRepository.findAllByReceiverId(receiverId, pageable);
-        return recommendationPage.getContent().stream()
+        List<Recommendation> recommendationPage =
+                recommendationRepository.findAllByReceiverId(receiverId, pageable).toList();
+        return recommendationPage.stream()
                 .map(recommendationMapper::toDto)
                 .toList();
     }
@@ -123,8 +125,9 @@ public class RecommendationService {
      */
     public List<RecommendationDto> getAllGivenRecommendations(long authorId) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
-        Page<Recommendation> recommendationPage = recommendationRepository.findAllByAuthorId(authorId, pageable);
-        return recommendationPage.getContent().stream()
+        List<Recommendation> recommendationPage = recommendationRepository
+                .findAllByAuthorId(authorId, pageable).toList();
+        return recommendationPage.stream()
                 .map(recommendationMapper::toDto)
                 .toList();
     }
@@ -139,7 +142,7 @@ public class RecommendationService {
         LocalDateTime sixMonthsAgo = LocalDateTime.now().minusMonths(6);
         LocalDateTime recommendationDate = recommendation.getUpdatedAt();
 
-        if (recommendationDate.isAfter(sixMonthsAgo)) {
+        if (recommendationDate.isBefore(sixMonthsAgo)) {
             log.error("Ошибка валидации: рекомендация обновлена слишком рано");
             throw new DataValidationException("Updated recommendation too early");
         }
@@ -223,7 +226,7 @@ public class RecommendationService {
      * @param recommendation - объект DTO с рекомендацией
      * @return List<SkillOffer> - список предложенных навыков
      */
-    private List<SkillOffer> getSkillOffers(RecommendationDto recommendation) {
+    private List<SkillOffer> SkillOffersToEntity(RecommendationDto recommendation) {
         List<SkillOffer> allSkillOffer = new ArrayList<>();
         for (SkillOfferDto skillOfferDto : recommendation.getSkillOffers()) {
             SkillOffer skillOffer = skillOfferRepository.findById(skillOfferDto.getId()).orElseThrow(() -> {
@@ -231,7 +234,6 @@ public class RecommendationService {
                 return new DataValidationException("Skill not found");
             });
             allSkillOffer.add(skillOffer);
-
         }
         return allSkillOffer;
     }
