@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/promotion")
+
 public class PromotionController {
     private final PromotionService promotionService;
     private final RestTemplate restTemplate;
@@ -125,7 +126,7 @@ public class PromotionController {
     }
 
     private PaymentResponse processPayment(Long entityId, BigDecimal amount) {
-        PaymentRequest paymentRequest = new PaymentRequest(entityId, amount, Currency.RUB);
+        PaymentRequest paymentRequest = new PaymentRequest(entityId, amount, Currency.USD);
         log.info("Initiating payment request: {}", paymentRequest);
         return restTemplate.postForObject("http://localhost:9081/api/payment", paymentRequest, PaymentResponse.class);
     }

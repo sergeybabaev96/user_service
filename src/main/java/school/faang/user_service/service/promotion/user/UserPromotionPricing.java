@@ -11,11 +11,11 @@ public class UserPromotionPricing {
     private static final Map<Integer, BigDecimal> priorityMultipliers = new HashMap<>();
 
     static {
-        prices.put(UserPromotionType.TEN_PERCENT_OF_USERS.getUserPercentage(), new BigDecimal("100.00"));
-        prices.put(UserPromotionType.TWENTY_FIVE_PERCENT_OF_USERS.getUserPercentage(), new BigDecimal("200.00"));
-        prices.put(UserPromotionType.FORTY_PERCENT_OF_USERS.getUserPercentage(), new BigDecimal("300.00"));
-        prices.put(UserPromotionType.FIFTY_FIVE_PERCENT_OF_USERS.getUserPercentage(), new BigDecimal("400.00"));
-        prices.put(UserPromotionType.SEVENTY_PERCENT_OF_USERS.getUserPercentage(), new BigDecimal("500.00"));
+        prices.put(UserPromotionType.TEN_PERCENT_OF_USERS.getUserPercentage(), new BigDecimal("10.00"));
+        prices.put(UserPromotionType.TWENTY_FIVE_PERCENT_OF_USERS.getUserPercentage(), new BigDecimal("20.00"));
+        prices.put(UserPromotionType.FORTY_PERCENT_OF_USERS.getUserPercentage(), new BigDecimal("30.00"));
+        prices.put(UserPromotionType.FIFTY_FIVE_PERCENT_OF_USERS.getUserPercentage(), new BigDecimal("40.00"));
+        prices.put(UserPromotionType.SEVENTY_PERCENT_OF_USERS.getUserPercentage(), new BigDecimal("50.00"));
 
         priorityMultipliers.put(PromotionPriority.PRIORITY_MINIMAL.getFeedRank(), new BigDecimal("1.0"));
         priorityMultipliers.put(PromotionPriority.PRIORITY_LOW.getFeedRank(), new BigDecimal("2.0"));
