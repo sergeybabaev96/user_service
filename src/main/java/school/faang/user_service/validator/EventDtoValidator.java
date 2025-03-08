@@ -41,7 +41,7 @@ public class EventDtoValidator {
             log.error("{} | {}", currentTime, ERROR_TITLE_NULL_OR_EMPTY);
             throw new DataValidationException(ERROR_TITLE_NULL_OR_EMPTY);
         }
-        if (eventDto.getStartDate() == null || eventDto.getStartDate().isBefore(LocalDateTime.now())) {
+        if (eventDto.getStartDate() == null || eventDto.getStartDate().isBefore(currentTime)) {
             log.error("{} | {}", currentTime, ERROR_START_DATE_INVALID);
             throw new DataValidationException(ERROR_START_DATE_INVALID);
         }

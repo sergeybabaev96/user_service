@@ -69,7 +69,7 @@ public class EventService {
     public EventDto updateEvent(EventDto eventDto) {
         Event existingEvent = eventRepository.findById(eventDto.getId())
                 .orElseThrow(() -> {
-                    log.error(EVENT_NOT_FOUND_LOG, eventDto.getId(), eventDto.getId(), LocalDateTime.now(), "updateEvent");
+                    log.error(EVENT_NOT_FOUND_LOG, eventDto.getId(), LocalDateTime.now(), "updateEvent");
                     return new DataValidationException(
                             String.format(EVENT_NOT_FOUND_EXCEPTION, eventDto.getId()));
                         }
