@@ -10,6 +10,7 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRepository;
 
 import java.util.List;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -20,44 +21,45 @@ public class MentorshipService {
     private final UserMapper userMapper;
 
     public List<UserDto> getMentees(long userId) {
-        User mentor = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Mentor doesn't exists"));
-        return mentor.getMentees() != null ? mentor.getMentees().stream()
-                .map(userMapper::toDto).toList() : List.of();
-
+        return getUserRelatedList(userId, User::getMentees);
     }
 
     public List<UserDto> getMentors(long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Mentee doesn't exists"));
-
-        return user.getMentors() != null ? user.getMentors()
-                .stream().map(userMapper::toDto).toList() : List.of();
-
+        return getUserRelatedList(userId, User::getMentors);
     }
 
     public void deleteMentee(long menteeId, long mentorId) {
-        User mentor = mentorshipRepository.findById(mentorId)
-                .orElseThrow(() -> new RuntimeException("Mentor doesn't exists"));
-
-        boolean removedMentee = mentor.getMentees().removeIf(mentee -> mentee.getId() == menteeId);
-
-        if (!removedMentee) {
-            log.error("Mentee with id {} not found for mentor with id {} ", menteeId, mentorId);
-            throw new RuntimeException("Mentee not found  for given mentor");
-        }
-
-        userRepository.save(mentor);
+        deleteUserFromRelation(mentorId, menteeId, true);
     }
 
     public void deleteMentor(long mentorId, long menteeId) {
-        User mentee = mentorshipRepository.findById(menteeId)
-                .orElseThrow(() -> new RuntimeException("Mentee doesn't exists"));
+        deleteUserFromRelation(menteeId, mentorId, false);
+    }
 
-        boolean removedMentor = mentee.getMentors().removeIf(mentor -> mentor.getId() == mentorId);
 
-        if (!removedMentor) {
-            log.error("Mentor with id {} not found for mentee with id {} ", mentorId, menteeId);
+    private List<UserDto> getUserRelatedList(long userId, Function<User, List<User>> relationGetter) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User doesn't exists"));
+        return relationGetter
+                .apply(user) != null ? relationGetter.apply(user)
+                .stream().map(userMapper::toDto)
+                .toList() : List.of();
+    }
+
+    public void deleteUserFromRelation(long ownerId, long targetId, boolean isMentee) {
+        User owner = mentorshipRepository.findById(ownerId).orElseThrow(() ->
+                new RuntimeException(isMentee ? "Mentor doesn't exist" : "Mentee doesn't exist"));
+
+        boolean removed = (isMentee ? owner.getMentees() : owner.getMentors())
+                .removeIf(user -> user.getId() == targetId);
+
+        if (!removed) {
+            log.error("{} with id {} not found for {} with id {}",
+                    isMentee ? "Mentee" : "Mentor", targetId,
+                    isMentee ? "mentor" : "mentee", ownerId);
+            throw new RuntimeException(isMentee ? "Mentee not found for given mentor" : "Mentor not found for given mentee");
         }
+        userRepository.save(owner);
+
     }
 }
