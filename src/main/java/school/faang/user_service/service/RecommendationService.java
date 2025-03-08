@@ -46,6 +46,27 @@ public class RecommendationService {
         checkGeneralRecommendationSkillOffer(recommendation);
 
         long newRecommendationId = saveCreateRecommendation(recommendation);
+        saveOrCreateSkillOffers(recommendation, newRecommendationId);
+
+        return recommendationMapper.toDto(recommendationRepository.findById(newRecommendationId)
+                .orElseThrow(() -> new IllegalStateException("Ошибка сохранения рекомендации!")));
+    }
+
+    public RecommendationDto update(RecommendationDto recommendation){
+        userValidator.validatorUserExistence(recommendation.getReceiverId());
+        checkValidDateRecommendation(recommendation);
+        checkGeneralRecommendationSkillOffer(recommendation);
+
+        recommendationRepository.update(recommendation.getAuthorId(),recommendation.getReceiverId(), recommendation.getContent());
+        skillOfferRepository.deleteAllByRecommendationId(recommendation.getId());
+
+        saveOrCreateSkillOffers(recommendation, recommendation.getId());
+
+        return recommendationMapper.toDto(recommendationRepository.findById(recommendation.getId())
+                .orElseThrow(() -> new IllegalStateException("Ошибка обновления рекомендации!")));
+    }
+
+    private void saveOrCreateSkillOffers(RecommendationDto recommendation, long newRecommendationId) {
         for (SkillOfferDto skillOffer : recommendation.getSkillOffers()) {
             long skillId = skillOffer.getSkillId();
             if (skillRepository.findUserSkill(skillId, recommendation.getReceiverId()).isPresent()) {
@@ -54,9 +75,6 @@ public class RecommendationService {
                 skillOfferRepository.create(skillId, newRecommendationId);
             }
         }
-
-        return recommendationMapper.toDto(recommendationRepository.findById(newRecommendationId)
-                .orElseThrow(() -> new IllegalStateException("Ошибка сохранения рекомендации!")));
     }
 
     private void checkGeneralRecommendationSkillOffer(RecommendationDto recommendation) {
