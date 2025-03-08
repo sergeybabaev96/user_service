@@ -11,7 +11,7 @@ public class UserServiceValidation {
     private static final String LESS_CURRENT_YEAR = "The start date of education must be less than the current date.\"";
     private static final String DATA_LOG_ERROR = "Data {} is not correct\"";
 
-    public static void yearFromEducationValidCurrentDate(Integer yearFrom) {
+    public static void validYearLessCurrentYear(Integer yearFrom) {
         if (yearFrom > LocalDate.now().getYear()) {
             log.error(DATA_LOG_ERROR, yearFrom);
             throw new DataValidationException(LESS_CURRENT_YEAR);

@@ -17,6 +17,8 @@ import school.faang.user_service.validation.UserServiceValidation;
 public class EducationService {
 
     private static final String USER_NULL = "User not found";
+    private static final String EDUCATION_NOT_FOUND = "Education data not found";
+    private static final String INVALID_USER = "Invalid user";
 
     private final EducationRepository educationRepository;
     private final UserRepository userRepository;
@@ -24,12 +26,27 @@ public class EducationService {
 
     @Transactional
     public EducationDto addEducation(long userId, EducationDto educationDto) {
-        UserServiceValidation.yearFromEducationValidCurrentDate(educationDto.getYearFrom());
+        UserServiceValidation.validYearLessCurrentYear(educationDto.getYearFrom());
         User user = userRepository.findById(userId).orElseThrow(() -> new DataValidationException(USER_NULL));
         Education education = educationMapper.toEducation(educationDto);
         education.setUser(user);
         Education saveEducation = educationRepository.save(education);
         return educationMapper.toEducationDto(saveEducation);
+    }
+
+    @Transactional
+    public EducationDto updateEducation(long userId, EducationDto educationDto) {
+        UserServiceValidation.validYearLessCurrentYear(educationDto.getYearFrom());
+        User user = userRepository.findById(userId).orElseThrow(() -> new DataValidationException(USER_NULL));
+        Education educationForUpdate = educationRepository
+                .findById(educationDto.getId())
+                .orElseThrow(() -> new DataValidationException(EDUCATION_NOT_FOUND));
+        if(educationForUpdate.getUser().getId() != user.getId()) {
+            throw new DataValidationException(INVALID_USER);
+        }
+        Education education = educationMapper.toEducation(educationDto);
+        education.setUser(educationForUpdate.getUser());
+        return educationMapper.toEducationDto(educationRepository.save(education));
     }
 
 }
