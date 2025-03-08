@@ -38,6 +38,6 @@ public class EventPromotion {
     @Column(name = "event_id", nullable = false)
     private Long eventId;
 
-    @Column(name = "promotion_percentage", nullable = false)
+    @Column(name = "percentage", nullable = false)
     private Integer percentage;
 }

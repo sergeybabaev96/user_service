@@ -9,7 +9,6 @@ public record EventDto(
         String description,
         LocalDateTime startDate,
         LocalDateTime endDate,
-        String location,
-        UserDto userDto
+        String location
 ) {
 }

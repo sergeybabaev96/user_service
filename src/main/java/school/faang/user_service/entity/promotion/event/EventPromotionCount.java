@@ -21,6 +21,9 @@ public class EventPromotionCount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "event_id", nullable = false)
+    private Long eventId;
+
     @Min(0)
     @Column(name = "count", nullable = false)
     private Integer count;

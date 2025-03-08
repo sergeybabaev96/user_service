@@ -38,6 +38,6 @@ public class UserPromotion {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "promotion_percentage", nullable = false)
+    @Column(name = "percentage", nullable = false)
     private Integer percentage;
 }

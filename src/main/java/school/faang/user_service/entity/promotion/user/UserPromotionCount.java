@@ -21,6 +21,9 @@ public class UserPromotionCount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
     @Min(0)
     @Column(name = "count", nullable = false)
     private Integer count;
