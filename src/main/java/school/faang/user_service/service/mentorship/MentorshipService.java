@@ -5,10 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.mentorship.MentorshipRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -19,86 +19,79 @@ public class MentorshipService {
     private final UserMapper userMapper;
 
     public List<UserDto> getMentees(long userId) {
-        log.info("Fetching mentees for user with ID {}", userId);
-        UserDto userDto = getUserDto(userId);
+        log.info("Получение всех менти для пользователя с ID {}", userId);
 
-        if (userDto.getMenteesIds().isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        List<Long> menteesIds = userDto.getMenteesIds();
-        List<UserDto> usersDto = new ArrayList<>();
-        for (Long menteeId : menteesIds) {
-            UserDto menteeDto = getUserDto(menteeId);
-            usersDto.add(menteeDto);
-        }
-        return usersDto;
+        User user = getUser(userId);
+        List<User> mentees = user.getMentees();
+        return mentees.stream()
+                .map(this::getUserDto)
+                .toList();
     }
 
     public List<UserDto> getMentors(long userId) {
-        log.info("Fetching mentors for user with ID {}", userId);
-        UserDto userDto = getUserDto(userId);
+        log.info("Получение всех менторов для пользователя с ID {}", userId);
 
-        if (userDto.getMentorsIds().isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        List<Long> mentorsIds = userDto.getMentorsIds();
-        List<UserDto> usersDto = new ArrayList<>();
-        for (Long mentorId : mentorsIds) {
-            UserDto mentorDto = getUserDto(mentorId);
-            usersDto.add(mentorDto);
-        }
-        return usersDto;
+        User user = getUser(userId);
+        List<User> mentors = user.getMentors();
+        return mentors.stream()
+                .map(this::getUserDto)
+                .toList();
     }
 
     public void deleteMentee(long menteeId, long mentorId) {
-        log.info("Attempting to delete mentee {} from mentor {}", menteeId, mentorId);
+        log.info("Попытка удалить менти {} у ментора {}", menteeId, mentorId);
 
-        User mentor = mentorshipRepository.findById(mentorId)
-                .orElseThrow(() -> new IllegalArgumentException("Mentor not found"));
+        User mentor = getUser(mentorId);
         List<User> mentees = mentor.getMentees();
 
-        boolean isRemoved = mentees.removeIf(user -> user.getId() == menteeId);
+        boolean isRemoved = removeUserFromList(mentees, menteeId);
 
         if (!isRemoved) {
-            log.error("Failed to find mentee {} under mentor {}", menteeId, mentorId);
-            throw new IllegalArgumentException("Mentee not found");
+            log.error("Не удалось найти менти {} у ментора {}", menteeId, mentorId);
+            throw new DataValidationException("Менти не найден");
         }
         mentor.setMentees(mentees);
         mentorshipRepository.save(mentor);
-        log.info("Successfully deleted mentee {} from mentor {}", menteeId, mentorId);
+        log.info("Менти {} успешно удален у ментора {}", menteeId, mentorId);
     }
 
-    public void deleteMentor(long menteeId, long mentorId) {
-        log.info("Attempting to delete mentor {} from mentee {}", mentorId, menteeId);
+    public void deleteMentor(long menteeId, long mentorId) throws DataValidationException {
+        log.info("Попытка удалить ментора {} у менти {}", mentorId, menteeId);
 
-        User mentee = mentorshipRepository.findById(menteeId)
-                .orElseThrow(() -> new IllegalArgumentException("Mentee not found"));
+        User mentee = getUser(menteeId);
         List<User> mentors = mentee.getMentors();
 
-        boolean isRemoved = mentors.removeIf(user -> user.getId() == mentorId);
+        boolean isRemoved = removeUserFromList(mentors, mentorId);
         if (!isRemoved) {
-            log.error("Failed to find mentor {} under mentee {}", mentorId, menteeId);
-            throw new IllegalArgumentException("Mentor not found");
+            log.error("Не удалось найти ментора {} у менти {}", mentorId, menteeId);
+            throw new DataValidationException("Ментор не найден");
         }
         mentee.setMentors(mentors);
         mentorshipRepository.save(mentee);
-        log.info("Successfully deleted mentor {} from mentee {}", mentorId, menteeId);
+        log.info("Ментор {} успешно удален у менти {}", mentorId, menteeId);
     }
 
-    private UserDto getUserDto(long userId) {
-        User user = mentorshipRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        List<Long> mentees = user.getMentees().stream()
+    private UserDto getUserDto(User user) {
+        List<Long> menteesIds = user.getMentees().stream()
                 .map(User::getId)
                 .toList();
-        List<Long> mentors = user.getMentors().stream()
+        List<Long> mentorsIds = user.getMentors().stream()
                 .map(User::getId)
                 .toList();
         UserDto userDto = userMapper.toDto(user);
-        userDto.setMenteesIds(mentees);
-        userDto.setMentorsIds(mentors);
+        userDto.setMenteesIds(menteesIds);
+        userDto.setMentorsIds(mentorsIds);
         return userDto;
+    }
+
+    private User getUser(long userId) {
+        return mentorshipRepository.findById(userId).orElseThrow(() -> {
+            log.error("Не удалось найти пользователя с ID {}", userId);
+            return new DataValidationException("Пользователь не найден");
+        });
+    }
+
+    private boolean removeUserFromList(List<User> users, long userId) {
+        return users.removeIf(user -> user.getId() == userId);
     }
 }
