@@ -51,11 +51,8 @@ public class EducationService {
         if (!education.getUser().getId().equals(userId)) {
             throw new DataValidationException("Нельзя обновлять данные другого пользователя");
         }
-        education.setYearFrom(educationDto.getYearFrom());
-        education.setYearTo(educationDto.getYearTo());
-        education.setInstitution(educationDto.getInstitution());
-        education.setEducationLevel(educationDto.getEducationLevel());
-        education.setSpecialization(educationDto.getSpecialization());
+
+        educationMapper.updateEducationFromDto(educationDto, education);
 
         education = educationRepository.save(education);
         return educationMapper.toEducationDto(education);
