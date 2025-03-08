@@ -17,7 +17,6 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.entity.recommendation.SkillOffer;
-import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.Recommendation.RecommendationMapperImpl;
 import school.faang.user_service.mapper.Recommendation.SkillOfferMapperImpl;
 import school.faang.user_service.repository.SkillRepository;
@@ -74,7 +73,6 @@ public class RecommendationServiceTest {
 
     @BeforeEach
     public void setUp() {
-        // Устанавливаем spy-объект для поля skillOfferMapper в recommendationMapper
         ReflectionTestUtils.setField(recommendationMapper, "skillOfferMapper", skillOfferMapper);
     }
 
@@ -83,24 +81,37 @@ public class RecommendationServiceTest {
     private static final long RECEIVER_ID = 2L;
     private static final String RECEIVER_NAME = "Kirill";
     private static final String AUTHOR_NAME = "Dima";
-    private static final String CONTENT = "Test";
-    private static final long NEW_RECOMMENDATION_ID = 1;
+    private static final String CONTENT = "Test1";
+    private static final String TITlE_SKILL = "Test";
+    private static final long NEW_RECOMMENDATION_ID = 0;
+    private static final long SKILL_OFFER_ID = 1;
 
     @Test
-    public void testExceptionCreationDate() {
+    public void createExistingReceiverSkills() {
 
         when(skillRepository.findUserSkill(SKILL_ID, RECEIVER_ID)).thenReturn(Optional.of(prepareDataSkill()));
         when(userRepository.getReferenceById(RECEIVER_ID)).thenReturn(prepareDataUser(RECEIVER_NAME, RECEIVER_ID));
         when(skillRepository.getReferenceById(SKILL_ID)).thenReturn(prepareDataSkill());
         when(userRepository.getReferenceById(AUTHOR_ID)).thenReturn(prepareDataUser(AUTHOR_NAME, AUTHOR_ID));
+        when(recommendationRepository.findById(NEW_RECOMMENDATION_ID)).thenReturn(Optional.of(prepareDataRecommendation(AUTHOR_NAME, AUTHOR_ID, RECEIVER_NAME, RECEIVER_ID, CONTENT, 1)));
 
-        assertThrows(DataValidationException.class, () -> recommendationService.create(prepareDataRecommendationDto()));
+        RecommendationDto resultCreate = recommendationService.create(prepareDataRecommendationDto());
         verify(userSkillGuaranteeRepository).save(captorListUserSkillGuarantee.capture());
 
-        UserSkillGuarantee result = captorListUserSkillGuarantee.getValue();
-        assertEquals(RECEIVER_NAME, result.getUser().getUsername());
-        assertEquals("test", result.getSkill().getTitle());
-        assertEquals(AUTHOR_NAME, result.getGuarantor().getUsername());
+        UserSkillGuarantee resultUserSkillGuarantee = captorListUserSkillGuarantee.getValue();
+        assertEquals(RECEIVER_NAME, resultUserSkillGuarantee.getUser().getUsername());
+        assertEquals(TITlE_SKILL, resultUserSkillGuarantee.getSkill().getTitle());
+        assertEquals(AUTHOR_NAME, resultUserSkillGuarantee.getGuarantor().getUsername());
+        assertEquals(CONTENT, resultCreate.getContent());
+        assertEquals(prepareDataListSkillOfferDto(1).size(), resultCreate.getSkillOffers().size());
+    }
+
+    @Test
+    public void skillCreationBaseCase() {
+        when(skillRepository.findUserSkill(SKILL_ID, RECEIVER_ID)).thenReturn(Optional.empty());
+        when(recommendationRepository.findById(NEW_RECOMMENDATION_ID)).thenReturn(Optional.of(prepareDataRecommendation(AUTHOR_NAME, AUTHOR_ID, RECEIVER_NAME, RECEIVER_ID, CONTENT, 1)));
+        recommendationService.create(prepareDataRecommendationDto());
+        verify(skillOfferRepository).create(SKILL_ID,NEW_RECOMMENDATION_ID);
     }
 
     @Test
@@ -108,32 +119,32 @@ public class RecommendationServiceTest {
 
         when(recommendationRepository.create(AUTHOR_ID, RECEIVER_ID, CONTENT)).thenReturn(NEW_RECOMMENDATION_ID);
         when(recommendationRepository.findById(NEW_RECOMMENDATION_ID)).thenReturn(Optional.ofNullable(
-                prepareDataRecommendation(AUTHOR_NAME, AUTHOR_ID, RECEIVER_NAME, RECEIVER_ID, CONTENT)));
+                prepareDataRecommendation(AUTHOR_NAME, AUTHOR_ID, RECEIVER_NAME, RECEIVER_ID, CONTENT, 1)));
 
         RecommendationDto result = recommendationService.create(prepareDataRecommendationDto());
         verify(skillOfferRepository).create(SKILL_ID, NEW_RECOMMENDATION_ID);
         assertEquals(AUTHOR_ID, result.getAuthorId());
         assertEquals(RECEIVER_ID, result.getReceiverId());
-        assertEquals(3, result.getSkillOffers().size());
+        assertEquals(1, result.getSkillOffers().size());
     }
 
     private RecommendationDto prepareDataRecommendationDto() {
         return RecommendationDto.builder()
                 .id(1L)
-                .skillId(1L)
-                .authorId(1L)
-                .receiverId(2L)
-                .content("Test")
+                .skillOffers(prepareDataListSkillOfferDto(1))
+                .authorId(AUTHOR_ID)
+                .receiverId(RECEIVER_ID)
+                .content(CONTENT)
                 .build();
     }
 
-    private Recommendation prepareDataRecommendation(String authorName, long authorId, String receiverName, long receiverId, String content) {
+    private Recommendation prepareDataRecommendation(String authorName, long authorId, String receiverName, long receiverId, String content, int numberSkillOffers) {
         return Recommendation.builder()
                 .id(1L)
                 .author(prepareDataUser(authorName, authorId))
                 .receiver(prepareDataUser(receiverName, receiverId))
                 .content(content)
-                .skillOffers(prepareDataListSkillOffer(3))
+                .skillOffers(prepareDataListSkillOffer(numberSkillOffers))
                 .createdAt(LocalDateTime.now())
                 .build();
     }
@@ -150,6 +161,18 @@ public class RecommendationServiceTest {
         return skillOffers;
     }
 
+    private List<SkillOfferDto> prepareDataListSkillOfferDto(int numberSkillOffers) {
+        List<SkillOfferDto> skillOfferDto = new ArrayList<>();
+        for (int i = 0; i < numberSkillOffers; i++) {
+            skillOfferDto.add(SkillOfferDto.builder()
+                    .id(1L + i)
+                    .skillId(1L + i)
+                    .recommendationId(1L + i)
+                    .build());
+        }
+        return skillOfferDto;
+    }
+
     private User prepareDataUser(String name, Long userId) {
         return User.builder()
                 .id(userId)
@@ -160,7 +183,7 @@ public class RecommendationServiceTest {
     private Skill prepareDataSkill() {
         return Skill.builder()
                 .id(1L)
-                .title("test")
+                .title(TITlE_SKILL)
                 .build();
     }
 

@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
+import school.faang.user_service.dto.recommendation.SkillOfferDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.entity.recommendation.Recommendation;
-import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.Recommendation.RecommendationMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
@@ -20,6 +20,7 @@ import school.faang.user_service.validator.SkillValidator;
 import school.faang.user_service.validator.UserValidator;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,6 +28,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RecommendationService {
 
+    public static final int MONTHS_LAST_RECOMMENDATION = 6;
     private final RecommendationRepository recommendationRepository;
     private final SkillOfferRepository skillOfferRepository;
     private final SkillRepository skillRepository;
@@ -38,31 +40,49 @@ public class RecommendationService {
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
 
     public RecommendationDto create(RecommendationDto recommendation) {
-        LocalDateTime recommendationThresholdDate = LocalDateTime.now().plusMonths(6);
-        skillValidator.validatorSkillId(recommendation.getSkillId());
-        userValidator.validatorUserExistence(recommendation.getReceiverId());
-        recommendationValidator.validatorExistenceUserSkillGuarantee(recommendation);
-        Optional<Recommendation> optionalRecommendation = recommendationRepository.findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(
-                recommendation.getAuthorId(), recommendation.getReceiverId());
-        optionalRecommendation.ifPresent(options
-                -> recommendationValidator.validateRecommendationDate(options.getCreatedAt(), recommendationThresholdDate));
 
-        if (skillRepository.findUserSkill(recommendation.getSkillId(), recommendation.getReceiverId()).isPresent()) {
-            saveSkillGuarantees(recommendation);
-            throw new DataValidationException("Рекомендация невозможна: у пользователя уже есть этот навык!");
-        }
+        userValidator.validatorUserExistence(recommendation.getReceiverId());
+        checkValidDateRecommendation(recommendation);
+        checkGeneralRecommendationSkillOffer(recommendation);
+
         long newRecommendationId = saveCreateRecommendation(recommendation);
-        skillOfferRepository.create(recommendation.getSkillId(), newRecommendationId);
+        for (SkillOfferDto skillOffer : recommendation.getSkillOffers()) {
+            long skillId = skillOffer.getSkillId();
+            if (skillRepository.findUserSkill(skillId, recommendation.getReceiverId()).isPresent()) {
+                saveSkillGuarantees(recommendation, skillId);
+            } else {
+                skillOfferRepository.create(skillId, newRecommendationId);
+            }
+        }
 
         return recommendationMapper.toDto(recommendationRepository.findById(newRecommendationId)
                 .orElseThrow(() -> new IllegalStateException("Ошибка сохранения рекомендации!")));
     }
 
-    private void saveSkillGuarantees(RecommendationDto recommendationDto) {
+    private void checkGeneralRecommendationSkillOffer(RecommendationDto recommendation) {
+        if (!recommendation.getSkillOffers().isEmpty()) {
+            List<Long> skillIds = recommendation.getSkillOffers().stream()
+                    .map(SkillOfferDto::getSkillId)
+                    .toList();
+
+            recommendationValidator.validatorIdDuplicates(skillIds);
+            skillValidator.validatorExistenceSkillListSkillOffer(skillIds);
+            recommendationValidator.validatorExistenceUserSkillGuarantee(recommendation, skillIds);
+        }
+    }
+
+    private void checkValidDateRecommendation(RecommendationDto recommendation) {
+        LocalDateTime recommendationThresholdDate = LocalDateTime.now().minusMonths(MONTHS_LAST_RECOMMENDATION);
+        Optional<Recommendation> optionalRecommendation = recommendationRepository.findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(
+                recommendation.getAuthorId(), recommendation.getReceiverId());
+        optionalRecommendation.ifPresent(options
+                -> recommendationValidator.validateRecommendationDate(options.getCreatedAt(), recommendationThresholdDate));
+    }
+
+    private void saveSkillGuarantees(RecommendationDto recommendationDto, long skillId) {
         User user = userRepository.getReferenceById(recommendationDto.getReceiverId());
         User guarantor = userRepository.getReferenceById(recommendationDto.getAuthorId());
-        Skill skill = skillRepository.getReferenceById(recommendationDto.getSkillId());
-
+        Skill skill = skillRepository.getReferenceById(skillId);
         UserSkillGuarantee guarantees = UserSkillGuarantee.builder()
                 .user(user)
                 .skill(skill)
@@ -71,7 +91,8 @@ public class RecommendationService {
 
         userSkillGuaranteeRepository.save(guarantees);
     }
-    private long saveCreateRecommendation(RecommendationDto recommendation){
+
+    private long saveCreateRecommendation(RecommendationDto recommendation) {
         return recommendationRepository.create(
                 recommendation.getAuthorId(),
                 recommendation.getReceiverId(),
