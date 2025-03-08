@@ -36,4 +36,4 @@ out/
 ### VS Code ###
 .vscode/
 
-target/slf4j/file/
+target/slf4j/file
