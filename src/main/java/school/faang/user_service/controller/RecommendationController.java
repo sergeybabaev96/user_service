@@ -14,4 +14,8 @@ public class RecommendationController {
     public RecommendationDto giveRecommendation(@Valid RecommendationDto recommendation) {
         return recommendationService.create(recommendation);
     }
+
+    public RecommendationDto updateRecommendation(@Valid RecommendationDto updated) {
+        return recommendationService.update(updated);
+    }
 }
