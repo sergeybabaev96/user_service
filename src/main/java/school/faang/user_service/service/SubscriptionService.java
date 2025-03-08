@@ -8,8 +8,8 @@ import school.faang.user_service.dto.FollowerResponse;
 import school.faang.user_service.dto.UserFilterRequest;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.filter.impl.UserFilterImpl;
-import school.faang.user_service.mapper.UserToUserDtoMapper;
+import school.faang.user_service.filter.UserFilter;
+import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.SubscriptionRepository;
 
 import java.util.List;
@@ -21,8 +21,8 @@ import java.util.stream.Stream;
 @Slf4j
 public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
-    private final UserToUserDtoMapper userToUserDtoMapper;
-    private final UserFilterImpl userFilter;
+    private final UserMapper userMapper;
+    private final List<UserFilter> userFilters;
 
     public void followUser(Long followerId, Long followeeId) {
         validateIds(followerId, followeeId);
@@ -47,16 +47,17 @@ public class SubscriptionService {
     public List<FollowerResponse> getFollowing(Long followeeId, UserFilterRequest filter) {
         Stream<User> userStream = subscriptionRepository.findByFollowerId(followeeId);
 
-        if (filter == null) {
-            return userStream
-                    .map(userToUserDtoMapper::userToUserDto)
-                    .toList();
-        } else {
-            return userStream
-                    .filter(user -> userFilter.apply(user, filter))
-                    .map(userToUserDtoMapper::userToUserDto)
-                    .toList();
+        if (filter != null) {
+            for (UserFilter userFilter : userFilters) {
+                if (userFilter.isApplicable(filter)) {
+                    userStream = userFilter.apply(userStream, filter);
+                }
+            }
         }
+
+        return userStream
+                .map(userMapper::userToUserDto)
+                .toList();
     }
 
     public int getFollowingCount(Long followerId) {
@@ -66,14 +67,15 @@ public class SubscriptionService {
     public List<FollowerResponse> getFollowers(Long followeeId, UserFilterRequest filter) {
         Stream<User> userStream = subscriptionRepository.findByFolloweeId(followeeId);
 
-        if (filter == null) {
-            return userStream.map(userToUserDtoMapper::userToUserDto).toList();
-        } else {
-            return userStream
-                    .filter(user -> userFilter.apply(user, filter))
-                    .map(userToUserDtoMapper::userToUserDto)
-                    .toList();
+        for (UserFilter userFilter : userFilters) {
+            if (userFilter.isApplicable(filter)) {
+                userStream = userFilter.apply(userStream, filter);
+            }
         }
+
+        return userStream
+                .map(userMapper::userToUserDto)
+                .toList();
     }
 
     public int getFollowersCount(Long followeeId) {
