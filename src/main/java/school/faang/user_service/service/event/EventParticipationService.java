@@ -24,7 +24,7 @@ public class EventParticipationService {
 
     @Transactional
     public void registerParticipant(Long eventId, Long userId) {
-        validateDateById(eventId, userId);
+        validateDataById(eventId, userId);
 
         if (checkExistsByEventIdAndUserId(eventId, userId)) {
             log.warn("User with id {} is already registered for the event with id {}", userId, eventId);
@@ -36,7 +36,7 @@ public class EventParticipationService {
 
     @Transactional
     public void unregisterParticipant(Long eventId, Long userId) {
-        validateDateById(eventId, userId);
+        validateDataById(eventId, userId);
 
         if (!checkExistsByEventIdAndUserId(eventId, userId)) {
             log.warn("User with id {} is not registered for the event with id {}", userId, eventId);
@@ -56,7 +56,7 @@ public class EventParticipationService {
         return eventParticipationRepository.countParticipants(eventId);
     }
 
-    private void validateDateById(Long eventId, Long userId) {
+    private void validateDataById(Long eventId, Long userId) {
         userValidator.checkUserExistsById(userId);
         eventValidator.checkEventExistsById(eventId);
     }
