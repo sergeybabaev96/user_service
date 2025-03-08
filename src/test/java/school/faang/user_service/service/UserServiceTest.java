@@ -3,7 +3,6 @@ package school.faang.user_service.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -294,8 +293,7 @@ class UserServiceTest {
 
         Assertions.assertThrows(
                 EntityNotFoundException.class,
-                () -> userService.updateTelegramChatId(userId, chatId)
-        );
+                () -> userService.updateTelegramChatId(userId, chatId));
     }
 
     @Test
@@ -309,8 +307,7 @@ class UserServiceTest {
 
         Assertions.assertThrows(
                 IllegalArgumentException.class,
-                () -> userService.updateTelegramChatId(userId, null)
-        );
+                () -> userService.updateTelegramChatId(userId, null));
     }
 
     @Test
@@ -323,14 +320,10 @@ class UserServiceTest {
         Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> userService.updateTelegramChatId(userId, 0L)
-        );
+                IllegalArgumentException.class, () -> userService.updateTelegramChatId(userId, 0L));
 
         Assertions.assertThrows(
                 IllegalArgumentException.class,
-                () -> userService.updateTelegramChatId(userId, -100L)
-        );
+                () -> userService.updateTelegramChatId(userId, -100L));
     }
-
 }
