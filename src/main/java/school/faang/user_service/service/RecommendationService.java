@@ -144,9 +144,9 @@ public class RecommendationService {
                 && LocalDateTime.now()
                 .minusMonths(recommendationMinDistanceMonths)
                 .isBefore(lastAuthorRecommendation.get().getUpdatedAt())) {
-            throw new DataValidationException(String.format(
-                    "Less than %d months have passed since the last recommendation",
-                    recommendationMinDistanceMonths));
+            throw new DataValidationException(
+                    "Less than %d months have passed since the last recommendation".formatted(
+                            recommendationMinDistanceMonths));
         }
 
         validateSkillOffers(recommendation);
@@ -158,21 +158,22 @@ public class RecommendationService {
                 .filter(dto -> skillRepository.existsById(dto.skillId()))
                 .toList();
         if (existedSkillsInRecommendation.size() != recommendation.skillOffers().stream().distinct().count()) {
-            throw new DataValidationException(String.format(
-                    "Skills %s are not registered",
-                    String.join(
-                            ", ",
-                            recommendation.skillOffers()
-                                    .stream()
-                                    .map(SkillOfferDto::skillId)
-                                    .filter(skillId -> existedSkillsInRecommendation.stream()
-                                            .filter(existedSkill -> existedSkill.skillId() == skillId)
-                                            .findFirst()
-                                            .isEmpty())
-                                    .map(skillRepository::findById)
-                                    .filter(Optional::isPresent)
-                                    .map(x -> x.get().getTitle())
-                                    .toList())));
+            throw new DataValidationException(
+                    "Skills %s are not registered".formatted(
+                            String.join(
+                                    ", ",
+                                    recommendation.skillOffers()
+                                            .stream()
+                                            .map(SkillOfferDto::skillId)
+                                            .filter(skillId -> existedSkillsInRecommendation.stream()
+                                                    .filter(
+                                                            existedSkill -> existedSkill.skillId() == skillId)
+                                                    .findFirst()
+                                                    .isEmpty())
+                                            .map(skillRepository::findById)
+                                            .filter(Optional::isPresent)
+                                            .map(x -> x.get().getTitle())
+                                            .toList())));
         }
     }
 
