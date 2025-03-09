@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.MentorshipRequestDto;
+import school.faang.user_service.dto.RequestFilterDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
+import school.faang.user_service.mapper.RequestFilterMapper;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
-
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -35,6 +37,8 @@ public class MentorshipRequestService {
     private final MentorshipRequestRepository mentorshipRequestRepository;
     private final MentorshipRequestMapper mentorshipRequestMapper;
     private final UserService userService;
+    private final MentorshipRequestMapper mentorshipRequestMapper;
+    private final RequestFilterMapper requestFilterMapper;
 
     public void requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
         validateMentorshipRequestDto(mentorshipRequestDto);
@@ -76,12 +80,7 @@ public class MentorshipRequestService {
         mentorshipRequestRepository.save(mentorshipRequest);
     }
 
-    private void validateMentorshipRequestDto(MentorshipRequestDto mentorshipRequestDto) {
-        Objects.requireNonNull(mentorshipRequestDto, ERROR_NULL_DTO);
-    }
-    private final MentorshipRequestMapper mentorshipRequestMapper;
-
-    public List<MentorshipRequestDto> getRequests(MentorshipRequestDto filterRequest) {
+    public List<RequestFilterDto> getRequests(RequestFilterDto filterRequest) {
         List<MentorshipRequest> requests = new ArrayList<>();
         mentorshipRequestRepository.findAll().forEach(requests::add);
 
@@ -96,7 +95,11 @@ public class MentorshipRequestService {
                                 .equals(filterRequest.getRequesterId()))
                 .filter(reg ->
                         filterRequest.getStatus() == null || reg.getStatus().equals(filterRequest.getStatus()))
-                .map(mentorshipRequestMapper::toDto)
+                .map(requestFilterMapper::toDto)
                 .toList();
+    }
+
+    private void validateMentorshipRequestDto(MentorshipRequestDto mentorshipRequestDto) {
+        Objects.requireNonNull(mentorshipRequestDto, ERROR_NULL_DTO);
     }
 }

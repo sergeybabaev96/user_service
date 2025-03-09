@@ -2,16 +2,16 @@ package school.faang.user_service.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import school.faang.user_service.dto.MentorshipRequestDto;
+import school.faang.user_service.dto.RequestFilterDto;
 import school.faang.user_service.entity.MentorshipRequest;
 
 @Mapper(componentModel = "spring")
-public interface MentorshipRequestMapper {
+public interface RequestFilterMapper {
     @Mapping(target = "requester", ignore = true)
     @Mapping(target = "receiver", ignore = true)
-    MentorshipRequest toEntity(MentorshipRequestDto mentorshipRequestDto);
+    MentorshipRequest toEntity(RequestFilterDto mentorshipRequestDto);
 
     @Mapping(source = "requester.id", target = "requesterId")
     @Mapping(source = "receiver.id", target = "receiverId")
-    MentorshipRequestDto toDto(MentorshipRequest mentorshipRequest);
+    RequestFilterDto toDto(MentorshipRequest mentorshipRequest);
 }
