@@ -90,7 +90,7 @@ public class GoalInvitationService {
     }
 
     private void validateFields(GoalInvitationDto goalInvitationDto, GoalInvitation goalInvitation) {
-        var goalIdId = Objects.requireNonNull(goalInvitationDto.getGoalId(), "Goal is required");
+        var goalId = Objects.requireNonNull(goalInvitationDto.getGoalId(), "Goal is required");
         var inviterId = Objects.requireNonNull(goalInvitationDto.getInviterId(), "InviterId is required");
         var invitedId = Objects.requireNonNull(goalInvitationDto.getInvitedId(), "InvitedId is required");
 
@@ -98,7 +98,7 @@ public class GoalInvitationService {
             throw new IllegalArgumentException("Inviter and invited must not be same person");
         }
 
-        var goal = goalService.findById(goalIdId)
+        var goal = goalService.findById(goalId)
                 .orElseThrow(() -> new EntityNotFoundException("Goal doesn't exist"));
         var inviter = userSevice.findById(inviterId)
                 .orElseThrow(() -> new EntityNotFoundException("Inviter doesn't exist"));
