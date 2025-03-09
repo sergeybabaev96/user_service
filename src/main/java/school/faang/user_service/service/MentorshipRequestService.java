@@ -66,7 +66,9 @@ public class MentorshipRequestService {
     LocalDateTime threeMouthAgo = LocalDateTime.now().minusMonths(REQUEST_COOLDOWN_MONTHS);
     Optional<MentorshipRequest> recentRequest = mentorshipRequestRepository
             .findLatestRequest(mentorshipRequestDto.getRequesterId(), mentorshipRequestDto.getReceiverId());
-        if(recentRequest.isPresent()) {
+        if(recentRequest.isPresent())
+
+    {
         if (recentRequest.get().getCreatedAt().isAfter(threeMouthAgo)) {
             log.error(ERROR_TOO_FREQUENT_REQUESTS);
             throw new IllegalArgumentException(ERROR_TOO_FREQUENT_REQUESTS);
@@ -97,14 +99,11 @@ private void validateMentorshipRequestDto(MentorshipRequestDto mentorshipRequest
     Objects.requireNonNull(mentorshipRequestDto, ERROR_NULL_DTO);
 }
 
+
 public void acceptRequest(long id) {
     MentorshipRequest mentorshipRequest = mentorshipRequestRepository.findById(id)
-            .orElseThrow(() ->
-                    new IllegalArgumentException(String.format(ERROR_ABSENT_REQUEST, id)));
-    if (mentorshipRequestDto.getRequesterId().equals(mentorshipRequestDto.getReceiverId())) {
-        log.error(ERROR_SELF_REQUEST);
-        throw new IllegalArgumentException(ERROR_SELF_REQUEST);
-    }
+            .orElseThrow(() -> new IllegalArgumentException(String.format(ERROR_ABSENT_REQUEST, id)));
+
     User receiver = mentorshipRequest.getReceiver();
     User requester = mentorshipRequest.getRequester();
 

@@ -17,8 +17,8 @@ public class MentorshipRequestController {
     private static final String END_MENTORSHIP_REQUEST = "End requestMentorship id: {}";
     private static final String START_GETS_REQUEST = "Start mentorshipRequestService.getRequests";
     private static final String END_GETS_REQUEST = "End mentorshipRequestService.getRequests";
-    private static final String START_ACCEPT_REQUEST = "Start acceptRequest";
-    private static final String END_ACCEPT_REQUEST = "End acceptRequest";
+    private static final String START_ACCEPT_REQUEST = "Start acceptRequest id: {}";
+    private static final String END_ACCEPT_REQUEST = "End acceptRequest id: {}";
 
     private final MentorshipRequestService mentorshipRequestService;
 
@@ -36,8 +36,8 @@ public class MentorshipRequestController {
     }
 
     public void acceptRequest(long id) {
-        log.info(START_ACCEPT_REQUEST);
+        log.info(START_ACCEPT_REQUEST, id);
         mentorshipRequestService.acceptRequest(id);
-        log.info(END_ACCEPT_REQUEST);
+        log.info(END_ACCEPT_REQUEST, id);
     }
 }
