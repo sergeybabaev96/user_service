@@ -9,6 +9,7 @@ import school.faang.user_service.dto.RequestFilterDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.filter.MentorshipRequestFilter;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 import school.faang.user_service.repository.UserRepository;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -26,6 +27,7 @@ public class MentorshipRequestService {
     private final MentorshipRequestRepository mentorshipRequestRepository;
     private final UserRepository userRepository;
     private final MentorshipRequestMapper mentorshipRequestMapper;
+    private final List<MentorshipRequestFilter> mentorshipRequestFilters;
 
     private static final int MONTHS_BETWEEN_REQUESTS = 3;
 
@@ -73,17 +75,17 @@ public class MentorshipRequestService {
 
     public List<MentorshipRequestDto> getRequests(RequestFilterDto filter) {
         List<MentorshipRequest> requests = (List<MentorshipRequest>) mentorshipRequestRepository.findAll();
+        Stream<MentorshipRequest> requestsStream = requests.stream();
 
-        List<MentorshipRequestDto> mentorshipRequestDtos = requests.stream()
+        for (MentorshipRequestFilter requestFilter : mentorshipRequestFilters) {
+            if (requestFilter.isApplicable(filter)) {
+                requestsStream = requestFilter.apply(requestsStream, filter);
+            }
+        }
+
+        return requestsStream
                 .map(mentorshipRequestMapper::toDto)
                 .toList();
-
-        return mentorshipRequestDtos.stream()
-                .filter(request -> filter.getDescription() == null || request.getDescription().contains(filter.getDescription()))
-                .filter(request -> filter.getRequesterId() == null || Objects.equals(request.getRequesterId(), filter.getRequesterId()))
-                .filter(request -> filter.getReceiverId() == null || Objects.equals(request.getReceiverId(), filter.getReceiverId()))
-                .filter(request -> filter.getStatus() == null || request.getStatus() == filter.getStatus())
-                .collect(Collectors.toList());
     }
 
     public MentorshipRequestDto acceptRequest(Long requestId) {
