@@ -2,6 +2,10 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
 import school.faang.user_service.dto.recommendation.SkillOfferDto;
@@ -72,6 +76,15 @@ public class RecommendationService {
 
         recommendationRepository.deleteById(id);
         return !recommendationRepository.existsById(id);
+    }
+
+    public Page<RecommendationDto> getAllUserRecommendations(long id, int page, int size){
+
+        userValidator.validatorUserExistence(id);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Recommendation> recommendationPage= recommendationRepository.findAllByReceiverId(id,pageable);
+
+        return recommendationPage.map(recommendationMapper::toDto);
     }
 
     private void saveOrCreateSkillOffers(RecommendationDto recommendation, long newRecommendationId) {
