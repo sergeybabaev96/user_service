@@ -39,18 +39,17 @@ public class MentorshipService {
     public void deleteMentee(long menteeId, long mentorId) {
         User mentor = userRepository.findById(mentorId)
                 .orElseThrow(() -> new IllegalStateException("Mentor not found."));
-        if (!mentor.getMentees().removeIf(mentee -> mentee.getId() == menteeId)) {
+        User mentee = userRepository.findById(menteeId)
+                .orElseThrow(() -> new IllegalStateException("Mentee not found."));
+        if (!mentor.getMentees().remove(mentee)) {
             throw new IllegalStateException("The mentee was not found in the mentor's list.");
         }
+        mentee.getMentors().remove(mentor);
         userRepository.save(mentor);
+        userRepository.save(mentee);
     }
 
     public void deleteMentor(long menteeId, long mentorId) {
-        User mentee = userRepository.findById(menteeId)
-                .orElseThrow(() -> new IllegalStateException("Mentee not found"));
-        if (!mentee.getMentors().removeIf(mentor -> mentor.getId() == mentorId)) {
-            throw new IllegalStateException("The mentor was not found in the mentee's list.");
-        }
-        userRepository.save(mentee);
+        deleteMentee(menteeId, mentorId);
     }
 }
