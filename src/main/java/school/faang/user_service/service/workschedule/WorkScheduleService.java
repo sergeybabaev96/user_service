@@ -18,18 +18,20 @@ public class WorkScheduleService {
     private final WorkScheduleRepository workScheduleRepository;
     private final WorkScheduleMapper workScheduleMapper;
 
-    public WorkScheduleDto addWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
-        if (workScheduleRepository.existsById(workScheduleDto.id()))
+    public WorkScheduleDto addWorkSchedule(long userId, WorkScheduleDto dto) {
+        if (workScheduleRepository.existsById(dto.id()))
             throw new EntityAlreadyExistsException("The work schedule already exists");
-        return workScheduleMapper.toDto(workScheduleRepository.save(getInstance(userId, workScheduleDto)));
+        return save(userId, dto);
     }
 
-    public WorkScheduleDto updateWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
-        long id = workScheduleDto.id();
-        if (!workScheduleRepository.existsById(id))
+    public WorkScheduleDto updateWorkSchedule(long userId, WorkScheduleDto dto) {
+        if (!workScheduleRepository.existsById(dto.id()))
             throw new EntityNotFoundException("The work schedule not found");
-        workScheduleRepository.deleteById(id);
-        return workScheduleMapper.toDto(workScheduleRepository.save(getInstance(userId, workScheduleDto)));
+        return save(userId, dto);
+    }
+
+    private WorkScheduleDto save(long userId, WorkScheduleDto dto) {
+        return workScheduleMapper.toDto(workScheduleRepository.save(getInstance(userId, dto)));
     }
 
     private WorkSchedule getInstance(long userId, WorkScheduleDto workScheduleDto) {
