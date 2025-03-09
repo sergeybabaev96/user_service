@@ -36,16 +36,20 @@ public class EducationService {
         }
     }
 
-    public EducationDto addEducation(long userId, @NonNull EducationDto educationDto) throws DataValidationException {
-        yearFromValidation(educationDto);
-
-        User user = userRepository.findById(userId).orElseThrow(() -> {
+    private User findUser(long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> {
             log.error("Ошибка: пользователь с ID {} не найден", userId);
             return new DataValidationException("User is not found");
         });
+    }
+
+    public EducationDto addEducation(long userId, @NonNull EducationDto educationDto) throws DataValidationException {
+        yearFromValidation(educationDto);
+
+        User user = findUser(userId);
 
         Education education = educationMapper.toEducation(educationDto);
-        education.getUser().setId(user.getId());
+        education.setUser(user);
 
         Education updatedEducation = educationRepository.save(education);
         return educationMapper.toEducationDto(updatedEducation);
@@ -53,24 +57,20 @@ public class EducationService {
 
     public EducationDto updateEducation(long userId, @NonNull EducationDto educationDto) throws DataValidationException {
         yearFromValidation(educationDto);
-        Education education = educationMapper.toEducation(getById(educationDto.getId()));
+        Education education = getById(educationDto.getId());
 
         updateEducationValidation(userId, education.getUser().getId());
-        Education updatedEducation = educationMapper.toEducation(educationDto);
-        updatedEducation.getUser().setId(education.getUser().getId());
+        User user = findUser(userId);
+        education.setUser(user);
 
-        return educationMapper.toEducationDto(educationRepository.save(updatedEducation));
+        return educationMapper.toEducationDto(educationRepository.save(education));
     }
 
-    public EducationDto getById(long educationId) throws DataValidationException {
+    public Education getById(long educationId) throws DataValidationException {
 
-        Education education = educationRepository.findById(educationId).orElseThrow(() -> {
+        return educationRepository.findById(educationId).orElseThrow(() -> {
             log.error("Ошибка: данные об образовании по ID {} не найдены", educationId);
             return new DataValidationException("Education is not found");
         });
-
-        return educationMapper.toEducationDto(education);
     }
-
-
 }
