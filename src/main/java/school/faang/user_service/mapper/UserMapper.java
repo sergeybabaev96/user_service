@@ -10,7 +10,7 @@ import java.util.List;
 public interface UserMapper {
     UserDto toDto(User user);
 
-    default List<UserDto> usersToUserDtos(List<User> users) {
+    static List<UserDto> usersToUserDtos(List<User> users) {
         return users.stream()
                 .map(user -> new UserDto(user.getId(), user.getUsername(), user.getEmail()))
                 .toList();

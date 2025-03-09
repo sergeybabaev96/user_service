@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.event.EventParticipationRepository;
 
@@ -13,27 +14,26 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EventParticipationService {
     private final EventParticipationRepository eventParticipationRepository;
-    private final UserMapper userMapper;
 
     public void registerParticipant(long eventId, long userId) {
         List<User> participants = eventParticipationRepository.findAllParticipantsByEventId(eventId);
         if (participants.stream().anyMatch(user -> user.getId() == userId)) {
-            throw new IllegalStateException("User is already registered for this event.");
+            throw new DataValidationException("User is already registered for this event.");
         }
         eventParticipationRepository.register(eventId, userId);
     }
 
     public void unregisterParticipant(long eventId, long userId) {
         List<User> participants = eventParticipationRepository.findAllParticipantsByEventId(eventId);
-        if (!(participants.stream().anyMatch(user -> user.getId() == userId))) {
-            throw new IllegalStateException("User is not registered for this event.");
+        if (participants.stream().noneMatch(user -> user.getId() == userId)) {
+            throw new DataValidationException("User is not registered for this event.");
         }
         eventParticipationRepository.unregister(eventId, userId);
     }
 
     public List<UserDto> getParticipants(long eventId) {
         List<User> participants = eventParticipationRepository.findAllParticipantsByEventId(eventId);
-        return userMapper.usersToUserDtos(participants);
+        return UserMapper.usersToUserDtos(participants);
     }
 
     public int getParticipantsCount(long eventId) {
