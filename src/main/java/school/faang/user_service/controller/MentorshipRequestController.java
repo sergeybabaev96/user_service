@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.MentorshipRequestDto;
 import school.faang.user_service.dto.RequestFilterDto;
+import school.faang.user_service.dto.RejectionDto;
 import school.faang.user_service.service.MentorshipRequestService;
 
 import java.util.List;
@@ -19,6 +20,8 @@ public class MentorshipRequestController {
     private static final String END_GETS_REQUEST = "End mentorshipRequestService.getRequests";
     private static final String START_ACCEPT_REQUEST = "Start acceptRequest id: {}";
     private static final String END_ACCEPT_REQUEST = "End acceptRequest id: {}";
+    private static final String START_REJECT_REQUEST = "Start rejectRequest";
+    private static final String END_REJECT_REQUEST = "End rejectRequest";
 
     private final MentorshipRequestService mentorshipRequestService;
 
@@ -39,5 +42,11 @@ public class MentorshipRequestController {
         log.info(START_ACCEPT_REQUEST, id);
         mentorshipRequestService.acceptRequest(id);
         log.info(END_ACCEPT_REQUEST, id);
+    }
+
+    public void rejectRequest(long id, RejectionDto rejection) {
+        log.info(START_REJECT_REQUEST);
+        mentorshipRequestService.rejectRequest(id, rejection);
+        log.info(END_REJECT_REQUEST);
     }
 }

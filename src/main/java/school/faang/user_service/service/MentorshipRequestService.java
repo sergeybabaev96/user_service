@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.MentorshipRequestDto;
 import school.faang.user_service.dto.RequestFilterDto;
+import school.faang.user_service.dto.RejectionDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.filter.RequestFilter;
@@ -38,6 +39,8 @@ public class MentorshipRequestService {
     private static final String ERROR_NULL_REQUEST_DTO = "RequestFilterDto cant be null";
     private static final String ERROR_ABSENT_REQUEST = "The request %d was not found.";
     private static final String ERROR_ALREADY_MENTOR = "User is already a mentor for the requester.";
+    private static final String ERROR_NULL_DTO = "RejectionDto cant be null";
+    private static final String INFO_REJECTION_REASON = "Request {} rejected. Reason: {}";
 
     private final MentorshipRequestRepository mentorshipRequestRepository;
     private final MentorshipRequestMapper mentorshipRequestMapper;
@@ -114,6 +117,16 @@ public class MentorshipRequestService {
         receiver.getMentors().add(requester);
         mentorshipRequest.setStatus(RequestStatus.ACCEPTED);
         mentorshipRequest.setReceiver(receiver);
+        mentorshipRequestRepository.save(mentorshipRequest);
+    }
+
+    public void rejectRequest(long id, RejectionDto rejection) {
+        Objects.requireNonNull(rejection, ERROR_NULL_DTO);
+        MentorshipRequest mentorshipRequest = mentorshipRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(String.format(ERROR_ABSENT_REQUEST, id)));
+        mentorshipRequest.setStatus(RequestStatus.REJECTED);
+        mentorshipRequest.setRejectionReason(rejection.getRejectionReason());
+        log.info(INFO_REJECTION_REASON, id, rejection.getRejectionReason());
         mentorshipRequestRepository.save(mentorshipRequest);
     }
 
