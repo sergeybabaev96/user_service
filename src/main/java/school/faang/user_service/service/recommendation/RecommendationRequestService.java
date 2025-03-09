@@ -18,8 +18,7 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 import school.faang.user_service.repository.recommendation.SkillRequestRepository;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -69,12 +68,9 @@ public class RecommendationRequestService {
     public List<RecommendationRequestDto> getRequests(RequestFilterDto filterDto) {
         List<RecommendationRequest> requests = StreamSupport
                 .stream(recommendationRequestRepository.findAll().spliterator(), false)
-                .toList();
-        return requests
-                .stream()
                 .filter(request -> filterByCondition(request, filterDto))
-                .map(recommendationRequestMapper::toRecommendationRequestDto)
                 .toList();
+        return recommendationRequestMapper.toRecommendationRequestDtoList(requests);
     }
 
     public RecommendationRequestDto getRequest(long requestId) {
@@ -107,8 +103,8 @@ public class RecommendationRequestService {
         }
 
         request.setStatus(RequestStatus.REJECTED);
-        recommendationRequestRepository.save(request);
         request.setRejectionReason(rejection.getReason());
+        recommendationRequestRepository.save(request);
         return recommendationRequestMapper.toRecommendationRequestDto(request);
     }
 
@@ -116,10 +112,9 @@ public class RecommendationRequestService {
         Optional<RecommendationRequest> request =
                 recommendationRequestRepository.findLatestPendingRequest(requester.getId(), receiver.getId());
         if (request.isPresent()) {
-            LocalDate lastRequestDate = request.get().getCreatedAt().toLocalDate();
-            LocalDate currentDate = LocalDate.now();
-            long months = ChronoUnit.MONTHS.between(lastRequestDate, currentDate);
-            return months >= RECOMMENDATION_REQUEST_INTERVAL_MONTHS;
+            LocalDateTime lastRequestDateTime = request.get().getCreatedAt();
+            LocalDateTime nextAllowedRequestDateTime = lastRequestDateTime.plusMonths(RECOMMENDATION_REQUEST_INTERVAL_MONTHS);
+            return !LocalDateTime.now().isBefore(nextAllowedRequestDateTime);
         } else {
             return true;
         }
