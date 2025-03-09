@@ -1,5 +1,6 @@
 package school.faang.user_service.controller.event;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.UserDto;
@@ -8,13 +9,9 @@ import school.faang.user_service.service.event.EventParticipationService;
 import java.util.List;
 
 @Controller
+@RequiredArgsConstructor
 public class EventParticipationController {
     private final EventParticipationService participationService;
-
-    @Autowired
-    public EventParticipationController(EventParticipationService participationService) {
-        this.participationService = participationService;
-    }
 
     public void registerParticipant(long eventId, long userId ) {
         participationService.registerParticipant(eventId, userId);
