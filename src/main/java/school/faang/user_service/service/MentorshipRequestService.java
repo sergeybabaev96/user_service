@@ -40,6 +40,7 @@ public class MentorshipRequestService {
     private static final String ERROR_ABSENT_REQUEST = "The request %d was not found.";
     private static final String ERROR_ALREADY_MENTOR = "User is already a mentor for the requester.";
     private static final String ERROR_NULL_DTO = "RejectionDto cant be null";
+    private static final String ERROR_EMPTY_REJECTION = "Rejection reason cannot be empty";
     private static final String INFO_REJECTION_REASON = "Request {} rejected. Reason: {}";
 
     private final MentorshipRequestRepository mentorshipRequestRepository;
@@ -122,6 +123,10 @@ public class MentorshipRequestService {
 
     public void rejectRequest(long id, RejectionDto rejection) {
         Objects.requireNonNull(rejection, ERROR_NULL_DTO);
+
+        if (rejection.getRejectionReason() == null || rejection.getRejectionReason().isBlank()) {
+            throw new IllegalArgumentException(ERROR_EMPTY_REJECTION);
+        }
         MentorshipRequest mentorshipRequest = mentorshipRequestRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(String.format(ERROR_ABSENT_REQUEST, id)));
         mentorshipRequest.setStatus(RequestStatus.REJECTED);
