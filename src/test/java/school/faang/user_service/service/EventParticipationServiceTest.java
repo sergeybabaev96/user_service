@@ -60,7 +60,11 @@ public class EventParticipationServiceTest {
                 .participatedEvents(new ArrayList<>())
                 .build();
 
-        userDto = new UserDto(user.getId(), user.getUsername(), user.getEmail());
+        userDto = UserDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .build();
 
     }
 
