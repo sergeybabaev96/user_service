@@ -13,7 +13,6 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface RecommendationMapper {
-
     @Mapping(target = "author", source = "authorId")
     @Mapping(target = "receiver", source = "receiverId")
     @Mapping(target = "skillOffers", source = "skillOffersDto")
@@ -26,11 +25,17 @@ public interface RecommendationMapper {
     @Mapping(target = "skillOffersDto", source = "skillOffers")
     RecommendationDto toRecommendationDto(Recommendation recommendation);
 
+    List<RecommendationDto> toRecommendationDtoList(List<Recommendation> recommendations);
+
     @Mapping(target = "skill", source = "skillId")
     @Mapping(target = "recommendation", ignore = true)
+    SkillOffer toSkillOffer(SkillOfferDto skillOfferDto);
+
     List<SkillOffer> toSkillOfferList(List<SkillOfferDto> skillOfferDtos);
 
     @Mapping(target = "skillId", source = "skill.id")
+    SkillOfferDto toSkillOfferDto(SkillOffer skillOffer);
+
     List<SkillOfferDto> toSkillOfferDtoList(List<SkillOffer> skillOffers);
 
     default User mapIdToUser(Long id) {
