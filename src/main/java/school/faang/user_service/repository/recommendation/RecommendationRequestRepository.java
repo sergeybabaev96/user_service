@@ -1,12 +1,28 @@
 package school.faang.user_service.repository.recommendation;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface RecommendationRequestRepository extends JpaRepository<RecommendationRequest, Long> {
+
+    @Query(nativeQuery = true, value = """
+            INSERT INTO recommendation_request (requester_id, receiver_id, message, status, createdAt, updatedAt)
+            VALUES (:requesterId, :receiverId, :message, :status, :createdAt, :updatedAt) returning id
+            """)
+    @Modifying
+    Long create(
+            long requesterId,
+            long receiverId,
+            String message,
+            RequestStatus status,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt);
 
     @Query(nativeQuery = true, value = """
             SELECT * FROM recommendation_request
@@ -15,4 +31,12 @@ public interface RecommendationRequestRepository extends JpaRepository<Recommend
             LIMIT 1
             """)
     Optional<RecommendationRequest> findLatestPendingRequest(long requesterId, long receiverId);
+
+    @Query(nativeQuery = true, value = """
+            SELECT * FROM recommendation_request
+            WHERE requester_id = ?1 AND receiver_id = ?2
+            ORDER BY created_at DESC
+            LIMIT 1
+            """)
+    Optional<RecommendationRequest> findLatestRequest(long requesterId, long receiverId);
 }

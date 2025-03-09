@@ -4,6 +4,7 @@ import org.springframework.lang.NonNull;
 import school.faang.user_service.entity.RequestStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record RecommendationRequestDto(
         long id,

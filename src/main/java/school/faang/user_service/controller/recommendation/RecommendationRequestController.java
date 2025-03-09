@@ -11,7 +11,7 @@ import school.faang.user_service.service.RecommendationRequestService;
 public class RecommendationRequestController {
     private final RecommendationRequestService recommendationRequestService;
 
-    RecommendationRequestDto requestRecommendation(RecommendationRequestDto recommendationRequest) {
+    public RecommendationRequestDto requestRecommendation(RecommendationRequestDto recommendationRequest) {
         validateRecommendationRequest(recommendationRequest);
 
         return recommendationRequestService.create(recommendationRequest);
