@@ -2,6 +2,7 @@ package school.faang.user_service.validator;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import school.faang.user_service.dto.recommendation.SkillOfferDto;
 import school.faang.user_service.dto.skill.SkillDto;
 import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.exception.DataValidationException;
@@ -22,9 +23,16 @@ public class SkillValidator {
         }
     }
 
-    public void validatorSkillId(long skillId) {
+    public void validatorSkillId(Long skillId) {
         if (!skillRepository.existsById(skillId)) {
             throw new DataValidationException("Skill с данным id не существует!");
+        }
+    }
+
+    public void validatorExistenceSkillListSkillOffer(List<Long> skillId) {
+        long result = skillRepository.countExisting(skillId);
+        if (result != skillId.size()) {
+            throw new DataValidationException("В списке предложенных навыков есть несуществующие навыки!");
         }
     }
 
