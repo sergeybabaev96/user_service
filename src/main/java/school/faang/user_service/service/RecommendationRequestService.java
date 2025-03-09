@@ -1,17 +1,22 @@
 package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.filter.RecommendationRequestFilter;
+import school.faang.user_service.mapper.RecommendationRequestMapper;
 import school.faang.user_service.mapper.SkillRequestMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestDto;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
+import school.faang.user_service.repository.recommendation.RequestFilterDto;
 import school.faang.user_service.repository.recommendation.SkillRequestDto;
-import school.faang.user_service.repository.recommendation.SkillRequestRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,10 +28,12 @@ public class RecommendationRequestService {
     private final UserService userService;
     private final RecommendationRequestRepository recommendationRequestRepository;
     private final SkillRepository skillRepository;
-    private final SkillRequestRepository skillRequestRepository;
+    private final SkillRequestService skillRequestService;
+    private final RecommendationService recommendationService;
     private final SkillRequestMapper skillRequestMapper;
+    private final RecommendationRequestMapper recommendationRequestMapper;
 
-    public RecommendationRequestDto create(RecommendationRequestDto recommendationRequest) {
+    public RecommendationRequestDto create(@NotNull RecommendationRequestDto recommendationRequest) {
         validateRecommendationRequest(recommendationRequest);
 
         recommendationRequest.skills().forEach(this::createSkillRequest);
@@ -48,6 +55,35 @@ public class RecommendationRequestService {
                 recommendationRequest.receiverId(),
                 recommendationRequest.createdAt(),
                 recommendationRequest.updatedAt());
+    }
+
+    public List<RecommendationRequestDto> getRequests(@NotNull RequestFilterDto filterDto) {
+        return recommendationRequestRepository.findAll()
+                .stream()
+                .map(this::fillRelativeObjectsInRecommendationRequestEntity)
+                .filter(new RecommendationRequestFilter(filterDto))
+                .map(recommendationRequestMapper::toDto)
+                .toList();
+    }
+
+    @NotNull
+    private RecommendationRequest fillRelativeObjectsInRecommendationRequestEntity(RecommendationRequest entity) {
+        var requester = userService.findById(entity.getRequester().getId());
+        entity.setRequester(requester);
+
+        var receiver = userService.findById(entity.getReceiver().getId());
+        entity.setReceiver(receiver);
+
+        var recommendation = recommendationService.findById(entity.getRecommendation().getId());
+        entity.setRecommendation(recommendation);
+
+        var skillRequests = entity.getSkills()
+                .stream()
+                .map(skillRequest -> skillRequestService.findById(skillRequest.getId()))
+                .toList();
+        entity.setSkills(skillRequests);
+
+        return entity;
     }
 
     private void validateRecommendationRequest(RecommendationRequestDto recommendationRequest) {
@@ -105,7 +141,7 @@ public class RecommendationRequestService {
     }
 
     private SkillRequestDto createSkillRequest(SkillRequestDto skillRequestDto) {
-        var skillRequest = skillRequestRepository.create(skillRequestDto.requestId(), skillRequestDto.skillId());
+        var skillRequest = skillRequestService.create(skillRequestDto.requestId(), skillRequestDto.skillId());
 
         return skillRequestMapper.toDto(skillRequest);
     }
