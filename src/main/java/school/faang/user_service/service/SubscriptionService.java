@@ -19,7 +19,6 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 @Slf4j
 public class SubscriptionService {
-
     private final SubscriptionRepository repository;
     private final UserMapper userMapper;
     private final List<UserFilter> userFilters;
@@ -64,8 +63,8 @@ public class SubscriptionService {
 
     private Stream<User> filterUsers(Stream<User> users, UserFilterDto filters) {
         List<UserFilter> applicableFilters = userFilters.stream()
-                    .filter(filter -> filter.isApplicable(filters))
-                    .toList();
+                .filter(filter -> filter.isApplicable(filters))
+                .toList();
 
         if (applicableFilters.isEmpty()) {
             return users;
