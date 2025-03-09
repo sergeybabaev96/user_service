@@ -6,7 +6,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import school.faang.user_service.entity.recommendation.Recommendation;
+import school.faang.user_service.entity.recommendation.SkillOffer;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface RecommendationRepository extends CrudRepository<Recommendation, Long> {
@@ -29,4 +32,10 @@ public interface RecommendationRepository extends CrudRepository<Recommendation,
     Page<Recommendation> findAllByAuthorId(long authorId, Pageable pageable);
 
     Optional<Recommendation> findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(long authorId, long receiverId);
+
+    default LocalDateTime findLastRecommendationDate(long authorId, long receiverId) {
+        return findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(authorId, receiverId)
+                .map(Recommendation::getCreatedAt)
+                .orElse(null);
+    }
 }
