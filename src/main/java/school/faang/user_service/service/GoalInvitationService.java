@@ -4,20 +4,20 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.goal.GoalInvitationDto;
-import school.faang.user_service.dto.goal.InvitationFilterIDto;
+import school.faang.user_service.dto.goal.InvitationFilterDto;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalInvitation;
 import school.faang.user_service.filter.goal.GoalInvitationFilter;
+import school.faang.user_service.filter.goal.GoalInvitationStatusFilter;
 import school.faang.user_service.mapper.goal.GoalInvitationMapper;
 import school.faang.user_service.repository.goal.GoalInvitationRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -27,6 +27,7 @@ public class GoalInvitationService {
     private final UserService userSevice;
     private final GoalService goalService;
     private final GoalInvitationMapper goalInvitationMapper;
+    private final List<GoalInvitationFilter> goalInvitationFilters;
 
     public GoalInvitationDto acceptGoalInvitation(long id) {
         GoalInvitation goalInvitation = checkExistingGoal(id);
@@ -54,27 +55,16 @@ public class GoalInvitationService {
         return goalInvitationMapper.toDto(repository.save(goalInvitation));
     }
 
-    public List<GoalInvitationDto> getInvitations(InvitationFilterIDto filter) {
-        List<GoalInvitation> goalInvitations = repository.findAll();
+    public List<GoalInvitationDto> getInvitations(InvitationFilterDto invitationFilterDto) {
+        Stream<GoalInvitation> filteredInvitations = repository.findAll().stream();
 
-        List<Predicate<GoalInvitation>> predicates = new ArrayList<>();
-
-        if (filter.inviterId() != null) {
-            predicates.add(goalInvitation -> goalInvitation.getInviter() != null
-                    && goalInvitation.getInviter().getId().equals(filter.inviterId()));
-        }
-        if (filter.invitedId() != null) {
-            predicates.add(goalInvitation -> goalInvitation.getInvited() != null
-                    && goalInvitation.getInvited().getId().equals(filter.invitedId()));
-        }
-        if (filter.status() != null) {
-            predicates.add(goalInvitation -> goalInvitation.getStatus() != null
-                    && goalInvitation.getStatus().equals(filter.status()));
+        for (GoalInvitationFilter filter : goalInvitationFilters) {
+            if (filter.isApplicable(invitationFilterDto)) {
+                filteredInvitations = filter.apply(filteredInvitations, invitationFilterDto);
+            }
         }
 
-
-        return GoalInvitationFilter.filter(goalInvitations, predicates)
-                .stream()
+        return filteredInvitations
                 .map(goalInvitationMapper::toDto)
                 .toList();
     }
