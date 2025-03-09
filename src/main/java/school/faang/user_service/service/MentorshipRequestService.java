@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.MentorshipRequestDto;
+import school.faang.user_service.dto.RejectionDto;
 import school.faang.user_service.dto.RequestFilterDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 import school.faang.user_service.repository.UserRepository;
 
@@ -23,10 +25,11 @@ import java.util.stream.Collectors;
 public class MentorshipRequestService {
     private final MentorshipRequestRepository mentorshipRequestRepository;
     private final UserRepository userRepository;
+    private final MentorshipRequestMapper mentorshipRequestMapper;
 
     private static final int MONTHS_BETWEEN_REQUESTS = 3;
 
-    public void requestMentorship(MentorshipRequestDto requestDto) {
+    public MentorshipRequestDto requestMentorship(MentorshipRequestDto requestDto) {
         if (requestDto.getDescription() == null || requestDto.getDescription().isBlank()) {
             log.error("requestMentorship description is null or empty");
             throw new IllegalArgumentException("Description is required");
@@ -60,21 +63,30 @@ public class MentorshipRequestService {
         });
 
         log.info("requestMentorship creating request");
-        mentorshipRequestRepository.create(requestDto.getRequesterId(), requestDto.getReceiverId(), requestDto.getDescription());
+        long requesterId = requestDto.getRequesterId();
+        long receiverId = requestDto.getReceiverId();
+        String description = requestDto.getDescription();
+        MentorshipRequest request = mentorshipRequestRepository.create(requesterId, receiverId, description);
+
+        return mentorshipRequestMapper.toDto(request);
     }
 
-    public List<MentorshipRequest> getRequests(RequestFilterDto filter) {
+    public List<MentorshipRequestDto> getRequests(RequestFilterDto filter) {
         List<MentorshipRequest> requests = (List<MentorshipRequest>) mentorshipRequestRepository.findAll();
 
-        return requests.stream()
+        List<MentorshipRequestDto> mentorshipRequestDtos = requests.stream()
+                .map(mentorshipRequestMapper::toDto)
+                .toList();
+
+        return mentorshipRequestDtos.stream()
                 .filter(request -> filter.getDescription() == null || request.getDescription().contains(filter.getDescription()))
-                .filter(request -> filter.getRequesterId() == null || Objects.equals(request.getRequester().getId(), filter.getRequesterId()))
-                .filter(request -> filter.getReceiverId() == null || Objects.equals(request.getReceiver().getId(), filter.getReceiverId()))
+                .filter(request -> filter.getRequesterId() == null || Objects.equals(request.getRequesterId(), filter.getRequesterId()))
+                .filter(request -> filter.getReceiverId() == null || Objects.equals(request.getReceiverId(), filter.getReceiverId()))
                 .filter(request -> filter.getStatus() == null || request.getStatus() == filter.getStatus())
                 .collect(Collectors.toList());
     }
 
-    public void acceptRequest(Long requestId) {
+    public MentorshipRequestDto acceptRequest(Long requestId) {
         MentorshipRequest request = mentorshipRequestRepository
                 .findById(requestId)
                 .orElseThrow(() -> {
@@ -99,9 +111,11 @@ public class MentorshipRequestService {
         receiver.getMentors().add(requester);
         request.setStatus(RequestStatus.ACCEPTED);
         mentorshipRequestRepository.save(request);
+
+        return mentorshipRequestMapper.toDto(request);
     }
 
-    public void rejectRequest(Long requestId, MentorshipRequestDto requestDto) {
+    public MentorshipRequestDto rejectRequest(Long requestId, RejectionDto rejection) {
         MentorshipRequest request = mentorshipRequestRepository
                 .findById(requestId)
                 .orElseThrow(() -> {
@@ -116,7 +130,9 @@ public class MentorshipRequestService {
 
         log.info("rejectRequest rejecting request");
         request.setStatus(RequestStatus.REJECTED);
-        request.setRejectionReason(requestDto.getRejectionReason());
+        request.setRejectionReason(rejection.getReason());
         mentorshipRequestRepository.save(request);
+
+        return mentorshipRequestMapper.toDto(request);
     }
 }

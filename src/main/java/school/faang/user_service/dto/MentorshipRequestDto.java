@@ -12,7 +12,6 @@ public class MentorshipRequestDto {
     private Long requesterId;
     private Long receiverId;
     private RequestStatus status;
-    private String rejectionReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
