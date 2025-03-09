@@ -1,22 +1,21 @@
 package school.faang.user_service.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.skill.SkillCandidateDto;
 import school.faang.user_service.dto.skill.SkillDto;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.SkillService;
-import school.faang.user_service.validator.SkillValidator;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class SkillController {
     private final SkillService skillService;
-    private final SkillValidator skillValidator;
 
     public SkillDto create(SkillDto skillDto) {
-        skillValidator.validateSkillDto(skillDto);
+        validateSkillDtoTitle(skillDto);
         return skillService.create(skillDto);
     }
 
@@ -30,5 +29,11 @@ public class SkillController {
 
     public SkillDto acquireSkillFromOffers(long skillId, long userId) {
         return skillService.acquireSkillFromOffers(skillId, userId);
+    }
+
+    private void validateSkillDtoTitle(SkillDto skill) {
+        if (skill.title() == null || skill.title().isBlank()) {
+            throw new DataValidationException("Invalid skill : " + skill);
+        }
     }
 }

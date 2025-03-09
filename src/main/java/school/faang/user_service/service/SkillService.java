@@ -27,8 +27,8 @@ public class SkillService {
     private final SkillMapper skillMapper;
 
     public SkillDto create(SkillDto skillDto) {
-        if (skillRepository.existsByTitle(skillDto.getTitle())) {
-            throw new DataValidationException("The skill already exists : " + skillDto.getTitle());
+        if (skillRepository.existsByTitle(skillDto.title())) {
+            throw new DataValidationException("The skill already exists : " + skillDto.title());
         }
 
         Skill skill = skillMapper.toEntity(skillDto);
@@ -51,10 +51,11 @@ public class SkillService {
     public SkillDto acquireSkillFromOffers(long skillId, long userId) {
         Skill skill = skillRepository.findUserSkill(skillId, userId).orElseGet(() -> {
             List<SkillOffer> skillOffers = skillOfferService.findAllOffersOfSkill(skillId, userId);
-            Skill skillUser = skillRepository.findUserSkill(skillId, userId).orElse(null);
 
             if (skillOffers.size() >= MIN_SKILL_OFFERS) {
                 skillRepository.assignSkillToUser(skillId, userId);
+                Skill skillUser = skillRepository.findUserSkill(skillId, userId)
+                        .orElseThrow(() -> new RuntimeException("Error adding a skill to a user"));
                 skillOffers.forEach(skillOffer ->
                     userSkillGuaranteeService.save(UserSkillGuarantee.builder()
                             .user(skillOffer.getRecommendation().getReceiver())
@@ -64,7 +65,7 @@ public class SkillService {
             }
 
             return skillRepository.findUserSkill(skillId, userId)
-                    .orElseThrow(() -> new RuntimeException("Skill isn`t find"));
+                    .orElseThrow(() -> new DataValidationException("Skill isn`t find"));
         });
 
         return skillMapper.toDto(skill);
