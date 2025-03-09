@@ -13,7 +13,6 @@ import school.faang.user_service.repository.mentorship.MentorshipRequestReposito
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,7 +36,7 @@ public class MentorshipRequestService {
     private final MentorshipRequestRepository mentorshipRequestRepository;
     private final MentorshipRequestMapper mentorshipRequestMapper;
     private final UserService userService;
-    private final MentorshipRequestMapper mentorshipRequestMapper;
+    private final MentorshipRequestFilter mentorshipRequestFilter;
     private final RequestFilterMapper requestFilterMapper;
 
     public void requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
@@ -84,17 +83,8 @@ public class MentorshipRequestService {
         List<MentorshipRequest> requests = new ArrayList<>();
         mentorshipRequestRepository.findAll().forEach(requests::add);
 
-        return requests.stream()
-                .filter(reg ->
-                        filterRequest.getDescription() == null || reg.getDescription().contains(filterRequest.getDescription()))
-                .filter(reg ->
-                        filterRequest.getReceiverId() == null || reg.getReceiver().getId()
-                                .equals(filterRequest.getReceiverId()))
-                .filter(reg ->
-                        filterRequest.getRequesterId() == null || reg.getRequester().getId()
-                                .equals(filterRequest.getRequesterId()))
-                .filter(reg ->
-                        filterRequest.getStatus() == null || reg.getStatus().equals(filterRequest.getStatus()))
+        return mentorshipRequestFilter.filterRequests(requests, filterRequest)
+                .stream()
                 .map(requestFilterMapper::toDto)
                 .toList();
     }
