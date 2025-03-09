@@ -16,11 +16,17 @@ import java.util.List;
 public class RecommendationRequestDto {
     @Nullable
     private Long id;
-    @NonNull private String message;
+    @NonNull
+    private String message;
     private RequestStatus status;
+    @Nullable
     private List<SkillRequestDto> skills;
+    @NonNull
     private long requesterId;
+    @NonNull
     private long receiverId;
-    @Nullable private LocalDateTime createdAt;
-    @Nullable private LocalDateTime updatedAt;
+    @Nullable
+    private LocalDateTime createdAt;
+    @Nullable
+    private LocalDateTime updatedAt;
 }
