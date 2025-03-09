@@ -57,6 +57,7 @@ user-service:
       bought-premium-topic: "pubsub:bought-premium"
       profile_pic_channel: profile_pic_channel
       recommendation-event: "pubsub:recommendation-event-channel"
+      filter-user-event: "pubsub:filter-user-event-channel"
   available-tariffs:
     super-user:
       shows: 100
