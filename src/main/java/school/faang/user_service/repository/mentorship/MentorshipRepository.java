@@ -11,7 +11,6 @@ import java.util.List;
 
 @Repository
 public interface MentorshipRepository extends CrudRepository<User, Long> {
-    //@Query("SELECT u FROM User u JOIN u.mentors m WHERE m.id = :mentorId")
     @Modifying
     @Query(nativeQuery = true, value = """
             SELECT u.* FROM users u INNER JOIN mentorship m ON u.id = m.mentor_id WHERE m.id = :mentorId

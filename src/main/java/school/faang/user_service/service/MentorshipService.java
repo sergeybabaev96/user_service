@@ -13,19 +13,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class MentorshipService {
     private final MentorshipRepository mentorshipRepository;
     private final MentorshipMapper mentorshipMapper;
     private final UserRepository userRepository;
 
-    public MentorshipService(MentorshipRepository mentorshipRepository, MentorshipMapper mentorshipMapper, UserRepository userRepository) {
-        this.mentorshipRepository = mentorshipRepository;
-        this.mentorshipMapper = mentorshipMapper;
-        this.userRepository = userRepository;
-    }
-
     public List<MentorshipDto> getMentees(long mentorId) {
         List<User> mentees = mentorshipRepository.findAllMenteesByMentorId(mentorId);
+        if (mentees == null || mentees.isEmpty()) {
+            return Collections.emptyList();
+        }
         return mentees.stream()
                 .map(mentorshipMapper::toDto)
                 .collect(Collectors.toList());
@@ -33,6 +31,9 @@ public class MentorshipService {
 
     public List<MentorshipDto> getMentors(long userId) {
         List<User> mentors = userRepository.findAllById(Collections.singleton(userId));
+        if (mentors == null || mentors.isEmpty()) {
+            return Collections.emptyList();
+        }
         return mentors.stream()
                 .map(mentorshipMapper::toDto)
                 .collect(Collectors.toList());
@@ -40,6 +41,9 @@ public class MentorshipService {
 
     public void deleteMentee(long menteeId, long mentorId) {
         List<User> mentee = mentorshipRepository.findAllMenteesByMentorId(mentorId);
+        if (mentee == null || mentee.isEmpty()) {
+            throw new IllegalArgumentException("У этого ментора нет менторов");
+        }
         boolean isMentee = mentee.stream()
                 .anyMatch(user -> user.getId().equals(menteeId));
 
@@ -52,7 +56,9 @@ public class MentorshipService {
 
     public void deleteMentor(Long menteeId, Long mentorId) {
         List<MentorshipDto> mentors = getMentors(menteeId);
-
+        if (mentors == null || mentors.isEmpty()) {
+            throw new IllegalArgumentException("У данного менти нет менторов.");
+        }
         boolean isMentor = mentors.stream()
                 .anyMatch(mentor -> mentor.getId().equals(mentorId));
         if (isMentor) {
