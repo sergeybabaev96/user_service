@@ -14,7 +14,6 @@ import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import school.faang.user_service.utils.validationUtils.RecommendationValidation;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
