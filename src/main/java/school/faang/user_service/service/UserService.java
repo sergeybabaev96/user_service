@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class UserSevice {
+public class UserService {
     private final UserRepository repository;
 
     public Optional<User> findById(Long id) {

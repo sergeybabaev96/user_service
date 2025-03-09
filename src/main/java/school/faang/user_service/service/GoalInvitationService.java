@@ -24,11 +24,11 @@ import java.util.function.Predicate;
 public class GoalInvitationService {
     private static final int MAX_GOAL_COUNT = 3;
     private final GoalInvitationRepository repository;
-    private final UserSevice userSevice;
+    private final UserService userSevice;
     private final GoalService goalService;
     private final GoalInvitationMapper goalInvitationMapper;
 
-    public GoalInvitation acceptGoalInvitation(long id) {
+    public GoalInvitationDto acceptGoalInvitation(long id) {
         GoalInvitation goalInvitation = checkExistingGoal(id);
         Goal goal = goalInvitation.getGoal();
         User invitedUser = goalInvitation.getInvited();
@@ -45,34 +45,38 @@ public class GoalInvitationService {
         userSevice.save(invitedUser);
 
         goalInvitation.setStatus(RequestStatus.ACCEPTED);
-        return repository.save(goalInvitation);
+        return goalInvitationMapper.toDto(repository.save(goalInvitation));
     }
 
-    public GoalInvitation rejectGoalInvitation(long id) {
+    public GoalInvitationDto rejectGoalInvitation(long id) {
         GoalInvitation goalInvitation = checkExistingGoal(id);
         goalInvitation.setStatus(RequestStatus.REJECTED);
-        return repository.save(goalInvitation);
+        return goalInvitationMapper.toDto(repository.save(goalInvitation));
     }
 
-    public List<GoalInvitation> getInvitations(InvitationFilterIDto filter) {
+    public List<GoalInvitationDto> getInvitations(InvitationFilterIDto filter) {
         List<GoalInvitation> goalInvitations = repository.findAll();
 
         List<Predicate<GoalInvitation>> predicates = new ArrayList<>();
 
-        if (filter.getInviterId() != null) {
+        if (filter.inviterId() != null) {
             predicates.add(goalInvitation -> goalInvitation.getInviter() != null
-                    && goalInvitation.getInviter().getId().equals(filter.getInviterId()));
+                    && goalInvitation.getInviter().getId().equals(filter.inviterId()));
         }
-        if (filter.getInvitedId() != null) {
+        if (filter.invitedId() != null) {
             predicates.add(goalInvitation -> goalInvitation.getInvited() != null
-                    && goalInvitation.getInvited().getId().equals(filter.getInvitedId()));
+                    && goalInvitation.getInvited().getId().equals(filter.invitedId()));
         }
-        if (filter.getStatus() != null) {
+        if (filter.status() != null) {
             predicates.add(goalInvitation -> goalInvitation.getStatus() != null
-                    && goalInvitation.getStatus().equals(filter.getStatus()));
+                    && goalInvitation.getStatus().equals(filter.status()));
         }
 
-        return GoalInvitationFilter.filter(goalInvitations, predicates);
+
+        return GoalInvitationFilter.filter(goalInvitations, predicates)
+                .stream()
+                .map(goalInvitationMapper::toDto)
+                .toList();
     }
 
     private GoalInvitation checkExistingGoal(long id) {

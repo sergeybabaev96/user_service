@@ -1,6 +1,5 @@
 package school.faang.user_service.filter.goal;
 
-import school.faang.user_service.dto.goal.InvitationFilterIDto;
 import school.faang.user_service.entity.goal.GoalInvitation;
 
 import java.util.List;
