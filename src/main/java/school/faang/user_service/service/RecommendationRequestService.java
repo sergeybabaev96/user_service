@@ -10,7 +10,6 @@ import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.RecommendationRequestFilter;
 import school.faang.user_service.mapper.RecommendationRequestMapper;
-import school.faang.user_service.mapper.SkillRequestMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
@@ -33,21 +32,19 @@ public class RecommendationRequestService {
     private final SkillRepository skillRepository;
     private final SkillRequestService skillRequestService;
     private final RecommendationService recommendationService;
-    private final SkillRequestMapper skillRequestMapper;
     private final RecommendationRequestMapper recommendationRequestMapper;
 
     public RecommendationRequestDto create(@NotNull RecommendationRequestDto recommendationRequest) {
         validateRecommendationRequest(recommendationRequest);
 
-        recommendationRequest.skills().forEach(this::createSkillRequest);
-
         var recommendationRequestId = recommendationRequestRepository.create(
                 recommendationRequest.requesterId(),
                 recommendationRequest.receiverId(),
                 recommendationRequest.message(),
-                recommendationRequest.status(),
-                recommendationRequest.createdAt(),
-                recommendationRequest.updatedAt());
+                RequestStatus.PENDING);
+
+        recommendationRequest.skills()
+                .forEach(skill -> skillRequestService.create(recommendationRequestId, skill.skillId()));
 
         return new RecommendationRequestDto(
                 recommendationRequestId,
@@ -162,11 +159,5 @@ public class RecommendationRequestService {
                                             .map(x -> x.get().getTitle())
                                             .toList())));
         }
-    }
-
-    private SkillRequestDto createSkillRequest(SkillRequestDto skillRequestDto) {
-        var skillRequest = skillRequestService.create(skillRequestDto.requestId(), skillRequestDto.skillId());
-
-        return skillRequestMapper.toDto(skillRequest);
     }
 }

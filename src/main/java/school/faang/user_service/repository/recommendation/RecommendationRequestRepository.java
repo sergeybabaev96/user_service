@@ -12,17 +12,11 @@ import java.util.Optional;
 public interface RecommendationRequestRepository extends JpaRepository<RecommendationRequest, Long> {
 
     @Query(nativeQuery = true, value = """
-            INSERT INTO recommendation_request (requester_id, receiver_id, message, status, createdAt, updatedAt)
-            VALUES (:requesterId, :receiverId, :message, :status, :createdAt, :updatedAt) returning id
+            INSERT INTO recommendation_request (requester_id, receiver_id, message, status)
+            VALUES (:requesterId, :receiverId, :message, :status) returning id
             """)
     @Modifying
-    Long create(
-            long requesterId,
-            long receiverId,
-            String message,
-            RequestStatus status,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt);
+    Long create(long requesterId, long receiverId, String message, RequestStatus status);
 
     @Query(nativeQuery = true, value = """
             SELECT * FROM recommendation_request
