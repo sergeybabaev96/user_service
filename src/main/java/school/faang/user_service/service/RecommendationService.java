@@ -11,8 +11,9 @@ import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.repository.UserSkillGuaranteeRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
-import school.faang.user_service.utils.ValidationRecommendationUtils;
+import school.faang.user_service.utils.validationUtils.RecommendationValidation;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -24,14 +25,19 @@ public class RecommendationService {
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
 
     public RecommendationDto create(RecommendationDto recommendationDto) {
-        ValidationRecommendationUtils.validateRecommendationContent(recommendationDto.getContent());
-        ValidationRecommendationUtils.validateSkills(recommendationDto, skillOfferRepository.findAllSkillOffers());
+        RecommendationValidation.validateRecommendationContent(recommendationDto.getContent());
+        RecommendationValidation.validateSkills(recommendationDto, skillOfferRepository.findAllSkillOffers());
+        LocalDateTime lastRecommendation = recommendationRepository.
+                findLastRecommendationDate(recommendationDto.getAuthorId(), recommendationDto.getReceiverId());
+        RecommendationValidation.validateRecommendationDate(lastRecommendation);
 
         Recommendation recommendation = recommendationMapper.toRecommendation(recommendationDto);
-        ValidationRecommendationUtils.validateRecommendationDate(recommendation);
+        recommendation.setCreatedAt(LocalDateTime.now());
+
+        Long recommendationId = createRecommendation(recommendation);
+        recommendation.setId(recommendationId);
 
         createSkillOffer(recommendation);
-        createInRecommendationRepository(recommendation);
         return recommendationMapper.toRecommendationDto(recommendation);
     }
 
@@ -52,7 +58,7 @@ public class RecommendationService {
         }
     }
 
-    private void createInRecommendationRepository(Recommendation recommendation) {
+    private Long createRecommendation(Recommendation recommendation) {
         Long authorId = recommendation.getAuthor().getId();
         Long receiverId = recommendation.getReceiver().getId();
         if (authorId == null) {
@@ -61,6 +67,6 @@ public class RecommendationService {
             throw new DataValidationException("Id of receiver can't be null");
         }
         String content = recommendation.getContent();
-        recommendationRepository.create(authorId, receiverId, content);
+        return recommendationRepository.create(authorId, receiverId, content);
     }
 }
