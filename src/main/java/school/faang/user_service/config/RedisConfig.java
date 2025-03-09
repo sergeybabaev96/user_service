@@ -1,7 +1,9 @@
 package school.faang.user_service.config;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -37,5 +39,10 @@ public class RedisConfig {
     @Bean
     public ChannelTopic recommendationEventTopic() {
         return new ChannelTopic(properties.getRedis().getChannel().getRecommendationEvent());
+    }
+
+    @Bean
+    public ChannelTopic filterUserChannelTopic() {
+        return new ChannelTopic(properties.getRedis().getChannel().getFilterUserEvent());
     }
 }

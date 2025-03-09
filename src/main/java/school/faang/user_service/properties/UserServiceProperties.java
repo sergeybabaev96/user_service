@@ -67,6 +67,7 @@ public class UserServiceProperties {
             private String boughtPremiumTopic;
             private String profilePicChannel;
             private String recommendationEvent;
+            private String filterUserEvent;
         }
     }
 }
