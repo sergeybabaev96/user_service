@@ -60,7 +60,7 @@ class UsersBanEventListenerTest {
     }
 
     @Test
-    void testOnMessageIOException() throws IOException {
+    void testOnMessageIoException() throws IOException {
 
         when(message.getBody()).thenReturn(jsonMessageBytes);
         when(objectMapper.readValue(jsonMessageBytes, EventUsersBan.class))

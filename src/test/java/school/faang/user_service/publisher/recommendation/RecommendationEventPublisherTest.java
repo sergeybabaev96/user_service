@@ -42,7 +42,7 @@ public class RecommendationEventPublisherTest {
     }
 
     @Test
-    void testPublish_Success() throws JsonProcessingException {
+    void testPublishSuccess() throws JsonProcessingException {
         String eventJson = "{\"requesterId\":1,\"receiverId\":2,\"recommendationId\":3}";
         when(objectMapper.writeValueAsString(recommendationEvent)).thenReturn(eventJson);
 
@@ -53,7 +53,7 @@ public class RecommendationEventPublisherTest {
     }
 
     @Test
-    void testPublish_JsonProcessingException() throws JsonProcessingException {
+    void testPublishJsonProcessingException() throws JsonProcessingException {
         when(objectMapper.writeValueAsString(recommendationEvent))
                 .thenThrow(new JsonProcessingException("JSON error") {});
 
