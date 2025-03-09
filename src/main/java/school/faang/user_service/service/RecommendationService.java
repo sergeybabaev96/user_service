@@ -12,8 +12,9 @@ import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.repository.UserSkillGuaranteeRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
-import school.faang.user_service.utils.ValidationRecommendationUtils;
+import school.faang.user_service.utils.validationUtils.RecommendationValidation;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,14 +28,13 @@ public class RecommendationService {
     private final RecommendationMapper recommendationMapper;
 
     public RecommendationDto update(RecommendationDto recommendationDto) {
-        Recommendation recommendation = recommendationMapper.toRecommendation(recommendationDto);
-        Iterable<SkillOffer> skillOffersIterable = skillOfferRepository.findAll();
-        List<SkillOffer> allSkillOffers = new ArrayList<>();
-        skillOffersIterable.forEach(allSkillOffers::add);
+        RecommendationValidation.validateRecommendationContent(recommendationDto.getContent());
+        RecommendationValidation.validateSkills(recommendationDto, skillOfferRepository.findAllSkillOffers());
+        LocalDateTime lastRecommendation = recommendationRepository.
+                findLastRecommendationDate(recommendationDto.getAuthorId(), recommendationDto.getReceiverId());
+        RecommendationValidation.validateRecommendationDate(lastRecommendation);
 
-        ValidationRecommendationUtils.validateRecommendationContent(recommendationDto);
-        ValidationRecommendationUtils.validateRecommendationDate(recommendationDto);
-        ValidationRecommendationUtils.validateSkills(recommendationDto, allSkillOffers);
+        Recommendation recommendation = recommendationMapper.toRecommendation(recommendationDto);
 
         updateRecommendation(recommendation);
         deleteAllAndCreate(recommendation);
@@ -72,7 +72,7 @@ public class RecommendationService {
         Long receiverId = recommendation.getReceiver().getId();
         String content = recommendation.getContent();
         if (authorId == null) {
-             throw new DataValidationException("Author id can't be null");
+            throw new DataValidationException("Author id can't be null");
         } else if (receiverId == null) {
             throw new DataValidationException("Author id can't be null");
         }

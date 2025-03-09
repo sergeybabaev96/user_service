@@ -28,9 +28,13 @@ public interface RecommendationMapper {
 
     @Mapping(target = "skill", source = "skillId")
     @Mapping(target = "recommendation", ignore = true)
+    SkillOffer toSkillOffer(SkillOfferDto skillOfferDto);
+
     List<SkillOffer> toSkillOfferList(List<SkillOfferDto> skillOfferDtos);
 
     @Mapping(target = "skillId", source = "skill.id")
+    SkillOfferDto toSkillOfferDto(SkillOffer skillOffer);
+
     List<SkillOfferDto> toSkillOfferDtoList(List<SkillOffer> skillOffers);
 
     default User mapIdToUser(Long id) {
