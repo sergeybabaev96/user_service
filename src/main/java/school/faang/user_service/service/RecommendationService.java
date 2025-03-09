@@ -9,6 +9,7 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.entity.recommendation.Recommendation;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.Recommendation.RecommendationMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
@@ -52,18 +53,25 @@ public class RecommendationService {
                 .orElseThrow(() -> new IllegalStateException("Ошибка сохранения рекомендации!")));
     }
 
-    public RecommendationDto update(RecommendationDto recommendation){
+    public RecommendationDto update(RecommendationDto recommendation) {
         userValidator.validatorUserExistence(recommendation.getReceiverId());
         checkValidDateRecommendation(recommendation);
         checkGeneralRecommendationSkillOffer(recommendation);
 
-        recommendationRepository.update(recommendation.getAuthorId(),recommendation.getReceiverId(), recommendation.getContent());
+        recommendationRepository.update(recommendation.getAuthorId(), recommendation.getReceiverId(), recommendation.getContent());
         skillOfferRepository.deleteAllByRecommendationId(recommendation.getId());
 
         saveOrCreateSkillOffers(recommendation, recommendation.getId());
 
         return recommendationMapper.toDto(recommendationRepository.findById(recommendation.getId())
                 .orElseThrow(() -> new IllegalStateException("Ошибка обновления рекомендации!")));
+    }
+
+    public boolean delete(long id) {
+        recommendationValidator.validatorExistenceRecommendation(id);
+
+        recommendationRepository.deleteById(id);
+        return !recommendationRepository.existsById(id);
     }
 
     private void saveOrCreateSkillOffers(RecommendationDto recommendation, long newRecommendationId) {

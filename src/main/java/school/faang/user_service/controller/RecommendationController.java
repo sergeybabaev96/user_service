@@ -18,4 +18,8 @@ public class RecommendationController {
     public RecommendationDto updateRecommendation(@Valid RecommendationDto updated) {
         return recommendationService.update(updated);
     }
+
+    public boolean deleteRecommendation(long id){
+        return recommendationService.delete(id);
+    }
 }
