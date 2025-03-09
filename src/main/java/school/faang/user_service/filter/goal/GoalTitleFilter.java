@@ -1,6 +1,5 @@
 package school.faang.user_service.filter.goal;
 
-
 import school.faang.user_service.dto.goal.GoalFilterDto;
 import school.faang.user_service.entity.goal.Goal;
 
@@ -15,7 +14,9 @@ public class GoalTitleFilter implements GoalFilter {
     }
 
     @Override
-    public List<Goal> apply(GoalFilterDto dto, Stream<Goal> goals) {
-        return List.of();
+    public List<Goal> apply(GoalFilterDto filter, Stream<Goal> goals) {
+
+        return goals.filter(goal -> goal.getTitle().contains(filter.getTitlePattern()))
+                .toList();
     }
 }

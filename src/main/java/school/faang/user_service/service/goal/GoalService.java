@@ -3,10 +3,11 @@ package school.faang.user_service.service.goal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.goal.GoalDto;
-import school.faang.user_service.entity.User;
+import school.faang.user_service.dto.goal.GoalFilterDto;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.filter.goal.GoalFilter;
 import school.faang.user_service.mapper.goal.GoalMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
@@ -26,6 +27,7 @@ public class GoalService {
     private final UserService userService;
     private final GoalMapper goalMapper;
     private final SkillRepository skillRepository;
+    private final GoalFilter goalFilter;
 
     public GoalDto createGoal(Long userId, GoalDto goalDto) {
         if (!userService.isWithinGoalLimit(userId)) {
@@ -70,11 +72,9 @@ public class GoalService {
         goalRepository.deleteById(goalId);
     }
 
-    public List<GoalDto> findSubtasksByGoalId(long goalId) {
-       Stream<Goal> subtasks = goalRepository.findByParent(goalId);
-
-
-
+    public List<GoalDto> findSubtasksByGoalId(long goalId, GoalFilterDto filters) {
+        Stream<Goal> goals = goalRepository.findByParent(goalId);
+        goalFilter.);
     }
 
 

@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.goal.GoalDto;
+import school.faang.user_service.dto.goal.GoalFilterDto;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.goal.GoalService;
+
+import java.util.List;
 
 
 @RestController
@@ -30,9 +33,8 @@ public class GoalController {
         goalService.deleteGoal(goalId);
     }
 
-    public GoalDto findSubtasksByGoalId(Long goalId) {
-        validateId(goalId, "goalId");
-        return goalService.findSubtasksByGoalId(goalId);
+    public List<GoalDto> findSubtasksByGoalId(Long goalId, GoalFilterDto filter) {
+        return goalService.findSubtasksByGoalId(goalId, filter);
     }
 
     private void validateUserIdAndGoalDto(Long userId, GoalDto goalDto) {
