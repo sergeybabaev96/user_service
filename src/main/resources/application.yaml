@@ -57,6 +57,11 @@ user-service:
       bought-premium-topic: "pubsub:bought-premium"
       profile_pic_channel: profile_pic_channel
       recommendation-event: "pubsub:recommendation-event-channel"
+  kafka:
+    bootstrap-servers: localhost:9092
+    group-id: achievement-group
+    channel:
+      goal-achievement-event: "goal-achievement-event"
   available-tariffs:
     super-user:
       shows: 100

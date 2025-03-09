@@ -9,6 +9,7 @@ import school.faang.user_service.dto.BuyTariffRequest;
 import school.faang.user_service.dto.TariffDto;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.user.GetUserRequest;
+import school.faang.user_service.service.GoalService;
 import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.service.DeactivateUserFacade;
 import java.util.List;
@@ -20,6 +21,7 @@ public class UserController {
 
     private final UserService userService;
     private final DeactivateUserFacade deactivateUserFacade;
+    private final GoalService goalService;
 
 
     @PostMapping("/deactivate")
@@ -45,5 +47,10 @@ public class UserController {
     @PostMapping("/upload-profile-pic")
     public void uploadProfilePic(@RequestParam("user_id") long userId, @RequestParam("avatar") MultipartFile avatar) {
         userService.saveProfilePic(userId, avatar);
+    }
+
+    @PostMapping("/assign-goal")
+    public void assignGoal(@RequestParam("user_id") long userId, @RequestParam("goal_id") long goalId) {
+        goalService.saveGoalForUser(userId, goalId);
     }
 }

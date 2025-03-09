@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import school.faang.user_service.common.Currency;
 import school.faang.user_service.dto.ErrorResponse;
+import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.exception.*;
 
 import java.util.Arrays;
@@ -125,6 +126,14 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ErrorResponse handleBusinessException(BusinessException e) {
         log.error("BusinessException: {}", e.getMessage());
+
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(GoalFoundForUserException.class)
+    public ErrorResponse handleBusinessException(GoalFoundForUserException e) {
+        log.error("GoalFoundForUserException: {}", e.getMessage());
 
         return new ErrorResponse(e.getMessage());
     }

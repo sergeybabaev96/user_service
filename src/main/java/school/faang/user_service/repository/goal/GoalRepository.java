@@ -62,4 +62,11 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
         SELECT EXISTS(SELECT 1 FROM user_goal WHERE goal_id=:goalId AND user_id != :userId)
     """)
     boolean existsOtherGoalsInProcess(long goalId, long userId);
+
+    @Modifying
+    @Query(nativeQuery = true, value = """
+        INSERT INTO user_goal (user_id, goal_id, created_at, updated_at)
+            VALUES (?1, ?2, NOW(), NOW())
+    """)
+    void saveGoalForUser(long userId, long goalId);
 }

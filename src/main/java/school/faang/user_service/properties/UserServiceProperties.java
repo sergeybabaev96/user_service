@@ -21,6 +21,7 @@ public class UserServiceProperties {
     private Map<String, TariffProperties> availableTariffs = new HashMap<>();
     private S3Properties s3;
     private UserServiceProperties.Redis redis = new UserServiceProperties.Redis();
+    private UserServiceProperties.Kafka kafka = new UserServiceProperties.Kafka();
 
     @Getter
     @Setter
@@ -67,6 +68,18 @@ public class UserServiceProperties {
             private String boughtPremiumTopic;
             private String profilePicChannel;
             private String recommendationEvent;
+        }
+    }
+
+    @Data
+    public static class Kafka {
+        private String bootstrapServers;
+        private String groupId;
+        private Channel channel;
+
+        @Data
+        public static class Channel {
+            private String goalAchievementEvent;
         }
     }
 }
