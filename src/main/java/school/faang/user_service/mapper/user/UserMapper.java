@@ -14,7 +14,13 @@ public interface UserMapper {
     @Mapping(source = "mentees", target = "menteeIds", expression = "java(toIds(user.getMentees))")
     UserDto toDto(User user);
 
-    default List<Long> toIds(List<User> users){
+    static List<Long> toIds(List<User> users){
         return users == null ? List.of() : users.stream().map(User::getId).toList();
+    }
+
+    static List<UserDto> usersToUserDtos(List<User> users) {
+        return users.stream()
+                .map(user -> new UserDto(user.getId(), user.getUsername(), user.getEmail()))
+                .toList();
     }
 }
