@@ -36,6 +36,6 @@ public interface SkillOfferRepository extends CrudRepository<SkillOffer, Long> {
     List<SkillOffer> findAllByUserId(long userId);
 
     @NotNull
-    @Query("SELECT * FROM skill_offer")
+    @Query(nativeQuery = true, value = "SELECT * FROM skill_offer")
     List<SkillOffer> findAllSkillOffers();
 }
