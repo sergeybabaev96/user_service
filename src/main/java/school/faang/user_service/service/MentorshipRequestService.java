@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.MentorshipRequestDto;
 import school.faang.user_service.dto.RequestFilterDto;
 import school.faang.user_service.entity.MentorshipRequest;
+import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 import school.faang.user_service.repository.UserRepository;
@@ -71,5 +72,51 @@ public class MentorshipRequestService {
                 .filter(request -> filter.getReceiverId() == null || Objects.equals(request.getReceiver().getId(), filter.getReceiverId()))
                 .filter(request -> filter.getStatus() == null || request.getStatus() == filter.getStatus())
                 .collect(Collectors.toList());
+    }
+
+    public void acceptRequest(Long requestId) {
+        MentorshipRequest request = mentorshipRequestRepository
+                .findById(requestId)
+                .orElseThrow(() -> {
+                    log.error("acceptRequest request not found");
+                    return new IllegalArgumentException("Request not found");
+                });
+
+        if (request.getStatus() != RequestStatus.PENDING) {
+            log.error("acceptRequest request already accepted or rejected");
+            throw new IllegalArgumentException("Request already accepted or rejected");
+        }
+
+        User requester = request.getRequester();
+        User receiver = request.getReceiver();
+
+        if (receiver.getMentors().contains(requester)) {
+            log.error("acceptRequest requester is already a mentor");
+            throw new IllegalArgumentException("Requester is already a mentor");
+        }
+
+        log.info("acceptRequest accepting request");
+        receiver.getMentors().add(requester);
+        request.setStatus(RequestStatus.ACCEPTED);
+        mentorshipRequestRepository.save(request);
+    }
+
+    public void rejectRequest(Long requestId, MentorshipRequestDto requestDto) {
+        MentorshipRequest request = mentorshipRequestRepository
+                .findById(requestId)
+                .orElseThrow(() -> {
+                    log.error("rejectRequest request not found");
+                    return new IllegalArgumentException("Request not found");
+                });
+
+        if (request.getStatus() != RequestStatus.PENDING) {
+            log.error("rejectRequest request already accepted or rejected");
+            throw new IllegalArgumentException("Request already accepted or rejected");
+        }
+
+        log.info("rejectRequest rejecting request");
+        request.setStatus(RequestStatus.REJECTED);
+        request.setRejectionReason(requestDto.getRejectionReason());
+        mentorshipRequestRepository.save(request);
     }
 }

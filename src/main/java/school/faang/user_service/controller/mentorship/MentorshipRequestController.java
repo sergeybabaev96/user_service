@@ -21,4 +21,12 @@ public class MentorshipRequestController {
     public List<MentorshipRequest> getRequests(RequestFilterDto filter) {
         return mentorshipRequestService.getRequests(filter);
     }
+
+    public void acceptRequest(Long requestId) {
+        mentorshipRequestService.acceptRequest(requestId);
+    }
+
+    public void rejectRequest(Long requestId, MentorshipRequestDto requestDto) {
+        mentorshipRequestService.rejectRequest(requestId, requestDto);
+    }
 }
