@@ -3,6 +3,7 @@ package school.faang.user_service.service.goal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.goal.GoalDto;
+import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.exception.DataValidationException;
@@ -13,6 +14,7 @@ import school.faang.user_service.service.skill.SkillService;
 import school.faang.user_service.service.user.UserService;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 
 @Service
@@ -42,7 +44,6 @@ public class GoalService {
                 .orElseThrow(() -> new RuntimeException("Goal with id " + goalDto.getId() + " does not exist")));
     }
 
-
     public GoalDto updateGoal(Long goalId, GoalDto goalDto) {
 
         Goal goal = goalRepository.findById(goalId)
@@ -58,7 +59,6 @@ public class GoalService {
         Goal updatedGoal = goalRepository.save(goal);
 
         return goalMapper.toDto(updatedGoal);
-
     }
 
     public void deleteGoal(Long goalId) {
@@ -66,10 +66,15 @@ public class GoalService {
             throw new DataValidationException("Goal with id " + goalId + " does not exist");
         }
 
-        goalRepository.removeSkillsFromGoal(goalId); //если есть навыки
+        goalRepository.removeSkillsFromGoal(goalId);
         goalRepository.deleteById(goalId);
+    }
+
+    public List<GoalDto> findSubtasksByGoalId(long goalId) {
+       Stream<Goal> subtasks = goalRepository.findByParent(goalId);
 
     }
+
 
     private void validateExistsGoalSkills(List<Long> skillIds) {
 

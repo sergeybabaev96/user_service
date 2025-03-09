@@ -30,6 +30,11 @@ public class GoalController {
         goalService.deleteGoal(goalId);
     }
 
+    public GoalDto findSubtasksByGoalId(Long goalId) {
+        validateId(goalId, "goalId");
+        return goalService.findSubtasksByGoalId(goalId);
+    }
+
     private void validateUserIdAndGoalDto(Long userId, GoalDto goalDto) {
         validateId(userId, "userId");
         validateTitle(goalDto.getTitle());
