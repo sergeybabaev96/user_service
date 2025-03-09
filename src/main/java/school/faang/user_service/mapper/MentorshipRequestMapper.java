@@ -13,5 +13,7 @@ public interface MentorshipRequestMapper {
     @Mapping(target = "status", expression = "java(school.faang.user_service.entity.RequestStatus.PENDING)")
     MentorshipRequest toEntity(MentorshipRequestDto dto);
 
+    @Mapping(source = "requester.id", target = "requesterId")
+    @Mapping(source = "receiver.id", target = "receiverId")
     MentorshipRequestDto toDto(MentorshipRequest entity);
 }

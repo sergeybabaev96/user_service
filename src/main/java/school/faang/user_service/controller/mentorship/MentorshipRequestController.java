@@ -15,9 +15,6 @@ public class MentorshipRequestController {
     private final MentorshipRequestService mentorshipRequestService;
 
     public void requestMentorship(MentorshipRequestDto requestDto) {
-        if (requestDto.getDescription() == null || requestDto.getDescription().isBlank()) {
-            throw new IllegalArgumentException("Description is required");
-        }
         mentorshipRequestService.requestMentorship(requestDto);
     }
 
