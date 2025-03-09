@@ -1,4 +1,4 @@
-package school.faang.user_service.service.promotion.user;
+package school.faang.user_service.model.promotion.user;
 
 import lombok.Getter;
 

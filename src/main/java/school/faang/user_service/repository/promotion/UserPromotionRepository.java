@@ -18,7 +18,8 @@ public interface UserPromotionRepository extends JpaRepository<UserPromotion, Lo
                 AND u.percentage = :percentage
                 AND u.feedRank = :feedRank
             """)
-    UserPromotion findSamePromotion(Long userId, LocalDateTime startDate, LocalDateTime endDate, Integer percentage, Integer feedRank);
+    UserPromotion findSamePromotion(Long userId, LocalDateTime startDate, LocalDateTime endDate,
+                                    Integer percentage, Integer feedRank);
 
     @Query("""
             SELECT u
@@ -33,11 +34,45 @@ public interface UserPromotionRepository extends JpaRepository<UserPromotion, Lo
     @Transactional
     @Query("""
             UPDATE UserPromotion u
-            SET u.percentage = :percentage
+            SET u.percentage = :newPercentage
             WHERE u.userId = :userId
                 AND u.startDate = :startDate
                 AND u.endDate = :endDate
+                AND u.feedRank = :feedRank
             """)
-    void updatePromotionPercentage(Long userId, LocalDateTime startDate, LocalDateTime endDate, Integer percentage);
+    void updateUserPromotionPercentage(Long userId, LocalDateTime startDate, LocalDateTime endDate,
+                                       Integer newPercentage, Integer feedRank);
 
+    @Query("""
+            SELECT u.percentage
+            FROM UserPromotion u
+            WHERE u.userId = :userId
+                AND u.startDate = :startDate
+                AND u.endDate = :endDate
+                AND u.feedRank = :feedRank
+            """)
+    Integer getUserPercentage(Long userId, LocalDateTime startDate, LocalDateTime endDate, Integer feedRank);
+
+    @Query("""
+            SELECT u.feedRank
+            FROM UserPromotion u
+            WHERE u.userId = :userId
+                AND u.startDate = :startDate
+                AND u.endDate = :endDate
+                AND u.percentage = :percentage
+            """)
+    Integer getUserFeedRank(Long userId, LocalDateTime startDate, LocalDateTime endDate, Integer percentage);
+
+    @Modifying
+    @Transactional
+    @Query("""
+            UPDATE UserPromotion u
+            SET u.feedRank = :newFeedRank
+            WHERE u.userId = :userId
+                AND u.startDate = :startDate
+                AND u.endDate = :endDate
+                AND u.percentage = :percentage
+            """)
+    void updateUserFeedRank(Long userId, LocalDateTime startDate, LocalDateTime endDate,
+                            Integer percentage, Integer newFeedRank);
 }

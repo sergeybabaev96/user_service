@@ -8,7 +8,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,12 +24,10 @@ public class EventPromotion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
     @FutureOrPresent
     @Column(name = "start_date", columnDefinition = "TIMESTAMP", nullable = false)
     private LocalDateTime startDate;
 
-    @NotNull
     @Future
     @Column(name = "end_date", columnDefinition = "TIMESTAMP", nullable = false)
     private LocalDateTime endDate;

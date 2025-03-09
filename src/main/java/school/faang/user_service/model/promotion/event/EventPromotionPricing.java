@@ -1,6 +1,6 @@
-package school.faang.user_service.service.promotion.event;
+package school.faang.user_service.model.promotion.event;
 
-import school.faang.user_service.service.promotion.PromotionPriority;
+import school.faang.user_service.model.promotion.PromotionPriority;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -26,7 +26,7 @@ public class EventPromotionPricing {
         priorityMultipliers.put(PromotionPriority.PRIORITY_ULTRA.getFeedRank(), new BigDecimal("54.0"));
     }
 
-    public static BigDecimal getPrice(EventPromotionType type, PromotionPriority promotionPriority) {
-        return prices.get(type.getEventPercentage()).multiply(priorityMultipliers.get(promotionPriority.getFeedRank()));
+    public static BigDecimal getPrice(int userPercentage, int feedRank) {
+        return prices.get(userPercentage).multiply(priorityMultipliers.get(feedRank));
     }
 }
