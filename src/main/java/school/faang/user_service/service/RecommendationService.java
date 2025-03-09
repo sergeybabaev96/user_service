@@ -52,9 +52,7 @@ public class RecommendationService {
         Pageable pageable = PageRequest.of(0 , 10);
         Page<Recommendation> recommendationPage = recommendationRepository.findAllByAuthorId(authorId, pageable);
         List<Recommendation> recommendationList = recommendationPage.getContent();
-        return recommendationList.stream()
-                .map(recommendationMapper::toRecommendationDto)
-                .toList();
+        return recommendationMapper.toRecommendationDtoList(recommendationList);
     }
 
     public List<RecommendationDto> getAllUserRecommendations(Long receiverId) {
