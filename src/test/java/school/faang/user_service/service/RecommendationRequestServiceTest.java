@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import school.faang.user_service.dto.RecommendationRequestedEvent;
 import school.faang.user_service.dto.recommendation.CreateRecommendationRequestRequest;
 import school.faang.user_service.dto.recommendation.CreateRecommendationRequestResponse;
 import school.faang.user_service.dto.recommendation.GetRecommendationRequestResponse;
@@ -19,6 +20,7 @@ import school.faang.user_service.exception.RecommendationRequestCreatedException
 import school.faang.user_service.exception.RequestAlreadyProcessedException;
 import school.faang.user_service.exception.ResourceNotFoundException;
 import school.faang.user_service.mapper.RecommendationRequestMapper;
+import school.faang.user_service.messaging.RecommendationRequestEventPublisher;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 import school.faang.user_service.service.recommendation.RecommendationRequestFilter;
 import school.faang.user_service.service.recommendation.RecommendationRequestService;
@@ -42,11 +44,15 @@ class RecommendationRequestServiceTest {
     private RecommendationRequestFilter recommendationRequestFilter;
     private RecommendationRequestService recommendationRequestService;
 
+    @Mock
+    private RecommendationRequestEventPublisher eventPublisher;
+
     @BeforeEach
     void setUp() {
         recommendationRequestMapper = Mappers.getMapper(RecommendationRequestMapper.class);
         recommendationRequestService = new RecommendationRequestService(recommendationRequestRepository,
-                userService, skillRequestService, recommendationRequestMapper, recommendationRequestFilter);
+                userService, skillRequestService,
+                recommendationRequestMapper, recommendationRequestFilter, eventPublisher);
     }
 
     @Test
@@ -96,17 +102,26 @@ class RecommendationRequestServiceTest {
         User requester = RecommendationReqDataFactory.createRequester();
         User receiver = RecommendationReqDataFactory.createReceiver();
         RecommendationRequest savedRequest = RecommendationReqDataFactory.createRecommendationRequest();
-        Mockito.when(userService.findById(1L))
-                .thenReturn(requester);
-        Mockito.when(userService.findById(2L))
-                .thenReturn(receiver);
+
+        Mockito.when(userService.findById(1L)).thenReturn(requester);
+        Mockito.when(userService.findById(2L)).thenReturn(receiver);
+
         RecommendationRequest request = recommendationRequestMapper.toEntity(saveDto, requester, receiver);
         Mockito.when(recommendationRequestRepository.save(request))
                 .thenReturn(savedRequest);
+
+        Mockito.when(recommendationRequestRepository.save(request)).thenReturn(savedRequest);
         CreateRecommendationRequestResponse result = recommendationRequestService.create(saveDto);
         Assertions.assertNotNull(result);
         Assertions.assertEquals(1L, result.id());
         Mockito.verify(recommendationRequestRepository, times(1)).save(request);
+
+        RecommendationRequestedEvent expectedEvent = new RecommendationRequestedEvent(
+                requester.getId(),
+                receiver.getId(),
+                savedRequest.getId() // ID сохранённого запроса
+        );
+        Mockito.verify(eventPublisher, times(1)).publish(Mockito.eq(expectedEvent));
     }
 
     @Test
