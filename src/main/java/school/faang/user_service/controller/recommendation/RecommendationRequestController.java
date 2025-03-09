@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.recommendation.RecommendationRequestDto;
+import school.faang.user_service.repository.recommendation.RejectionDto;
 import school.faang.user_service.repository.recommendation.RequestFilterDto;
 import school.faang.user_service.service.RecommendationRequestService;
 
@@ -26,6 +27,10 @@ public class RecommendationRequestController {
 
     public RecommendationRequestDto getRecommendationRequest(long id) {
         return recommendationRequestService.getRequest(id);
+    }
+
+    public boolean rejectRequest(long id, RejectionDto rejection) {
+        return recommendationRequestService.rejectRequest(id, rejection);
     }
 
     private static void validateRecommendationRequest(RecommendationRequestDto recommendationRequest) {

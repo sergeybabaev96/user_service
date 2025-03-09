@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.RecommendationRequestFilter;
@@ -13,6 +14,7 @@ import school.faang.user_service.mapper.SkillRequestMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestDto;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
+import school.faang.user_service.repository.recommendation.RejectionDto;
 import school.faang.user_service.repository.recommendation.RequestFilterDto;
 import school.faang.user_service.repository.recommendation.SkillRequestDto;
 
@@ -72,6 +74,22 @@ public class RecommendationRequestService {
                 () -> new DataRetrievalFailureException(String.format("Recommendation with id %d is not found", id)));
 
         return recommendationRequestMapper.toDto(entity);
+    }
+
+    public boolean rejectRequest(long id, RejectionDto rejection) {
+        var entity = recommendationRequestRepository.findById(id).orElseThrow(
+                () -> new DataRetrievalFailureException(String.format("Recommendation with id %d is not found", id)));
+        if (entity.getStatus() == RequestStatus.ACCEPTED || entity.getStatus() == RequestStatus.REJECTED) {
+            return false;
+        }
+
+        entity.setStatus(RequestStatus.REJECTED);
+        entity.setRejectionReason(rejection.reason());
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        recommendationRequestRepository.save(entity);
+
+        return true;
     }
 
     @NotNull
