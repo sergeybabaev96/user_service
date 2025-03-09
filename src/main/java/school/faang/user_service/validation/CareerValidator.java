@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Slf4j
 public class CareerValidator {
-    private static final String ERROR_FROM_DATE_EMPTY = "data from can't be empty";
+    private static final String ERROR_FROM_DATE_EMPTY = "Data from can't be empty";
     private static final String ERROR_FROM_DATE_IN_THE_FUTURE = "Date {} is not correct";
     private static final String ERROR_COMPANY_EMPTY = "Fields company can't be empty";
     private static final String ERROR_POSITION_EMPTY = "Fields position can't be empty";
