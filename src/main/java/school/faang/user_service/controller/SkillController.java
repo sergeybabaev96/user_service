@@ -12,17 +12,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SkillController {
 
-    private final SkillService skillService;// Это бин класса SkillService
+    private final SkillService skillService;
 
     public SkillDto create(SkillDto skill) {
         validateSkill(skill);
         return skillService.create(skill);
-    }
-
-    private void validateSkill(SkillDto skill) {
-        if (skill.getTitle() == null || skill.getTitle().isBlank()) {
-            throw new IllegalArgumentException("Skill title cannot be empty");
-        }
     }
 
     public void getUserSkills(long userId) {
@@ -31,5 +25,15 @@ public class SkillController {
 
     public List<SkillCandidateDto> getOfferedSkills(long userId) {
         return skillService.getOfferedSkills(userId);
+    }
+
+    public SkillDto acquireSkillFromOffers(long skillId, long userId) {
+        return skillService.acquireSkillFromOffers(skillId, userId);
+    }
+
+    private void validateSkill(SkillDto skill) {
+        if (skill.getTitle() == null || skill.getTitle().isBlank()) {
+            throw new IllegalArgumentException("Skill title cannot be empty");
+        }
     }
 }

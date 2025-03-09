@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SkillService {
 
+    private static final int MIN_SKILL_OFFERS = 3;
+
     private final SkillRepository skillRepository;
     private final SkillMapper skillMapper;
 
@@ -36,5 +38,22 @@ public class SkillService {
     public List<SkillCandidateDto> getOfferedSkills(long userId) {
         List<Skill> skills = skillRepository.findSkillsOfferedToUser(userId);
         return skills.stream().map(skillMapper::toSkillCandidateDto).collect(Collectors.toList());
+    }
+
+    public SkillDto acquireSkillFromOffers(long skillId, long userId) {
+        if (skillRepository.findUserSkill(skillId, userId) != null) {
+            throw new DataValidationException("Skill already exists");
+        }
+
+        List<Skill> offers = skillRepository.findAllByUserId(userId);
+        if (offers.size() < MIN_SKILL_OFFERS) {
+            throw new IllegalArgumentException("Not enough offers to acquire this skill");
+        }
+
+        skillRepository.assignSkillToUser(userId, skillId);
+
+        Skill skill = skillRepository.findById(skillId).
+                orElseThrow(() -> new DataValidationException("Skill not found"));
+        return skillMapper.toDto(skill);
     }
 }
