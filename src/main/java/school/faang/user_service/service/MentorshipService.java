@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.user.UserMapper;
-import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 @Service
@@ -17,7 +17,7 @@ import java.util.function.Function;
 @Slf4j
 public class MentorshipService {
     private final MentorshipRepository mentorshipRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final UserMapper userMapper;
 
     public List<UserDto> getMentees(long userId) {
@@ -38,12 +38,13 @@ public class MentorshipService {
 
 
     private List<UserDto> getUserRelatedList(long userId, Function<User, List<User>> relationGetter) {
-        User user = userRepository.findById(userId)
+        User user = userService.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User doesn't exists"));
-        return relationGetter
-                .apply(user) != null ? relationGetter.apply(user)
-                .stream().map(userMapper::toDto)
-                .toList() : List.of();
+        return Optional
+                .ofNullable(relationGetter.apply(user))
+                .orElse(List.of()).stream()
+                .map(userMapper::toDto)
+                .toList();
     }
 
     public void deleteUserFromRelation(long ownerId, long targetId, boolean isMentee) {
@@ -59,7 +60,6 @@ public class MentorshipService {
                     isMentee ? "mentor" : "mentee", ownerId);
             throw new RuntimeException(isMentee ? "Mentee not found for given mentor" : "Mentor not found for given mentee");
         }
-        userRepository.save(owner);
-
+        userService.save(owner);
     }
 }
