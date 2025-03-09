@@ -71,14 +71,14 @@ public class RecommendationRequestService {
 
     public RecommendationRequestDto getRequest(long id) {
         var entity = recommendationRequestRepository.findById(id).orElseThrow(
-                () -> new DataRetrievalFailureException(String.format("Recommendation with id %d is not found", id)));
+                () -> new DataRetrievalFailureException("Recommendation with id %d is not found".formatted(id)));
 
         return recommendationRequestMapper.toDto(entity);
     }
 
     public boolean rejectRequest(long id, RejectionDto rejection) {
         var entity = recommendationRequestRepository.findById(id).orElseThrow(
-                () -> new DataRetrievalFailureException(String.format("Recommendation with id %d is not found", id)));
+                () -> new DataRetrievalFailureException("Recommendation with id %d is not found".formatted(id)));
         if (entity.getStatus() == RequestStatus.ACCEPTED || entity.getStatus() == RequestStatus.REJECTED) {
             return false;
         }
@@ -115,16 +115,12 @@ public class RecommendationRequestService {
     private void validateRecommendationRequest(RecommendationRequestDto recommendationRequest) {
         var requesterId = recommendationRequest.requesterId();
         if (!userService.existsById(requesterId)) {
-            throw new DataValidationException(String.format(
-                    "Requester with id %d is not found",
-                    requesterId));
+            throw new DataValidationException("Requester with id %d is not found".formatted(requesterId));
         }
 
         var receiverId = recommendationRequest.receiverId();
         if (!userService.existsById(receiverId)) {
-            throw new DataValidationException(String.format(
-                    "Receiver with id %d is not found",
-                    receiverId));
+            throw new DataValidationException("Receiver with id %d is not found".formatted(receiverId));
         }
 
         var latestRequest = recommendationRequestRepository.findLatestRequest(requesterId, receiverId);
@@ -132,11 +128,12 @@ public class RecommendationRequestService {
                 && LocalDateTime.now()
                 .minusMonths(recommendationRequestMinDistanceMonths)
                 .isBefore(latestRequest.get().getCreatedAt())) {
-            throw new DataValidationException(String.format(
-                    "Less than %d months have passed since the last recommendation request from user %d to user %d",
-                    recommendationRequestMinDistanceMonths,
-                    requesterId,
-                    receiverId));
+            throw new DataValidationException(
+                    "Less than %d months have passed since the last recommendation request from user %d to user %d"
+                            .formatted(
+                                    recommendationRequestMinDistanceMonths,
+                                    requesterId,
+                                    receiverId));
         }
 
         validateSkills(recommendationRequest);
@@ -148,21 +145,22 @@ public class RecommendationRequestService {
                 .filter(dto -> skillRepository.existsById(dto.skillId()))
                 .toList();
         if (existedSkillsInRecommendation.size() != recommendationRequest.skills().stream().distinct().count()) {
-            throw new DataValidationException(String.format(
-                    "Skills %s are not registered",
-                    String.join(
-                            ", ",
-                            recommendationRequest.skills()
-                                    .stream()
-                                    .map(SkillRequestDto::skillId)
-                                    .filter(skillId -> existedSkillsInRecommendation.stream()
-                                            .filter(existedSkill -> existedSkill.skillId() == skillId)
-                                            .findFirst()
-                                            .isEmpty())
-                                    .map(skillRepository::findById)
-                                    .filter(Optional::isPresent)
-                                    .map(x -> x.get().getTitle())
-                                    .toList())));
+            throw new DataValidationException(
+                    "Skills %s are not registered".formatted(
+                            String.join(
+                                    ", ",
+                                    recommendationRequest.skills()
+                                            .stream()
+                                            .map(SkillRequestDto::skillId)
+                                            .filter(skillId -> existedSkillsInRecommendation.stream()
+                                                    .filter(
+                                                            existedSkill -> existedSkill.skillId() == skillId)
+                                                    .findFirst()
+                                                    .isEmpty())
+                                            .map(skillRepository::findById)
+                                            .filter(Optional::isPresent)
+                                            .map(x -> x.get().getTitle())
+                                            .toList())));
         }
     }
 
