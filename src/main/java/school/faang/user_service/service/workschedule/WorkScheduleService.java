@@ -3,9 +3,11 @@ package school.faang.user_service.service.workschedule;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.WorkScheduleDto;
 import school.faang.user_service.entity.WorkSchedule;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.EntityAlreadyExistsException;
+import school.faang.user_service.mapper.WorkScheduleMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.WorkScheduleRepository;
 
@@ -14,38 +16,40 @@ import school.faang.user_service.repository.WorkScheduleRepository;
 public class WorkScheduleService {
     private final UserRepository userRepository;
     private final WorkScheduleRepository workScheduleRepository;
+    private final WorkScheduleMapper workScheduleMapper;
 
-    public WorkSchedule addWorkSchedule(long userId, WorkSchedule workSchedule) {
-        if (workScheduleRepository.existsById(workSchedule.getId()))
+    public WorkScheduleDto addWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
+        if (workScheduleRepository.existsById(workScheduleDto.id()))
             throw new EntityAlreadyExistsException("The work schedule already exists");
-        return workScheduleRepository.save(getInstance(userId, workSchedule));
+        return workScheduleMapper.toDto(workScheduleRepository.save(getInstance(userId, workScheduleDto)));
     }
 
-    public WorkSchedule updateWorkSchedule(long userId, WorkSchedule workSchedule) {
-        if (!workScheduleRepository.existsById(workSchedule.getId()))
+    public WorkScheduleDto updateWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
+        long id = workScheduleDto.id();
+        if (!workScheduleRepository.existsById(id))
             throw new EntityNotFoundException("The work schedule not found");
-        workScheduleRepository.delete(workSchedule);
-        return workScheduleRepository.save(getInstance(userId, workSchedule));
+        workScheduleRepository.deleteById(id);
+        return workScheduleMapper.toDto(workScheduleRepository.save(getInstance(userId, workScheduleDto)));
     }
 
-    private WorkSchedule getInstance(long userId, WorkSchedule workSchedule) {
-        if (!(workSchedule.getStartTime().isBefore(workSchedule.getStartLunch())
-                && workSchedule.getStartLunch().isBefore(workSchedule.getEndLunch())
-                && workSchedule.getEndLunch().isBefore(workSchedule.getEndTime())))
+    private WorkSchedule getInstance(long userId, WorkScheduleDto workScheduleDto) {
+        if (!(workScheduleDto.startTime().isBefore(workScheduleDto.startLunch())
+                && workScheduleDto.startLunch().isBefore(workScheduleDto.endLunch())
+                && workScheduleDto.endLunch().isBefore(workScheduleDto.endTime())))
             throw new DataValidationException("The work schedule time is invalid");
         if (!userRepository.existsById(userId))
             throw new EntityNotFoundException("User not founds");
 
         return WorkSchedule.builder()
-                .startTime(workSchedule.getStartTime())
-                .startLunch(workSchedule.getStartLunch())
-                .endLunch(workSchedule.getEndLunch())
-                .endTime(workSchedule.getEndTime())
+                .startTime(workScheduleDto.startTime())
+                .startLunch(workScheduleDto.startLunch())
+                .endLunch(workScheduleDto.endLunch())
+                .endTime(workScheduleDto.endTime())
                 .user(userRepository.getReferenceById(userId))
                 .build();
     }
 
-    public WorkSchedule getWorkScheduleById(long id) {
-        return workScheduleRepository.getReferenceById(id);
+    public WorkScheduleDto getWorkScheduleById(long id) {
+        return workScheduleMapper.toDto(workScheduleRepository.getReferenceById(id));
     }
 }
