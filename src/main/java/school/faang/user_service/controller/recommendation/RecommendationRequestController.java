@@ -24,6 +24,10 @@ public class RecommendationRequestController {
         return recommendationRequestService.getRequests(filterDto);
     }
 
+    public RecommendationRequestDto getRecommendationRequest(long id) {
+        return recommendationRequestService.getRequest(id);
+    }
+
     private static void validateRecommendationRequest(RecommendationRequestDto recommendationRequest) {
         if (recommendationRequest.message().isBlank()) {
             throw new DataValidationException("Recommendation request's message is required");

@@ -3,6 +3,7 @@ package school.faang.user_service.service;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.exception.DataValidationException;
@@ -64,6 +65,13 @@ public class RecommendationRequestService {
                 .filter(new RecommendationRequestFilter(filterDto))
                 .map(recommendationRequestMapper::toDto)
                 .toList();
+    }
+
+    public RecommendationRequestDto getRequest(long id) {
+        var entity = recommendationRequestRepository.findById(id).orElseThrow(
+                () -> new DataRetrievalFailureException(String.format("Recommendation with id %d is not found", id)));
+
+        return recommendationRequestMapper.toDto(entity);
     }
 
     @NotNull
