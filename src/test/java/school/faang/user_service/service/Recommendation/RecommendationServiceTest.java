@@ -111,7 +111,7 @@ public class RecommendationServiceTest {
         when(skillRepository.findUserSkill(SKILL_ID, RECEIVER_ID)).thenReturn(Optional.empty());
         when(recommendationRepository.findById(NEW_RECOMMENDATION_ID)).thenReturn(Optional.of(prepareDataRecommendation(AUTHOR_NAME, AUTHOR_ID, RECEIVER_NAME, RECEIVER_ID, CONTENT, 1)));
         recommendationService.create(prepareDataRecommendationDto());
-        verify(skillOfferRepository).create(SKILL_ID,NEW_RECOMMENDATION_ID);
+        verify(skillOfferRepository).create(SKILL_ID, NEW_RECOMMENDATION_ID);
     }
 
     @Test
@@ -126,6 +126,62 @@ public class RecommendationServiceTest {
         assertEquals(AUTHOR_ID, result.getAuthorId());
         assertEquals(RECEIVER_ID, result.getReceiverId());
         assertEquals(1, result.getSkillOffers().size());
+    }
+
+
+    @Test
+    void testSkillOfferToDto() {
+        Skill skill = Skill.builder().id(1L).build();
+        Recommendation recommendation = Recommendation.builder().id(2L).build();
+        SkillOffer skillOffer = SkillOffer.builder().id(3L).skill(skill).recommendation(recommendation).build();
+
+        SkillOfferDto dto = skillOfferMapper.toDto(skillOffer);
+
+        assertNotNull(dto);
+        assertEquals(3L, dto.getId());
+        assertEquals(1L, dto.getSkillId());
+        assertEquals(2L, dto.getRecommendationId());
+    }
+
+    @Test
+    void testSkillOfferListToDtoList() {
+        Skill skill = Skill.builder().id(1L).build();
+        Recommendation recommendation = Recommendation.builder().id(2L).build();
+        SkillOffer skillOffer = SkillOffer.builder().id(3L).skill(skill).recommendation(recommendation).build();
+
+        List<SkillOfferDto> dtoList = skillOfferMapper.toDtoList(Collections.singletonList(skillOffer));
+
+        assertNotNull(dtoList);
+        assertEquals(1, dtoList.size());
+        assertEquals(3L, dtoList.get(0).getId());
+    }
+
+    @Test
+    void testRecommendationToDto() {
+        User author = User.builder().id(1L).build();
+        User receiver = User.builder().id(2L).build();
+        Skill skill = Skill.builder().id(3L).build();
+
+        Recommendation recommendation = Recommendation.builder()
+                .id(4L)
+                .author(author)
+                .receiver(receiver)
+                .content("Test content")
+                .skillOffers(Collections.singletonList(
+                        SkillOffer.builder().id(5L).skill(skill).recommendation(null).build()
+                ))
+                .build();
+
+        RecommendationDto dto = recommendationMapper.toDto(recommendation);
+
+        assertNotNull(dto);
+        assertEquals(4L, dto.getId());
+        assertEquals(1L, dto.getAuthorId());
+        assertEquals(2L, dto.getReceiverId());
+        assertEquals("Test content", dto.getContent());
+        assertNotNull(dto.getSkillOffers());
+        assertEquals(1, dto.getSkillOffers().size());
+        assertEquals(5L, dto.getSkillOffers().get(0).getId());
     }
 
     private RecommendationDto prepareDataRecommendationDto() {
@@ -185,60 +241,5 @@ public class RecommendationServiceTest {
                 .id(1L)
                 .title(TITlE_SKILL)
                 .build();
-    }
-
-    @Test
-    void testSkillOfferToDto() {
-        Skill skill = Skill.builder().id(1L).build();
-        Recommendation recommendation = Recommendation.builder().id(2L).build();
-        SkillOffer skillOffer = SkillOffer.builder().id(3L).skill(skill).recommendation(recommendation).build();
-
-        SkillOfferDto dto = skillOfferMapper.toDto(skillOffer);
-
-        assertNotNull(dto);
-        assertEquals(3L, dto.getId());
-        assertEquals(1L, dto.getSkillId());
-        assertEquals(2L, dto.getRecommendationId());
-    }
-
-    @Test
-    void testSkillOfferListToDtoList() {
-        Skill skill = Skill.builder().id(1L).build();
-        Recommendation recommendation = Recommendation.builder().id(2L).build();
-        SkillOffer skillOffer = SkillOffer.builder().id(3L).skill(skill).recommendation(recommendation).build();
-
-        List<SkillOfferDto> dtoList = skillOfferMapper.toDtoList(Collections.singletonList(skillOffer));
-
-        assertNotNull(dtoList);
-        assertEquals(1, dtoList.size());
-        assertEquals(3L, dtoList.get(0).getId());
-    }
-
-    @Test
-    void testRecommendationToDto() {
-        User author = User.builder().id(1L).build();
-        User receiver = User.builder().id(2L).build();
-        Skill skill = Skill.builder().id(3L).build();
-
-        Recommendation recommendation = Recommendation.builder()
-                .id(4L)
-                .author(author)
-                .receiver(receiver)
-                .content("Test content")
-                .skillOffers(Collections.singletonList(
-                        SkillOffer.builder().id(5L).skill(skill).recommendation(null).build()
-                ))
-                .build();
-
-        RecommendationDto dto = recommendationMapper.toDto(recommendation);
-
-        assertNotNull(dto);
-        assertEquals(4L, dto.getId());
-        assertEquals(1L, dto.getAuthorId());
-        assertEquals(2L, dto.getReceiverId());
-        assertEquals("Test content", dto.getContent());
-        assertNotNull(dto.getSkillOffers());
-        assertEquals(1, dto.getSkillOffers().size());
-        assertEquals(5L, dto.getSkillOffers().get(0).getId());
     }
 }
