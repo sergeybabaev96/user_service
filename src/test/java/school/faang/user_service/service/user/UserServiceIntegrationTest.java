@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import school.faang.user_service.BaseTest;
+import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.user.GetUserRequest;
 import school.faang.user_service.entity.Tariff;
@@ -39,6 +40,8 @@ public class UserServiceIntegrationTest extends BaseTest {
     private TariffMapper tariffMapper;
     @MockBean
     private TariffRepository tariffRepository;
+    @MockBean
+    private UserContext userContext;
 
     @BeforeEach
     public void setUp() {
