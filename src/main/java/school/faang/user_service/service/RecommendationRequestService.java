@@ -38,23 +38,24 @@ public class RecommendationRequestService {
         validateRecommendationRequest(recommendationRequest);
 
         var recommendationRequestId = recommendationRequestRepository.create(
-                recommendationRequest.requesterId(),
-                recommendationRequest.receiverId(),
-                recommendationRequest.message(),
+                recommendationRequest.getRequesterId(),
+                recommendationRequest.getReceiverId(),
+                recommendationRequest.getMessage(),
                 RequestStatus.PENDING);
 
-        recommendationRequest.skills()
+        recommendationRequest.getSkills()
                 .forEach(skill -> skillRequestService.create(recommendationRequestId, skill.skillId()));
 
-        return new RecommendationRequestDto(
-                recommendationRequestId,
-                recommendationRequest.message(),
-                recommendationRequest.status(),
-                recommendationRequest.skills(),
-                recommendationRequest.requesterId(),
-                recommendationRequest.receiverId(),
-                recommendationRequest.createdAt(),
-                recommendationRequest.updatedAt());
+        var createdRecommendationRequest = recommendationRequestRepository.findById(recommendationRequestId)
+                .orElseThrow(() -> new DataRetrievalFailureException(
+                        "Recommendation request #%d is not created".formatted(recommendationRequestId)));
+
+        var createdDto = recommendationRequestMapper.toDto(createdRecommendationRequest);
+        createdDto.setRequesterId(recommendationRequest.getRequesterId());
+        createdDto.setReceiverId(recommendationRequest.getReceiverId());
+        createdDto.setSkills(recommendationRequest.getSkills());
+
+        return createdDto;
     }
 
     public List<RecommendationRequestDto> getRequests(@NotNull RequestFilterDto filterDto) {
@@ -110,12 +111,12 @@ public class RecommendationRequestService {
     }
 
     private void validateRecommendationRequest(RecommendationRequestDto recommendationRequest) {
-        var requesterId = recommendationRequest.requesterId();
+        var requesterId = recommendationRequest.getRequesterId();
         if (!userService.existsById(requesterId)) {
             throw new DataValidationException("Requester with id %d is not found".formatted(requesterId));
         }
 
-        var receiverId = recommendationRequest.receiverId();
+        var receiverId = recommendationRequest.getReceiverId();
         if (!userService.existsById(receiverId)) {
             throw new DataValidationException("Receiver with id %d is not found".formatted(receiverId));
         }
@@ -137,16 +138,16 @@ public class RecommendationRequestService {
     }
 
     private void validateSkills(RecommendationRequestDto recommendationRequest) {
-        var existedSkillsInRecommendation = recommendationRequest.skills()
+        var existedSkillsInRecommendation = recommendationRequest.getSkills()
                 .stream()
                 .filter(dto -> skillRepository.existsById(dto.skillId()))
                 .toList();
-        if (existedSkillsInRecommendation.size() != recommendationRequest.skills().stream().distinct().count()) {
+        if (existedSkillsInRecommendation.size() != recommendationRequest.getSkills().stream().distinct().count()) {
             throw new DataValidationException(
                     "Skills %s are not registered".formatted(
                             String.join(
                                     ", ",
-                                    recommendationRequest.skills()
+                                    recommendationRequest.getSkills()
                                             .stream()
                                             .map(SkillRequestDto::skillId)
                                             .filter(skillId -> existedSkillsInRecommendation.stream()

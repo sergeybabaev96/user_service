@@ -34,7 +34,7 @@ public class RecommendationRequestController {
     }
 
     private static void validateRecommendationRequest(RecommendationRequestDto recommendationRequest) {
-        if (recommendationRequest.message().isBlank()) {
+        if (recommendationRequest.getMessage().isBlank()) {
             throw new DataValidationException("Recommendation request's message is required");
         }
     }

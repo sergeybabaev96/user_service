@@ -1,5 +1,8 @@
 package school.faang.user_service.dto.recommendation;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import school.faang.user_service.entity.RequestStatus;
@@ -7,13 +10,17 @@ import school.faang.user_service.entity.RequestStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record RecommendationRequestDto(
-        @Nullable Long id,
-        @NonNull String message,
-        RequestStatus status,
-        List<SkillRequestDto> skills,
-        long requesterId,
-        long receiverId,
-        @Nullable LocalDateTime createdAt,
-        @Nullable LocalDateTime updatedAt) {
+@Getter
+@Setter
+@RequiredArgsConstructor
+public class RecommendationRequestDto {
+    @Nullable
+    private Long id;
+    @NonNull private String message;
+    private RequestStatus status;
+    private List<SkillRequestDto> skills;
+    private long requesterId;
+    private long receiverId;
+    @Nullable private LocalDateTime createdAt;
+    @Nullable private LocalDateTime updatedAt;
 }
