@@ -19,4 +19,3 @@ public class UserService {
         return countGoals <= GOALS_PER_USER;
     }
 }
-
