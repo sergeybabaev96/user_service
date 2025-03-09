@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.CareerDto;
 import school.faang.user_service.entity.Career;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.exceptions.DataValidationException;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.CareerMapper;
 import school.faang.user_service.repository.CareerRepository;
 import school.faang.user_service.repository.UserRepository;
@@ -20,10 +20,10 @@ public class CareerService {
     private final CareerRepository careerRepository;
     private final CareerMapper careerMapper;
 
-    public CareerDto addCareer(long userId, CareerDto careerDto){
+    public CareerDto addCareer(long userId, CareerDto careerDto) {
         validateFromDateBeforeNow(careerDto);
         User user = userRepository.findById(userId).orElseThrow(() ->
-                new EntityNotFoundException("User not found."));
+                new EntityNotFoundException(String.format("User with id = %d not found.", userId)));
         Career career = careerMapper.toCareer(careerDto);
         career.setUser(user);
         Career savedCareer = careerRepository.save(career);
@@ -32,7 +32,7 @@ public class CareerService {
 
     public CareerDto updateCareer(long userId, CareerDto careerDto) {
         validateFromDateBeforeNow(careerDto);
-        Career existingCareer = careerRepository.findById(userId).orElseThrow(() ->
+        Career existingCareer = careerRepository.findById(careerDto.getId()).orElseThrow(() ->
                 new EntityNotFoundException("Career not found."));
         if(existingCareer.getUser().getId() != userId) {
             throw new DataValidationException("User cannot update someone else's career.");
@@ -51,7 +51,8 @@ public class CareerService {
 
     private void validateFromDateBeforeNow(CareerDto careerDto){
         if(!careerDto.getFrom().isBefore(LocalDate.now())) {
-            throw new DataValidationException();
+            throw new DataValidationException("Career start date must be in the past. Current value: " +
+                    careerDto.getFrom());
         }
     }
 }
