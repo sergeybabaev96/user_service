@@ -103,7 +103,7 @@ public class User {
     @JoinTable(name = "mentorship",
             joinColumns = @JoinColumn(name = "mentee_id"),
             inverseJoinColumns = @JoinColumn(name = "mentor_id"))
-    private List<User> mentors;
+    private List<User>  mentors;
 
     @OneToMany(mappedBy = "receiver")
     private List<MentorshipRequest> receivedMentorshipRequests;
