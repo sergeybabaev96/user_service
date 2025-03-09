@@ -3,9 +3,9 @@ package school.faang.user_service.controller.recommendation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.repository.recommendation.RecommendationRequestDto;
-import school.faang.user_service.repository.recommendation.RejectionDto;
-import school.faang.user_service.repository.recommendation.RequestFilterDto;
+import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
+import school.faang.user_service.dto.recommendation.RejectionDto;
+import school.faang.user_service.dto.recommendation.RequestFilterDto;
 import school.faang.user_service.service.RecommendationRequestService;
 
 import java.util.List;

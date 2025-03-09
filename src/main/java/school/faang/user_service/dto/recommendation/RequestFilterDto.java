@@ -1,4 +1,4 @@
-package school.faang.user_service.repository.recommendation;
+package school.faang.user_service.dto.recommendation;
 
 import org.jetbrains.annotations.Nullable;
 import school.faang.user_service.entity.RequestStatus;

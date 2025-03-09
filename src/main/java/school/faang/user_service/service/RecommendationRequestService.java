@@ -12,11 +12,11 @@ import school.faang.user_service.filter.RecommendationRequestFilter;
 import school.faang.user_service.mapper.RecommendationRequestMapper;
 import school.faang.user_service.mapper.SkillRequestMapper;
 import school.faang.user_service.repository.SkillRepository;
-import school.faang.user_service.repository.recommendation.RecommendationRequestDto;
+import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
-import school.faang.user_service.repository.recommendation.RejectionDto;
-import school.faang.user_service.repository.recommendation.RequestFilterDto;
-import school.faang.user_service.repository.recommendation.SkillRequestDto;
+import school.faang.user_service.dto.recommendation.RejectionDto;
+import school.faang.user_service.dto.recommendation.RequestFilterDto;
+import school.faang.user_service.dto.recommendation.SkillRequestDto;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -3,7 +3,7 @@ package school.faang.user_service.filter;
 import org.jetbrains.annotations.Nullable;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
-import school.faang.user_service.repository.recommendation.RequestFilterDto;
+import school.faang.user_service.dto.recommendation.RequestFilterDto;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

@@ -3,7 +3,7 @@ package school.faang.user_service.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import school.faang.user_service.entity.recommendation.SkillRequest;
-import school.faang.user_service.repository.recommendation.SkillRequestDto;
+import school.faang.user_service.dto.recommendation.SkillRequestDto;
 
 @Mapper(componentModel = "spring")
 public interface SkillRequestMapper {
