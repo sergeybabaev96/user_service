@@ -15,6 +15,7 @@ import school.faang.user_service.service.skill.SkillService;
 import school.faang.user_service.service.user.UserService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -27,7 +28,7 @@ public class GoalService {
     private final UserService userService;
     private final GoalMapper goalMapper;
     private final SkillRepository skillRepository;
-    private final GoalFilter goalFilter;
+    private final List<GoalFilter> goalFilters;
 
     public GoalDto createGoal(Long userId, GoalDto goalDto) {
         if (!userService.isWithinGoalLimit(userId)) {
@@ -74,9 +75,26 @@ public class GoalService {
 
     public List<GoalDto> findSubtasksByGoalId(long goalId, GoalFilterDto filters) {
         Stream<Goal> goals = goalRepository.findByParent(goalId);
-        goalFilter.);
+
+        for (GoalFilter filter : goalFilters) {
+            if (filter.isApplicable(filters)) {
+                goals = filter.apply(filters, goals);
+            }
+        }
+
+        return goals
+                .map(goalMapper::toDto)
+                .collect(Collectors.toList());
     }
 
+    public List<GoalDto> getGoalsByUser(Long userId, GoalFilterDto filters) {
+
+        Stream<Goal> goals = goalRepository.findGoalsByUserId(userId);
+        goalFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .forEach(filter -> filter.apply(filters, goals));
+        return goals.map(goalMapper::toDto).toList();
+    }
 
     private void validateExistsGoalSkills(List<Long> skillIds) {
 
@@ -89,5 +107,4 @@ public class GoalService {
         goalRepository.removeSkillsFromGoal(goal.getId());
         newSillIds.forEach(sillId -> goalRepository.addSkillToGoal(sillId, goal.getId()));
     }
-
 }
