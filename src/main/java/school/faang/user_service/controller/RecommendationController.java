@@ -34,6 +34,14 @@ public class RecommendationController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return recommendationService.getAllUserRecommendations(recieverId,page,size);
+        return recommendationService.getAllUserRecommendations(recieverId, page, size);
+    }
+
+    public Page<RecommendationDto> getAllGivenRecommendations(
+            @PathVariable @Min(1) long authorId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return recommendationService.getAllGivenRecommendations(authorId, page, size);
     }
 }

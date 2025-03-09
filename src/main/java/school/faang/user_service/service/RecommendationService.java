@@ -13,7 +13,6 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.entity.recommendation.Recommendation;
-import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.Recommendation.RecommendationMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
@@ -83,6 +82,14 @@ public class RecommendationService {
         userValidator.validatorUserExistence(id);
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Recommendation> recommendationPage= recommendationRepository.findAllByReceiverId(id,pageable);
+
+        return recommendationPage.map(recommendationMapper::toDto);
+    }
+
+    public Page<RecommendationDto> getAllGivenRecommendations(long id, int page, int size){
+        userValidator.validatorUserExistence(id);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Recommendation> recommendationPage= recommendationRepository.findAllByAuthorId(id,pageable);
 
         return recommendationPage.map(recommendationMapper::toDto);
     }
