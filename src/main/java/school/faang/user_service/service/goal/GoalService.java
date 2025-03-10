@@ -9,7 +9,6 @@ import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.goal.GoalFilter;
 import school.faang.user_service.mapper.goal.GoalMapper;
-import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.skill.SkillService;
 import school.faang.user_service.service.user.UserService;
@@ -17,7 +16,6 @@ import school.faang.user_service.service.user.UserService;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +25,6 @@ public class GoalService {
     private final SkillService skillService;
     private final UserService userService;
     private final GoalMapper goalMapper;
-    private final SkillRepository skillRepository;
     private final List<GoalFilter> goalFilters;
 
     public GoalDto createGoal(Long userId, GoalDto goalDto) {
@@ -38,15 +35,20 @@ public class GoalService {
         if (!goalRepository.existsById(goalDto.getParentId())) {
             throw new RuntimeException("Goal parent with id " + goalDto.getParentId() + " does not exist");
         }
+
         validateExistsGoalSkills(goalDto.getSkillIds());
 
-        Goal goal = goalRepository.create(goalDto.getTitle(), goalDto.getDescription(), goalDto.getParentId());
-        goalDto.getSkillIds().forEach(skillId -> goalRepository.addSkillToGoal(skillId, goal.getId()));
+        Long goalId = goalRepository.create(goalDto.getTitle(), goalDto.getDescription(),
+                goalDto.getParentId()).getId();
 
-        return goalMapper.toDto(goalRepository.findById(goalDto.getId())
-                .orElseThrow(() -> new RuntimeException("Goal with id " + goalDto.getId() + " does not exist")));
+        goalDto.getSkillIds().forEach(skillId -> goalRepository.addSkillToGoal(skillId, goalId));
+
+        Goal createdGoal = goalRepository.findById(goalId)
+                .orElseThrow(() -> new RuntimeException("Goal with id " + goalId + " does not exist"));
+
+        return goalMapper.toDto(createdGoal);
     }
-
+    
     public GoalDto updateGoal(Long goalId, GoalDto goalDto) {
 
         Goal goal = goalRepository.findById(goalId)
@@ -54,9 +56,8 @@ public class GoalService {
         if (!GoalStatus.COMPLETED.equals(goal.getStatus()) && GoalStatus.COMPLETED.equals(goalDto.getStatus())) {
             validateExistsGoalSkills(goalDto.getSkillIds());
             goal.getUsers().forEach(user ->
-                    goal.getSkillsToAchieve().forEach(skill -> {
-                        skillRepository.assignSkillToUser(user.getId(), skill.getId());
-                    }));
+                    goal.getSkillsToAchieve().forEach(skill ->
+                            skillService.skillRepository.assignSkillToUser(user.getId(), skill.getId())));
         }
         updateGoalSkills(goal, goalDto.getSkillIds());
         Goal updatedGoal = goalRepository.save(goal);
