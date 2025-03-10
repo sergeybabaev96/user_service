@@ -10,9 +10,9 @@ public enum EventPromotionType {
     FIFTY_PERCENT_OF_USERS(50),
     SIXTY_PERCENT_OF_USERS(60);
 
-    private final int eventPercentage;
+    private final int userPercentage;
 
     EventPromotionType(int userPercentage) {
-        this.eventPercentage = userPercentage;
+        this.userPercentage = userPercentage;
     }
 }
