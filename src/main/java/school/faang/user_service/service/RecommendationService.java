@@ -28,7 +28,8 @@ public class RecommendationService {
         RecommendationValidation.validateRecommendationContent(recommendationDto.getContent());
         RecommendationValidation.validateSkills(recommendationDto, skillOfferRepository.findAllSkillOffers());
         LocalDateTime lastRecommendation = recommendationRepository.
-                findLastRecommendationDate(recommendationDto.getAuthorId(), recommendationDto.getReceiverId());
+                findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(recommendationDto.getAuthorId(),
+                        recommendationDto.getReceiverId()).map(Recommendation::getCreatedAt).orElse(null);
         RecommendationValidation.validateRecommendationDate(lastRecommendation);
 
         Recommendation recommendation = recommendationMapper.toRecommendation(recommendationDto);
@@ -38,6 +39,21 @@ public class RecommendationService {
         recommendation.setId(recommendationId);
 
         createSkillOffer(recommendation);
+        return recommendationMapper.toRecommendationDto(recommendation);
+    }
+
+    public RecommendationDto update(RecommendationDto recommendationDto) {
+        RecommendationValidation.validateRecommendationContent(recommendationDto.getContent());
+        RecommendationValidation.validateSkills(recommendationDto, skillOfferRepository.findAllSkillOffers());
+        LocalDateTime lastRecommendation = recommendationRepository.
+                findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(recommendationDto.getAuthorId(),
+                        recommendationDto.getReceiverId()).map(Recommendation::getCreatedAt).orElse(null);
+        RecommendationValidation.validateRecommendationDate(lastRecommendation);
+
+        Recommendation recommendation = recommendationMapper.toRecommendation(recommendationDto);
+
+        updateRecommendation(recommendation);
+        deleteAllAndCreate(recommendation);
         return recommendationMapper.toRecommendationDto(recommendation);
     }
 
@@ -68,5 +84,36 @@ public class RecommendationService {
         }
         String content = recommendation.getContent();
         return recommendationRepository.create(authorId, receiverId, content);
+    }
+
+    private void deleteAllAndCreate(Recommendation recommendation) {
+        List<SkillOffer> skillOffersOfReceiver =
+                skillOfferRepository.findAllByUserId(recommendation.getReceiver().getId());
+
+        skillOfferRepository.deleteAllByRecommendationId(recommendation.getId());
+        for (SkillOffer skillOffer : recommendation.getSkillOffers()) {
+            skillOfferRepository.create(skillOffer.getSkill().getId(), recommendation.getId());
+            if (skillOffersOfReceiver.contains(skillOffer)) {
+                UserSkillGuarantee userSkillGuarantee = new UserSkillGuarantee();
+                userSkillGuarantee.setUser(recommendation.getReceiver());
+                userSkillGuarantee.setGuarantor(recommendation.getAuthor());
+                userSkillGuarantee.setSkill(skillOffer.getSkill());
+                skillOffer.getSkill().setGuarantees(List.of(userSkillGuarantee));
+                userSkillGuaranteeRepository.save(userSkillGuarantee);
+            }
+        }
+    }
+
+    private void updateRecommendation(Recommendation recommendation) {
+        Long authorId = recommendation.getAuthor().getId();
+        Long receiverId = recommendation.getReceiver().getId();
+        String content = recommendation.getContent();
+        if (authorId == null) {
+            throw new DataValidationException("Author id can't be null");
+        } else if (receiverId == null) {
+            throw new DataValidationException("Author id can't be null");
+        }
+
+        recommendationRepository.update(authorId, receiverId, content);
     }
 }
