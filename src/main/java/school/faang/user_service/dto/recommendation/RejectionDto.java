@@ -1,4 +1,8 @@
 package school.faang.user_service.dto.recommendation;
 
-public record RejectionDto(String reason) {
+import lombok.Data;
+
+@Data
+public class RejectionDto {
+    private String reason;
 }

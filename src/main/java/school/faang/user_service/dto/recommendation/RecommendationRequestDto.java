@@ -1,9 +1,18 @@
 package school.faang.user_service.dto.recommendation;
 
+import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record RecommendationRequestDto(long id, String message, List<Long> skillsId, Long requesterId,
-                                       Long receiverId, LocalDateTime createdAt, LocalDateTime updatedAt) {
+@Data
+public class RecommendationRequestDto {
+    private long id;
+    private String message;
+    private List<Long> skillsId;
+    private Long requesterId;
+    private Long receiverId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
 
 }

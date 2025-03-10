@@ -32,8 +32,8 @@ public class RecommendationRequestService {
     private final SkillRequestService skillRequestService;
 
     public RecommendationRequestDto create(RecommendationRequestDto dto) {
-        User requester = userService.getUserById(dto.requesterId());
-        User receiver = userService.getUserById(dto.receiverId());
+        User requester = userService.getUserById(dto.getRequesterId());
+        User receiver = userService.getUserById(dto.getReceiverId());
 
         Optional<RecommendationRequest> existingRequest = recommendationRequestRepository
                 .findByRequesterAndReceiverAndCreatedDateAfter(requester, receiver, SIX_MONTHS_AGO);
@@ -42,8 +42,8 @@ public class RecommendationRequestService {
             throw new IllegalStateException("Recommendation request already sent within the last 6 months.");
         }
         RecommendationRequest request = recommendationRequestRepository
-                .create(dto.requesterId(), dto.receiverId(), dto.message());
-        request.setSkills(skillRequestService.findByIds(dto.skillsId()));
+                .create(dto.getRequesterId(), dto.getReceiverId(), dto.getMessage());
+        request.setSkills(skillRequestService.findByIds(dto.getSkillsId()));
 
         return recommendationRequestMapper.toRecommendationRequestDto(request);
     }
@@ -71,8 +71,10 @@ public class RecommendationRequestService {
                 -> new NotFoundException("Recommendation request with ID " + id + " not found"));
         if (request.getStatus().equals(RequestStatus.PENDING)) {
             request.setStatus(RequestStatus.REJECTED);
-            request.setRejectionReason(rejection.reason());
+            request.setRejectionReason(rejection.getReason());
             recommendationRequestRepository.save(request);
+        }else {
+            throw new IllegalStateException("Cannot reject recommendation request with status " + request.getStatus());
         }
         return recommendationRequestMapper.toRecommendationRequestDto(request);
     }

@@ -17,7 +17,7 @@ public class RecommendationRequestController {
 
 
     public RecommendationRequestDto requestRecommendation(RecommendationRequestDto recommendationRequest) {
-        if (recommendationRequest.message() == null || recommendationRequest.message().trim().isBlank()) {
+        if (recommendationRequest.getMessage() == null || recommendationRequest.getMessage().trim().isBlank()) {
             throw new IllegalArgumentException("Recommendation message cannot be null or empty.");
         }
         recommendationRequestService.create(recommendationRequest);
