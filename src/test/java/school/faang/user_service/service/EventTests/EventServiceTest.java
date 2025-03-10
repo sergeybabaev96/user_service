@@ -41,6 +41,9 @@ class EventServiceTest {
     private EventDTO mockEventDTO;
     private Event mockEvent;
 
+    //TODO названия Positive \ Negative PositiveиЧтоДелает
+    //сначала позитивные потом негативные
+    //сначала верифай потом все ассерт
     @BeforeEach
     void setUp() {
         mockUser = new User();
@@ -54,27 +57,37 @@ class EventServiceTest {
 
     }
 
+    private void validDTO() {
+        mockEventDTO.setTitle("title");
+        mockEventDTO.setStartDate(LocalDateTime.now().plusHours(1));
+        mockEventDTO.setRelatedSkills(List.of(101L, 102L));
+        List<Skill> skills = new ArrayList<>();
+        Skill skill101 = new Skill();
+        skill101.setId(101L);
+        Skill skill102 = new Skill();
+        skill102.setId(102L);
+        skills.add(skill101);
+        skills.add(skill102);
+        mockUser.setSkills(skills);
+    }
+
     @Test
     void create_shouldCreateEventWhenValid() {
         validDTO();
         when(userRepository.findById(mockUser.getId())).thenReturn(Optional.of(mockUser));
         when(eventMapper.eventDTOToEvent(mockEventDTO)).thenReturn(mockEvent);
         when(eventMapper.eventToEventDTO(mockEvent)).thenReturn(mockEventDTO);
-
         EventDTO result = eventService.create(mockEventDTO);
-
-        assertNotNull(result);
         verify(eventRepository).save(mockEvent);
+        assertNotNull(result);
     }
 
     @Test
     void create_shouldThrowExceptionWhenOwnerNotFound() {
         when(userRepository.findById(mockUser.getId())).thenReturn(Optional.empty());
-
         DataValidationException thrown = assertThrows(DataValidationException.class, () -> {
             eventService.create(mockEventDTO);
         });
-
         assertEquals("Owner not found", thrown.getMessage());
     }
 
@@ -82,20 +95,16 @@ class EventServiceTest {
     void getById_shouldReturnEventDTOWhenFound() {
         when(eventRepository.findById(1L)).thenReturn(Optional.of(mockEvent));
         when(eventMapper.eventToEventDTO(mockEvent)).thenReturn(mockEventDTO);
-
         EventDTO result = eventService.getById(1L);
-
         assertEquals(mockEventDTO, result);
     }
 
     @Test
     void getById_shouldThrowExceptionWhenEventNotFound() {
         when(eventRepository.findById(1L)).thenReturn(Optional.empty());
-
         DataValidationException thrown = assertThrows(DataValidationException.class, () -> {
             eventService.getById(1L);
         });
-
         assertEquals("Event not found", thrown.getMessage());
     }
 
@@ -106,55 +115,34 @@ class EventServiceTest {
         when(userRepository.findById(mockEventDTO.getOwnerId())).thenReturn(Optional.of(mockUser));
         when(eventMapper.eventToEventDTO(mockEvent)).thenReturn(mockEventDTO);
         doNothing().when(eventMapper).updateEventFromDTO(mockEventDTO, mockEvent);
-
         EventDTO result = eventService.update(1L, mockEventDTO);
-
-        assertNotNull(result);
         verify(eventRepository).save(mockEvent);
+        assertNotNull(result);
     }
 
     @Test
     void update_shouldThrowExceptionWhenEventNotFound() {
         when(eventRepository.findById(1L)).thenReturn(Optional.empty());
-
         DataValidationException thrown = assertThrows(DataValidationException.class, () -> {
             eventService.update(1L, mockEventDTO);
         });
-
         assertEquals("Event not found", thrown.getMessage());
     }
 
     @Test
     void delete_shouldDeleteEventWhenExists() {
         when(eventRepository.findById(1L)).thenReturn(Optional.of(mockEvent));
-
         eventService.delete(1L);
-
         verify(eventRepository).delete(mockEvent);
     }
 
     @Test
     void delete_shouldThrowExceptionWhenEventNotFound() {
         when(eventRepository.findById(1L)).thenReturn(Optional.empty());
-
         DataValidationException thrown = assertThrows(DataValidationException.class, () -> {
             eventService.delete(1L);
         });
-
         assertEquals("Event not found", thrown.getMessage());
     }
 
-    private void validDTO (){
-        mockEventDTO.setTitle("title");
-        mockEventDTO.setStartDate(LocalDateTime.now().plusHours(1));
-        mockEventDTO.setRelatedSkills(List.of(101L,102L));
-        List<Skill> skills = new ArrayList<>();
-        Skill skill101 = new Skill();
-        skill101.setId(101L);
-        Skill skill102 = new Skill();
-        skill102.setId(102L);
-        skills.add(skill101);
-        skills.add(skill102);
-        mockUser.setSkills(skills);
-    }
 }
