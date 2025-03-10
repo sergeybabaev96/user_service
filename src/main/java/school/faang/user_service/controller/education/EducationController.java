@@ -28,16 +28,16 @@ public class EducationController {
         return ResponseEntity.ok(savedEducation);
     }
 
-    @PutMapping("/userId={userId}/education")
+    @PutMapping("/education")
     public ResponseEntity<EducationDto> updateEducation(
-            @PathVariable long userId,
+            @RequestParam("userId") long userId,
             @RequestBody EducationDto educationDto) {
         EducationDto updatedEducation = educationService.updateEducation(userId, educationDto);
         return ResponseEntity.ok(updatedEducation);
     }
 
-    @GetMapping
-    public ResponseEntity<EducationDto> getById(@RequestParam("id") long educationId) {
+    @GetMapping("/educationId={educationId}")
+    public ResponseEntity<EducationDto> getById(@PathVariable long educationId) {
         EducationDto educationDto = educationService.getById(educationId);
         return ResponseEntity.ok(educationDto);
     }
