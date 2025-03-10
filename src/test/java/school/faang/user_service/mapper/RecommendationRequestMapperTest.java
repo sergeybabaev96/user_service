@@ -7,13 +7,10 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.Spy;
 import school.faang.user_service.dto.RecommendationRequestDto;
 import school.faang.user_service.entity.RequestStatus;
-import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
-import school.faang.user_service.entity.recommendation.SkillRequest;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
