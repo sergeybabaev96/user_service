@@ -21,6 +21,4 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             WHERE ue.user_id = :userId
             """)
     List<Event> findParticipatedEventsByUserId(long userId);
-
-    Optional<Object> existById(long eventId);
 }
