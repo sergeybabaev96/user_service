@@ -20,23 +20,19 @@ public class CareerService {
     private final CareerMapper careerMapper;
 
     public CareerDto addCareer(long userId, CareerDto careerDto) {
-        // Проверяем, чтобы дата начала карьеры не была в будущем
-        if (careerDto.getFrom().isAfter(LocalDate.now())) {
-            throw new DataValidationException("Career start can't be in the future");
-        }
-
-        // Проверяем, чтобы дата начала карьеры, компания и позиция не были пустыми
         if (careerDto.getFrom() == null
                 || careerDto.getCompany() == null || careerDto.getCompany().isEmpty() || careerDto.getCompany().isBlank()
                 || careerDto.getPosition() == null || careerDto.getPosition().isEmpty() || careerDto.getPosition().isBlank()) {
             throw new DataValidationException("Career fields can't be empty");
         }
 
-        // Получаем пользователя по userId
+        if (careerDto.getFrom().isAfter(LocalDate.now())) {
+            throw new DataValidationException("Career start can't be in the future");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataValidationException("The user with id  " + userId + " can't be found."));
 
-        // Сохраняем данные о карьере в БД
         Career career = careerMapper.toCareer(careerDto); //перевожу обект Dto в объект Entity
         career.setUser(user); //для этого пришлось создать setter в Career (его до этого не было) - правильно ли?
         Career savedCareer = careerRepository.save(career); //сохраняю в базу данных
@@ -44,17 +40,16 @@ public class CareerService {
     }
 
     public CareerDto updateCareer(long userId, CareerDto careerDto) {
-        // Проверяем, чтобы дата начала карьеры не была в будущем
-        if (careerDto.getFrom().isAfter(LocalDate.now())) {
-            throw new DataValidationException("Career start can't be in the future");
-        }
-
-        // Проверяем, чтобы дата начала карьеры, компания и позиция не были пустыми
         if (careerDto.getFrom() == null
                 || careerDto.getCompany() == null || careerDto.getCompany().isEmpty() || careerDto.getCompany().isBlank()
                 || careerDto.getPosition() == null || careerDto.getPosition().isEmpty() || careerDto.getPosition().isBlank()) {
             throw new DataValidationException("Career fields can't be empty");
         }
+
+        if (careerDto.getFrom().isAfter(LocalDate.now())) {
+            throw new DataValidationException("Career start can't be in the future");
+        }
+
         Career existingCareer = careerRepository.findById(careerDto.getId())
                 .orElseThrow(() -> new DataValidationException("Career with id "
                         + careerDto.getId() + " can't be found"));
@@ -63,7 +58,6 @@ public class CareerService {
             throw new DataValidationException("You can't change data of another user");
         }
 
-        // Сохраняем данные о карьере в БД
         existingCareer.setDateFrom(careerDto.getFrom());
         existingCareer.setDateTo(careerDto.getTo());
         existingCareer.setCompany(careerDto.getCompany());

@@ -11,5 +11,5 @@ public class CareerDto {
     private LocalDate to;
     private String company;
     private String position;
-    private long user;
+    private long userId;
 }
