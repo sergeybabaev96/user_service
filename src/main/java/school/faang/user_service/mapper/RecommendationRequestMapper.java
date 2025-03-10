@@ -8,9 +8,11 @@ import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface RecommendationRequestMapper {
+    @Mapping(target = "skills", ignore = true)
     RecommendationRequest toEntity(RecommendationRequestDto dto);
 
     @Mapping(target = "requesterId", source = "requester.id")
     @Mapping(target = "receiverId", source = "receiver.id")
+    @Mapping(target = "skills", ignore = true)
     RecommendationRequestDto toDto(RecommendationRequest entity);
 }
