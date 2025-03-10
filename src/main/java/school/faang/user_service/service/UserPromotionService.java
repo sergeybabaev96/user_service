@@ -36,13 +36,14 @@ public class UserPromotionService {
             "startDate=%s, endDate=%s already exists in DB";
     public static final String NO_USER_PROMOTION_FOUND = "No promotion found for userId=%d, startDate=%s," +
             " endDate=%s, userPercentage=%d and feedRank=%d";
-    private static final String CANT_UPDATE_USER_PROMOTION_TYPE = "Can't update promotionType for userId=%d, " +
+    public static final String CANT_UPDATE_USER_PROMOTION_TYPE = "Can't update promotionType for userId=%d, " +
             "startDate=%s, endDate=%s and promotionPriority=%s.";
-    private static final String CANT_UPDATE_USER_PROMOTION_PRIORITY = "Can't update promotionPriority for " +
+    public static final String CANT_UPDATE_USER_PROMOTION_PRIORITY = "Can't update promotionPriority for " +
             "userId=%d, startDate=%s, endDate=%s and promotionType=%s.";
     public static final String PAYMENT_FAILED_FOR_USER = "Payment failed for user with ID: {}";
     public static final String PAYMENT_SUCCESSFUL_FOR_USER = "Payment successful for user with ID: {}";
     public static final String CALCULATED_PRICE_DIFFERENCE_FOR_USER = "Calculated priceDifference for userID: {} is: {}";
+    private static final String VALIDATING_USER_PROMOTION = "Validating user promotion with id={}";
 
     private static final BigDecimal USER_PROMOTION_PRICE_DECREASE = new BigDecimal("0.03");
     private static final BigDecimal USER_PROMOTION_PRICE_PER_MINUTE = new BigDecimal("5");
@@ -66,6 +67,7 @@ public class UserPromotionService {
             UserPromotionType promotionType, PromotionPriority promotionPriority) {
 
         validateUserDto(userDto);
+        log.info(VALIDATING_USER_PROMOTION, userDto.userId());
         PromotionValidation.validateUserPromotion(userDto.userId(), startDate, endDate,
                 promotionType, promotionPriority);
         BigDecimal promotionPrice = calculateUserPromotionPrice(userDto.userId(),
@@ -94,11 +96,12 @@ public class UserPromotionService {
             UserPromotionType promotionType, PromotionPriority promotionPriority) {
 
         validateUserDto(userDto);
+        log.info(VALIDATING_USER_PROMOTION, userDto.userId());
         PromotionValidation.validateUserPromotion(userDto.userId(), startDate,
                 endDate, promotionType, promotionPriority);
         try {
             endUserPromotion(userDto, startDate, endDate, promotionType, promotionPriority);
-        } catch (IllegalArgumentException ex) {
+        } catch (PromotionNotFoundException ex) {
             log.error("Error ending user promotion. userID: {}: {}", userDto.userId(), ex.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
@@ -110,6 +113,7 @@ public class UserPromotionService {
             UserPromotionType promotionType, PromotionPriority newPromotionPriority) {
 
         validateUserDto(userDto);
+        log.info(VALIDATING_USER_PROMOTION, userDto.userId());
         PromotionValidation.validateUserPromotion(userDto.userId(), startDate,
                 endDate, promotionType, newPromotionPriority);
         BigDecimal priceDifference = calculateUserPromotionPriceDifferenceOnPriorityChange(
@@ -120,7 +124,7 @@ public class UserPromotionService {
             PaymentResponse paymentResponse = processPayment(userDto.userId(), priceDifference);
             if (paymentResponse == null || paymentResponse.status() != PaymentStatus.SUCCESS) {
                 log.error(PAYMENT_FAILED_FOR_USER, userDto.userId());
-                return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body("Payment failed for promotion update");
+                return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body("Payment failed for promotion priority update");
             }
             log.info(PAYMENT_SUCCESSFUL_FOR_USER, userDto.userId());
         } else {
@@ -136,6 +140,7 @@ public class UserPromotionService {
             UserPromotionType newPromotionType, PromotionPriority promotionPriority) {
 
         validateUserDto(userDto);
+        log.info(VALIDATING_USER_PROMOTION, userDto.userId());
         PromotionValidation.validateUserPromotion(userDto.userId(), startDate,
                 endDate, newPromotionType, promotionPriority);
         BigDecimal priceDifference = calculateUserPromotionPriceDifferenceOnTypeChange(
@@ -146,7 +151,7 @@ public class UserPromotionService {
             PaymentResponse paymentResponse = processPayment(userDto.userId(), priceDifference);
             if (paymentResponse == null || paymentResponse.status() != PaymentStatus.SUCCESS) {
                 log.error(PAYMENT_FAILED_FOR_USER, userDto.userId());
-                return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body("Payment failed for promotion update");
+                return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body("Payment failed for promotion type update");
             }
             log.info(PAYMENT_SUCCESSFUL_FOR_USER, userDto.userId());
         } else {
@@ -154,11 +159,11 @@ public class UserPromotionService {
         }
         userPromotionRepository.updateUserPromotionPercentage(userDto.userId(), startDate, endDate,
                 newPromotionType.getUserPercentage(), promotionPriority.getFeedRank());
-        return ResponseEntity.ok("User promotion updated successfully");
+        return ResponseEntity.ok("User promotion type updated successfully");
     }
 
     private void startUserPromotion(UserDto userDto, LocalDateTime startDate, LocalDateTime endDate,
-                                   UserPromotionType promotionType, PromotionPriority promotionPriority) {
+                                    UserPromotionType promotionType, PromotionPriority promotionPriority) {
 
         int promotionViewsPercentage = promotionType.getUserPercentage();
         int feedRank = promotionPriority.getFeedRank();
@@ -180,7 +185,7 @@ public class UserPromotionService {
     }
 
     private void endUserPromotion(UserDto userDto, LocalDateTime startDate, LocalDateTime endDate,
-                                 UserPromotionType promotionType, PromotionPriority promotionPriority) {
+                                  UserPromotionType promotionType, PromotionPriority promotionPriority) {
 
         int promotionViewsPercentage = promotionType.getUserPercentage();
         int feedRank = promotionPriority.getFeedRank();
@@ -198,9 +203,8 @@ public class UserPromotionService {
 
 
     private BigDecimal calculateUserPromotionPrice(Long userId, LocalDateTime startDate, LocalDateTime endDate,
-                                                  int userPercentage, int feedRank) {
-        PromotionValidation.validateUserId(userId);
-        PromotionValidation.validateDates(startDate, endDate);
+                                                   int userPercentage, int feedRank) {
+
         long seconds = Duration.between(startDate, endDate).toSeconds();
         BigDecimal cost = USER_PROMOTION_PRICE_PER_MINUTE.multiply(
                 BigDecimal.valueOf(seconds).divide(SECONDS_IN_MINUTE, RoundingMode.CEILING));
@@ -219,11 +223,10 @@ public class UserPromotionService {
             Long userId, LocalDateTime startDate, LocalDateTime endDate,
             UserPromotionType newPromotionType, PromotionPriority promotionPriority) {
 
-        PromotionValidation.validateUserPromotion(userId, startDate, endDate, newPromotionType, promotionPriority);
         Integer oldUserPercentage = userPromotionRepository.getUserPercentage(userId, startDate, endDate,
                 promotionPriority.getFeedRank());
         if (oldUserPercentage == null) {
-            String message = String.format(CANT_UPDATE_USER_PROMOTION_TYPE,
+            String message = String.format(CANT_UPDATE_USER_PROMOTION_TYPE + ". No such promotion exists",
                     userId, startDate, endDate, promotionPriority);
             log.error(message);
             throw new PromotionNotFoundException(message);
@@ -243,11 +246,10 @@ public class UserPromotionService {
             Long userId, LocalDateTime startDate, LocalDateTime endDate,
             UserPromotionType promotionType, PromotionPriority newPromotionPriority) {
 
-        PromotionValidation.validateUserPromotion(userId, startDate, endDate, promotionType, newPromotionPriority);
         Integer oldFeedRank = userPromotionRepository.getUserFeedRank(userId, startDate, endDate,
                 promotionType.getUserPercentage());
         if (oldFeedRank == null) {
-            String message = String.format(CANT_UPDATE_USER_PROMOTION_PRIORITY,
+            String message = String.format(CANT_UPDATE_USER_PROMOTION_PRIORITY + ". No such promotion exists",
                     userId, startDate, endDate, promotionType);
             log.error(message);
             throw new PromotionNotFoundException(message);

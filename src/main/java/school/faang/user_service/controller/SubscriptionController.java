@@ -9,8 +9,8 @@ import school.faang.user_service.service.SubscriptionService;
 
 import java.util.List;
 
-@Controller
 @RequiredArgsConstructor
+@Controller
 @Slf4j
 public class SubscriptionController {
     private final SubscriptionService subscriptionService;
