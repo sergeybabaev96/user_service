@@ -4,6 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record FileUploadResponseDto(
+
         String status,
+
         String error) {
 }

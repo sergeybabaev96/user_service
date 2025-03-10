@@ -6,9 +6,13 @@ import java.util.List;
 
 @Builder
 public record RecommendationRequestRcvDto(
+
         String message,
+
         List<Long> skillIds,
+
         Long requesterId,
+
         Long receiverId
 ) {
 }

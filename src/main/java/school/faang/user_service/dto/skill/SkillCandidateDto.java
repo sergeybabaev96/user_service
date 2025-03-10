@@ -4,6 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record SkillCandidateDto(
+
         ResponseSkillDto skill,
+
         long offersAmount) {
 }

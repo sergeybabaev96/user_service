@@ -8,14 +8,23 @@ import java.util.List;
 
 @Builder
 public record RecommendationRequestDto(
+
         Long id,
+
         String message,
+
         RequestStatus status,
+
         String rejectionReason,
+
         List<Long> skillIds,
+
         Long requesterId,
+
         Long receiverId,
+
         LocalDateTime createdAt,
+
         LocalDateTime updatedAt
 ) {
 }

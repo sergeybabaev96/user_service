@@ -4,5 +4,6 @@ import lombok.Builder;
 
 @Builder
 public record RejectionDto(
+        
         String reason) {
 }

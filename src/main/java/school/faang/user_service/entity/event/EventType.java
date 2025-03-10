@@ -5,7 +5,8 @@ public enum EventType {
     POLL("Poll"),
     MEETING("Meeting"),
     GIVEAWAY("Giveaway"),
-    PRESENTATION("Presentation");
+    PRESENTATION("Presentation"),
+    ;
     private final String type;
 
     EventType(String type) {

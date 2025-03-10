@@ -4,6 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record ParticipantsCountDto(
+
         Long eventId,
+
         long participantsCount) {
 }
