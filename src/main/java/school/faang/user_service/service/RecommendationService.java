@@ -50,16 +50,9 @@ public class RecommendationService {
                 recommendation.getReceiverId(),
                 recommendation.getContent());
 
-        if (recommendation.getSkillOffers() != null) {
-            var receiverSkills = skillRepository.findAllByUserId(recommendation.getReceiverId());
-            recommendation.getSkillOffers()
-                    .forEach(dto -> createSkillOffer(recommendation, dto, receiverSkills));
-        }
-
         var createdRecommendation = recommendationRepository.findByAuthorIdAndReceiverId(
                 recommendation.getAuthorId(),
-                recommendation.getReceiverId()
-        );
+                recommendation.getReceiverId());
         if (createdRecommendation.isEmpty()) {
             throw new DataValidationException(
                     "Recommendation is not created (author id: %d, receiver id: %d)".formatted(
@@ -70,34 +63,48 @@ public class RecommendationService {
         var createdRecommendationDto = recommendationMapper.toDto(createdRecommendation.get());
         createdRecommendationDto.setSkillOffers(recommendation.getSkillOffers());
 
+        if (recommendation.getSkillOffers() != null) {
+            var receiverSkills = skillRepository.findAllByUserId(createdRecommendationDto.getReceiverId());
+            recommendation.getSkillOffers()
+                    .forEach(dto -> createSkillOffer(createdRecommendationDto, dto, receiverSkills));
+        }
+
         return createdRecommendationDto;
     }
 
     public RecommendationDto update(@NotNull RecommendationDto recommendation) {
         validateRecommendation(recommendation);
 
-        if (recommendation.getId() == null) {
-            throw new DataValidationException("Recommendation id is required");
-        }
-
         recommendationRepository.update(
                 recommendation.getAuthorId(),
                 recommendation.getReceiverId(),
                 recommendation.getContent());
 
-        skillOfferService.deleteAllByRecommendationId(recommendation.getId());
+        var updatedRecommendation = recommendationRepository.findByAuthorIdAndReceiverId(
+                recommendation.getAuthorId(),
+                recommendation.getReceiverId());
+        if (updatedRecommendation.isEmpty()) {
+            throw new DataValidationException(
+                    "Source recommendation is not found (author id: %d, receiver id: %d)".formatted(
+                            recommendation.getAuthorId(),
+                            recommendation.getReceiverId()));
+        }
+
+        skillOfferService.deleteAllByRecommendationId(updatedRecommendation.get().getId());
+
+        var updatedRecommendationDto = recommendationMapper.toDto(updatedRecommendation.get());
 
         if (recommendation.getSkillOffers() != null) {
             var receiverSkills = skillRepository.findAllByUserId(recommendation.getReceiverId());
             var createdSkillOffers = recommendation.getSkillOffers()
                     .stream()
-                    .map(dto -> createSkillOffer(recommendation, dto, receiverSkills))
+                    .map(dto -> createSkillOffer(updatedRecommendationDto, dto, receiverSkills))
                     .toList();
 
-            recommendation.setSkillOffers(createdSkillOffers);
+            updatedRecommendationDto.setSkillOffers(createdSkillOffers);
         }
 
-        return recommendation;
+        return updatedRecommendationDto;
     }
 
     public void delete(long id) {
