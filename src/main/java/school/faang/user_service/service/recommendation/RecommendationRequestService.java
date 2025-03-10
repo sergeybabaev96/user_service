@@ -92,7 +92,7 @@ public class RecommendationRequestService {
             request.setStatus(RequestStatus.REJECTED);
             request.setRejectionReason(rejection.getReason());
             recommendationRequestRepository.save(request);
-        }else {
+        } else {
             throw new IllegalStateException("Cannot reject recommendation request with status " + request.getStatus());
         }
         return recommendationRequestMapper.toRecommendationRequestDto(request);

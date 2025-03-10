@@ -20,14 +20,12 @@ import school.faang.user_service.filter.recommendation.TestRecommendationRequest
 import school.faang.user_service.mapper.RecommendationRequestMapperImpl;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 import school.faang.user_service.service.UserService;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -57,7 +55,7 @@ class RecommendationRequestServiceTest {
     private RecommendationRequest firstRecommendationRequest;
     private RecommendationRequest secondRecommendationRequest;
     private RecommendationRequestDto requestDto;
-    private User requester;
+    private  User requester;
     private User receiver;
     private RecommendationRequest request;
 
@@ -100,7 +98,6 @@ class RecommendationRequestServiceTest {
 
     @Test
     public void testGetFilteredRecommendationRequestsAcceptedIsFiltered() {
-
         when(recommendationRequestRepository.findAll())
                 .thenReturn(List.of(firstRecommendationRequest, secondRecommendationRequest));
 
@@ -158,7 +155,7 @@ class RecommendationRequestServiceTest {
 
     @Test
     public void testRejectRequestStatusNotPending() {
-        long requestId = 1L;
+        final long requestId = 1L;
         RecommendationRequest request = new RecommendationRequest();
         request.setId(1L);
         request.setStatus(RequestStatus.ACCEPTED);
@@ -167,12 +164,13 @@ class RecommendationRequestServiceTest {
 
         when(recommendationRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
 
-        assertThrows(IllegalStateException.class, () -> recommendationRequestService.rejectRequest(requestId, rejectionDto));
+        assertThrows(IllegalStateException.class, () -> recommendationRequestService
+                .rejectRequest(requestId, rejectionDto));
     }
 
     @Test
     public void testRejectRequestStatusAccepted() {
-        long requestId = 1L;
+        final long requestId = 1L;
         RecommendationRequest request = new RecommendationRequest();
         request.setId(1L);
         request.setStatus(RequestStatus.PENDING);
@@ -180,7 +178,7 @@ class RecommendationRequestServiceTest {
         rejectionDto.setReason("запрос отклонен");
 
         when(recommendationRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
-        RecommendationRequestDto dto = recommendationRequestService
+        final RecommendationRequestDto dto = recommendationRequestService
                 .rejectRequest(requestId, rejectionDto);
 
         verify(recommendationRequestRepository, times(1)).save(request);
@@ -206,6 +204,7 @@ class RecommendationRequestServiceTest {
 
         assertThrows(IllegalStateException.class, () -> recommendationRequestService.create(dto));
     }
+
     @Test
     public void testRequesterAndReceiverAndCreatedDateAfter() {
         RecommendationRequestDto dto = new RecommendationRequestDto();
@@ -243,28 +242,12 @@ class RecommendationRequestServiceTest {
 
 
     }
+
     @Test
     public void testCreatedDtosetRequesterIdNull() {
         RecommendationRequestDto dto = new RecommendationRequestDto();
         dto.setReceiverId(3L);
         assertThrows(IllegalArgumentException.class, () -> recommendationRequestService.create(dto));
-
-
-    }
-    @Test
-    public void testCreatedRequesterNull() {
-        RecommendationRequestDto dto = new RecommendationRequestDto();
-        dto.setReceiverId(3L);
-        assertThrows(NotFoundException.class, () -> recommendationRequestService.create(dto));
-
-    }
-    @Test
-    public void testCreatedtReceiverNull() {
-        RecommendationRequestDto dto = new RecommendationRequestDto();
-        dto.setReceiverId(3L);
-        assertThrows(NotFoundException.class, () -> recommendationRequestService.create(dto));
-
-
     }
 
 
