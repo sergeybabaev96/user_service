@@ -23,4 +23,25 @@ public class MentorshipService {
                 .toList();
     }
 
+    public List<UserDto> getMentors(Long menteeId) {
+        List<User> mentors = mentorshipRepository.findAllMentorsByMenteeId(menteeId);
+        return mentors.stream()
+                .map(userMapper::toDto)
+                .toList();
+    }
+
+    public void deleteMentee(Long menteeId, Long mentorId) {
+        int deletedRows = mentorshipRepository.deleteMenteeFromMentor(menteeId, mentorId);
+        if (deletedRows == 0) {
+            throw new IllegalArgumentException("No mentorship relationship found to delete");
+        }
+    }
+
+    public void deleteMentor(Long menteeId, Long mentorId) {
+        int deletedRows = mentorshipRepository.deleteMentorFromMentee(menteeId, mentorId);
+        if (deletedRows == 0) {
+            throw new IllegalArgumentException("No mentorship relationship found to delete");
+        }
+    }
+
 }
