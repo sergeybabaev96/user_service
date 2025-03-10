@@ -50,8 +50,9 @@ public class ValidatorSkillTest {
     public void testEmptySkillOffer() {
         assertThrows(DataValidationException.class, () -> skillValidator.validatorSkillOfferIsEmpty(List.of()));
     }
+
     @Test
-    public void testDoesEmptySkillOffer(){
+    public void testDoesEmptySkillOffer() {
         assertDoesNotThrow(() -> skillValidator.validatorSkillOfferIsEmpty(getSkillOffers(1)));
     }
 
