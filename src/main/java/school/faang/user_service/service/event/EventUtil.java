@@ -36,7 +36,7 @@ public class EventUtil {
             return event.getRelatedSkills().stream()
                     .anyMatch(ownerSkillsIDs::contains);
         } else {
-            return false;
+            throw new DataValidationException("Related are empty or not match");
         }
     }
 }

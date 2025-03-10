@@ -42,7 +42,8 @@ public class EventService {
             eventRepository.save(entityEvent);
             return eventMapper.eventToEventDTO(entityEvent);
         } else {
-            throw new DataValidationException("Skills are empty or not match");
+            log.error(event.toString());
+            throw new RuntimeException("Event was not created");
         }
     }
 
@@ -62,7 +63,7 @@ public class EventService {
         User eventOwner = userRepository.findById(event.getOwnerId())
                 .orElseThrow(() -> new DataValidationException("Owner not found"));
         if (!eventUtil.checkOwnerSkills(eventOwner, event) || !eventUtil.isValid(event)) {
-            throw new DataValidationException("Skills are empty or not match");
+            log.error("Event was not accept a validator or not check skills : \n {}", event);
         }
         // Используем маппер для обновления существующего объекта
         eventMapper.updateEventFromDTO(event, updatedEvent);
