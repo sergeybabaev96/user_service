@@ -24,7 +24,7 @@ public class MentorshipService {
         User user = getUser(userId);
         List<User> mentees = user.getMentees();
         return mentees.stream()
-                .map(this::getUserDto)
+                .map(this::mapUserToUserDto)
                 .toList();
     }
 
@@ -34,7 +34,7 @@ public class MentorshipService {
         User user = getUser(userId);
         List<User> mentors = user.getMentors();
         return mentors.stream()
-                .map(this::getUserDto)
+                .map(this::mapUserToUserDto)
                 .toList();
     }
 
@@ -71,7 +71,7 @@ public class MentorshipService {
         log.info("Ментор {} успешно удален у менти {}", mentorId, menteeId);
     }
 
-    private UserDto getUserDto(User user) {
+    private UserDto mapUserToUserDto(User user) {
         List<Long> menteesIds = user.getMentees().stream()
                 .map(User::getId)
                 .toList();
