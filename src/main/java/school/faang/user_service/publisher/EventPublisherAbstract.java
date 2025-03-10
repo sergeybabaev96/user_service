@@ -18,9 +18,9 @@ public abstract class EventPublisherAbstract<T> {
         try {
             String eventToPublish = objectMapper.writeValueAsString(event);
             redisTemplate.convertAndSend(topic, eventToPublish);
-        } catch (JsonProcessingException e) {
-            log.error("An error occurred while working with JSON: ", e);
-            throw new RuntimeException(e);
+        } catch (JsonProcessingException ex) {
+            log.error("An error occurred while working with JSON: ", ex);
+            throw new RuntimeException(ex);
         }
     }
 }

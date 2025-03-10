@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.event.EventDto;
@@ -26,12 +25,18 @@ import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.service.TestData;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class EventServiceImplTest {
@@ -49,6 +54,9 @@ public class EventServiceImplTest {
     private ArgumentCaptor<Event> captor;
     private EventServiceImpl eventService;
 
+    private List<Long> userIdsToBan;
+    private List<User> usersToBan;
+
     @BeforeEach
     void setUp() {
         List<EventFilter> filters = TestData.createFilters();
@@ -59,6 +67,13 @@ public class EventServiceImplTest {
                 userRepository,
                 skillRepository,
                 filters);
+
+        userIdsToBan = Arrays.asList(1L, 2L, 3L);
+        usersToBan = Arrays.asList(
+                createUser(1L, "User1", false),
+                createUser(2L, "User2", false),
+                createUser(3L, "User3", false)
+        );
     }
 
     @Test
@@ -67,7 +82,7 @@ public class EventServiceImplTest {
         Event event2 = TestData.createEvent(2L, "some meeting", "2024-01-07T00:00:00", 40);
         Event event3 = TestData.createEvent(3L, "best meeting", "2024-01-07T00:00:00", 60);
         Event event4 = TestData.createEvent(4L, "some meeting", "2024-01-04T00:00:00", 60);
-        Mockito.when(eventRepository.findAll()).thenReturn(List.of(event1, event2, event3, event4));
+        when(eventRepository.findAll()).thenReturn(List.of(event1, event2, event3, event4));
 
         EventFilterDto filter = TestData.createEventFilterDto("some", "2024-01-06T00:00:00", 50);
 
@@ -83,18 +98,18 @@ public class EventServiceImplTest {
     public void testGetEventSuccess() {
         Event event = TestData.createEvent(1L, "some meeting", "2024-01-04T00:00:00", 80);
         long id = event.getId();
-        Mockito.when(eventRepository.findById(id)).thenReturn(Optional.of(event));
+        when(eventRepository.findById(id)).thenReturn(Optional.of(event));
 
         EventDto dto = eventService.getEvent(id);
 
-        Mockito.verify(eventRepository, Mockito.times(1)).findById(id);
+        verify(eventRepository, times(1)).findById(id);
         assertEquals(event.getTitle(), dto.title());
     }
 
     @Test
     public void testGetEventIfNoEventExistsFailed() {
         long id = 1L;
-        Mockito.when(eventRepository.findById(id)).thenReturn(Optional.empty());
+        when(eventRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> eventService.getEvent(id));
     }
@@ -103,11 +118,11 @@ public class EventServiceImplTest {
     public void testCreateSuccess() {
         eventMapper.setSkillMapper(skillMapper);
         EventRequestDto dto = TestData.createEventRequestDto("meeting", "2024-01-04T00:00:00", 1L);
-        Mockito.when(userRepository.findById(dto.ownerId())).thenReturn(Optional.of(new User()));
+        when(userRepository.findById(dto.ownerId())).thenReturn(Optional.of(new User()));
 
         eventService.createEvent(dto);
 
-        Mockito.verify(eventRepository, Mockito.times(1)).save(captor.capture());
+        verify(eventRepository, times(1)).save(captor.capture());
         Event capturedEvent = captor.getValue();
         assertEquals(dto.title(), capturedEvent.getTitle());
         assertEquals(dto.maxAttendees(), capturedEvent.getMaxAttendees());
@@ -116,7 +131,7 @@ public class EventServiceImplTest {
     @Test
     public void testCreateIfOwnerNotExistsFailed() {
         EventRequestDto dto = TestData.createEventRequestDto("meeting", "2024-01-04T00:00:00", 1L);
-        Mockito.when(userRepository.findById(dto.ownerId())).thenReturn(Optional.empty());
+        when(userRepository.findById(dto.ownerId())).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> eventService.createEvent(dto));
     }
@@ -124,9 +139,9 @@ public class EventServiceImplTest {
     @Test
     public void testCreateIfInvalidSkillsFailed() {
         EventRequestDto dto = TestData.createEventRequestDto("meeting", 1L, List.of(1L));
-        Mockito.when(userRepository.findById(dto.ownerId()))
+        when(userRepository.findById(dto.ownerId()))
                 .thenReturn(Optional.of(TestData.createUser(1L, List.of())));
-        Mockito.when(skillRepository.findAllById(dto.relatedSkillsIds())).thenReturn(List.of(new Skill()));
+        when(skillRepository.findAllById(dto.relatedSkillsIds())).thenReturn(List.of(new Skill()));
 
         assertThrows(DataValidationException.class, () -> eventService.createEvent(dto));
     }
@@ -139,11 +154,11 @@ public class EventServiceImplTest {
         User owner = TestData.createUser(1L, List.of());
         event.setOwner(owner);
         EventRequestDto dto = TestData.createEventRequestDto("meeting", "2024-01-04T00:00:00", 1L);
-        Mockito.when(eventRepository.findById(event.getId())).thenReturn(Optional.of(event));
+        when(eventRepository.findById(event.getId())).thenReturn(Optional.of(event));
 
         eventService.updateEvent(dto, event.getId());
 
-        Mockito.verify(eventRepository, Mockito.times(1)).save(captor.capture());
+        verify(eventRepository, times(1)).save(captor.capture());
         Event capturedEvent = captor.getValue();
         assertEquals(dto.title(), capturedEvent.getTitle());
     }
@@ -155,7 +170,7 @@ public class EventServiceImplTest {
         long differentOwnerId = dto.ownerId() + 1;
         User owner = TestData.createUser(differentOwnerId, List.of());
         event.setOwner(owner);
-        Mockito.when(eventRepository.findById(event.getId())).thenReturn(Optional.of(event));
+        when(eventRepository.findById(event.getId())).thenReturn(Optional.of(event));
 
         assertThrows(DataValidationException.class, () -> eventService.updateEvent(dto, event.getId()));
     }
@@ -166,8 +181,8 @@ public class EventServiceImplTest {
         EventRequestDto dto = TestData.createEventRequestDto("meeting", 1L, List.of(1L));
         User owner = TestData.createUser(1L, List.of());
         event.setOwner(owner);
-        Mockito.when(eventRepository.findById(event.getId())).thenReturn(Optional.of(event));
-        Mockito.when(skillRepository.findAllById(dto.relatedSkillsIds())).thenReturn(List.of(new Skill()));
+        when(eventRepository.findById(event.getId())).thenReturn(Optional.of(event));
+        when(skillRepository.findAllById(dto.relatedSkillsIds())).thenReturn(List.of(new Skill()));
 
         assertThrows(DataValidationException.class, () -> eventService.updateEvent(dto, event.getId()));
     }
@@ -177,7 +192,7 @@ public class EventServiceImplTest {
         long id = 1L;
         eventService.deleteEvent(id);
 
-        Mockito.verify(eventRepository, Mockito.times(1)).deleteById(id);
+        verify(eventRepository, times(1)).deleteById(id);
     }
 
     @Test
@@ -185,7 +200,7 @@ public class EventServiceImplTest {
         long userId = 1L;
         eventService.getOwnedEvents(userId);
 
-        Mockito.verify(eventRepository, Mockito.times(1)).findAllByUserId(userId);
+        verify(eventRepository, times(1)).findAllByUserId(userId);
     }
 
     @Test
@@ -193,6 +208,46 @@ public class EventServiceImplTest {
         long userId = 1L;
         eventService.getParticipatedEvents(userId);
 
-        Mockito.verify(eventRepository, Mockito.times(1)).findParticipatedEventsByUserId(userId);
+        verify(eventRepository, times(1)).findParticipatedEventsByUserId(userId);
+    }
+
+    @Test
+    void testBanUsersSuccess() {
+        when(userRepository.findAllById(userIdsToBan)).thenReturn(usersToBan);
+
+        eventService.banUsers(userIdsToBan);
+
+        verify(userRepository, times(1)).findAllById(userIdsToBan);
+        usersToBan.forEach(user -> assertTrue(user.isBanned()));
+    }
+
+    @Test
+    void testBanUsersEmptyList() {
+        userIdsToBan = Collections.emptyList();
+        usersToBan = Collections.emptyList();
+        when(userRepository.findAllById(userIdsToBan)).thenReturn(usersToBan);
+
+        eventService.banUsers(userIdsToBan);
+
+        verify(userRepository, times(1)).findAllById(userIdsToBan);
+        assertTrue(usersToBan.isEmpty());
+    }
+
+    @Test
+    void testBanUsersNoUsersFound() {
+        when(userRepository.findAllById(userIdsToBan)).thenReturn(Collections.emptyList());
+
+        eventService.banUsers(userIdsToBan);
+
+        verify(userRepository, times(1)).findAllById(userIdsToBan);
+        usersToBan.forEach(user -> assertFalse(user.isBanned()));
+    }
+
+    private User createUser(Long id, String name, boolean banned) {
+        User user = new User();
+        user.setId(id);
+        user.setUsername(name);
+        user.setBanned(banned);
+        return user;
     }
 }

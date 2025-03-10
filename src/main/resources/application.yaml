@@ -26,13 +26,14 @@ spring:
         recommendation-channel: recommendation_channel
         achievement-channel: achievement_channel
         follower-channel: follower_channel
-
-server:
-  port: 8080
+        user-ban-channel: user_ban
 
   mvc:
     servlet:
       path: /api/v1
+
+server:
+  port: 8080
 
 thread_pool:
   max_threads: 10
@@ -52,5 +53,4 @@ payment-service:
 config:
   value:
     min.skill.offers: 3
-
 
