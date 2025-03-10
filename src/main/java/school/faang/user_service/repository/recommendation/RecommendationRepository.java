@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import school.faang.user_service.entity.recommendation.Recommendation;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 public interface RecommendationRepository extends CrudRepository<Recommendation, Long> {

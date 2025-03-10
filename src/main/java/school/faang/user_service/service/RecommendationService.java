@@ -1,6 +1,7 @@
 package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
 import school.faang.user_service.entity.UserSkillGuarantee;
@@ -16,6 +17,7 @@ import school.faang.user_service.utils.validationUtils.RecommendationValidation;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class RecommendationService {
@@ -55,6 +57,14 @@ public class RecommendationService {
         updateRecommendation(recommendation);
         deleteAllAndCreate(recommendation);
         return recommendationMapper.toRecommendationDto(recommendation);
+    }
+
+    public void delete(Long id) {
+        if (id == null) {
+            throw new DataValidationException("Id не должен быть null");
+        }
+        recommendationRepository.deleteById(id);
+        log.info("Рекомендация id: {} была удалена", id);
     }
 
     private void createSkillOffer(Recommendation recommendation) {
