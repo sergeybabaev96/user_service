@@ -11,10 +11,10 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.events.RecommendationEvent;
-import school.faang.user_service.dto.RecommendationRequestDto;
-import school.faang.user_service.dto.RecommendationRequestRcvDto;
+import school.faang.user_service.dto.recomendation.RecommendationRequestDto;
+import school.faang.user_service.dto.recomendation.RecommendationRequestRcvDto;
 import school.faang.user_service.dto.RejectionDto;
-import school.faang.user_service.dto.RequestFilterDto;
+import school.faang.user_service.dto.recomendation.RequestFilterDto;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
@@ -48,13 +48,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static school.faang.user_service.service.TestData.getSkills;
-import static school.faang.user_service.service.TestData.getUsers;
-import static school.faang.user_service.service.TestData.createFilterDto;
-import static school.faang.user_service.service.TestData.createRejectDto;
-import static school.faang.user_service.service.TestData.createRequest;
-import static school.faang.user_service.service.TestData.createRequestRcvDto;
-import static school.faang.user_service.service.TestData.createSkillRequest;
+import static school.faang.user_service.TestData.getSkills;
+import static school.faang.user_service.TestData.getUsers;
+import static school.faang.user_service.TestData.createFilterDto;
+import static school.faang.user_service.TestData.createRejectDto;
+import static school.faang.user_service.TestData.createRequest;
+import static school.faang.user_service.TestData.createRequestRcvDto;
+import static school.faang.user_service.TestData.createSkillRequest;
 
 @ExtendWith(MockitoExtension.class)
 public class RecommendationRequestServiceTest {

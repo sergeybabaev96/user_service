@@ -9,6 +9,7 @@ import school.faang.user_service.publisher.EventPublisherAbstract;
 
 @Component
 public class RecommendationEventPublisher extends EventPublisherAbstract<RecommendationEvent> {
+
     private final Channels channels;
 
     public RecommendationEventPublisher(RedisTemplate<String, Object> redisTemplate,

@@ -3,5 +3,7 @@ package school.faang.user_service.dto;
 import lombok.Builder;
 
 @Builder
-public record RejectionDto(String reason) {
+public record RejectionDto(
+        
+        String reason) {
 }

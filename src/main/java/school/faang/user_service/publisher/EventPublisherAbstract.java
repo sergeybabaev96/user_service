@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 @Slf4j
 @RequiredArgsConstructor
 public abstract class EventPublisherAbstract<T> {
+
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
 

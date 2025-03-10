@@ -10,7 +10,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-import school.faang.user_service.service.UserService;
+import school.faang.user_service.controller.user.UserController;
+import school.faang.user_service.service.user.UserService;
 
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {

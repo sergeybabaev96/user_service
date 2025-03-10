@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.dto.event.ParticipantsCountDto;
 import school.faang.user_service.service.event.EventParticipationService;
 
@@ -20,6 +20,7 @@ import java.util.List;
 @RequestMapping("/events")
 @RequiredArgsConstructor
 public class EventParticipationController {
+
     private final EventParticipationService eventParticipationService;
 
     @PostMapping("/{id}/participants/{userId}")
@@ -65,5 +66,4 @@ public class EventParticipationController {
     ) {
         return eventParticipationService.getParticipantsCount(eventId);
     }
-
 }
