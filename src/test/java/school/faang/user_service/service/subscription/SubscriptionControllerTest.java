@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import school.faang.user_service.controller.SubscriptionController;
+import school.faang.user_service.controller.subscription.SubscriptionController;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.validator.subscription.SubscriptionValidator;

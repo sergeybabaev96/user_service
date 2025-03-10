@@ -9,8 +9,7 @@ import school.faang.user_service.dto.mentorship.RequestFilterDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.exceptions.DataValidationException;
-import school.faang.user_service.mapper.mentorship.MentorshipRejectionMapper;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.mentorship.MentorshipRequestMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
@@ -18,6 +17,7 @@ import school.faang.user_service.service.mentorship.filters.RequestFilter;
 import school.faang.user_service.validator.mentorship.MentorshipRequestValidator;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 public class MentorshipRequestService {
 
     private final MentorshipRequestMapper requestMapper;
-    private final MentorshipRejectionMapper rejectionMapper;
     private final MentorshipRequestRepository requestRepository;
     private final MentorshipRequestValidator requestValidator;
     private final UserRepository userRepository;
@@ -34,7 +33,7 @@ public class MentorshipRequestService {
 
     public MentorshipRequest requestMentorship(MentorshipRequest requestEntity) {
         long requesterId = requestEntity.getRequester().getId();
-        long receiverId = requestEntity.getRequester().getId();
+        long receiverId = requestEntity.getReceiver().getId();
 
         if (!requestValidator.validateLastRequestData(requesterId, receiverId)) {
             throw new DataValidationException("Too early for next mentorship request");
@@ -47,7 +46,12 @@ public class MentorshipRequestService {
             requestEntity.setRequester(requester);
             requestEntity.setReceiver(receiver);
 
-            requester.getSentMentorshipRequests().add(requestEntity);
+            List<MentorshipRequest> requests = requester.getSentMentorshipRequests();
+            if (requests == null) {
+                requests = new ArrayList<>();
+            }
+            requests.add(requestEntity);
+            requester.setSentMentorshipRequests(requests);
 
             userRepository.save(requester);
             return requestRepository.save(requestEntity);
@@ -58,7 +62,9 @@ public class MentorshipRequestService {
         Stream<MentorshipRequest> mentorshipRequests = requestRepository.findAll().stream();
         return requestFilters.stream()
                 .filter(filter -> filter.isApplicable(filtersRequested))
-                .flatMap(filter -> filter.apply(mentorshipRequests, filtersRequested))
+                .reduce(mentorshipRequests,
+                        (stream, filter) -> filter.apply(stream, filtersRequested),
+                        (stream1, stream2) -> stream1)
                 .toList();
     }
 
@@ -82,11 +88,12 @@ public class MentorshipRequestService {
         return requestMapper.toDto(requestRepository.save(request));
     }
 
-    public void rejectRequest(long id, RejectionDto rejection) {
+    public MentorshipRequest rejectRequest(long id, RejectionDto rejection) {
         MentorshipRequest request = requestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Request not found"));
 
         request.setStatus(RequestStatus.REJECTED);
         request.setRejectionReason(rejection.getRejectionReason());
+        return requestRepository.save(request);
     }
 }

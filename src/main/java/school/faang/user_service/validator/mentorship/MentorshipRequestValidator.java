@@ -1,13 +1,9 @@
 package school.faang.user_service.validator.mentorship;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.exceptions.DataValidationException;
-import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 
 import java.time.LocalDateTime;
@@ -19,8 +15,6 @@ public class MentorshipRequestValidator {
     private final int REQUEST_FREQUENCY = 3;
 
     private final MentorshipRequestRepository requestRepository;
-    private final UserRepository userRepository;
-
 
     public boolean validateLastRequestData(long requesterId, long receiverId) {
         Optional<MentorshipRequest> request = requestRepository.findLatestRequest(requesterId, receiverId);
