@@ -1,5 +1,6 @@
 package school.faang.user_service.service.career;
 
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.CareerDto;
@@ -58,10 +59,7 @@ public class CareerService {
             throw new DataValidationException("You can't change data of another user");
         }
 
-        existingCareer.setDateFrom(careerDto.getFrom());
-        existingCareer.setDateTo(careerDto.getTo());
-        existingCareer.setCompany(careerDto.getCompany());
-        existingCareer.setPosition(careerDto.getPosition());
+        careerMapper.UpdatedCareer(existingCareer, careerDto);
 
         Career careerUpdated = careerRepository.save(existingCareer);
         return careerMapper.toCareerDto(careerUpdated);

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.CareerDto;
 import school.faang.user_service.service.career.CareerService;
 
+
 @Component
 @AllArgsConstructor
 public class CareerController {
