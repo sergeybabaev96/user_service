@@ -39,7 +39,7 @@ public class RequestValidation {
                 .filter(request -> request.getCreatedAt().isAfter(LocalDateTime.now()
                         .minusMonths(SIX_MONTH_RECOMMENDATION_LIMIT)))
                 .isPresent()) {
-            throw new EntityNotFoundException("The request has already existed for the last 6 months DTO: " + dto);
+            throw new IllegalStateException("The request has already existed for the last 6 months DTO: " + dto);
         }
 
         List<Long> skillIds = dto.getSkillsIds();
