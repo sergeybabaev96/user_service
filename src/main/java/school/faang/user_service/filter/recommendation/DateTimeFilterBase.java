@@ -16,10 +16,10 @@ public abstract class DateTimeFilterBase implements RecommendationRequestFilter 
 
     @Override
     public Stream<RecommendationRequest> apply(Stream<RecommendationRequest> source, RequestFilterDto filterDto) {
-        return source.filter(x -> {
-            var timestamp = getTimeStamp(x);
+        return source.filter(request -> {
+            var timestamp = getTimeStamp(request);
             return isMatchesFromTimestamp(getFromTimeStamp(filterDto), timestamp)
-                    && isMatchesToTimestamp(getToTimeStamp(filterDto), x.getCreatedAt());
+                    && isMatchesToTimestamp(getToTimeStamp(filterDto), request.getCreatedAt());
         });
     }
 

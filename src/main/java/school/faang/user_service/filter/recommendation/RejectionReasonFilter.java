@@ -15,6 +15,7 @@ public class RejectionReasonFilter implements RecommendationRequestFilter {
 
     @Override
     public Stream<RecommendationRequest> apply(Stream<RecommendationRequest> source, RequestFilterDto filterDto) {
-        return source.filter(x -> x.getRejectionReason().equals(filterDto.getRejectionReason()));
+        return source.filter(request -> request.getRejectionReason()
+                .equals(filterDto.getRejectionReason()));
     }
 }

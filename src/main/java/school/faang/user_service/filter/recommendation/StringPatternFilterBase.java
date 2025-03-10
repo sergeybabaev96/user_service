@@ -24,8 +24,8 @@ public abstract class StringPatternFilterBase implements RecommendationRequestFi
 
         var pattern = Pattern.compile(patternString);
 
-        return source.filter(x -> {
-            var field = getFieldToCheck(x);
+        return source.filter(request -> {
+            var field = getFieldToCheck(request);
             return field != null && pattern.matcher(field).matches();
         });
     }
