@@ -33,7 +33,6 @@ class MentorshipServiceTest {
 
         @Test
         void getMentees_shouldReturnDtoList_whenMenteesExist() {
-
             Long mentorId = 1L;
             User mentee = new User();
             mentee.setId(2L);
@@ -44,10 +43,7 @@ class MentorshipServiceTest {
             when(mentorshipRepository.findAllMenteesByMentorId(mentorId))
                     .thenReturn(mentees);
 
-            UserDto menteeDto = new UserDto();
-            menteeDto.setId(mentee.getId());
-            menteeDto.setName(mentee.getUsername());
-            menteeDto.setEmail(mentee.getEmail());
+            UserDto menteeDto = new UserDto(mentee.getId(), mentee.getUsername(), mentee.getEmail());
             when(userMapper.toDto(mentee)).thenReturn(menteeDto);
 
             List<UserDto> result = mentorshipService.getMentees(mentorId);
@@ -59,7 +55,6 @@ class MentorshipServiceTest {
 
         @Test
         void getMentees_shouldReturnEmptyList_whenNoMenteesExist() {
-
             Long mentorId = 2L;
             when(mentorshipRepository.findAllMenteesByMentorId(mentorId))
                     .thenReturn(List.of());
