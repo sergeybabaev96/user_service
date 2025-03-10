@@ -4,10 +4,18 @@ plugins {
     id("io.spring.dependency-management") version "1.1.0"
     id("org.jsonschema2pojo") version "1.2.1"
     kotlin("jvm")
+    jacoco
+    application
 }
 
 group = "faang.school"
 version = "1.0"
+
+jacoco {
+    toolVersion = "0.8.12"
+    reportsDirectory.set(layout.buildDirectory.dir("customJacocoReportDir"))
+    applyTo(tasks.run.get())
+}
 
 configurations {
     compileOnly {
@@ -92,4 +100,45 @@ tasks.bootJar {
 }
 kotlin {
     jvmToolchain(17)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco/test/html"))
+        csv.required.set(false)
+    }
+}
+
+tasks.test {
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            isEnabled = true
+            element = "CLASS"
+            excludes = listOf(
+                "org.gradle.*",
+                "school.faang.user_service.mapper.*",
+                "school.faang.user_service.dto.*",
+                "school.faang.user_service.entity.*",
+                "school.faang.user_service.exception.*",
+                "school.faang.user_service.config.context.*",
+                "school.faang.user_service.client.*",
+                "school.faang.user_service.repository.*",
+                "com.json.student.*",
+                "school.faang.user_service.UserServiceApplication",
+                "school.faang.user_service.controller.*"
+
+            )
+
+            limit {
+                minimum = "0.5".toBigDecimal()
+            }
+        }
+    }
 }

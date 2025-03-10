@@ -51,13 +51,14 @@ public class RecommendationValidatorTest {
         when(userSkillGuaranteeRepository.findBySkillIdInAndGuarantorIdAndUserId(SKILL_ID_LIST, guarantorId, userId)).thenReturn(userSkillGuaranteeList);
         assertThrows(DataValidationException.class, () -> recommendationValidator.validatorExistenceUserSkillGuarantee(prepareDataRecommendationDto(), SKILL_ID_LIST));
     }
+
     @Test
-    public void presenceDuplicates(){
+    public void presenceDuplicates() {
         assertThrows(DataValidationException.class, () -> recommendationValidator.validatorIdDuplicates(SKILL_ID_LIST));
     }
 
     @Test
-    public void ExistenceRecommendation(){
+    public void ExistenceRecommendation() {
         long id = 1L;
         when(recommendationRepository.existsById(id)).thenReturn(false);
 
