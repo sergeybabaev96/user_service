@@ -98,9 +98,7 @@ public class MentorshipRequestService {
                 requestStream = filter.apply(requestStream, filterRequestDto);
             }
         }
-        return requestStream
-                .map(requestFilterMapper::toDto)
-                .toList();
+        return requestFilterMapper.toListDto(requestStream.toList());
     }
 
     private void validateMentorshipRequestDto(MentorshipRequestDto mentorshipRequestDto) {
