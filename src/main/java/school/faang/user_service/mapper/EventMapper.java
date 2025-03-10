@@ -20,7 +20,7 @@ public interface EventMapper {
     Event toEntity(EventDto eventDto);
 
     @Mapping(target = "ownerId", source = "owner.id")
-    @Mapping(target = "relatedSkills", source = "relatedSkills", qualifiedByName = "skillsToIds")
+    @Mapping(target = "relatedSkillsId", source = "relatedSkills", qualifiedByName = "skillsToIds")
     @Mapping(target = "eventType", source = "type")
     @Mapping(target = "eventStatus", source = "status")
     EventDto toDto(Event event);

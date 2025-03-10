@@ -1,6 +1,5 @@
 package school.faang.user_service.service.event;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.event.EventDto;
@@ -9,13 +8,14 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.filter.EventFilter;
 import school.faang.user_service.mapper.EventMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -24,37 +24,17 @@ public class EventService {
     private final UserRepository userRepository;
     private final SkillRepository skillRepository;
     private final EventMapper eventMapper;
+    private final List<EventFilter> eventFilters;
 
-    public EventDto create(@NotNull(message = "Event can not be null") EventDto eventDto) {
+    public EventDto create(EventDto eventDto) {
         validateUserSkills(eventDto);
         Event event = eventMapper.toEntity(eventDto);
-        event.setOwner(getUserById(eventDto.getOwnerId()));
-        event.setRelatedSkills(mapSkillIdsToEntities(eventDto.getRelatedSkills()));
+        User user = getUserById(eventDto.getOwnerId());
+        event.setOwner(user);
+        List<Skill> relatedSkills = mapSkillIdsToEntities(eventDto.getRelatedSkillsId());
+        event.setRelatedSkills(relatedSkills);
         Event savedEvent = eventRepository.save(event);
         return eventMapper.toDto(savedEvent);
-    }
-
-    private void validateUserSkills(@NotNull(message = "Event can not be null") EventDto eventDto) {
-        List<Long> requiredSkills = eventDto.getRelatedSkills();
-        if (requiredSkills != null && !requiredSkills.isEmpty()) {
-            User user = userRepository.findById(eventDto.getOwnerId())
-                    .orElseThrow(() -> new DataValidationException("User not found."));
-            if (!user.getSkills().containsAll(requiredSkills)) {
-                throw new DataValidationException("User does not possess required skills.");
-            }
-        }
-    }
-
-    private User getUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new DataValidationException("User not found."));
-    }
-
-    private List<Skill> mapSkillIdsToEntities(@NotNull(message = "Skills can not be null") List<Long> skillIds) {
-        return skillIds.stream()
-                .map(id -> skillRepository.findById(id)
-                        .orElseThrow(() -> new DataValidationException("Skill not found for id: " + id)))
-                .collect(Collectors.toList());
     }
 
     public EventDto getEvent(long eventId) {
@@ -63,45 +43,31 @@ public class EventService {
         return eventMapper.toDto(event);
     }
 
-    public List<EventDto> getEventsByFilter(@NotNull(message = "Event can not be null") EventFilterDto filter) {
-        List<Event> allEvents = eventRepository.findAll();
-        List<Event> eventsAfterFilter = allEvents.stream()
-                .filter(event -> filter.getTitle() == null || event.getTitle()
-                        .contains(filter.getTitle()))
-                .filter(event -> filter.getStartDate() == null || event.getStartDate()
-                        .isAfter(filter.getStartDate()))
-                .filter(event -> filter.getEndDate() == null || event.getEndDate()
-                        .isBefore(filter.getEndDate()))
-                .filter(event -> filter.getLocation() == null || event.getLocation()
-                        .equalsIgnoreCase(filter.getLocation()))
-                .toList();
+    public List<EventDto> getEventsByFilter(EventFilterDto eventFilterDto) {
+        Stream<Event> allEvents = eventRepository.findAll().stream();
 
-        return eventsAfterFilter.stream()
+        for (EventFilter eventFilter : eventFilters) {
+            if (eventFilter.isApplicable(eventFilterDto)) {
+                allEvents = eventFilter.apply(allEvents, eventFilterDto);
+            }
+        }
+
+        return allEvents
                 .map(eventMapper::toDto)
                 .toList();
     }
 
     public void deleteEvent(long eventId) {
-        eventRepository.findById(eventId)
+        eventRepository.existById(eventId)
                 .orElseThrow(() -> new DataValidationException("ID is not found" + eventId));
         eventRepository.deleteById(eventId);
     }
 
-    public EventDto updateEvent(@NotNull(message = "Event can not be null") EventDto eventDto) {
+    public EventDto updateEvent(EventDto eventDto) {
         Event event = eventMapper.toEntity(eventDto);
         validation(event);
         eventRepository.save(event);
         return eventMapper.toDto(event);
-    }
-
-    private void validation(@NotNull(message = "Event can not be null") Event event) {
-        User owner = event.getOwner();
-        List<Skill> skillsOwner = owner.getSkills();
-        for (Skill skill : skillsOwner) {
-            if (!skill.getEvents().contains(event)) {
-                throw new DataValidationException("User can not carry out this event - " + event);
-            }
-        }
     }
 
     public List<EventDto> getOwnerEvent(long userId) {
@@ -116,5 +82,44 @@ public class EventService {
         return events.stream()
                 .map(eventMapper::toDto)
                 .toList();
+    }
+
+    private List<Skill> mapSkillIdsToEntities(List<Long> skillIds) {
+        return skillIds.stream()
+                .map(id -> skillRepository.findById(id)
+                        .orElseThrow(() -> new DataValidationException("Skill not found for id: " + id)))
+                .toList();
+    }
+
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new DataValidationException("User not found."));
+    }
+
+    private void validation(Event event) {
+        User owner = event.getOwner();
+        List<Skill> skillsOwner = owner.getSkills();
+        for (Skill skill : skillsOwner) {
+            if (!skill.getEvents().contains(event)) {
+                throw new DataValidationException("User can not carry out this event - " + event);
+            }
+        }
+    }
+
+    private void validateUserSkills(EventDto eventDto) {
+        List<Long> requiredSkillIds = eventDto.getRelatedSkillsId();
+
+        if (requiredSkillIds == null || requiredSkillIds.isEmpty()) {
+            return;
+        }
+
+        User user = userRepository.findById(eventDto.getOwnerId())
+                .orElseThrow(() -> new DataValidationException("User not found."));
+
+        List<Skill> requiredSkills = skillRepository.findAllById(requiredSkillIds);
+
+        if (!user.getSkills().containsAll(requiredSkills)) {
+            throw new DataValidationException("User does not possess required skills.");
+        }
     }
 }

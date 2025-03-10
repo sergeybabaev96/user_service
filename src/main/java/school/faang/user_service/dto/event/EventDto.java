@@ -1,5 +1,7 @@
 package school.faang.user_service.dto.event;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import school.faang.user_service.entity.event.EventStatus;
 import school.faang.user_service.entity.event.EventType;
@@ -9,15 +11,37 @@ import java.util.List;
 
 @Data
 public class EventDto {
+    @NotNull(message = "Id cannot be null")
     private Long id;
+
+    @NotBlank(message = "Title cannot be blank")
+    @NotNull(message = "Title cannot be null")
     private String title;
+
+    @NotNull(message = "Start date cannot be null")
     private LocalDateTime startDate;
+
+    @NotNull(message = "End date cannot be null")
     private LocalDateTime endDate;
+
+    @NotNull(message = "Owner ID cannot be null")
     private Long ownerId;
+
+    @NotNull(message = "Description cannot be null")
     private String description;
-    private List<Long> relatedSkills;
+
+    @NotNull(message = "Related skills ID list cannot be null")
+    private List<Long> relatedSkillsId;
+
+    @NotNull(message = "Location cannot be null")
     private String location;
+
+    @NotNull(message = "Max attendees cannot be null")
     private int maxAttendees;
+
+    @NotNull(message = "Event type cannot be null")
     private EventType eventType;
+
+    @NotNull(message = "Event status cannot be null")
     private EventStatus eventStatus;
 }
