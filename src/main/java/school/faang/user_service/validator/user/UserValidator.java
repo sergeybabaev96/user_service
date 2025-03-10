@@ -15,5 +15,4 @@ public class UserValidator {
             throw new EntityNotFoundException("User not found");
         }
     }
-
 }

@@ -97,5 +97,4 @@ public class RecommendationRequestService {
         request = recommendationRequestRepository.save(request);
         return recommendationRequestMapper.toDto(request);
     }
-
 }
