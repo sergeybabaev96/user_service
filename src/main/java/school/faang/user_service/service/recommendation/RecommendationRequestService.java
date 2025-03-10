@@ -108,7 +108,7 @@ public class RecommendationRequestService {
         return recommendationRequestMapper.toRecommendationRequestDto(request);
     }
 
-    private boolean canRequestRecommendation(User requester, User receiver) {
+    public boolean canRequestRecommendation(User requester, User receiver) {
         Optional<RecommendationRequest> request =
                 recommendationRequestRepository.findLatestPendingRequest(requester.getId(), receiver.getId());
         if (request.isPresent()) {
@@ -120,13 +120,13 @@ public class RecommendationRequestService {
         }
     }
 
-    private boolean allSkillsExist(List<SkillRequestDto> skills) {
+    public boolean allSkillsExist(List<SkillRequestDto> skills) {
         return skills
                 .stream()
                 .allMatch(skill -> skillRepository.existsById(skill.getId()));
     }
 
-    private boolean filterByCondition(RecommendationRequest request, RequestFilterDto filter) {
+    public boolean filterByCondition(RecommendationRequest request, RequestFilterDto filter) {
         RecommendationRequestFilterProcessor processor = new RecommendationRequestFilterProcessor();
         return processor.filter(Stream.of(request), filter).findAny().isPresent();
     }
