@@ -1,17 +1,17 @@
 package school.faang.user_service.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.MentorshipDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.MentorshipMapper;
 import school.faang.user_service.repository.UserRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MentorshipService {
@@ -19,37 +19,39 @@ public class MentorshipService {
     private final MentorshipMapper mentorshipMapper;
 
     public List<MentorshipDto> getMentees(long userId) {
-        return userRepository.findById(userId)
-                .map(User::getMentees)
-                .orElse(List.of())
-                .stream()
-                .map(mentorshipMapper::toDto)
-                .collect(Collectors.toList());
+        return getUsersById(userId, User::getMentees);
     }
 
     public List<MentorshipDto> getMentors(long userId) {
+        return getUsersById(userId, User::getMentors);
+    }
+
+    private List<MentorshipDto> getUsersById(long userId, Function<User, List<User>> mapperFunction) {
         return userRepository.findById(userId)
-                .map(user -> user.getMentors()
-                        .stream()
-                        .map(mentorshipMapper::toDto)
-                        .toList())
-                .orElseGet(List::of);
+                .map(mapperFunction)
+                .map(mentorshipMapper::toDtos)
+                .orElse(List.of());
     }
 
     public void deleteMentee(long menteeId, long mentorId) {
+        deleteMentorship(menteeId, mentorId);
+    }
+
+    public void deleteMentor(long menteeId, long mentorId) {
+        deleteMentorship(menteeId, mentorId);
+    }
+
+    @Transactional
+    private void deleteMentorship(long menteeId, long mentorId) {
         User mentor = userRepository.findById(mentorId)
-                .orElseThrow(() -> new IllegalStateException("Mentor not found."));
+                .orElseThrow(() -> new EntityNotFoundException("Mentor not found."));
         User mentee = userRepository.findById(menteeId)
-                .orElseThrow(() -> new IllegalStateException("Mentee not found."));
+                .orElseThrow(() -> new EntityNotFoundException("Mentee not found."));
         if (!mentor.getMentees().remove(mentee)) {
-            throw new IllegalStateException("The mentee was not found in the mentor's list.");
+            throw new EntityNotFoundException("The mentee was not found in the mentor's list.");
         }
         mentee.getMentors().remove(mentor);
         userRepository.save(mentor);
         userRepository.save(mentee);
-    }
-
-    public void deleteMentor(long menteeId, long mentorId) {
-        deleteMentee(menteeId, mentorId);
     }
 }
