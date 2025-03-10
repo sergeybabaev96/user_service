@@ -3,6 +3,7 @@ package school.faang.user_service.service.goal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.config.goal.GoalInvitationConfig;
 import school.faang.user_service.dto.goal.GoalInvitationDto;
 import school.faang.user_service.dto.goal.InvitationFilterDto;
 import school.faang.user_service.entity.goal.GoalInvitation;
@@ -11,7 +12,7 @@ import school.faang.user_service.exception.InvalidInvitationException;
 import school.faang.user_service.mapper.GoalInvitationMapper;
 import school.faang.user_service.repository.goal.GoalInvitationRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
-import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.user.UserService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,12 +22,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GoalInvitationService {
 
-    private static final int MAX_ACTIVE_GOALS = 3;
-
     private final GoalInvitationRepository goalInvitationRepository;
     private final GoalRepository goalRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final GoalInvitationMapper goalInvitationMapper;
+    private final GoalInvitationConfig goalInvitationConfig;
 
     public void createInvitation(GoalInvitationDto invitationDto) {
         log.info("Creating invitation: {}", invitationDto);
@@ -86,13 +86,8 @@ public class GoalInvitationService {
             throw new InvalidInvitationException("Inviter and invited user cannot be the same.");
         }
 
-        if (!userRepository.existsById(invitation.getInviter().getId())) {
-            throw new InvalidInvitationException("Inviter does not exist.");
-        }
-
-        if (!userRepository.existsById(invitation.getInvited().getId())) {
-            throw new InvalidInvitationException("Invited user does not exist.");
-        }
+        userService.validateUserExists(invitation.getInviter().getId());
+        userService.validateUserExists(invitation.getInvited().getId());
 
         if (!goalRepository.existsById(invitation.getGoal().getId())) {
             throw new InvalidInvitationException("Goal does not exist.");
@@ -100,7 +95,8 @@ public class GoalInvitationService {
     }
 
     private void validateAcceptance(GoalInvitation invitation) {
-        if (goalRepository.countActiveGoalsPerUser(invitation.getInvited().getId()) >= MAX_ACTIVE_GOALS) {
+        if (goalRepository.countActiveGoalsPerUser(invitation.getInvited().getId()) >=
+                goalInvitationConfig.getMaxActiveGoals()) {
             throw new InvalidInvitationException("User has reached the maximum number of active goals.");
         }
 
