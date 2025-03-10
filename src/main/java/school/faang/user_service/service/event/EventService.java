@@ -18,6 +18,13 @@ import school.faang.user_service.repository.event.EventRepository;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Сервис для управления событиями.
+ * Предоставляет методы для создания, получения, обновления и удаления событий,
+ * а также для фильтрации событий и получения событий по владельцу или участнику.
+ *
+ * @author Zhltsk-V
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -28,6 +35,13 @@ public class EventService {
     private final EventMapper eventMapper;
     private final List<EventFilter> eventFilters;
 
+    /**
+     * Создает новое событие на основе переданного DTO.
+     *
+     * @param eventDto DTO события, содержащее данные для создания.
+     * @return Созданное событие в виде {@link EventDto}.
+     * @throws DataValidationException если пользователь не обладает необходимыми навыками.
+     */
     public EventDto create(EventDto eventDto) {
         log.info("Creating event with data: {}", eventDto);
         validateUserSkills(eventDto);
@@ -41,6 +55,13 @@ public class EventService {
         return eventMapper.toDto(savedEvent);
     }
 
+    /**
+     * Получает событие по его идентификатору.
+     *
+     * @param eventId Идентификатор события.
+     * @return Событие в виде {@link EventDto}.
+     * @throws DataValidationException если событие не найдено.
+     */
     public EventDto getEvent(long eventId) {
         log.info("Fetching event with ID: {}", eventId);
         Event event = eventRepository.findById(eventId)
@@ -51,6 +72,12 @@ public class EventService {
         return eventMapper.toDto(event);
     }
 
+    /**
+     * Получает список событий, соответствующих заданному фильтру.
+     *
+     * @param eventFilterDto DTO фильтра, содержащее критерии поиска.
+     * @return Список событий в виде {@link List<EventDto>}.
+     */
     public List<EventDto> getEventsByFilter(EventFilterDto eventFilterDto) {
         log.info("Fetching events by filter: {}", eventFilterDto);
         Stream<Event> allEvents = eventRepository.findAll().stream();
@@ -68,6 +95,12 @@ public class EventService {
         return filteredEvents;
     }
 
+    /**
+     * Удаляет событие по его идентификатору.
+     *
+     * @param eventId Идентификатор события для удаления.
+     * @throws DataValidationException если событие не найдено.
+     */
     public void deleteEvent(long eventId) {
         log.info("Deleting event with ID: {}", eventId);
         eventRepository.findById(eventId)
@@ -79,6 +112,13 @@ public class EventService {
         log.info("Event deleted successfully with ID: {}", eventId);
     }
 
+    /**
+     * Обновляет существующее событие на основе переданного DTO.
+     *
+     * @param eventDto DTO события, содержащее обновленные данные.
+     * @return Обновленное событие в виде {@link EventDto}.
+     * @throws DataValidationException если событие не прошло валидацию.
+     */
     public EventDto updateEvent(EventDto eventDto) {
         log.info("Updating event with data: {}", eventDto);
         Event event = eventMapper.toEntity(eventDto);
@@ -88,6 +128,12 @@ public class EventService {
         return eventMapper.toDto(updatedEvent);
     }
 
+    /**
+     * Получает список событий, созданных конкретным пользователем.
+     *
+     * @param userId Идентификатор пользователя.
+     * @return Список событий в виде {@link List<EventDto>}.
+     */
     public List<EventDto> getOwnerEvent(long userId) {
         log.info("Fetching events for owner with ID: {}", userId);
         List<Event> events = eventRepository.findAllByUserId(userId);
@@ -98,6 +144,12 @@ public class EventService {
         return eventDtos;
     }
 
+    /**
+     * Получает список событий, в которых участвовал конкретный пользователь.
+     *
+     * @param userId Идентификатор пользователя.
+     * @return Список событий в виде {@link List<EventDto>}.
+     */
     public List<EventDto> getParticipatedEvents(long userId) {
         log.info("Fetching participated events for user with ID: {}", userId);
         List<Event> events = eventRepository.findParticipatedEventsByUserId(userId);
@@ -108,6 +160,13 @@ public class EventService {
         return eventDtos;
     }
 
+    /**
+     * Преобразует список идентификаторов навыков в список сущностей {@link Skill}.
+     *
+     * @param skillIds Список идентификаторов навыков.
+     * @return Список сущностей {@link Skill}.
+     * @throws DataValidationException если навык не найден.
+     */
     private List<Skill> mapSkillIdsToEntities(List<Long> skillIds) {
         log.debug("Mapping skill IDs to entities: {}", skillIds);
         return skillIds.stream()
@@ -119,6 +178,13 @@ public class EventService {
                 .toList();
     }
 
+    /**
+     * Получает пользователя по его идентификатору.
+     *
+     * @param userId Идентификатор пользователя.
+     * @return Сущность {@link User}.
+     * @throws DataValidationException если пользователь не найден.
+     */
     private User getUserById(Long userId) {
         log.debug("Fetching user with ID: {}", userId);
         return userRepository.findById(userId)
@@ -128,6 +194,12 @@ public class EventService {
                 });
     }
 
+    /**
+     * Проверяет, может ли пользователь проводить указанное событие.
+     *
+     * @param event Событие для валидации.
+     * @throws DataValidationException если пользователь не может проводить событие.
+     */
     private void validation(Event event) {
         log.debug("Validating event: {}", event);
         User owner = event.getOwner();
@@ -140,6 +212,12 @@ public class EventService {
         }
     }
 
+    /**
+     * Проверяет, обладает ли пользователь необходимыми навыками для создания события.
+     *
+     * @param eventDto DTO события.
+     * @throws DataValidationException если пользователь не обладает необходимыми навыками.
+     */
     private void validateUserSkills(EventDto eventDto) {
         log.debug("Validating user skills for event: {}", eventDto);
         List<Long> requiredSkillIds = eventDto.getRelatedSkillsId();

@@ -9,6 +9,12 @@ import school.faang.user_service.entity.event.EventType;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * DTO для представления события.
+ * Содержит информацию о событии, такую как название, даты, описание, местоположение и т.д.
+ *
+ * @author Zhltsk-V
+ */
 @Data
 public class EventDto {
     @NotNull(message = "Id cannot be null")
