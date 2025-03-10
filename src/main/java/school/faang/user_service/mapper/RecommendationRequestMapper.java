@@ -13,11 +13,13 @@ public interface RecommendationRequestMapper {
 
     @Mapping(source = "requesterId", target = "requester.id")
     @Mapping(source = "receiverId", target = "receiver.id")
+    @Mapping(target = "skills", ignore = true)
     RecommendationRequest toRecommendationRequest(RecommendationRequestDto recommendationRequestDto);
 
     @InheritInverseConfiguration
     @Mapping(source = "requester.id", target = "requesterId")
     @Mapping(source = "receiver.id", target = "receiverId")
+    @Mapping(target = "skills", ignore = true)
     RecommendationRequestDto toRecommendationRequestDto(RecommendationRequest recommendationRequest);
 
     List<RecommendationRequestDto> toRecommendationRequestDtoList(List<RecommendationRequest> recommendationRequestList);
