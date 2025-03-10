@@ -20,4 +20,3 @@ public interface UserMapper {
 
     List<User> toEntityList(List<UserDto> userDtos);
 }
-
