@@ -1,6 +1,7 @@
 package school.faang.user_service.service.implementation;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.UserSkillGuarantee;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SkillServiceImpl implements SkillService {
@@ -30,9 +32,13 @@ public class SkillServiceImpl implements SkillService {
 
     @Override
     public SkillDto create(SkillDto skillDto) {
+        String title = skillDto.getTitle();
+
         validateSkill(skillDto);
-        if (skillRepository.existsByTitle(skillDto.getTitle())) {
-            throw new DataValidationException("Skill with title '" + skillDto.getTitle() + "' already exists.");
+
+        if (skillRepository.existsByTitle(title)) {
+            log.error("Attempt to create a duplicate skill: {}", title);
+            throw new DataValidationException("Skill with title '" + title + "' already exists.");
         }
         Skill skill = skillMapper.toEntity(skillDto);
         Skill savedSkill = skillRepository.save(skill);
@@ -45,7 +51,7 @@ public class SkillServiceImpl implements SkillService {
         List<Skill> skills = skillRepository.findAllByUserId(userId);
         return skills.stream()
                 .map(skillMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -57,14 +63,16 @@ public class SkillServiceImpl implements SkillService {
 
         return skillCountMap.entrySet().stream()
                 .map(entry -> skillMapper.toSkillCandidateDto(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public SkillDto acquireSkillFromOffers(Long skillId, Long userId) {
-        // Проверяем, есть ли у пользователя уже этот скилл
+        Skill skill = skillRepository.findById(skillId)
+                .orElseThrow(() -> new DataValidationException("Skill not found"));
+
         if (skillRepository.findUserSkill(skillId, userId).isPresent()) {
-            throw new DataValidationException("User already has this skill");
+            return null;
         }
 
         List<SkillOffer> offers = skillOfferRepository.findAllOffersOfSkill(skillId, userId);
@@ -75,19 +83,24 @@ public class SkillServiceImpl implements SkillService {
         skillRepository.assignSkillToUser(skillId, userId);
 
         List<UserSkillGuarantee> guarantees = offers.stream()
-                .map(offer -> new UserSkillGuarantee(null, offer.getRecommendation().getReceiver(),
-                        offer.getSkill(), offer.getRecommendation().getAuthor()))
+                .map(offer -> UserSkillGuarantee.builder()
+                        .user(offer.getRecommendation().getReceiver())
+                        .skill(offer.getSkill())
+                        .guarantor(offer.getRecommendation().getAuthor())
+                        .build())
                 .collect(Collectors.toList());
 
         userSkillGuaranteeRepository.saveAll(guarantees);
 
-        Skill skill = skillRepository.findById(skillId)
-                .orElseThrow(() -> new DataValidationException("Skill not found"));
         return skillMapper.toDto(skill);
     }
 
     private void validateSkill(SkillDto skillDto) {
-        if (Objects.isNull(skillDto) || Objects.isNull(skillDto.getTitle()) || skillDto.getTitle().isBlank()) {
+        if (Objects.isNull(skillDto)) {
+            throw new DataValidationException("Skill data is null");
+        }
+        String title = skillDto.getTitle();
+        if (Objects.isNull(title) || title.isBlank()) {
             throw new DataValidationException("Skill title is empty");
         }
     }
