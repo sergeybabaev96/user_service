@@ -28,4 +28,8 @@ public class RecommendationController {
     public List<RecommendationDto> getAllGivenRecommendation(Long authorId) {
         return recommendationService.getAllGivenRecommendation(authorId);
     }
+
+    public List<RecommendationDto> getAllUserRecommendations(Long receiverId) {
+        return recommendationService.getAllUserRecommendations(receiverId);
+    }
 }

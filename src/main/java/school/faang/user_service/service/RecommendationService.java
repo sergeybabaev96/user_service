@@ -80,6 +80,16 @@ public class RecommendationService {
         return recommendationMapper.toRecommendationDtoList(recommendationList);
     }
 
+    public List<RecommendationDto> getAllUserRecommendations(Long receiverId) {
+        if (receiverId == null) {
+            throw new DataValidationException("Id пользователя не может быть null");
+        }
+        Pageable pageable = PageRequest.of(0 , 10);
+        Page<Recommendation> recommendationPage = recommendationRepository.findAllByReceiverId(receiverId, pageable);
+        List<Recommendation> recommendationList = recommendationPage.getContent();
+        return recommendationMapper.toRecommendationDtoList(recommendationList);
+    }
+
     private void createSkillOffer(Recommendation recommendation) {
         List<SkillOffer> skillOfferListOfReceiver =
                 skillOfferRepository.findAllByUserId(recommendation.getReceiver().getId());
