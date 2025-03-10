@@ -2,6 +2,9 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
 import school.faang.user_service.entity.UserSkillGuarantee;
@@ -67,6 +70,16 @@ public class RecommendationService {
         log.info("Рекомендация id: {} была удалена", id);
     }
 
+    public List<RecommendationDto> getAllGivenRecommendation(Long authorId) {
+        if (authorId == null) {
+            throw new DataValidationException("Id автора не может быть null");
+        }
+        Pageable pageable = PageRequest.of(0 , 10);
+        Page<Recommendation> recommendationPage = recommendationRepository.findAllByAuthorId(authorId, pageable);
+        List<Recommendation> recommendationList = recommendationPage.getContent();
+        return recommendationMapper.toRecommendationDtoList(recommendationList);
+    }
+
     private void createSkillOffer(Recommendation recommendation) {
         List<SkillOffer> skillOfferListOfReceiver =
                 skillOfferRepository.findAllByUserId(recommendation.getReceiver().getId());
@@ -102,6 +115,9 @@ public class RecommendationService {
 
         skillOfferRepository.deleteAllByRecommendationId(recommendation.getId());
         for (SkillOffer skillOffer : recommendation.getSkillOffers()) {
+            if (skillOffer.getSkill() == null) {
+                throw new DataValidationException("Скилл не может быть null");
+            }
             skillOfferRepository.create(skillOffer.getSkill().getId(), recommendation.getId());
             if (skillOffersOfReceiver.contains(skillOffer)) {
                 UserSkillGuarantee userSkillGuarantee = new UserSkillGuarantee();
