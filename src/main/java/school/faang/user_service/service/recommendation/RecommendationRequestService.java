@@ -32,21 +32,40 @@ public class RecommendationRequestService {
     private final SkillRequestService skillRequestService;
 
     public RecommendationRequestDto create(RecommendationRequestDto dto) {
+        // Проверка на null для dto
+        if (dto == null) {
+            throw new IllegalArgumentException("RecommendationRequestDto must not be null");
+        }
+        // Проверка на null для requesterId и receiverId
+        if (dto.getRequesterId() == null || dto.getReceiverId() == null) {
+            throw new IllegalArgumentException("Requester ID and Receiver ID must not be null");
+        }
         User requester = userService.getUserById(dto.getRequesterId());
         User receiver = userService.getUserById(dto.getReceiverId());
-
+        // Проверка на существование пользователей
+        if (requester == null) {
+            throw new NotFoundException("Requester not found with ID " + dto.getRequesterId());
+        }
+        if (receiver == null) {
+            throw new NotFoundException("Receiver not found with ID " + dto.getReceiverId());
+        }
         Optional<RecommendationRequest> existingRequest = recommendationRequestRepository
                 .findByRequesterAndReceiverAndCreatedDateAfter(requester, receiver, SIX_MONTHS_AGO);
-
         if (existingRequest.isPresent()) {
             throw new IllegalStateException("Recommendation request already sent within the last 6 months.");
         }
-        RecommendationRequest request = recommendationRequestRepository
-                .create(dto.getRequesterId(), dto.getReceiverId(), dto.getMessage());
+        RecommendationRequest request = new RecommendationRequest();
+        request.setRequester(requester);
+        request.setReceiver(receiver);
+        request.setMessage(dto.getMessage());
         request.setSkills(skillRequestService.findByIds(dto.getSkillsId()));
+
+        // Сохранение нового запроса
+        recommendationRequestRepository.save(request);
 
         return recommendationRequestMapper.toRecommendationRequestDto(request);
     }
+
 
     public RecommendationRequestDto getRecommendationRequestById(long id) {
         return recommendationRequestRepository.findById(id)
