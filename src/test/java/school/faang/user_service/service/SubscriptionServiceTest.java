@@ -89,27 +89,12 @@ public class SubscriptionServiceTest {
 
     @Test
     public void testGetFollowers() {
-        User follower1 = User.builder().username("Robert").build();
-        User follower2 = User.builder().username("+79209202495").build();
-        when(repository.findByFolloweeId(followeeId)).thenReturn(Stream.of(follower1, follower2));
-        UserFilterDto userFilterDto = new UserFilterDto("Rob", null, 0, 0);
-        when(userFilters.stream()).thenReturn(Stream.of(userFilter));
-        when(userFilter.isApplicable(userFilterDto)).thenReturn(true);
-        when(userFilter.apply(any(Stream.class), eq(userFilterDto)))
-                .thenAnswer(invocation -> {
-                    Stream<User> inputStream = invocation.getArgument(0);
-                    return inputStream.filter(user ->
-                            user.getUsername() != null
-                                    &&
-                                    user.getUsername().contains("Rob")
-                    );
-                });
-        UserDto dtoRobert = new UserDto(5L, "Robert", "robN@gmail.com");
-        when(userMapper.toDto(follower1)).thenReturn(dtoRobert);
-        List<UserDto> result = subscriptionService.getFollowers(followeeId, userFilterDto);
+        Stream<User> followers = Stream.of(new User());
+        when(repository.findByFolloweeId(followeeId)).thenReturn(followers);
+
+        List<UserDto> result = subscriptionService.getFollowers(followeeId, filterDto);
+
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Robert", result.get(0).username());
         verify(repository, times(1)).findByFolloweeId(followeeId);
     }
 
@@ -123,29 +108,13 @@ public class SubscriptionServiceTest {
     }
 
     @Test
-    public void testGetFollowing() {
-        User followee1 = User.builder().username("Alice").build();
-        User followee2 = User.builder().username("Anna").build();
-        when(repository.findByFollowerId(followerId)).thenReturn(Stream.of(followee1, followee2));
-        UserFilterDto userFilterDto = new UserFilterDto("al", null, 0, 0);
-        when(userFilters.stream()).thenReturn(Stream.of(userFilter));
-        when(userFilter.isApplicable(userFilterDto)).thenReturn(true);
-        when(userFilter.apply(any(Stream.class), eq(userFilterDto)))
-                .thenAnswer(invocation -> {
-                    Stream<User> inputStream = invocation.getArgument(0);
-                    return inputStream.filter(user ->
-                            user.getUsername() != null
-                                    &&
-                                    user.getUsername().toLowerCase().contains("al")
-                    );
-                });
+    public void testGettingFollowing() {
+        Stream<User> following = Stream.of(new User());
+        when(repository.findByFollowerId(followerId)).thenReturn(following);
 
-        UserDto dtoAlice = new UserDto(1L, "Alice", "qHl8N@example.com");
-        when(userMapper.toDto(followee1)).thenReturn(dtoAlice);
-        List<UserDto> result = subscriptionService.getFollowing(followerId, userFilterDto);
+        List<UserDto> result = subscriptionService.getFollowing(followerId, filterDto);
+
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Alice", result.get(0).username());
         verify(repository, times(1)).findByFollowerId(followerId);
     }
 

@@ -50,6 +50,19 @@ public class UserPhoneFilterTest {
     }
 
     @Test
+    void testNoApplicableWhenPhoneIsBlank() {
+        filterDto = createUserFilterDto("");
+        assertFalse(filter.isApplicable(filterDto));
+    }
+
+    @Test
+    void testNoApplicableWhenPhoneIsEmpty() {
+        filterDto = createUserFilterDto("  ");
+        assertFalse(filter.isApplicable(filterDto));
+    }
+
+
+    @Test
     void testOneMatchingApplyFilter() {
         User firstUser = createUser("+79123347588");
         User secondUser = createUser("+79928389981");
@@ -73,6 +86,20 @@ public class UserPhoneFilterTest {
     @Test
     void testUserWithNullPhone() {
         User firstUser = createUser(null);
+        User secondUser = createUser("+791237789231");
+        applyAndAssertCount(Stream.of(firstUser, secondUser), filterDto, 1);
+    }
+
+    @Test
+    void testUserWithEmptyPhone() {
+        User firstUser = createUser("");
+        User secondUser = createUser("+791237789231");
+        applyAndAssertCount(Stream.of(firstUser, secondUser), filterDto, 1);
+    }
+
+    @Test
+    void testUserWithBlankPhone() {
+        User firstUser = createUser("  ");
         User secondUser = createUser("+791237789231");
         applyAndAssertCount(Stream.of(firstUser, secondUser), filterDto, 1);
     }

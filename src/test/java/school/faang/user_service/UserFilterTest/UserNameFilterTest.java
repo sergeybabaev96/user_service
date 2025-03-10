@@ -52,6 +52,19 @@ public class UserNameFilterTest {
     }
 
     @Test
+    void testNoApplicableWhenNameIsBlank() {
+        filterDto = createUserFilterDto("");
+        assertFalse(filter.isApplicable(filterDto));
+    }
+
+    @Test
+    void testNoApplicableWhenNameIsEmpty() {
+        filterDto = createUserFilterDto("  ");
+        assertFalse(filter.isApplicable(filterDto));
+    }
+
+
+    @Test
      void testOneMatchApplyFilter() {
         User firstUser = createUser("Boby");
         User secondUser = createUser("Lola");
@@ -75,6 +88,20 @@ public class UserNameFilterTest {
     @Test
     void testUserWithNullUserName() {
         User firstUser = createUser(null);
+        User secondUser = createUser("Bob");
+        applyAndAssertCount(Stream.of(firstUser, secondUser), filterDto, 1);
+    }
+
+    @Test
+    void testUserWithBlankName() {
+        User firstUser = createUser("");
+        User secondUser = createUser("Bob");
+        applyAndAssertCount(Stream.of(firstUser, secondUser), filterDto, 1);
+    }
+
+    @Test
+    void testUserWithEmptyName() {
+        User firstUser = createUser("  ");
         User secondUser = createUser("Bob");
         applyAndAssertCount(Stream.of(firstUser, secondUser), filterDto, 1);
     }

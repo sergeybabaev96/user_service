@@ -11,7 +11,8 @@ public class UserNameFilter implements UserFilter {
 
     @Override
     public boolean isApplicable(UserFilterDto filter) {
-        return filter.namePattern() != null;
+        return filter.namePattern() != null
+                && !filter.namePattern().isBlank();
     }
 
     @Override
@@ -20,6 +21,7 @@ public class UserNameFilter implements UserFilter {
             return users;
         }
         return users.filter(user -> user.getUsername() != null
+                && !user.getUsername().isBlank()
                 && user.getUsername().toLowerCase().contains(filter.namePattern().toLowerCase()));
     }
 }
