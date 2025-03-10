@@ -7,10 +7,6 @@ import school.faang.user_service.entity.MentorshipRequest;
 
 @Mapper(componentModel = "spring")
 public interface RequestFilterMapper {
-    @Mapping(target = "requester", ignore = true)
-    @Mapping(target = "receiver", ignore = true)
-    MentorshipRequest toEntity(RequestFilterDto mentorshipRequestDto);
-
     @Mapping(source = "requester.id", target = "requesterId")
     @Mapping(source = "receiver.id", target = "receiverId")
     RequestFilterDto toDto(MentorshipRequest mentorshipRequest);
