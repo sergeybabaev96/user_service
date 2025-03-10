@@ -1,17 +1,28 @@
 package school.faang.user_service.repository.recommendation;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.entity.recommendation.SkillOffer;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SkillOfferRepository extends CrudRepository<SkillOffer, Long> {
 
-    @Query(nativeQuery = true, value = "INSERT INTO skill_offer (skill_id, recommendation_id) VALUES (?1, ?2) returning id")
-    Long create(long skillId, long recommendationId);
+    @Query(nativeQuery = true, value = "INSERT INTO skill_offer (skill_id, recommendation_id) VALUES (?1, ?2)")
+    @Modifying
+    @Transactional
+    void create(long skillId, long recommendationId);
 
+    @Modifying
+    @Transactional
     void deleteAllByRecommendationId(long recommendationId);
+
+    Optional<SkillOffer> findBySkillIdAndRecommendationId(long skillId, long recommendationId);
+
+    List<SkillOffer> findAllByRecommendationId(long recommendationId);
 
     @Query(nativeQuery = true, value = """
             SELECT COUNT(so.id) FROM skill_offer so

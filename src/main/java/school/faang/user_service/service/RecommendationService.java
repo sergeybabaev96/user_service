@@ -21,7 +21,6 @@ import school.faang.user_service.dto.recommendation.SkillOfferDto;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
@@ -45,42 +44,58 @@ public class RecommendationService {
     public RecommendationDto create(@NotNull RecommendationDto recommendation) {
         validateRecommendation(recommendation);
 
-        var receiverSkills = skillRepository.findAllByUserId(recommendation.receiverId());
-        recommendation.skillOffers()
-                .forEach(dto -> createSkillOffer(recommendation, dto, receiverSkills));
+        // This method does not return id of created entity!
+        recommendationRepository.create(
+                recommendation.getAuthorId(),
+                recommendation.getReceiverId(),
+                recommendation.getContent());
 
-        var recommendationId = recommendationRepository.create(
-                recommendation.authorId(),
-                recommendation.receiverId(),
-                recommendation.content());
+        if (recommendation.getSkillOffers() != null) {
+            var receiverSkills = skillRepository.findAllByUserId(recommendation.getReceiverId());
+            recommendation.getSkillOffers()
+                    .forEach(dto -> createSkillOffer(recommendation, dto, receiverSkills));
+        }
 
-        return new RecommendationDto(
-                recommendationId,
-                recommendation.authorId(),
-                recommendation.receiverId(),
-                recommendation.content(),
-                recommendation.skillOffers(),
-                recommendation.createdAt());
+        var createdRecommendation = recommendationRepository.findByAuthorIdAndReceiverId(
+                recommendation.getAuthorId(),
+                recommendation.getReceiverId()
+        );
+        if (createdRecommendation.isEmpty()) {
+            throw new DataValidationException(
+                    "Recommendation is not created (author id: %d, receiver id: %d)".formatted(
+                            recommendation.getAuthorId(),
+                            recommendation.getReceiverId()));
+        }
+
+        var createdRecommendationDto = recommendationMapper.toDto(createdRecommendation.get());
+        createdRecommendationDto.setSkillOffers(recommendation.getSkillOffers());
+
+        return createdRecommendationDto;
     }
 
     public RecommendationDto update(@NotNull RecommendationDto recommendation) {
         validateRecommendation(recommendation);
 
+        if (recommendation.getId() == null) {
+            throw new DataValidationException("Recommendation id is required");
+        }
+
         recommendationRepository.update(
-                recommendation.authorId(),
-                recommendation.receiverId(),
-                recommendation.content());
+                recommendation.getAuthorId(),
+                recommendation.getReceiverId(),
+                recommendation.getContent());
 
-        skillOfferService.deleteAllByRecommendationId(recommendation.id());
+        skillOfferService.deleteAllByRecommendationId(recommendation.getId());
 
-        var receiverSkills = skillRepository.findAllByUserId(recommendation.receiverId());
-        var createdSkillOffers = recommendation.skillOffers()
-                .stream()
-                .map(dto -> createSkillOffer(recommendation, dto, receiverSkills))
-                .toList();
+        if (recommendation.getSkillOffers() != null) {
+            var receiverSkills = skillRepository.findAllByUserId(recommendation.getReceiverId());
+            var createdSkillOffers = recommendation.getSkillOffers()
+                    .stream()
+                    .map(dto -> createSkillOffer(recommendation, dto, receiverSkills))
+                    .toList();
 
-        recommendation.skillOffers().clear();
-        recommendation.skillOffers().addAll(createdSkillOffers);
+            recommendation.setSkillOffers(createdSkillOffers);
+        }
 
         return recommendation;
     }
@@ -90,55 +105,54 @@ public class RecommendationService {
     }
 
     public List<RecommendationDto> getAllUserRecommendations(long receiverId) {
-        return getRecommendationDTOs(
+        return getRecommendationDtos(
                 pageRequest -> recommendationRepository.findAllByReceiverId(receiverId, pageRequest));
     }
 
     public List<RecommendationDto> getAllGivenRecommendations(long authorId) {
-        return getRecommendationDTOs(
+        return getRecommendationDtos(
                 pageRequest -> recommendationRepository.findAllByAuthorId(authorId, pageRequest));
     }
 
-    private List<RecommendationDto> getRecommendationDTOs(Function<Pageable, Page<Recommendation>> pageFetcher) {
-        List<RecommendationDto> recommendationDTOs = new ArrayList<>();
+    private List<RecommendationDto> getRecommendationDtos(Function<Pageable, Page<Recommendation>> pageFetcher) {
+        List<RecommendationDto> recommendationDtos = new ArrayList<>();
 
         var page = pageFetcher.apply(getInitialPageRequest());
         if (page.isEmpty()) {
-            return recommendationDTOs;
+            return recommendationDtos;
         }
 
-        recommendationDTOs.addAll(page.map(this::toRecommendationDto).toList());
+        recommendationDtos.addAll(page.map(this::toRecommendationDto).toList());
         IntStream.range(1, page.getTotalPages())
-                .forEach(pageIndex -> processRecommendationsPage(pageIndex, recommendationDTOs, pageFetcher));
+                .forEach(pageIndex -> processRecommendationsPage(pageIndex, recommendationDtos, pageFetcher));
 
-        return recommendationDTOs;
+        return recommendationDtos;
     }
 
     private void processRecommendationsPage(
             int pageIndex,
-            List<RecommendationDto> recommendationDTOs,
+            List<RecommendationDto> recommendationDtos,
             Function<Pageable, Page<Recommendation>> pageFetcher) {
         var pageRequest = PageRequest.of(pageIndex, pageSize);
         var page = pageFetcher.apply(pageRequest);
-        recommendationDTOs.addAll(page.map(this::toRecommendationDto).toList());
+        recommendationDtos.addAll(page.map(this::toRecommendationDto).toList());
     }
 
     @NotNull
-    private RecommendationDto toRecommendationDto(Recommendation entity) {
-        var recommendationDto = recommendationMapper.toDto(entity);
-        var skillOfferDTOs = entity.getSkillOffers()
+    private RecommendationDto toRecommendationDto(Recommendation recommendation) {
+        var recommendationDto = recommendationMapper.toDto(recommendation);
+        var skillOfferDTOs = skillOfferService.findAllByRecommendationId(recommendation.getId())
                 .stream()
                 .map(skillOfferMapper::toDto)
                 .toList();
-        recommendationDto.skillOffers().clear();
-        recommendationDto.skillOffers().addAll(skillOfferDTOs);
+        recommendationDto.setSkillOffers(skillOfferDTOs);
 
         return recommendationDto;
     }
 
     private void validateRecommendation(RecommendationDto recommendation) {
         var lastAuthorRecommendation = recommendationRepository.findLastRecommendationByAuthorId(
-                recommendation.authorId());
+                recommendation.getAuthorId());
 
         if (lastAuthorRecommendation.isPresent()
                 && LocalDateTime.now()
@@ -153,16 +167,20 @@ public class RecommendationService {
     }
 
     private void validateSkillOffers(RecommendationDto recommendation) {
-        var existedSkillsInRecommendation = recommendation.skillOffers()
+        if (recommendation.getSkillOffers() == null) {
+            return;
+        }
+
+        var existedSkillsInRecommendation = recommendation.getSkillOffers()
                 .stream()
                 .filter(dto -> skillRepository.existsById(dto.skillId()))
                 .toList();
-        if (existedSkillsInRecommendation.size() != recommendation.skillOffers().stream().distinct().count()) {
+        if (existedSkillsInRecommendation.size() != recommendation.getSkillOffers().stream().distinct().count()) {
             throw new DataValidationException(
                     "Skills %s are not registered".formatted(
                             String.join(
                                     ", ",
-                                    recommendation.skillOffers()
+                                    recommendation.getSkillOffers()
                                             .stream()
                                             .map(SkillOfferDto::skillId)
                                             .filter(skillId -> existedSkillsInRecommendation.stream()
@@ -170,9 +188,7 @@ public class RecommendationService {
                                                             existedSkill -> existedSkill.skillId() == skillId)
                                                     .findFirst()
                                                     .isEmpty())
-                                            .map(skillRepository::findById)
-                                            .filter(Optional::isPresent)
-                                            .map(x -> x.get().getTitle())
+                                            .map(Object::toString)
                                             .toList())));
         }
     }
@@ -185,17 +201,26 @@ public class RecommendationService {
                 .filter(x -> x.getId() == skillOfferDto.skillId())
                 .findFirst();
         if (existedSkill.isPresent()
-                && userSkillGuaranteeRepository.findByGuarantorId(recommendation.authorId()).isEmpty()) {
+                && userSkillGuaranteeRepository.findByGuarantorId(recommendation.getAuthorId()).isEmpty()) {
             userSkillGuaranteeRepository.create(
-                    recommendation.receiverId(),
+                    recommendation.getReceiverId(),
                     skillOfferDto.skillId(),
-                    recommendation.authorId());
+                    recommendation.getAuthorId());
         }
 
-        var skillOfferId = skillOfferService.create(skillOfferDto.skillId(), recommendation.id());
-        var skillOffer = skillOfferService.findById(skillOfferId);
+        // This method does not return id of created entity!
+        skillOfferService.create(skillOfferDto.skillId(), recommendation.getId());
+        var skillOffer = skillOfferService.findBySkillIdAndRecommendationId(
+                skillOfferDto.skillId(),
+                recommendation.getId());
+        if (skillOffer.isEmpty()) {
+            throw new DataValidationException(
+                    "Skill offer is not created (skill id: %d, recommendation id: %d)".formatted(
+                            skillOfferDto.skillId(),
+                            recommendation.getId()));
+        }
 
-        return skillOfferMapper.toDto(skillOffer);
+        return skillOfferMapper.toDto(skillOffer.get());
     }
 
     private Pageable getInitialPageRequest() {

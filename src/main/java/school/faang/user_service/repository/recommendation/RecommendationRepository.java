@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.entity.recommendation.Recommendation;
 
 import java.util.Optional;
@@ -13,15 +14,18 @@ public interface RecommendationRepository extends CrudRepository<Recommendation,
 
     @Query(nativeQuery = true, value = """
             INSERT INTO recommendation (author_id, receiver_id, content)
-            VALUES (?1, ?2, ?3) returning id
+            VALUES (?1, ?2, ?3)
             """)
-    Long create(long authorId, long receiverId, String content);
+    @Modifying
+    @Transactional
+    void create(long authorId, long receiverId, String content);
 
     @Query(nativeQuery = true, value = """
             UPDATE recommendation SET content = :content, updated_at = now()
             WHERE author_id = :authorId AND receiver_id = :receiverId
             """)
     @Modifying
+    @Transactional
     void update(long authorId, long receiverId, String content);
 
     @Query(nativeQuery = true, value = """
@@ -35,4 +39,6 @@ public interface RecommendationRepository extends CrudRepository<Recommendation,
     Page<Recommendation> findAllByAuthorId(long authorId, Pageable pageable);
 
     Optional<Recommendation> findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(long authorId, long receiverId);
+
+    Optional<Recommendation> findByAuthorIdAndReceiverId(long authorId, long receiverId);
 }

@@ -10,7 +10,9 @@ import school.faang.user_service.dto.recommendation.RecommendationDto;
 public interface RecommendationMapper {
     @Mapping(target = "authorId", source = "author.id")
     @Mapping(target = "receiverId", source = "receiver.id")
+    @Mapping(target = "skillOffers", ignore = true)
     RecommendationDto toDto(Recommendation entity);
 
+    @Mapping(target = "skillOffers", ignore = true)
     Recommendation toEntity(RecommendationDto dto);
 }
