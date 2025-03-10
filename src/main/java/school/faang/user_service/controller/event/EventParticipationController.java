@@ -24,38 +24,25 @@ public class EventParticipationController {
 
     @PostMapping("/{eventId}/register/{userId}")
     public ResponseEntity<String> registerParticipant(@PathVariable Long eventId, @PathVariable Long userId) {
-        validateId(userId);
-        validateId(eventId);
         eventParticipationService.registerParticipant(eventId, userId);
         return ResponseEntity.ok("User with id %s registered for event with id %s".formatted(userId, eventId));
     }
 
     @DeleteMapping("/{eventId}/unregister/{userId}")
     public ResponseEntity<String> unregisterParticipant(@PathVariable Long eventId, @PathVariable Long userId) {
-        validateId(userId);
-        validateId(eventId);
         eventParticipationService.unregisterParticipant(eventId, userId);
         return ResponseEntity.ok("User with id %s unregistered for event with id %s".formatted(userId, eventId));
     }
 
     @GetMapping("/{eventId}/participants")
-    public ResponseEntity<List<UserDto>> getParticipation(@PathVariable Long eventId) {
-        validateId(eventId);
+    public ResponseEntity<List<UserDto>> getParticipant(@PathVariable Long eventId) {
         List<UserDto> participants = eventParticipationService.getParticipant(eventId);
         return ResponseEntity.ok(participants);
     }
 
     @GetMapping("/{eventId}/participants/count")
-    public ResponseEntity<Integer> getParticipantCount(@PathVariable Long eventId) {
-        validateId(eventId);
+    public ResponseEntity<Integer> getParticipantsCount(@PathVariable Long eventId) {
         int countParticipants = eventParticipationService.getParticipantCount(eventId);
         return ResponseEntity.ok(countParticipants);
-    }
-
-    private void validateId(Long id) {
-        if (id == null) {
-            log.warn("id can't be empty");
-            throw new IllegalArgumentException("id can't be empty");
-        }
     }
 }
