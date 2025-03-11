@@ -18,6 +18,7 @@ import school.faang.user_service.service.SkillService;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,9 +33,10 @@ public class SkillServiceImpl implements SkillService {
 
     @Override
     public SkillDto create(SkillDto skillDto) {
-        String title = skillDto.getTitle();
 
         validateSkill(skillDto);
+
+        String title = skillDto.getTitle();
 
         if (skillRepository.existsByTitle(title)) {
             log.error("Attempt to create a duplicate skill: {}", title);
@@ -71,8 +73,10 @@ public class SkillServiceImpl implements SkillService {
         Skill skill = skillRepository.findById(skillId)
                 .orElseThrow(() -> new DataValidationException("Skill not found"));
 
-        if (skillRepository.findUserSkill(skillId, userId).isPresent()) {
-            return null;
+        Optional<Skill> acquiredSkill = skillRepository.findUserSkill(skillId, userId);
+        if (acquiredSkill.isPresent()) {
+            log.warn("Skill with id: {} already acquired by user with id: {}", skillId, userId);
+            return skillMapper.toDto(acquiredSkill.get());
         }
 
         List<SkillOffer> offers = skillOfferRepository.findAllOffersOfSkill(skillId, userId);
