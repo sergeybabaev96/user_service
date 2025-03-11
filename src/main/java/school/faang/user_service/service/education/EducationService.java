@@ -24,7 +24,7 @@ public class EducationService {
         validateYearFrom(educationDto.getYearFrom());
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new InvalidInvitationException("User not found"));
+                .orElseThrow(() -> new DataValidationException("User not found"));
 
         Education education = educationMapper.toEducation(educationDto);
         education.setUser(user);
@@ -37,7 +37,7 @@ public class EducationService {
         validateYearFrom(educationDto.getYearFrom());
 
         Education education = educationRepository.findById(educationDto.getId())
-                .orElseThrow(() -> new InvalidInvitationException("Education not found"));
+                .orElseThrow(() -> new DataValidationException("Education not found"));
 
         if (education.getUser().getId() != userId) {
             throw new DataValidationException("User can only update their own education");
