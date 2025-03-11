@@ -3,38 +3,24 @@ package school.faang.user_service.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
-import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.service.RecommendationService;
 
 import java.util.List;
 
-@Controller
 @RequiredArgsConstructor
+@Controller
 public class RecommendationController {
     private final RecommendationService recommendationService;
-    private final RecommendationMapper recommendationMapper;
-
-    public RecommendationDto giveRecommendation(RecommendationDto recommendationDto) {
-        if (validateRecommendation(recommendationDto)) {
-            recommendationService.create(recommendationDto);
-        } else {
-            throw new DataValidationException("The recommendation is empty");
-        }
-        return recommendationDto;
-    }
-
-    private boolean validateRecommendation(RecommendationDto recommendationDto) {
-        return !recommendationDto.getContent().isBlank();
+    public RecommendationDto giveRecommendation(RecommendationDto recommendation) {
+        validateRecommendation(recommendation);
+        recommendationService.create(recommendation);
+        return recommendation;
     }
 
     public RecommendationDto updateRecommendation(RecommendationDto updated) {
-        if (validateRecommendation(updated)) {
-            recommendationService.update(updated);
-        } else {
-            throw new DataValidationException("The recommendation is empty");
-        }
+        validateRecommendation(updated);
+        recommendationService.update(updated);
         return updated;
     }
 
@@ -42,15 +28,13 @@ public class RecommendationController {
         recommendationService.delete(id);
     }
 
-    public List<RecommendationDto> getAllUserRecommendations(long receiverId) {
-        List<RecommendationDto> recommendationDtos = recommendationService.getAllUserRecommendations(receiverId);
-        List<Recommendation> entities = recommendationDtos.stream().map(recommendationMapper::toEntity).toList();
-        return entities.stream().map(recommendationMapper::toDto).toList();
+    public List<RecommendationDto> getAllUserRecommendations(long recieverId) {
+        return recommendationService.getAllUserRecommendations(recieverId);
     }
 
-    public List<RecommendationDto> getAllGivenRecommendations(long authorId) {
-        List<RecommendationDto> recommendationDtos = recommendationService.getAllGivenRecommendations(authorId);
-        List<Recommendation> entities = recommendationDtos.stream().map(recommendationMapper::toEntity).toList();
-        return entities.stream().map(recommendationMapper::toDto).toList();
+    private void validateRecommendation(RecommendationDto recommendation) {
+        if (recommendation.getContent().isBlank()) {
+            throw new DataValidationException("The recommendation is empty");
+        }
     }
 }
