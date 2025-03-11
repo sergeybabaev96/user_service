@@ -16,6 +16,6 @@ public class UserService {
     public boolean isWithinGoalLimit(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new DataValidationException("user not found"));
         int countGoals = user.getGoals().size();
-        return countGoals <= GOALS_PER_USER;
+        return countGoals < GOALS_PER_USER;
     }
 }
