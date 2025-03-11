@@ -4,7 +4,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,51 +12,50 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.SearchGoalDto;
-import school.faang.user_service.entity.goal.Goal;
-import school.faang.user_service.service.goal.GoalService;
+import school.faang.user_service.service.goal.GoalServiceImpl;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/goal")
 @RequiredArgsConstructor
 public class GoalController {
-    private final GoalService goalService;
+    private final GoalServiceImpl goalService;
 
-    @PostMapping("/create-goal")
-    public @ResponseBody ResponseEntity<GoalDto> createGoal(@RequestParam Long userId,
-                                                            @RequestBody @NonNull Goal goal) {
+    @PostMapping()
+    public ResponseEntity<GoalDto> createGoal(@RequestParam Long userId,
+                                              @RequestBody @NonNull GoalDto goal) {
         GoalDto createdGoal = goalService.createGoal(userId, goal);
-        return new ResponseEntity<>(createdGoal, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdGoal);
     }
 
-    @PutMapping("/update-goal")
-    public @ResponseBody ResponseEntity<GoalDto> updateGoal(@RequestParam Long goalId,
-                                                            @RequestBody @NonNull GoalDto goal) {
+    @PutMapping("/{goalId}")
+    public ResponseEntity<GoalDto> updateGoal(@PathVariable("goalId") Long goalId,
+                                              @RequestBody @NonNull GoalDto goal) {
         GoalDto updatedGoal = goalService.updateGoal(goalId, goal);
-        return new ResponseEntity<>(updatedGoal, HttpStatus.OK);
+        return ResponseEntity.ok(updatedGoal);
     }
 
-    @DeleteMapping("/delete-goal")
-    public @ResponseBody ResponseEntity<GoalDto> deleteGoal(@RequestParam long goalId) {
-        GoalDto deletedGoal = goalService.deleteGoal(goalId);
-        return new ResponseEntity<>(deletedGoal, HttpStatus.OK);
+    @DeleteMapping("/{goalId}")
+    public ResponseEntity deleteGoal(@PathVariable("goalId") long goalId) {
+        goalService.deleteGoal(goalId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/find-subtasks/{goalId}")
-    public @ResponseBody ResponseEntity<List<GoalDto>>
-    findSubtasksByGoalId(@PathVariable long goalId, @NonNull SearchGoalDto searchGoalDto) {
-        List<GoalDto> subtask = goalService.findSubtasksByGoalId(goalId, searchGoalDto);
-        return new ResponseEntity<>(subtask, HttpStatus.OK);
+    public ResponseEntity<List<GoalDto>>
+    findSubtasksByGoalId(@PathVariable long goalId, @NonNull SearchGoalDto searchGoal) {
+        List<GoalDto> subTasks = goalService.findSubtasksByGoalId(goalId, searchGoal);
+        return ResponseEntity.ok(subTasks);
     }
 
     @GetMapping("/find-goals-by-user/{userId}")
-    public @ResponseBody ResponseEntity<List<GoalDto>>
-    getGoalsByUser(@PathVariable long userId, @NonNull SearchGoalDto searchGoalDto) {
-        List<GoalDto> subtask = goalService.getGoalsByUser(userId, searchGoalDto);
-        return new ResponseEntity<>(subtask, HttpStatus.OK);
+    public ResponseEntity<List<GoalDto>>
+    getGoalsByUser(@PathVariable long userId, @NonNull SearchGoalDto searchGoal) {
+        List<GoalDto> goalsByUser = goalService.getGoalsByUser(userId, searchGoal);
+        return ResponseEntity.ok(goalsByUser);
     }
 }

@@ -15,6 +15,5 @@ public class GoalDto {
     private GoalStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<Long> userIds;
     private List<Long> skillIds;
 }

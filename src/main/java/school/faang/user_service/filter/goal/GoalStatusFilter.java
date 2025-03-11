@@ -10,12 +10,12 @@ import java.util.stream.Stream;
 @Component
 public class GoalStatusFilter implements GoalFilter {
     @Override
-    public boolean isApplicable(SearchGoalDto searchGoalDto) {
-        return Objects.nonNull(searchGoalDto.status());
+    public boolean isApplicable(SearchGoalDto searchGoal) {
+        return Objects.nonNull(searchGoal.status());
     }
 
     @Override
-    public Stream<Goal> apply(Stream<Goal> goals, SearchGoalDto searchGoalDto) {
-        return goals.filter(goal -> searchGoalDto.status().equals(goal.getStatus()));
+    public Stream<Goal> apply(Stream<Goal> goals, SearchGoalDto searchGoal) {
+        return goals.filter(goal -> searchGoal.status().equals(goal.getStatus()));
     }
 }

@@ -1,30 +1,16 @@
 package school.faang.user_service.service.skill;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.Skill;
-import school.faang.user_service.repository.SkillRepository;
 
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class SkillService {
-    private final SkillRepository skillRepository;
+public interface SkillService {
+    List<Skill> findAllSkillsById(List<Long> skillIds);
 
-    public List<Skill> findAllSkillsById(List<Long> skillIds) {
-        return skillRepository.findAllById(skillIds);
-    }
+    List<Skill> findSkillsByUserId(Long userId);
 
-    public List<Skill> findSkillsByUserId(Long userId) {
-        return skillRepository.findAllByUserId(userId);
-    }
+    List<Skill> findSkillsByGoalId(Long goalId);
 
-    public List<Skill> findSkillsByGoalId(Long goalId) {
-        return skillRepository.findSkillsByGoalId(goalId);
-    }
+    void saveAllSkills(List<Skill> skills);
 
-    public void saveAllSkills(List<Skill> skills) {
-        skillRepository.saveAll(skills);
-    }
 }
