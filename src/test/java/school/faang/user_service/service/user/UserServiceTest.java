@@ -65,6 +65,9 @@ public class UserServiceTest {
     @Spy
     private UserMapperImpl userMapperImpl;
 
+    @Mock
+    private UserAvatarService userAvatarService;
+
     @InjectMocks
     private UserService userService;
 
@@ -160,29 +163,31 @@ public class UserServiceTest {
         assertFalse(user.isActive());
     }
 
-    @org.junit.Test
+    @Test
     public void testRemoveUserFromGoals() {
         Goal goal = new Goal();
         goal.setUsers(Collections.singletonList(user));
+        when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
         when(goalRepository.findGoalsByUserId(userId)).thenReturn(Stream.of(goal));
 
         userService.deactivateUser(userId);
 
-        verify(goalRepository).delete(goal);
+        verify(goalRepository).deleteAll(List.of(goal));
     }
 
-    @org.junit.Test
+    @Test
     public void testRemoveUserEvents() {
         Event event = new Event();
+        event.setOwner(user);
         event.setStatus(EventStatus.PLANNED);
         event.setAttendees(Collections.singletonList(user));
+        when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
         when(eventRepository.findAllByUserId(userId)).thenReturn(Collections.singletonList(event));
         when(eventRepository.findParticipatedEventsByUserId(userId)).thenReturn(Collections.singletonList(event));
 
         userService.deactivateUser(userId);
 
-        verify(eventRepository).save(event);
-        verify(eventRepository, times(2)).save(event);
+        verify(eventRepository).saveAll(List.of(event));
     }
 
     @Test

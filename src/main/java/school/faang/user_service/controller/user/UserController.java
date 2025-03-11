@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.avatar.AvatarType;
 import school.faang.user_service.dto.user.UserRegistrationDto;
@@ -35,6 +36,7 @@ public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
     private final UserAvatarService userAvatarService;
+    private final UserContext userContext;
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserDto> getUser(@PathVariable @Positive long userId) {
