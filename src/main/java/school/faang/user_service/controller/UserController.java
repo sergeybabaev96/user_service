@@ -46,9 +46,4 @@ public class UserController {
     public UserNotificationDto updateUserChat(@RequestBody UserChatIdUpdateDto userChatIdUpdateDto) {
         return userService.updateUserChatId(userChatIdUpdateDto);
     }
-
-    @GetMapping("/event/{userId}")
-    public UserEventDto getUserForEvent(@PathVariable long userId) {
-        return userService.getUserForEvent(userId);
-    }
 }
