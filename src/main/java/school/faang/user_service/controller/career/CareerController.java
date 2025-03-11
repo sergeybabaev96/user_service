@@ -1,17 +1,17 @@
 package school.faang.user_service.controller.career;
 
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.CareerDto;
 import school.faang.user_service.service.career.CareerService;
 
-
-@Component
-@AllArgsConstructor
+@Controller
+@RequiredArgsConstructor
 public class CareerController {
-    private final CareerService careerService;
+    public final CareerService careerService;
 
-    public CareerDto careerDto(long userId, CareerDto careerDto) {
+    public CareerDto addCareer(long userId, CareerDto careerDto) {
         return careerService.addCareer(userId, careerDto);
     }
 
@@ -19,7 +19,7 @@ public class CareerController {
         return careerService.updateCareer(userId, careerDto);
     }
 
-    public CareerDto getById(long careerId) {
-        return careerService.getById(careerId);
+    public CareerDto getById(long carrerId) {
+        return careerService.getById(carrerId);
     }
 }

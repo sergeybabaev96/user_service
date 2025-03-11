@@ -2,7 +2,6 @@ package school.faang.user_service.dto;
 
 import lombok.Data;
 
-
 import java.time.LocalDate;
 
 @Data
@@ -12,5 +11,4 @@ public class CareerDto {
     private LocalDate to;
     private String company;
     private String position;
-    private long userId;
 }

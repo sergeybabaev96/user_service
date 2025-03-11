@@ -11,17 +11,13 @@ public interface CareerMapper {
 
     @Mapping(source = "from", target = "dateFrom")
     @Mapping(source = "to", target = "dateTo")
-    @Mapping(source = "UserId", target = "user")
     Career toCareer(CareerDto careerDto);
 
     @Mapping(source = "dateFrom", target = "from")
     @Mapping(source = "dateTo", target = "to")
-    @Mapping(source = "user", target = "UserId")
     CareerDto toCareerDto(Career career);
 
     @Mapping(source = "from", target = "dateFrom")
     @Mapping(source = "to", target = "dateTo")
-    @Mapping(source = "UserId", target = "user")
-    Career UpdatedCareer(@MappingTarget Career career, CareerDto careerDto);
+    Career updatedCareer(@MappingTarget Career career, CareerDto careerDto);
 }
-

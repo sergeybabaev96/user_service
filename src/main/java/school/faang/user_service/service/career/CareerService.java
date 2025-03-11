@@ -2,6 +2,7 @@ package school.faang.user_service.service.career;
 
 
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.DialectOverride;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.CareerDto;
 import school.faang.user_service.entity.Career;
@@ -20,36 +21,53 @@ public class CareerService {
     private final CareerRepository careerRepository;
     private final CareerMapper careerMapper;
 
-    public CareerDto addCareer(long userId, CareerDto careerDto) {
+    private void checkCareerDto(CareerDto careerDto) {
         if (careerDto.getFrom() == null
-                || careerDto.getCompany() == null || careerDto.getCompany().isEmpty() || careerDto.getCompany().isBlank()
-                || careerDto.getPosition() == null || careerDto.getPosition().isEmpty() || careerDto.getPosition().isBlank()) {
+                || careerDto.getCompany() == null || careerDto.getCompany().isBlank()
+                || careerDto.getPosition() == null || careerDto.getPosition().isBlank()) {
+            throw new DataValidationException("Career fields can't be empty");
+        }
+        if (careerDto.getFrom().isAfter(LocalDate.now())) {
+            throw new DataValidationException("Career start can't be in the future");
+        }
+    }
+
+    public CareerDto addCareer(long userId, CareerDto careerDto) {
+        checkCareerDto(careerDto);
+
+/*
+        if (careerDto.getFrom() == null
+                || careerDto.getCompany() == null || careerDto.getCompany().isBlank()
+                || careerDto.getPosition() == null || careerDto.getPosition().isBlank()) {
             throw new DataValidationException("Career fields can't be empty");
         }
 
         if (careerDto.getFrom().isAfter(LocalDate.now())) {
             throw new DataValidationException("Career start can't be in the future");
         }
+*/
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataValidationException("The user with id  " + userId + " can't be found."));
 
-        Career career = careerMapper.toCareer(careerDto); //перевожу обект Dto в объект Entity
-        career.setUser(user); //для этого пришлось создать setter в Career (его до этого не было) - правильно ли?
-        Career savedCareer = careerRepository.save(career); //сохраняю в базу данных
+        Career career = careerMapper.toCareer(careerDto);
+        career.setUser(user);
+        Career savedCareer = careerRepository.save(career);
         return careerMapper.toCareerDto(savedCareer);
     }
 
     public CareerDto updateCareer(long userId, CareerDto careerDto) {
+        checkCareerDto(careerDto);
+        /*
         if (careerDto.getFrom() == null
-                || careerDto.getCompany() == null || careerDto.getCompany().isEmpty() || careerDto.getCompany().isBlank()
-                || careerDto.getPosition() == null || careerDto.getPosition().isEmpty() || careerDto.getPosition().isBlank()) {
+                || careerDto.getCompany() == null || careerDto.getCompany().isBlank()
+                || careerDto.getPosition() == null || careerDto.getPosition().isBlank()) {
             throw new DataValidationException("Career fields can't be empty");
         }
-
         if (careerDto.getFrom().isAfter(LocalDate.now())) {
             throw new DataValidationException("Career start can't be in the future");
         }
+*/
 
         Career existingCareer = careerRepository.findById(careerDto.getId())
                 .orElseThrow(() -> new DataValidationException("Career with id "
@@ -59,7 +77,10 @@ public class CareerService {
             throw new DataValidationException("You can't change data of another user");
         }
 
-        careerMapper.UpdatedCareer(existingCareer, careerDto);
+        existingCareer.setDateFrom(careerDto.getFrom());
+        existingCareer.setDateTo(careerDto.getTo());
+        existingCareer.setCompany(careerDto.getCompany());
+        existingCareer.setPosition(careerDto.getPosition());
 
         Career careerUpdated = careerRepository.save(existingCareer);
         return careerMapper.toCareerDto(careerUpdated);
