@@ -12,13 +12,14 @@ import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.MentorshipAlreadyExistsException;
+import school.faang.user_service.filter.MentorshipRequestFilter;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -29,6 +30,7 @@ public class MentorshipRequestService {
     private final MentorshipRequestRepository mentorshipRequestRepository;
     private final MentorshipRequestMapper mentorshipRequestMapper;
     private final UserRepository userRepository;
+    private final List<MentorshipRequestFilter> filters;
 
     @Transactional
     public void requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
@@ -64,34 +66,23 @@ public class MentorshipRequestService {
         }
     }
 
-    public List<MentorshipRequestDto> getRequests(RequestFilterDto filter) {
-
+    public List<MentorshipRequestDto> getRequests(RequestFilterDto filterDto) {
         Iterable<MentorshipRequest> mentorshipRequestIterable = mentorshipRequestRepository.findAll();
-        List<MentorshipRequest> requests = StreamSupport.stream(mentorshipRequestIterable.spliterator(), false)
-                .filter(request -> {
-                    boolean result = true;
-                    if (filter.getDescription() != null) {
-                        result = result && request.getDescription() != null
-                                && request.getDescription().contains(filter.getDescription());
-                    }
-                    if (filter.getRequesterId() != null) {
-                        result = result && request.getRequester() != null
-                                && request.getRequester().getId().equals(filter.getRequesterId());
-                    }
-                    if (filter.getReceiverId() != null) {
-                        result = result && request.getReceiver() != null
-                                && request.getReceiver().getId().equals(filter.getReceiverId());
-                    }
-                    if (filter.getStatus() != null) {
-                        result = result && request.getStatus() == filter.getStatus();
-                    }
-                    return result;
-                })
-                .toList();
+        Stream<MentorshipRequest> requestStream = StreamSupport
+                .stream(mentorshipRequestIterable.spliterator(), false);
 
-        return requests.stream()
+        Stream<MentorshipRequest> filteredStream = filters.stream()
+                .filter(f -> f.isApplyable(filterDto))
+                .reduce(
+                        requestStream,
+                        (stream, filter) ->
+                                filter.filter(stream, filterDto),
+                        (s1, s2) -> s1
+                );
+
+        return filteredStream
                 .map(mentorshipRequestMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional
