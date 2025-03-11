@@ -9,12 +9,12 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-
-    @Mapping(source = "mentors", target = "mentorIds", expression ="java(toIds(user.getMentors))")
-    @Mapping(source = "mentees", target = "menteeIds", expression = "java(toIds(user.getMentees))")
+    
+    @Mapping(target = "mentorIds", expression = "java(UserMapper.toIds(user.getMentors()))")
+    @Mapping(target = "menteeIds", expression = "java(UserMapper.toIds(user.getMentees()))")
     UserDto toDto(User user);
 
-    default List<Long> toIds(List<User> users){
+    default List<Long> toIds(List<User> users) {
         return users == null ? List.of() : users.stream().map(User::getId).toList();
     }
 }
