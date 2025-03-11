@@ -28,7 +28,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import school.faang.user_service.entity.contact.Contact;
 import school.faang.user_service.entity.contact.ContactPreference;
-import school.faang.user_service.entity.contact.PregerredContactNotification;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.event.Rating;
 import school.faang.user_service.entity.goal.Goal;
@@ -174,8 +173,4 @@ public class User {
     @Column(name = "locale")
     @Convert(converter = LocaleConverter.class)
     private Locale locale;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "preference_contact")
-    private PregerredContactNotification preferenceNotification;
 }
