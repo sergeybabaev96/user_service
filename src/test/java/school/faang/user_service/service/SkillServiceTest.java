@@ -21,7 +21,7 @@ public class SkillServiceTest {
     private SkillService skillService;
 
     @Test
-    public void testDoesSkillExistsRequestDataFromRepository() {
+    public void testDoesSkillExists_RequestDataFromRepository() {
         var skillId = 10L;
         when(skillRepository.existsById(skillId)).thenReturn(true);
 
