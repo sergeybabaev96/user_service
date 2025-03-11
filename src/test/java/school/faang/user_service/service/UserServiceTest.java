@@ -1,0 +1,59 @@
+package school.faang.user_service.service;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataRetrievalFailureException;
+import school.faang.user_service.entity.User;
+import school.faang.user_service.repository.UserRepository;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class UserServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private UserService userService;
+
+    long userId;
+
+    @BeforeEach
+    public void init() {
+        userId = 10L;
+    }
+
+    @Test
+    public void testGetUserById_FoundUser() {
+        var testUser = User.builder()
+                .id(userId)
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+
+        var result = userService.getUserById(userId);
+
+        verify(userRepository, times(1)).findById(userId);
+        assertEquals(testUser, result);
+    }
+
+    @Test
+    public void testGetUserById_ThrowsException() {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(
+                DataRetrievalFailureException.class,
+                () -> userService.getUserById(userId));
+        verify(userRepository, times(1)).findById(userId);
+    }
+}
