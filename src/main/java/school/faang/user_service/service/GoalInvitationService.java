@@ -14,6 +14,7 @@ import school.faang.user_service.filter.goal.GoalInvitationStatusFilter;
 import school.faang.user_service.mapper.goal.GoalInvitationMapper;
 import school.faang.user_service.repository.goal.GoalInvitationRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,12 +30,23 @@ public class GoalInvitationService {
     private final GoalInvitationMapper goalInvitationMapper;
     private final List<GoalInvitationFilter> goalInvitationFilters;
 
-    public GoalInvitationDto acceptGoalInvitation(long id) {
+    public GoalInvitationDto create(GoalInvitationDto goalInvitationDto) {
+        GoalInvitation goalInvitation = goalInvitationMapper.toEntity(goalInvitationDto);
+        validateFields(goalInvitationDto, goalInvitation);
+        goalInvitation.setStatus(RequestStatus.PENDING);
+
+        return goalInvitationMapper.toDto(repository.save(goalInvitation));
+    }
+
+    public GoalInvitationDto accept(long id) {
         GoalInvitation goalInvitation = checkExistingGoal(id);
         Goal goal = goalInvitation.getGoal();
         User invitedUser = goalInvitation.getInvited();
 
         List<Goal> goals = invitedUser.getGoals();
+        if (goals == null) {
+            goals = new ArrayList<>();
+        }
         if (goals.size() >= MAX_GOAL_COUNT) {
             throw new IllegalStateException("User has maximum goals");
         }
@@ -43,13 +55,14 @@ public class GoalInvitationService {
         }
 
         goals.add(goal);
+        invitedUser.setGoals(goals);
         userSevice.save(invitedUser);
 
         goalInvitation.setStatus(RequestStatus.ACCEPTED);
         return goalInvitationMapper.toDto(repository.save(goalInvitation));
     }
 
-    public GoalInvitationDto rejectGoalInvitation(long id) {
+    public GoalInvitationDto reject(long id) {
         GoalInvitation goalInvitation = checkExistingGoal(id);
         goalInvitation.setStatus(RequestStatus.REJECTED);
         return goalInvitationMapper.toDto(repository.save(goalInvitation));
@@ -71,7 +84,7 @@ public class GoalInvitationService {
 
     private GoalInvitation checkExistingGoal(long id) {
         GoalInvitation goalInvitation = findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("GaolInvitation with id = " + id + " does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException("GoalInvitation with id = " + id + " does not exist"));
         goalService.findById(goalInvitation.getGoal().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Goal with id = " + id + " does not exist"));
 
@@ -80,13 +93,6 @@ public class GoalInvitationService {
 
     public Optional<GoalInvitation> findById(Long id) {
         return repository.findById(id);
-    }
-
-    public GoalInvitationDto createInvitation(GoalInvitationDto goalInvitationDto) {
-        GoalInvitation goalInvitation = goalInvitationMapper.toEntity(goalInvitationDto);
-        validateFields(goalInvitationDto, goalInvitation);
-
-        return goalInvitationMapper.toDto(repository.save(goalInvitation));
     }
 
     private void validateFields(GoalInvitationDto goalInvitationDto, GoalInvitation goalInvitation) {

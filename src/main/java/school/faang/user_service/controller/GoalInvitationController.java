@@ -24,17 +24,17 @@ public class GoalInvitationController {
 
     @PostMapping("/create")
     public GoalInvitationDto createInvitation(@RequestBody GoalInvitationDto goalInvitationDto) {
-        return service.createInvitation(goalInvitationDto);
+        return service.create(goalInvitationDto);
     }
 
     @PostMapping("/accept/{id}")
     public GoalInvitationDto acceptGoalInvitation(@PathVariable long id) {
-        return service.acceptGoalInvitation(id);
+        return service.accept(id);
     }
 
     @PostMapping("/reject/{id}")
     public GoalInvitationDto rejectGoalInvitation(@PathVariable long id) {
-        return service.rejectGoalInvitation(id);
+        return service.reject(id);
     }
 
     @PostMapping("/filter")
