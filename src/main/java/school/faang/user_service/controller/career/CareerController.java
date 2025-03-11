@@ -1,12 +1,13 @@
 package school.faang.user_service.controller.career;
 
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.CareerDto;
 import school.faang.user_service.service.career.CareerService;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CareerController {
     private final CareerService careerService;
 
