@@ -16,6 +16,7 @@ import school.faang.user_service.filter.EventFilterDto;
 import school.faang.user_service.service.event.EventService;
 import school.faang.user_service.validator.EventDtoValidator;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -27,11 +28,15 @@ public class EventController {
     @PostMapping
     public ResponseEntity<EventDto> create(@RequestBody EventDto event) {
         EventDtoValidator.validate(event);
-        return ResponseEntity.ok(eventService.create(event));
+        EventDto createdEvent = eventService.create(event);
+
+        URI location = URI.create("/events/" + createdEvent.getId());
+
+        return ResponseEntity.created(location).body(createdEvent);
     }
 
     @GetMapping("/{eventId}")
-    public ResponseEntity<EventDto> getEvent(@PathVariable long eventId) {
+    public ResponseEntity<EventDto> getEvent(@PathVariable("eventId") long eventId) {
         return ResponseEntity.ok(eventService.getEvent(eventId));
     }
 
@@ -41,24 +46,24 @@ public class EventController {
     }
 
     @DeleteMapping("/{eventId}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable long eventId) {
+    public ResponseEntity<Void> deleteEvent(@PathVariable("eventId") long eventId) {
         eventService.deleteEvent(eventId);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{eventId}")
-    public ResponseEntity<EventDto> updateEvent(@RequestBody EventDto event) {
+    public ResponseEntity<EventDto> updateEvent(@PathVariable("eventId") long eventId, @RequestBody EventDto event) {
         EventDtoValidator.validate(event);
-        return ResponseEntity.ok(eventService.updateEvent(event));
+        return ResponseEntity.ok(eventService.updateEvent(event,eventId));
     }
 
     @GetMapping("/owned/{userId}")
-    public ResponseEntity<List<EventDto>> getOwnedEvents(@PathVariable long userId) {
+    public ResponseEntity<List<EventDto>> getOwnedEvents(@PathVariable("userId") long userId) {
         return ResponseEntity.ok(eventService.getOwnedEvents(userId));
     }
 
     @GetMapping("/participated/{userId}")
-    public ResponseEntity<List<EventDto>> getParticipatedEvents(@PathVariable long userId) {
+    public ResponseEntity<List<EventDto>> getParticipatedEvents(@PathVariable("userId") long userId) {
         return ResponseEntity.ok(eventService.getParticipatedEvents(userId));
     }
 }
