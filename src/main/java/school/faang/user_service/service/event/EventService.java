@@ -48,11 +48,15 @@ public class EventService {
         return eventMapper.toDto(event);
     }
 
-    public List<EventDto> getEventsByFilter(EventFilterDto filter) {
-        List<Event> events = eventRepository.findAll();
+    public List<EventDto> getEventsByFilter(EventFilterDto filterDto) {
+        List<EventFilter> filters = new ArrayList<>();
+        filters.add(new TitleFilter(filterDto.getTitle()));
+        filters.add(new DateRangeFilter(filterDto.getStartDate(), filterDto.getEndDate()));
+        filters.add(new OwnerFilter(filterDto.getOwnerId()));
 
-        return events.stream()
-                .filter(filter::matches)
+        return eventRepository.findAll().stream()
+                .filter(event -> filters.stream()
+                        .allMatch(filter -> filter.matches(event)))
                 .map(eventMapper::toDto)
                 .collect(Collectors.toList());
     }

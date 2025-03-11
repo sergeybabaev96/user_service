@@ -1,5 +1,6 @@
 package school.faang.user_service.controller.event;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import school.faang.user_service.dto.event.EventDto;
-import school.faang.user_service.filter.EventFilterDto;
+import school.faang.user_service.filter.Event.EventFilterDto;
 import school.faang.user_service.service.event.EventService;
 import school.faang.user_service.validator.EventDtoValidator;
 
@@ -41,7 +42,7 @@ public class EventController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<EventDto>> getEventsByFilter(@ModelAttribute EventFilterDto filter) {
+    public ResponseEntity<List<EventDto>> getEventsByFilter(@Valid @ModelAttribute EventFilterDto filter) {
         return ResponseEntity.ok(eventService.getEventsByFilter(filter));
     }
 
