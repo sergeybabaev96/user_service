@@ -1,9 +1,11 @@
 package school.faang.user_service.mapper;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.ReportingPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
 import school.faang.user_service.dto.mentorship.RejectionDto;
@@ -11,8 +13,10 @@ import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.UserRepository;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@DecoratedWith(MentorshipRequestMapperDecorator.class)
 public abstract class MentorshipRequestMapper {
+
     @Autowired
     protected UserRepository userRepository;
 

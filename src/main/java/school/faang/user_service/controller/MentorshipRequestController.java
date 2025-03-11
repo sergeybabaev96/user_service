@@ -2,6 +2,7 @@ package school.faang.user_service.controller;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/mentorship-request")
 @RequiredArgsConstructor
+@Slf4j
 public class MentorshipRequestController {
 
     private static final int DESCRIPTION_MAX_LENGTH = 4096;
@@ -29,13 +31,24 @@ public class MentorshipRequestController {
     private final MentorshipRequestService mentorshipRequestService;
 
     @PostMapping("/requests")
-    public ResponseEntity<String> requestMentorship(@RequestBody MentorshipRequestDto mentorshipRequestDto) {
+    public ResponseEntity<?> requestMentorship(@RequestBody MentorshipRequestDto mentorshipRequestDto) {
         try {
             validateMentorshipRequest(mentorshipRequestDto);
             mentorshipRequestService.requestMentorship(mentorshipRequestDto);
+            log.info("Mentorship request created successfully for DTO: {}", mentorshipRequestDto);
             return ResponseEntity.ok("Request created successfully");
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            String errorMessage = String.format(
+                    "Failed to create mentorship request. Reason: %s. Request data: [requesterId=%s, receiverId=%s, description=%s, status=%s]",
+                    e.getMessage(),
+                    mentorshipRequestDto.getRequesterId(),
+                    mentorshipRequestDto.getReceiverId(),
+                    mentorshipRequestDto.getDescription(),
+                    mentorshipRequestDto.getStatus()
+            );
+
+            log.error("Error processing mentorship request: {}. DTO: {}. Stack trace: {}", e.getMessage(), mentorshipRequestDto, e);
+            return ResponseEntity.badRequest().body(errorMessage);
         }
     }
 

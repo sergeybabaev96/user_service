@@ -17,11 +17,8 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -42,11 +39,12 @@ public class MentorshipRequestService {
     }
 
     private void validateMentorshipRequest(MentorshipRequestDto mentorshipRequestDto) {
-
-        if (!(userRepository.existsById(mentorshipRequestDto.getRequesterId())
-                && (userRepository.existsById(mentorshipRequestDto.getReceiverId())))) {
-            log.info("Both of users need to be registered");
-            throw new IllegalArgumentException("One of the users is not existed");
+        Long requesterId = mentorshipRequestDto.getRequesterId();
+        Long receiverId = mentorshipRequestDto.getReceiverId();
+        if (requesterId == null || receiverId == null ||
+                !userRepository.existsById(requesterId) || !userRepository.existsById(receiverId)) {
+            log.info("Both users need to be registered or IDs cannot be null");
+            throw new IllegalArgumentException("User is not existed or is null");
         }
 
         mentorshipRequestRepository.findLatestRequest(mentorshipRequestDto.getRequesterId(),
