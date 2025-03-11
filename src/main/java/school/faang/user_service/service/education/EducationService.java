@@ -28,8 +28,7 @@ public class EducationService {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new DataValidationException("Пользователь не найден."));
 
-        Education education = educationMapper.toEducation(educationDto);
-        education.setUser(user);
+        Education education = educationMapper.toEducationWithUser(educationDto,user);
         education = educationRepository.save(education);
         return educationMapper.toEducationDto(education);
     }
@@ -41,7 +40,7 @@ public class EducationService {
             throw new DataValidationException("Данные об образовании не могут быть пустыми.");
         }
 
-        if (educationDto.getYearFrom() < Year.now().getValue()) {
+        if (educationDto.getYearFrom() >= Year.now().getValue()) {
             throw new DataValidationException("Год должен быть меньше текущего.");
         }
 
@@ -56,7 +55,6 @@ public class EducationService {
 
         education = educationRepository.save(education);
         return educationMapper.toEducationDto(education);
-
     }
 
     public EducationDto getById(long educationId) {
