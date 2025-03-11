@@ -134,7 +134,7 @@ public class RecommendationServiceTest {
         verify(userSkillGuaranteeRepository, times(2))
                 .save(guaranteeCaptor.capture());
 
-        //verify(kafkaTemplate, times(1)).send(kafkaTopic, analyticDto);
+        verify(kafkaTemplate, times(1)).send(any(), any());
 
         assertEquals(1L, createResponse.getId());
         assertEquals(1L, createResponse.getAuthorId());

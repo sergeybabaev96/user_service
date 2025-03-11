@@ -38,7 +38,7 @@ public class RecommendationService {
     private final SkillRepository skillRepository;
     private final UserRepository userRepository;
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
-    private final KafkaTemplate<String, RecommendationAnalyticDto> kafkaTemplate;
+    private final KafkaTemplate<String, RecommendationAnalyticDto> recommendationCreateTemplate;
     private final RecommendationValidator recommendationValidator;
 
     @Value("${recommendation.analytic.recommendation-topic}")
@@ -61,12 +61,10 @@ public class RecommendationService {
         recommendation.setId(recommendationId);
 
         saveSkillOffers(recommendation, createRequest.getSkillIds());
-        RecommendationAnalyticDto recommendationAnalyticDto = new RecommendationAnalyticDto();
-        recommendationAnalyticDto.setRecommendationId(recommendationId);
-        recommendationAnalyticDto.setAuthorId(recommendation.getAuthor().getId());
-        recommendationAnalyticDto.setReceivedId(recommendation.getReceiver().getId());
-        recommendationAnalyticDto.setReceivedAt(LocalDateTime.now());
-        kafkaTemplate.send(recommendationTopic, recommendationAnalyticDto);
+        RecommendationAnalyticDto recommendationAnalyticDto = new RecommendationAnalyticDto(
+                recommendationId, recommendation.getAuthor().getId(), recommendation.getReceiver().getId(),
+                LocalDateTime.now());
+        recommendationCreateTemplate.send(recommendationTopic, recommendationAnalyticDto);
 
         return recommendationMapper.toCreateResponse(recommendation);
     }
