@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface SkillCandidateMapper {
 
+    @Mapping(target = "skillId", source = "skill.id")
     @Mapping(target = "offersAmount", source = "offersAmount")
     SkillCandidateDto toSkillCandidateDto(Skill skill, int offersAmount);
 

@@ -54,14 +54,17 @@ public class SkillService {
 
             if (skillOffers.size() >= MIN_SKILL_OFFERS) {
                 skillRepository.assignSkillToUser(skillId, userId);
+
                 Skill skillUser = skillRepository.findUserSkill(skillId, userId)
                         .orElseThrow(() -> new RuntimeException("Error adding a skill to a user"));
+
                 skillOffers.forEach(skillOffer ->
-                    userSkillGuaranteeService.save(UserSkillGuarantee.builder()
-                            .user(skillOffer.getRecommendation().getReceiver())
-                            .skill(skillUser)
-                            .guarantor(skillOffer.getRecommendation().getAuthor())
-                            .build()));
+                        userSkillGuaranteeService.save(UserSkillGuarantee.builder()
+                                .user(skillOffer.getRecommendation().getReceiver())
+                                .skill(skillUser)
+
+                                .guarantor(skillOffer.getRecommendation().getAuthor())
+                                .build()));
             }
 
             return skillRepository.findUserSkill(skillId, userId)
