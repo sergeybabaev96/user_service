@@ -78,7 +78,6 @@ class RecommendationRequestServiceTest {
 
         requester = new User();
         requester.setId(1L);
-
         receiver = new User();
         receiver.setId(2L);
 
@@ -112,13 +111,13 @@ class RecommendationRequestServiceTest {
     public void testGetFilteredRecommendationRequestsAcceptedIsNotFiltered() {
         firstRecommendationRequest.setStatus(RequestStatus.PENDING);
         secondRecommendationRequest.setStatus(RequestStatus.PENDING);
-        // Настраиваем моки
+
         when(recommendationRequestRepository.findAll())
                 .thenReturn(List.of(firstRecommendationRequest, secondRecommendationRequest));
-        // Act: вызываем метод, который мы тестируем
+
         List<RecommendationRequestDto> requestDtos = recommendationRequestService
                 .getFilteredRecommendationRequests(new RequestFilterDto(null));
-        // Assert: проверяем, что возвращаемый список не пуст
+
         assertTrue(requestDtos.isEmpty(), "Expected the filtered list to be empty");
         assertEquals(0, requestDtos.size());
     }
@@ -219,14 +218,11 @@ class RecommendationRequestServiceTest {
         receiver.setId(2L);
 
         when(skillRequestService.findByIds(dto.getSkillsId())).thenReturn(new ArrayList<>());
-        // Настройка моков для пользователей
         when(userService.getUserById(dto.getRequesterId())).thenReturn(requester);
         when(userService.getUserById(dto.getReceiverId())).thenReturn(receiver);
 
-        // Вызов метода, который мы тестируем
         recommendationRequestService.create(dto);
 
-        // Проверка, что метод save был вызван с правильным объектом
         verify(recommendationRequestRepository, times(1)).save(argThat(savedRequest -> {
             assertEquals(requester, savedRequest.getRequester());
             assertEquals(receiver, savedRequest.getReceiver());
@@ -235,12 +231,9 @@ class RecommendationRequestServiceTest {
         }));
     }
 
-
     @Test
     public void testCreatedDtoNull() {
         assertThrows(IllegalArgumentException.class, () -> recommendationRequestService.create(null));
-
-
     }
 
     @Test
