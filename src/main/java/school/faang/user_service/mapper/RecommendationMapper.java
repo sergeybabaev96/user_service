@@ -8,6 +8,7 @@ import school.faang.user_service.entity.recommendation.Recommendation;
 
 @Mapper(componentModel = "spring", uses = {SkillOfferMapper.class})
 public interface RecommendationMapper {
+    //This mapper for work with ViewDto
     @Mapping(target = "author", ignore = true)
     @Mapping(target = "receiver", ignore = true)
     @Mapping(source = "skillOffers", target = "skillOffers")

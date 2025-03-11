@@ -1,5 +1,6 @@
 package school.faang.user_service.dto.skilloffer;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 /**
  * DTO для создания предложения навыка.
@@ -12,6 +13,7 @@ import lombok.Data;
  */
 @Data
 public class SkillOfferCreateDto {
+    @NotNull(message = "skillId не может быть null")
     private Long skillId;
 
 }
