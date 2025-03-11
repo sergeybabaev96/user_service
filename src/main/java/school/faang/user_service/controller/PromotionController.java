@@ -78,7 +78,7 @@ public class PromotionController {
                 userDto.userId(), promotionType, startDate, endDate, newPromotionPriority);
         ResponseEntity<String> response = userPromotionService.processUpdateUserPromotionPriority(userDto, startDate,
                 endDate, promotionType, newPromotionPriority);
-        log.info("Successfully updated user promotion type for userId: {} with new promotion priority: {} ",
+        log.info("Successfully updated user promotion type for userId: {}. New promotion priority: {} ",
                 userDto.userId(), newPromotionPriority);
         return response;
     }
@@ -96,7 +96,7 @@ public class PromotionController {
                 userDto.userId(), newPromotionType, startDate, endDate, promotionPriority);
         ResponseEntity<String> response = userPromotionService.processUpdateUserPromotionType(userDto, startDate,
                 endDate, newPromotionType, promotionPriority);
-        log.info("Successfully updated user promotion type for userId: {} with new promotion type: {} ",
+        log.info("Successfully updated user promotion type for userId: {}. New promotion type: {} ",
                 userDto.userId(), newPromotionType);
         return response;
     }
@@ -148,7 +148,7 @@ public class PromotionController {
                 eventDto.eventId(), newPromotionType, startDate, endDate, promotionPriority);
         ResponseEntity<String> response = eventPromotionService.processUpdateEventPromotionType(eventDto, startDate,
                 endDate, newPromotionType, promotionPriority);
-        log.info("Successfully updated event promotion type for userId: {} with new promotion type: {} " +
+        log.info("Successfully updated event promotion type for userId: {}. New promotion type: {} " +
                 "and priority: {}", eventDto.eventId(), newPromotionType, promotionPriority);
         return response;
     }
@@ -166,7 +166,7 @@ public class PromotionController {
                 eventDto.eventId(), promotionType, startDate, endDate, newPromotionPriority);
         ResponseEntity<String> response = eventPromotionService.processUpdateEventPromotionPriority(eventDto, startDate,
                 endDate, promotionType, newPromotionPriority);
-        log.info("Successfully updated event promotion type for userId: {} with new promotion priority: {}",
+        log.info("Successfully updated event promotion priority for userId: {}. New promotion priority: {}",
                 eventDto.eventId(), newPromotionPriority);
         return response;
     }
