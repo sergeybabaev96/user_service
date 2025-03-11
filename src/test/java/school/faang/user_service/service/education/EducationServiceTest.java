@@ -72,9 +72,23 @@ class EducationServiceTest {
         EducationDto result = educationService.addEducation(1L, educationDto);
 
         assertNotNull(result);
-        assertEquals(educationDto.getId(), result.getId());
+        assertEquals(educationDto, result);
         verify(userRepository, times(1)).findById(1L);
+        verify(educationMapper, times(1)).toEducation(educationDto);
         verify(educationRepository, times(1)).save(education);
+        verify(educationMapper, times(1)).toEducationDto(education);
+    }
+
+    @Test
+    void testAddEducation_UserNotFound() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(DataValidationException.class, () -> educationService.addEducation(1L, educationDto));
+
+        verify(userRepository, times(1)).findById(1L);
+        verify(educationMapper, never()).toEducation(any());
+        verify(educationRepository, never()).save(any());
+        verify(educationMapper, never()).toEducationDto(any());
     }
 
     @Test
@@ -100,6 +114,41 @@ class EducationServiceTest {
     }
 
     @Test
+    void testUpdateEducation_EducationNotFound() {
+        when(educationRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(DataValidationException.class, () -> {
+            educationService.updateEducation(1L, educationDto);
+        });
+
+        verify(educationRepository, times(1)).findById(1L);
+        verify(educationMapper, never()).toEducation(any());
+        verify(educationRepository, never()).save(any());
+        verify(educationMapper, never()).toEducationDto(any());
+    }
+
+    @Test
+    void testUpdateEducation_UserNotOwner() {
+        Education anotherUserEducation = new Education();
+        anotherUserEducation.setId(1L);
+
+        User anotherUser = new User();
+        anotherUser.setId(2L);
+        anotherUserEducation.setUser(anotherUser);
+
+        when(educationRepository.findById(1L)).thenReturn(Optional.of(anotherUserEducation));
+
+        assertThrows(DataValidationException.class, () -> {
+            educationService.updateEducation(1L, educationDto);
+        });
+
+        verify(educationRepository, times(1)).findById(1L);
+        verify(educationMapper, never()).toEducation(any());
+        verify(educationRepository, never()).save(any());
+        verify(educationMapper, never()).toEducationDto(any());
+    }
+
+    @Test
     void testUpdateEducation_InvalidUserId() {
         when(educationRepository.findById(1L)).thenReturn(Optional.of(education));
 
@@ -118,14 +167,20 @@ class EducationServiceTest {
         EducationDto result = educationService.getById(1L);
 
         assertNotNull(result);
-        assertEquals(educationDto.getId(), result.getId());
+        assertEquals(educationDto, result);
         verify(educationRepository, times(1)).findById(1L);
+        verify(educationMapper, times(1)).toEducationDto(education);
     }
 
     @Test
     void testGetById_EducationNotFound() {
         when(educationRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(DataValidationException.class, () -> educationService.getById(1L));
+        assertThrows(DataValidationException.class, () -> {
+            educationService.getById(1L);
+        });
+
+        verify(educationRepository, times(1)).findById(1L);
+        verify(educationMapper, never()).toEducationDto(any());
     }
 }
