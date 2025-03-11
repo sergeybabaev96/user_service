@@ -113,15 +113,13 @@ public class RecommendationService {
 
     public List<RecommendationDto> getAllUserRecommendations(long recieverId) {
         List<Recommendation> recommendations = recommendationRepository.findAllByReceiverId(recieverId, Pageable.unpaged()).toList();
-        List<RecommendationDto> recommendationDtos = recommendations.stream()
+        return recommendations.stream()
                 .map(recommendationMapper::toDto).toList();
-        return recommendationDtos;
     }
 
     public List<RecommendationDto> getAllGivenRecommendations(long authorId) {
         List<Recommendation> recommendations = recommendationRepository.findAllByAuthorId(authorId, Pageable.unpaged()).toList();
-        List<RecommendationDto> recommendationDtos = recommendations.stream()
+        return recommendations.stream()
                 .map(recommendationMapper::toDto).toList();
-        return recommendationDtos;
     }
 }
