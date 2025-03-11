@@ -13,7 +13,7 @@ import java.util.List;
 public interface GoalMapper {
 
     @Mapping(target = "parentId", source = "parent.id")
-    @Mapping(target = "skillIds", source = "skillsToAchieve", expression = "java(skillsToIds(skillsToAchieve))")
+    @Mapping(target = "skillIds", expression = "java(skillsToIds(skillsToAchieve))")
     GoalDto toDto(Goal goal);
 
     default List<Long> skillsToIds(List<Skill> skills) {
