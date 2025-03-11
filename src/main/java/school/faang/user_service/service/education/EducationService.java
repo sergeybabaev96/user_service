@@ -2,11 +2,12 @@ package school.faang.user_service.service.education;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.EducationDto;
+import school.faang.user_service.dto.education.EducationDto;
 import school.faang.user_service.entity.Education;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.mapper.EducationMapper;
+import school.faang.user_service.exception.InvalidInvitationException;
+import school.faang.user_service.mapper.education.EducationMapper;
 import school.faang.user_service.repository.EducationRepository;
 import school.faang.user_service.repository.UserRepository;
 
@@ -23,7 +24,7 @@ public class EducationService {
         validateYearFrom(educationDto.getYearFrom());
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new DataValidationException("User not found"));
+                .orElseThrow(() -> new InvalidInvitationException("User not found"));
 
         Education education = educationMapper.toEducation(educationDto);
         education.setUser(user);
@@ -36,7 +37,7 @@ public class EducationService {
         validateYearFrom(educationDto.getYearFrom());
 
         Education education = educationRepository.findById(educationDto.getId())
-                .orElseThrow(() -> new DataValidationException("Education not found"));
+                .orElseThrow(() -> new InvalidInvitationException("Education not found"));
 
         if (education.getUser().getId() != userId) {
             throw new DataValidationException("User can only update their own education");

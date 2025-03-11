@@ -2,7 +2,7 @@ package school.faang.user_service.controller.education;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import school.faang.user_service.dto.EducationDto;
+import school.faang.user_service.dto.education.EducationDto;
 import school.faang.user_service.service.education.EducationService;
 
 @Controller
