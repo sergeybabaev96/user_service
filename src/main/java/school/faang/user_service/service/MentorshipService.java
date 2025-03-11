@@ -33,15 +33,16 @@ public class MentorshipService {
                 .orElse(List.of());
     }
 
+    @Transactional
     public void deleteMentee(long menteeId, long mentorId) {
         deleteMentorship(menteeId, mentorId);
     }
 
+    @Transactional
     public void deleteMentor(long menteeId, long mentorId) {
         deleteMentorship(menteeId, mentorId);
     }
 
-    @Transactional
     private void deleteMentorship(long menteeId, long mentorId) {
         User mentor = userRepository.findById(mentorId)
                 .orElseThrow(() -> new EntityNotFoundException("Mentor not found."));
