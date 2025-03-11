@@ -1,6 +1,10 @@
 name: Test User Service App
 
 on:
+  push:
+    branches:
+      - minotaur-master-stream9
+
   pull_request:
     branches:
       - minotaur-master-stream9
