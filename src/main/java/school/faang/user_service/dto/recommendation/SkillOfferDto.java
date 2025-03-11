@@ -12,11 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SkillOfferDto {
-    @NotNull
     @Positive(message = "Id должно быть больше нуля")
     private Long id;
 
-    @NotNull
     @Positive(message = "Id должно быть больше нуля")
     private Long skillId;
 }

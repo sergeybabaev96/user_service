@@ -4,11 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 
 public record BuyPremiumDto(
-        @NotBlank
+        @NotBlank(message = "Поле не может быть пустым")
         String paymentMethod,
-        @Positive
+        @Positive(message = "Значение должно быть положительным числом")
         int days,
-        @Positive
+        @Positive(message = "Значение Id должно быть положительным числом")
         long userId
 ) {
 }

@@ -3,14 +3,17 @@ package school.faang.user_service.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.subscription.SubscriptionUserDto;
 import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.event.FollowEvent;
 import school.faang.user_service.exception.BusinessException;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filters.user.UserFilter;
 import school.faang.user_service.mapper.SubscriptionMapperImpl;
+import school.faang.user_service.publisher.FollowMessagePublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
 
@@ -34,6 +37,7 @@ public class SubscriptionServiceTest {
     private SubscriptionRepository subscriptionRepository;
     private UserRepository userRepository;
     private SubscriptionMapperImpl subscriptionMapper;
+    private FollowMessagePublisher followMessagePublisher;
     private List<UserFilter> userFilters;
 
     User user1 = User.builder().id(1L).username("Mary").email("user@gmail.com").build();
@@ -47,6 +51,7 @@ public class SubscriptionServiceTest {
     public void init() {
         subscriptionRepository = mock(SubscriptionRepository.class);
         userRepository = mock(UserRepository.class);
+        followMessagePublisher = mock(FollowMessagePublisher.class);
         subscriptionMapper = spy(SubscriptionMapperImpl.class);
         userFilters = List.of(mock(UserFilter.class), mock(UserFilter.class));
 
@@ -54,7 +59,8 @@ public class SubscriptionServiceTest {
                 subscriptionRepository,
                 userRepository,
                 userFilters,
-                subscriptionMapper
+                subscriptionMapper,
+                followMessagePublisher
         );
     }
 
@@ -112,10 +118,16 @@ public class SubscriptionServiceTest {
         when(subscriptionRepository.existsByFollowerIdAndFolloweeId(FOLLOWER_ID, FOLLOWEE_ID))
                 .thenReturn(false);
 
+
         subscriptionService.followUser(FOLLOWER_ID, FOLLOWEE_ID);
 
+        ArgumentCaptor<FollowEvent> argumentCaptor = ArgumentCaptor.forClass(FollowEvent.class);
         verify(subscriptionRepository, times(1))
                 .followUser(FOLLOWER_ID, FOLLOWEE_ID);
+        verify(followMessagePublisher, times(1))
+                .publish(argumentCaptor.capture());
+        assertEquals(FOLLOWER_ID, argumentCaptor.getValue().getFollowerId());
+        assertEquals(FOLLOWEE_ID, argumentCaptor.getValue().getFolloweeId());
     }
 
     @Test

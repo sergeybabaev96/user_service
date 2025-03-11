@@ -26,6 +26,10 @@ spring:
     redis:
       port: 6379
       host: localhost
+      channels:
+        follow: follow_channel
+        profile-view: profile_view_channel
+        mentorship: mentorship_channel
 
 server:
   port: 8080
@@ -48,9 +52,42 @@ services:
     host: localhost
     port: 8082
 
-payment-service:
-  host: localhost
-  port: 9080
+  payment-service:
+    host: localhost
+    port: 9080
 
-schedule:
-  cron: "0 0 6 * * MON"
+premium:
+  schedule:
+    removal-cron: "0 0 0 * * SUN"
+  batch:
+    size: 1000
+
+task:
+  execution:
+    pool:
+      core-size: 4
+      max-size: 8
+      keep-alive: 60
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local
+
+---
+logging:
+  level:
+    root: info
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    root: info
+

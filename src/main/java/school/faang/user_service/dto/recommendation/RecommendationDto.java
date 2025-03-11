@@ -16,21 +16,25 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecommendationDto {
-    @Positive(message = "Id должно быть больше нуля")
+    private final String notNullId = "Поле Id не может быть равным нулю";
+    private final String positiveId = "Поле Id должно быть положительным числом";
+
+    @NotNull(message = notNullId)
+    @Positive(message = positiveId)
     private Long id;
 
-    @NotNull
-    @Positive(message = "Id должно быть больше нуля")
+    @NotNull(message = notNullId)
+    @Positive(message = positiveId)
     private Long authorId;
 
-    @NotNull
-    @Positive(message = "Id должно быть больше нуля")
+    @NotNull(message = notNullId)
+    @Positive(message = positiveId)
     private Long receiverId;
 
     @NotBlank(message = "Рекомендация не должна быть пустой!")
     private String content;
 
-    @NotNull
+    @NotNull(message = "Список не должен быть пустым")
     private List<SkillOfferDto> skillOffers;
     private LocalDateTime createdAt;
 }
