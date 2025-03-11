@@ -3,9 +3,10 @@ package school.faang.user_service.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import school.faang.user_service.dto.MentorshipRequestDto;
 import school.faang.user_service.dto.RequestFilterDto;
 import school.faang.user_service.service.MentorshipRequestService;
+
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -24,10 +25,10 @@ public class MentorshipRequestController {
         log.info(END_MENTORSHIP_REQUEST, mentorshipRequestDto.getId());
     }
 
-    public void getRequests(MentorshipRequestDto filter) {
-    public void getRequests(RequestFilterDto filter) {
+    public List<RequestFilterDto> getRequests(RequestFilterDto filter) {
         log.info(START_GETS_REQUEST);
-        mentorshipRequestService.getRequests(filter);
+        List<RequestFilterDto> requestFilterDtoList = mentorshipRequestService.getRequests(filter);
         log.info(END_GETS_REQUEST);
+        return requestFilterDtoList;
     }
 }
