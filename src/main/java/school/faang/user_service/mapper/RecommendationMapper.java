@@ -11,7 +11,7 @@ import school.faang.user_service.entity.recommendation.SkillOffer;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = SkillOfferMapper.class)
 public interface RecommendationMapper {
 
     @Mapping(target = "author", source = "authorId")
@@ -28,17 +28,6 @@ public interface RecommendationMapper {
 
     List<RecommendationDto> toRecommendationDtoList(List<Recommendation> recommendations);
 
-    @Mapping(target = "skill", source = "skillId")
-    @Mapping(target = "recommendation", ignore = true)
-    SkillOffer toSkillOffer(SkillOfferDto skillOfferDto);
-
-    List<SkillOffer> toSkillOfferList(List<SkillOfferDto> skillOfferDtos);
-
-    @Mapping(target = "skillId", source = "skill.id")
-    SkillOfferDto toSkillOfferDto(SkillOffer skillOffer);
-
-    List<SkillOfferDto> toSkillOfferDtoList(List<SkillOffer> skillOffers);
-
     default User mapIdToUser(Long id) {
         if (id == null) {
             return null;
@@ -46,14 +35,5 @@ public interface RecommendationMapper {
         User user = new User();
         user.setId(id);
         return user;
-    }
-
-    default Skill mapIdToSkill(Long id) {
-        if (id == null) {
-            return null;
-        }
-        Skill skill = new Skill();
-        skill.setId(id);
-        return skill;
     }
 }

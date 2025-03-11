@@ -38,7 +38,6 @@ public class RecommendationService {
         RecommendationValidation.validateRecommendationDate(lastRecommendation);
 
         Recommendation recommendation = recommendationMapper.toRecommendation(recommendationDto);
-        recommendation.setCreatedAt(LocalDateTime.now());
 
         Long recommendationId = createRecommendation(recommendation);
         recommendation.setId(recommendationId);
@@ -74,7 +73,7 @@ public class RecommendationService {
         if (authorId == null) {
             throw new DataValidationException("Id автора не может быть null");
         }
-        Pageable pageable = PageRequest.of(0 , 10);
+        Pageable pageable = PageRequest.of(0, 10);
         Page<Recommendation> recommendationPage = recommendationRepository.findAllByAuthorId(authorId, pageable);
         List<Recommendation> recommendationList = recommendationPage.getContent();
         return recommendationMapper.toRecommendationDtoList(recommendationList);
@@ -84,7 +83,7 @@ public class RecommendationService {
         if (receiverId == null) {
             throw new DataValidationException("Id пользователя не может быть null");
         }
-        Pageable pageable = PageRequest.of(0 , 10);
+        Pageable pageable = PageRequest.of(0, 10);
         Page<Recommendation> recommendationPage = recommendationRepository.findAllByReceiverId(receiverId, pageable);
         List<Recommendation> recommendationList = recommendationPage.getContent();
         return recommendationMapper.toRecommendationDtoList(recommendationList);
@@ -97,10 +96,12 @@ public class RecommendationService {
         for (SkillOffer skillOffer : skillOffersOfRecommendation) {
             skillOfferRepository.create(skillOffer.getSkill().getId(), recommendation.getId());
             if (skillOfferListOfReceiver.contains(skillOffer)) {
-                UserSkillGuarantee userSkillGuarantee = new UserSkillGuarantee();
-                userSkillGuarantee.setUser(recommendation.getReceiver());
-                userSkillGuarantee.setSkill(skillOffer.getSkill());
-                userSkillGuarantee.setGuarantor(recommendation.getAuthor());
+                UserSkillGuarantee userSkillGuarantee = UserSkillGuarantee.builder()
+                        .user(recommendation.getReceiver())
+                        .skill(skillOffer.getSkill())
+                        .guarantor(recommendation.getAuthor())
+                        .build();
+
                 skillOffer.getSkill().setGuarantees(List.of(userSkillGuarantee));
                 userSkillGuaranteeRepository.save(userSkillGuarantee);
             }

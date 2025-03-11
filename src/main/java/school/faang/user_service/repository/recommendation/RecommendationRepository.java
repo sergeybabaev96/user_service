@@ -30,10 +30,4 @@ public interface RecommendationRepository extends CrudRepository<Recommendation,
     Page<Recommendation> findAllByAuthorId(long authorId, Pageable pageable);
 
     Optional<Recommendation> findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(long authorId, long receiverId);
-
-    default LocalDateTime findLastRecommendationDate(long authorId, long receiverId) {
-        return findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(authorId, receiverId)
-                .map(Recommendation::getCreatedAt)
-                .orElse(null);
-    }
 }
