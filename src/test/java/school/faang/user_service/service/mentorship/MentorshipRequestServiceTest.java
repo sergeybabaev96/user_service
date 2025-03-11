@@ -176,16 +176,16 @@ public class MentorshipRequestServiceTest {
         long requesterId = 1L;
         long receiverId = 2L;
 
-        MentorshipRequestDto requestDto = MentorshipRequestDto.builder()
+        final MentorshipRequestDto requestDto = MentorshipRequestDto.builder()
                 .requester(user1)
                 .receiver(user2)
                 .description("description")
                 .build();
 
-        User requesterUser = User.builder()
+        final User requesterUser = User.builder()
                 .id(requesterId)
                 .build();
-        User receiverUser = User.builder()
+        final User receiverUser = User.builder()
                 .id(receiverId)
                 .build();
 
@@ -201,9 +201,9 @@ public class MentorshipRequestServiceTest {
                 .create("description", requesterId, receiverId);
 
         Mockito.verify(mentorshipOfferedEventPublisher).publish(argThat(event ->
-                event.getRequesterId() == 1 &&
-                        event.getRequestId() == null &&
-                        event.getMentorId() == 2
+                event.getRequesterId() == 1
+                        && event.getRequestId() == null
+                        && event.getMentorId() == 2
         ));
     }
 
