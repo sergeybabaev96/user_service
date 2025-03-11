@@ -4,10 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
+import school.faang.user_service.dto.recommendation.SkillOfferDto;
+import school.faang.user_service.entity.Skill;
+import school.faang.user_service.entity.User;
+import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.repository.SkillRepository;
+import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import java.time.temporal.ChronoUnit;
@@ -21,11 +26,13 @@ public class RecommendationService {
     private final SkillOfferRepository skillOfferRepository;
     private final SkillRepository skillRepository;
     private final RecommendationMapper recommendationMapper;
+    private final UserRepository userRepository;
+    private final UserSkillGuarantee userSkillGuarantee;
 
     public RecommendationDto create(RecommendationDto recommendationDto) {
         if (validateTime(recommendationDto) && validateSkillExist(recommendationDto)) {
             saveSkillOffers(recommendationDto);
-            //todo:добавить гаранта, если у получателя уже есть этот скилл, если автор еще не гарант. Пока не понимаю, как это реализовать.
+            addGuarantee(recommendationDto);
             recommendationRepository.create(recommendationDto.getAuthorId(), recommendationDto.getReceiverId(), recommendationDto.getContent());
         }
         return recommendationDto;
@@ -40,8 +47,7 @@ public class RecommendationService {
             recommendationDto.getSkillOffers().forEach(skillOfferDto -> {
                 skillOfferRepository.create(skillOfferDto.getSkillId(), skillOfferDto.getRecommendationId());
             });
-            //todo:  Если у пользователя-получателя рекомендации уже есть предлагаемый навык,
-            // то автор рекомендации должен быть добавлен в список гарантов (skill.addGuarantee)
+            addGuarantee(recommendationDto);
         }
         return recommendationDto;
     }
@@ -83,6 +89,23 @@ public class RecommendationService {
     }
 
     public void addGuarantee(RecommendationDto recommendationDto) {
-        //todo: как-то реализовать этот метод
+        List<Skill> receiverSkills = skillRepository.findAllByUserId(recommendationDto.getReceiverId());
+        Optional<User> optionalReceiver = userRepository.findById(recommendationDto.getReceiverId());
+        Optional<User> optionalGarantor = userRepository.findById(recommendationDto.getAuthorId());
+
+        for (SkillOfferDto skill : recommendationDto.getSkillOffers()) {
+            for (Skill receiverSkill : receiverSkills) {
+                if (skill.getSkillId() == receiverSkill.getId()) {
+                    userSkillGuarantee.setUser(optionalReceiver.get());
+                    userSkillGuarantee.setGuarantor(optionalGarantor.get());
+                    userSkillGuarantee.setSkill(receiverSkill);
+                }
+            }
+        }
+    }
+
+    public List<RecommendationDto> getAllGivenRecommendations(long authorId) {
+        List<Recommendation> recommendations = recommendationRepository.findAllByAuthorId(authorId, Pageable.unpaged()).toList();
+        return recommendations.stream().map(recommendationMapper::toDto).toList();
     }
 }

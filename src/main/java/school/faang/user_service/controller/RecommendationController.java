@@ -7,7 +7,6 @@ import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.service.RecommendationService;
-import school.faang.user_service.service.SubscriptionService;
 
 import java.util.List;
 
@@ -16,7 +15,6 @@ import java.util.List;
 public class RecommendationController {
     private final RecommendationService recommendationService;
     private final RecommendationMapper recommendationMapper;
-    private final SubscriptionService subscriptionService;
 
     public RecommendationDto giveRecommendation(RecommendationDto recommendationDto) {
         if (validateRecommendation(recommendationDto)) {
@@ -28,10 +26,7 @@ public class RecommendationController {
     }
 
     private boolean validateRecommendation(RecommendationDto recommendationDto) {
-        if (recommendationDto.getContent().isBlank()) {
-            return false;
-        }
-        return true;
+        return !recommendationDto.getContent().isBlank();
     }
 
     public RecommendationDto updateRecommendation(RecommendationDto updated) {
@@ -47,13 +42,15 @@ public class RecommendationController {
         recommendationService.delete(id);
     }
 
-    public List<Recommendation> getAllUserRecommendations(RecommendationDto recommendationDto) {
-        List<RecommendationDto> recommendationDtos = recommendationService.getAllUserRecommendations(recommendationDto.getReceiverId());
-        return recommendationDtos.stream().map(recommendationMapper::toEntity).toList();
+    public List<RecommendationDto> getAllUserRecommendations(long receiverId) {
+        List<RecommendationDto> recommendationDtos = recommendationService.getAllUserRecommendations(receiverId);
+        List<Recommendation> entities = recommendationDtos.stream().map(recommendationMapper::toEntity).toList();
+        return entities.stream().map(recommendationMapper::toDto).toList();
     }
 
-    public List<Recommendation> getAllGivenRecommendations(RecommendationDto recommendationDto) {
-        List<RecommendationDto> recommendationDtos = subscriptionService.getAllGivenRecommendations(recommendationDto.getAuthorId());
-        return recommendationDtos.stream().map(recommendationMapper::toEntity).toList();
+    public List<RecommendationDto> getAllGivenRecommendations(long authorId) {
+        List<RecommendationDto> recommendationDtos = recommendationService.getAllGivenRecommendations(authorId);
+        List<Recommendation> entities = recommendationDtos.stream().map(recommendationMapper::toEntity).toList();
+        return entities.stream().map(recommendationMapper::toDto).toList();
     }
 }
