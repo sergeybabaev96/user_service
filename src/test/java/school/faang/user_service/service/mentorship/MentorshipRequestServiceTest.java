@@ -6,15 +6,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import school.faang.user_service.TestData;
 import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
+import school.faang.user_service.dto.mentorship.MentorshipRequestFilterDto;
 import school.faang.user_service.dto.mentorship.MentorshipResponseDto;
 import school.faang.user_service.dto.user.UserDto;
-import org.mockito.Spy;
-import school.faang.user_service.dto.MentorshipRequestDto;
-import school.faang.user_service.dto.MentorshipRequestFilterDto;
-import school.faang.user_service.dto.MentorshipResponseDto;
-import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.events.MentorshipOfferedEvent;
@@ -27,14 +24,7 @@ import school.faang.user_service.service.mentorship.filter.AuthorFilter;
 import school.faang.user_service.service.mentorship.filter.DescriptionFilter;
 import school.faang.user_service.service.mentorship.filter.ReceiverFilter;
 import school.faang.user_service.service.mentorship.filter.RequestFilter;
-import school.faang.user_service.dto.mentorship.MentorshipRequestFilterDto;
 import school.faang.user_service.service.mentorship.filter.StatusFilter;
-import school.faang.user_service.service.filter.AuthorFilter;
-import school.faang.user_service.service.filter.DescriptionFilter;
-import school.faang.user_service.service.filter.ReceiverFilter;
-import school.faang.user_service.service.filter.RequestFilter;
-import school.faang.user_service.service.filter.StatusFilter;
-import school.faang.user_service.service.impl.MentorshipRequestServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -201,7 +191,8 @@ public class MentorshipRequestServiceTest {
 
         when(userRepositoryMock.findById(requesterId)).thenReturn(Optional.of(requesterUser));
         when(userRepositoryMock.findById(receiverId)).thenReturn(Optional.of(receiverUser));
-        when(mentorshipRequestMapperSpy.toMentorshipOfferedEvent(any(MentorshipRequestDto.class), any(MentorshipRequest.class)))
+        when(mentorshipRequestMapperSpy.toMentorshipOfferedEvent(any(MentorshipRequestDto.class),
+                any(MentorshipRequest.class)))
                 .thenReturn(mentorshipOfferedEvent);
 
         mentorshipRequestService.requestMentorship(requestDto);
