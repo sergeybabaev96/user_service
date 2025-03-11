@@ -32,6 +32,10 @@ public class RecommendationController {
         return recommendationService.getAllUserRecommendations(recieverId);
     }
 
+    public List<RecommendationDto> getAllGivenRecommendations(long authorId) {
+        return recommendationService.getAllGivenRecommendations(authorId);
+    }
+
     private void validateRecommendation(RecommendationDto recommendation) {
         if (recommendation.getContent().isBlank()) {
             throw new DataValidationException("The recommendation is empty");
