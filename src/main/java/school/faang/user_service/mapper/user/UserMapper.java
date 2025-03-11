@@ -10,11 +10,11 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    @Mapping(target = "mentorIds", expression ="java(UserMapper.toIds(user.getMentors()))")
+    @Mapping(target = "mentorIds", expression = "java(UserMapper.toIds(user.getMentors()))")
     @Mapping(target = "menteeIds", expression = "java(UserMapper.toIds(user.getMentees()))")
     UserDto toDto(User user);
-
-    static List<Long> toIds(List<User> users){
+  
+    static List<Long> toIds(List<User> users) {
         return users == null ? List.of() : users.stream().map(User::getId).toList();
     }
 
