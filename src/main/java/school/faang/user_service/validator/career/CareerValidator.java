@@ -1,4 +1,4 @@
-package school.faang.user_service.validation;
+package school.faang.user_service.validator.career;
 
 import lombok.extern.slf4j.Slf4j;
 import school.faang.user_service.dto.CareerDto;
@@ -20,7 +20,7 @@ public class CareerValidator {
         }
         if(careerDto.getFrom().isAfter(LocalDate.now())) {
             log.error(ERROR_FROM_DATE_IN_THE_FUTURE, careerDto.getFrom());
-            throw new DataValidationException(String.format(ERROR_FROM_DATE_IN_THE_FUTURE, careerDto.getFrom()));
+            throw new DataValidationException(String.format(ERROR_FROM_DATE_IN_THE_FUTURE));
         }
         if(careerDto.getCompany() == null || careerDto.getCompany().isBlank()) {
             log.error(ERROR_COMPANY_EMPTY);

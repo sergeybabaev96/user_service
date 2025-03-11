@@ -10,7 +10,7 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.CareerMapper;
 import school.faang.user_service.repository.CareerRepository;
 import school.faang.user_service.repository.UserRepository;
-import school.faang.user_service.validation.CareerValidator;
+import school.faang.user_service.validator.career.CareerValidator;
 
 @Service
 @RequiredArgsConstructor
@@ -35,24 +35,27 @@ public class CareerService {
         CareerValidator.validate(careerDto);
         Career career = careerRepository
                 .findById(careerDto.getId())
-                .orElseThrow(() -> new DataValidationException(String.format("Career not found")));
+                .orElseThrow(() -> new DataValidationException(String.format("Career not found", userId)));
 
         if (career.getUser().getId() != userId) {
             log.error("User {} can only update their own career", userId);
             throw new DataValidationException("User can only update their own career");
         }
-        career.setDateFrom(careerDto.getFrom());
-        career.setDateTo(careerDto.getTo());
-        career.setCompany(careerDto.getCompany());
-        career.setPosition(careerDto.getPosition());
+        Career updateCareer = careerMapper.toCareer(careerDto);
+        updateCareer.setUser(career.getUser());
 
         Career saveCareer = careerRepository.save(career);
         return careerMapper.toCareerDto(saveCareer);
     }
 
     public CareerDto getById(long careerId) {
-        Career career = careerRepository.findById(careerId)
-                .orElseThrow(() -> new DataValidationException(String.format("Career not found")));
-        return careerMapper.toCareerDto(career);
+        return careerRepository
+                .findById(careerId)
+                .map(careerMapper::toCareerDto)
+                .orElseThrow(() -> {
+                    String errorMessage = String.format("Career with id: %s not found", careerId);
+                    log.error(errorMessage);
+                    return new DataValidationException(errorMessage);
+                });
     }
 }
