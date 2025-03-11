@@ -23,8 +23,8 @@ spring:
         format_sql: true
 
   kafka:
+    bootstrap-servers: localhost:9092
     consumer:
-      bootstrap-servers: localhost:9092
       group-id: user-service-group-ban
       security:
         protocol: PLAINTEXT
@@ -65,6 +65,10 @@ payment-service:
 user:
   ban:
     kafka_topic: "user_ban"
+
+recommendation:
+  analytic:
+    recommendation-topic: "recommendation-create"
 
 services:
   s3:
