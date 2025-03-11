@@ -47,20 +47,24 @@ public class RecommendationValidator {
      */
     private void validateSkillOffers(RecommendationCreateDto recommendation) {
         List<SkillOfferCreateDto> skillOffers = recommendation.getSkillOffers();
-        if (skillOffers == null || skillOffers.isEmpty()) {
+        if (skillOffers == null) {
+            log.error("Ошибка валидации: список навыков в рекомендации равен null");
+            throw new DataValidationException("Skill offers list is null");
+        }
+
+        if (skillOffers.isEmpty()) {
             log.error("Ошибка валидации: отсутствуют навыки в рекомендации");
             throw new DataValidationException("Skill offer is not found");
         }
 
-        List<Long> skillIds = skillOffers.stream()
-                .map(SkillOfferCreateDto::getSkillId)
-                .toList();
-        for (Long skillId : skillIds) {
-            if (!skillRepository.existsById(skillId)) {
-                log.error("Навык с ID {} не найден в системе", skillId);
+        Optional<Long> absentSkillOffer = skillOffers.stream()
+                .map(SkillOfferCreateDto:: getSkillId)
+                .filter(skillId -> !skillRepository.existsById(skillId))
+                .findFirst();
+            if (absentSkillOffer.isPresent()) {
+                log.error("Навык с ID {} не найден в системе", absentSkillOffer.get());
                 throw new DataValidationException("Skill offer not found");
             }
-        }
     }
 
     /**
@@ -72,8 +76,7 @@ public class RecommendationValidator {
      */
     private void validateRecommendationTimeInterval(RecommendationCreateDto recommendation) {
         LocalDateTime sixMonthsAgo = LocalDateTime.now().minusMonths(6);
-        LocalDateTime lastRecommendationDate = getUpdateAtCreateRecommendation(recommendation)
-                .orElseThrow(() -> new DataValidationException("Update date is not found"));
+        LocalDateTime lastRecommendationDate = getUpdateAtCreateRecommendation(recommendation);
 
         if (lastRecommendationDate.isBefore(sixMonthsAgo)) {
             log.error("Ошибка валидации: рекомендация обновлена слишком рано");
@@ -100,16 +103,17 @@ public class RecommendationValidator {
      * @param recommendation - объект DTO с рекомендацией
      * @return Optional<LocalDateTime> - дата последнего обновления рекомендации
      */
-    private Optional<LocalDateTime> getUpdateAtCreateRecommendation(RecommendationCreateDto recommendation) {
+    private LocalDateTime getUpdateAtCreateRecommendation(RecommendationCreateDto recommendation) {
         User recommendationAuthor  = getUser(recommendation.getAuthorId());
         return recommendationAuthor.getRecommendationsGiven().stream()
-                .filter(rec -> {
-                    User receiver = rec.getReceiver();
-                    User createRecommendationReceiver = getUser(receiver.getId());
-                    return receiver.equals(createRecommendationReceiver);
+                .filter(existingRecommendation -> {
+                    User receiver = existingRecommendation.getReceiver();
+                    return receiver.getId().equals(recommendation.getReceiverId());
                 })
                 .findFirst()
-                .map(Recommendation::getUpdatedAt);
+                .map(Recommendation::getUpdatedAt)
+                .orElseThrow(() ->
+                        new DataValidationException("Update date is not found"));
     }
 
     /**

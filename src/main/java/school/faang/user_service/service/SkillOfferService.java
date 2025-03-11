@@ -1,6 +1,7 @@
 package school.faang.user_service.service;
 
 import jakarta.transaction.Transactional;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class SkillOfferService {
     private final SkillRepository skillRepository;
 
     @Transactional
-    public void saveSkillsOffer(RecommendationCreateDto recommendation, long recommendationId) {
+    public void saveSkillsOffer(@NonNull RecommendationCreateDto recommendation, long recommendationId) {
         if (recommendation.getSkillOffers() == null || recommendation.getSkillOffers().isEmpty()) {
             log.warn("Список skillOffers пуст или равен null для рекомендации с ID {}", recommendationId);
             throw new DataValidationException("skillOffers is not found or Empty");
@@ -70,6 +71,7 @@ public class SkillOfferService {
             }
         }
     }
+
     private User getUser(long userId) {
         return userRepository.findById(userId).orElseThrow(() -> {
             log.error("Ошибка: пользователь с ID {} не найден", userId);
