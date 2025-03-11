@@ -126,11 +126,11 @@ public class RecommendationService {
      * @throws DataValidationException если рекомендация не найдена
      */
     public void delete(long recommendationId) {
-        if (recommendationRepository.existsById(recommendationId)) {
-            recommendationRepository.deleteById(recommendationId);
+        if (!recommendationRepository.existsById(recommendationId)) {
+            log.error("Рекомендация с ID {} не найдена", recommendationId);
+            throw new DataValidationException(String.format("Recommendation id %d not found", recommendationId));
         }
-        log.error("Рекомендация с ID {} не найдена", recommendationId);
-        throw new DataValidationException(String.format("Recommendation id %d not found", recommendationId));
+        recommendationRepository.deleteById(recommendationId);
     }
 
     /**
