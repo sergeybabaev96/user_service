@@ -153,12 +153,8 @@ public class EventServiceTest {
                 .id(1L)
                 .status(EventStatus.COMPLETED)
                 .build();
-        Event plannedEvent = Event.builder()
-                .id(2L)
-                .status(EventStatus.PLANNED)
-                .build();
 
-        when(eventRepository.findAll()).thenReturn(List.of(compleatedEvent, plannedEvent));
+        when(eventRepository.findEventsByStatuses(any())).thenReturn(List.of(compleatedEvent));
 
         getService().clearPastEvents();
 
