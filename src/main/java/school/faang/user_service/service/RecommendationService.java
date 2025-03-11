@@ -131,10 +131,12 @@ public class RecommendationService {
             }
             skillOfferRepository.create(skillOffer.getSkill().getId(), recommendation.getId());
             if (skillOffersOfReceiver.contains(skillOffer)) {
-                UserSkillGuarantee userSkillGuarantee = new UserSkillGuarantee();
-                userSkillGuarantee.setUser(recommendation.getReceiver());
-                userSkillGuarantee.setGuarantor(recommendation.getAuthor());
-                userSkillGuarantee.setSkill(skillOffer.getSkill());
+                UserSkillGuarantee userSkillGuarantee = UserSkillGuarantee.builder()
+                        .user(recommendation.getReceiver())
+                        .skill(skillOffer.getSkill())
+                        .guarantor(recommendation.getAuthor())
+                        .build();
+
                 skillOffer.getSkill().setGuarantees(List.of(userSkillGuarantee));
                 userSkillGuaranteeRepository.save(userSkillGuarantee);
             }
