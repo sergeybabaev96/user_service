@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
 import school.faang.user_service.exception.recommendation.DataValidationException;
-import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.service.RecommendationService;
 
 import java.util.List;
@@ -15,7 +14,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RecommendationController {
     private final RecommendationService recommendationService;
-    private final RecommendationMapper recommendationMapper;
 
     public RecommendationDto giveRecommendation(RecommendationDto recommendation) {
         validateRecommendation(recommendation);
@@ -41,6 +39,7 @@ public class RecommendationController {
 
     public void validateRecommendation(RecommendationDto recommendation) {
         if (recommendation == null || recommendation.getContent().isBlank()) {
+            log.info("Recommendation Is Not Valid");
             throw new DataValidationException("recommendation is not valid");
         }
     }

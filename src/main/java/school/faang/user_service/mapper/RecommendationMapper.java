@@ -7,9 +7,8 @@ import school.faang.user_service.entity.recommendation.Recommendation;
 
 import java.util.List;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface RecommendationMapper {
-    RecommendationMapper INSTANCE = Mappers.getMapper(RecommendationMapper.class);
 
     RecommendationDto toDto(Recommendation recommendation);
     Recommendation toEntity(RecommendationDto recommendationDto);
