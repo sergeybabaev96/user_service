@@ -10,7 +10,7 @@ import school.faang.user_service.service.EventService;
 public class Schedule {
     private EventService eventService;
 
-    @Scheduled(cron = "${schedule.cron}")
+    @Scheduled(cron = "${premium.schedule.removal-cron}")
     public void clearEvents(){eventService.clearPastEvents();
     }
 }
