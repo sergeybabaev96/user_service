@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 import lombok.NonNull;
+import school.faang.user_service.entity.contact.PreferredContact;
 
 @Builder
 @Schema(description = "DTO пользователя")
@@ -19,6 +20,8 @@ public record UserDto(
         String username,
         @Email
         @Schema(description = "Email пользователя", example = "johndoe@example.com")
-        String email
+        String email,
+        @Schema(description = "Предпочтительный способ связи", example = "EMAIL")
+        PreferredContact preference
 ) {
 }
