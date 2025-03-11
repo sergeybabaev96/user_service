@@ -1,8 +1,9 @@
 package school.faang.user_service.repository.mentorship;
 
-import feign.Param;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import school.faang.user_service.entity.MentorshipRequest;
 
 import java.util.Optional;

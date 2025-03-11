@@ -4,13 +4,16 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import school.faang.user_service.dto.MentorshipRequestDto;
 import school.faang.user_service.dto.MentorshipRequestFilterDto;
 import school.faang.user_service.dto.MentorshipResponseDto;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.events.MentorshipOfferedEvent;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.mapper.MentorshipRequestMapperImpl;
 import school.faang.user_service.publisher.MentorshipOfferedEventPublisher;
@@ -27,19 +30,32 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
+
 public class MentorshipRequestServiceTest {
     MentorshipRequestRepository mentorshipRequestRepositoryMock;
     UserRepository userRepositoryMock;
+
     MentorshipRequestMapper mentorshipRequestMapperSpy;
+
     AuthorFilter authorFilterMock;
     DescriptionFilter descriptionFilterMock;
     ReceiverFilter receiverFilterMock;
     StatusFilter statusFilterMock;
     List<RequestFilter> filters;
     MentorshipRequestService mentorshipRequestService;
+
+
+    @Spy
     MentorshipOfferedEventPublisher mentorshipOfferedEventPublisher;
     UserDto user1;
     UserDto user2;
+
+    @Mock
+    MentorshipOfferedEvent mentorshipOfferedEvent;
 
 
     @BeforeEach
@@ -94,7 +110,7 @@ public class MentorshipRequestServiceTest {
 
     @Test
     public void testRequestMentorshipWithNonExistentRequesterUserIdFailed() {
-        Mockito.when(userRepositoryMock.findById(1L)).thenThrow(new IllegalArgumentException());
+        when(userRepositoryMock.findById(1L)).thenThrow(new IllegalArgumentException());
 
         var requestDto = MentorshipRequestDto.builder()
                 .requester(user1)
@@ -109,8 +125,8 @@ public class MentorshipRequestServiceTest {
 
     @Test
     public void testRequestMentorshipWithNonExistentReceiverUserIdFailed() {
-        Mockito.when(userRepositoryMock.findById(1L)).thenReturn(Optional.of(new User()));
-        Mockito.when(userRepositoryMock.findById(2L)).thenThrow(new IllegalArgumentException());
+        when(userRepositoryMock.findById(1L)).thenReturn(Optional.of(new User()));
+        when(userRepositoryMock.findById(2L)).thenThrow(new IllegalArgumentException());
 
         var requestDto = MentorshipRequestDto.builder()
                 .requester(user1)
@@ -145,10 +161,10 @@ public class MentorshipRequestServiceTest {
                 .id(receiverId)
                 .build();
 
-        Mockito.when(mentorshipRequestRepositoryMock.findLatestRequest(requesterId, receiverId))
+        when(mentorshipRequestRepositoryMock.findLatestRequest(requesterId, receiverId))
                 .thenReturn(Optional.of(latestMentorshipRequest));
-        Mockito.when(userRepositoryMock.findById(requesterId)).thenReturn(Optional.of(requesterUser));
-        Mockito.when(userRepositoryMock.findById(receiverId)).thenReturn(Optional.of(receiverUser));
+        when(userRepositoryMock.findById(requesterId)).thenReturn(Optional.of(requesterUser));
+        when(userRepositoryMock.findById(receiverId)).thenReturn(Optional.of(receiverUser));
 
         Assert.assertThrows(
                 IllegalArgumentException.class,
@@ -159,6 +175,7 @@ public class MentorshipRequestServiceTest {
     public void testRequestMentorshipSuccess() {
         long requesterId = 1L;
         long receiverId = 2L;
+
         MentorshipRequestDto requestDto = MentorshipRequestDto.builder()
                 .requester(user1)
                 .receiver(user2)
@@ -172,13 +189,21 @@ public class MentorshipRequestServiceTest {
                 .id(receiverId)
                 .build();
 
-        Mockito.when(userRepositoryMock.findById(requesterId)).thenReturn(Optional.of(requesterUser));
-        Mockito.when(userRepositoryMock.findById(receiverId)).thenReturn(Optional.of(receiverUser));
+        when(userRepositoryMock.findById(requesterId)).thenReturn(Optional.of(requesterUser));
+        when(userRepositoryMock.findById(receiverId)).thenReturn(Optional.of(receiverUser));
+        when(mentorshipRequestMapperSpy.toMentorshipOfferedEvent(any(MentorshipRequestDto.class), any(MentorshipRequest.class)))
+                .thenReturn(mentorshipOfferedEvent);
 
         mentorshipRequestService.requestMentorship(requestDto);
 
-        Mockito.verify(mentorshipRequestRepositoryMock, Mockito.times(1))
+        Mockito.verify(mentorshipRequestRepositoryMock, times(1))
                 .create("description", requesterId, receiverId);
+
+        Mockito.verify(mentorshipOfferedEventPublisher).publish(argThat(event ->
+                event.getRequesterId() == 1 &&
+                        event.getRequestId() == null &&
+                        event.getMentorId() == 2
+        ));
     }
 
     @Test
@@ -189,7 +214,7 @@ public class MentorshipRequestServiceTest {
                 .descriptionPattern("desc")
                 .receiverPattern("Jack")
                 .build();
-        Mockito.when(mentorshipRequestRepositoryMock.findAll())
+        when(mentorshipRequestRepositoryMock.findAll())
                 .thenReturn(TestData.getListOfRequests());
 
         List<MentorshipResponseDto> requests = mentorshipRequestService.getRequests(filters);
