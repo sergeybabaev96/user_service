@@ -17,14 +17,9 @@ public interface GoalMapper {
     GoalDto toDto(Goal goal);
 
     default List<Long> skillsToIds(List<Skill> skills) {
-        if (skills == null) {
-            return new ArrayList<>();
-        }
-        List<Long> skillIds = new ArrayList<>();
-        for (Skill skill : skills) {
-            skillIds.add(skill.getId());
-        }
-        return skillIds;
+        return skills == null ? new ArrayList<>() :
+                skills.stream()
+                        .map(Skill::getId)
+                        .toList();
     }
-
 }

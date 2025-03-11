@@ -14,7 +14,6 @@ import school.faang.user_service.service.skill.SkillService;
 import school.faang.user_service.service.user.UserService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -29,11 +28,11 @@ public class GoalService {
 
     public GoalDto createGoal(Long userId, GoalDto goalDto) {
         if (!userService.isWithinGoalLimit(userId)) {
-            throw new RuntimeException("User has the maximum number of goals");
+            throw new DataValidationException("User has the maximum number of goals");
         }
 
         if (!goalRepository.existsById(goalDto.getParentId())) {
-            throw new RuntimeException("Goal parent with id " + goalDto.getParentId() + " does not exist");
+            throw new DataValidationException("Goal parent with id " + goalDto.getParentId() + " does not exist");
         }
 
         validateExistsGoalSkills(goalDto.getSkillIds());
@@ -48,12 +47,16 @@ public class GoalService {
 
         return goalMapper.toDto(createdGoal);
     }
-    
+
     public GoalDto updateGoal(Long goalId, GoalDto goalDto) {
 
         Goal goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new DataValidationException("Goal with id " + goalId + " does not exist"));
-        if (!GoalStatus.COMPLETED.equals(goal.getStatus()) && GoalStatus.COMPLETED.equals(goalDto.getStatus())) {
+
+        if (GoalStatus.COMPLETED.equals(goal.getStatus())) {
+            throw new DataValidationException("Cannot update a goal that is already completed");
+        }
+        if (GoalStatus.COMPLETED.equals(goalDto.getStatus())) {
             validateExistsGoalSkills(goalDto.getSkillIds());
             goal.getUsers().forEach(user ->
                     goal.getSkillsToAchieve().forEach(skill ->
@@ -76,25 +79,25 @@ public class GoalService {
 
     public List<GoalDto> findSubtasksByGoalId(long goalId, GoalFilterDto filters) {
         Stream<Goal> goals = goalRepository.findByParent(goalId);
+        return applyFilters(goals, filters)
+                .map(goalMapper::toDto)
+                .toList();
+    }
 
+    public List<GoalDto> getGoalsByUser(Long userId, GoalFilterDto filters) {
+        Stream<Goal> goals = goalRepository.findGoalsByUserId(userId);
+        return applyFilters(goals, filters)
+                .map(goalMapper::toDto)
+                .toList();
+    }
+
+    private Stream<Goal> applyFilters(Stream<Goal> goals, GoalFilterDto filters) {
         for (GoalFilter filter : goalFilters) {
             if (filter.isApplicable(filters)) {
                 goals = filter.apply(filters, goals);
             }
         }
-
-        return goals
-                .map(goalMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    public List<GoalDto> getGoalsByUser(Long userId, GoalFilterDto filters) {
-
-        Stream<Goal> goals = goalRepository.findGoalsByUserId(userId);
-        goalFilters.stream()
-                .filter(filter -> filter.isApplicable(filters))
-                .forEach(filter -> filter.apply(filters, goals));
-        return goals.map(goalMapper::toDto).toList();
+        return goals;
     }
 
     private void validateExistsGoalSkills(List<Long> skillIds) {

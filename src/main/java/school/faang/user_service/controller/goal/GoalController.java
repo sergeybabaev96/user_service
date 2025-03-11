@@ -20,7 +20,7 @@ public class GoalController {
     }
 
     public GoalDto updateGoal(long goalId, GoalDto goalDto) {
-        validateTitle(goalDto.getTitle());
+        validateTextField("title", goalDto.getTitle());
         return goalService.updateGoal(goalId, goalDto);
     }
 
@@ -39,20 +39,14 @@ public class GoalController {
     }
 
     private void validateGoalDto(GoalDto goalDto) {
-        validateTitle(goalDto.getTitle());
-        validateDescription(goalDto.getDescription());
+        validateTextField("title", goalDto.getTitle());
+        validateTextField("description", goalDto.getDescription());
         validateParentId(goalDto.getParentId());
     }
 
-    private void validateTitle(String title) {
-        if (title == null || title.isBlank()) {
-            throw new DataValidationException("Invalid goal title: " + title);
-        }
-    }
-
-    private void validateDescription(String description) {
-        if (description == null || description.isBlank()) {
-            throw new DataValidationException("Invalid goal description: " + description);
+    private void validateTextField(String fieldName, String value) {
+        if (value == null || value.isBlank()) {
+            throw new DataValidationException("Invalid " + fieldName + ": " + value);
         }
     }
 
