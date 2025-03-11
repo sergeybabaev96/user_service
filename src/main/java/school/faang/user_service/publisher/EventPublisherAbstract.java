@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 @Slf4j
 @RequiredArgsConstructor
 public abstract class EventPublisherAbstract<T> {
+
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
 
@@ -18,9 +19,9 @@ public abstract class EventPublisherAbstract<T> {
         try {
             String eventToPublish = objectMapper.writeValueAsString(event);
             redisTemplate.convertAndSend(topic, eventToPublish);
-        } catch (JsonProcessingException e) {
-            log.error("An error occurred while working with JSON: ", e);
-            throw new RuntimeException(e);
+        } catch (JsonProcessingException ex) {
+            log.error("An error occurred while working with JSON: ", ex);
+            throw new RuntimeException(ex);
         }
     }
 }

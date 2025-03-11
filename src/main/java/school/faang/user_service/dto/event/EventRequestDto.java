@@ -11,6 +11,7 @@ import java.util.List;
 
 @Builder
 public record EventRequestDto(
+
         @NotBlank
         String title,
 
@@ -26,11 +27,14 @@ public record EventRequestDto(
         String description,
 
         List<Long> relatedSkillsIds,
+
         String location,
+
         int maxAttendees,
 
         @NotNull
         EventType eventType,
 
         @NotNull
-        EventStatus eventStatus) {}
+        EventStatus eventStatus) {
+}

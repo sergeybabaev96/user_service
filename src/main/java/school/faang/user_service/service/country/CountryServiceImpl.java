@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.Country;
 import school.faang.user_service.repository.CountryRepository;
-import school.faang.user_service.service.CountryService;
 
 @Slf4j
 @Service

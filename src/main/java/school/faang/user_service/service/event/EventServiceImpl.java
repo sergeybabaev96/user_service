@@ -1,6 +1,8 @@
 package school.faang.user_service.service.event;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.event.EventFilterDto;
@@ -10,8 +12,8 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.EntityNotFoundException;
-import school.faang.user_service.filter.event.EventFilter;
-import school.faang.user_service.mapper.event.EventMapper;
+import school.faang.user_service.service.event.filter.EventFilter;
+import school.faang.user_service.mapper.EventMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
@@ -104,6 +107,18 @@ public class EventServiceImpl implements EventService {
     public Event findByIdOrThrow(long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Event is not exists! id: " + eventId));
+    }
+
+    @Transactional
+    @Override
+    public void banUsers(List<Long> userIdsToBan) {
+        log.info("Trying to ban users: {}", userIdsToBan);
+        List<User> usersToBan = getAllUsersByIds(userIdsToBan);
+        usersToBan.forEach(v -> v.setBanned(true));
+    }
+
+    private List<User> getAllUsersByIds(List<Long> ids) {
+        return userRepository.findAllById(ids);
     }
 
     private List<Skill> getAndValidateRelatedSkills(List<Long> relatedSkillsIds, User owner) {

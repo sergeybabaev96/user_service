@@ -26,6 +26,7 @@ spring:
         recommendation-channel: recommendation_channel
         achievement-channel: achievement_channel
         follower-channel: follower_channel
+        user-ban-channel: user_ban
         recommendation-mentorship-offered: recommendation_mentorship_offered
 
   mvc:
@@ -53,3 +54,4 @@ payment-service:
 config:
   value:
     min.skill.offers: 3
+

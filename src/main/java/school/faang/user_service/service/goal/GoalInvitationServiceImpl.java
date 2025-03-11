@@ -10,12 +10,12 @@ import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalInvitation;
-import school.faang.user_service.exception.goal.InvitationEntityNotFoundException;
-import school.faang.user_service.mapper.goal.GoalInvitationMapper;
+import school.faang.user_service.exception.InvitationEntityNotFoundException;
+import school.faang.user_service.mapper.GoalInvitationMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalInvitationRepository;
-import school.faang.user_service.service.goal.filter.invitation.InvitationFilter;
-import school.faang.user_service.validator.goal.InvitationDtoValidator;
+import school.faang.user_service.service.goal.filter.InvitationFilter;
+import school.faang.user_service.service.goal.validator.InvitationDtoValidator;
 
 import java.util.List;
 import java.util.stream.Stream;

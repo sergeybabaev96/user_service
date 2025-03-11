@@ -6,7 +6,10 @@ import java.time.LocalDateTime;
 
 @Builder
 public record EventFilterDto(
+
         String titleContains,
+
         LocalDateTime startDateLaterThan,
+
         Integer maxAttendeesLessThan) {
 }

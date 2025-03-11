@@ -4,6 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record ResponseSkillDto(
+
         Long id,
+
         String title) {
 }

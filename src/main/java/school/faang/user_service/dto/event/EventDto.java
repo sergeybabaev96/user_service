@@ -8,14 +8,25 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record EventDto(
+
         Long id,
+
         String title,
+
         LocalDateTime startDate,
+
         LocalDateTime endDate,
+
         Long ownerId,
+
         String description,
+
         List<ResponseSkillDto> relatedSkillsDto,
+
         String location,
+
         int maxAttendees,
+
         EventType eventType,
+
         EventStatus eventStatus) {}

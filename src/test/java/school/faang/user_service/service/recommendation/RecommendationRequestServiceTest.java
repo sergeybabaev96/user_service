@@ -11,10 +11,10 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.events.RecommendationEvent;
-import school.faang.user_service.dto.RecommendationRequestDto;
-import school.faang.user_service.dto.RecommendationRequestRcvDto;
+import school.faang.user_service.dto.recomendation.RecommendationRequestDto;
+import school.faang.user_service.dto.recomendation.RecommendationRequestRcvDto;
 import school.faang.user_service.dto.RejectionDto;
-import school.faang.user_service.dto.RequestFilterDto;
+import school.faang.user_service.dto.recomendation.RequestFilterDto;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
@@ -48,13 +48,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static school.faang.user_service.service.TestData.getSkills;
-import static school.faang.user_service.service.TestData.getUsers;
-import static school.faang.user_service.service.TestData.createFilterDto;
-import static school.faang.user_service.service.TestData.createRejectDto;
-import static school.faang.user_service.service.TestData.createRequest;
-import static school.faang.user_service.service.TestData.createRequestRcvDto;
-import static school.faang.user_service.service.TestData.createSkillRequest;
+import static school.faang.user_service.TestData.getSkills;
+import static school.faang.user_service.TestData.getUsers;
+import static school.faang.user_service.TestData.createFilterDto;
+import static school.faang.user_service.TestData.createRejectDto;
+import static school.faang.user_service.TestData.createRequest;
+import static school.faang.user_service.TestData.createRequestRcvDto;
+import static school.faang.user_service.TestData.createSkillRequest;
 
 @ExtendWith(MockitoExtension.class)
 public class RecommendationRequestServiceTest {
@@ -131,7 +131,7 @@ public class RecommendationRequestServiceTest {
     }
 
     @Test
-    void testCreateRecommendationRequest_Successfully() {
+    void testCreateRecommendationRequestSuccessfully() {
         when(recommendationRequestRepository.findLatestPendingRequest(requester.getId(),
                 receiver.getId())).thenReturn(Optional.empty());
         when(skillRepository.existsById(anyLong())).thenReturn(true);
@@ -167,7 +167,7 @@ public class RecommendationRequestServiceTest {
     }
 
     @Test
-    void testCreateRecommendationRequest_UserRequestHimself() {
+    void testCreateRecommendationRequestUserRequestHimself() {
         RecommendationRequestRcvDto requestDto = createRequestRcvDto(requester, requester, recommendationRequest,
                 Arrays.asList(skill1.getId(), skill2.getId(), skill3.getId()));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -178,7 +178,7 @@ public class RecommendationRequestServiceTest {
     }
 
     @Test
-    void testCreateRecommendationRequest_RequestPeriodIsNotExceeded() {
+    void testCreateRecommendationRequestRequestPeriodIsNotExceeded() {
         when(recommendationRequestRepository.findLatestPendingRequest(1L, 2L))
                 .thenReturn(Optional.of(RecommendationRequest.builder()
                         .createdAt(LocalDateTime.now().minusMonths(3))
@@ -193,7 +193,7 @@ public class RecommendationRequestServiceTest {
     }
 
     @Test
-    void testCreateRecommendationRequest_SkillIdNotExist() {
+    void testCreateRecommendationRequestSkillIdNotExist() {
         when(recommendationRequestRepository.findLatestPendingRequest(1L, 2L)).thenReturn(Optional.empty());
         when(skillRepository.existsById(skill1.getId())).thenReturn(true);
         when(skillRepository.existsById(skill2.getId())).thenReturn(true);
@@ -207,7 +207,7 @@ public class RecommendationRequestServiceTest {
     }
 
     @Test
-    void testCreateRecommendationRequest_UserIdNotExist() {
+    void testCreateRecommendationRequestUserIdNotExist() {
         when(recommendationRequestRepository.findLatestPendingRequest(requester.getId(),
                 receiver.getId())).thenReturn(Optional.empty());
         when(skillRepository.existsById(anyLong())).thenReturn(true);
@@ -222,7 +222,7 @@ public class RecommendationRequestServiceTest {
     }
 
     @Test
-    void testGetRequestById_Successfully() {
+    void testGetRequestByIdSuccessfully() {
         Long id = recommendationRequest.getId();
         when(recommendationRequestRepository.findById(id)).thenReturn(Optional.of(recommendationRequest));
 
@@ -238,7 +238,7 @@ public class RecommendationRequestServiceTest {
     }
 
     @Test
-    void testGetRequestById_NotFoundRequest() {
+    void testGetRequestByIdNotFoundRequest() {
         Long id = 5L;
         when(recommendationRequestRepository.findById(id)).thenReturn(Optional.empty());
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -250,7 +250,7 @@ public class RecommendationRequestServiceTest {
     }
 
     @Test
-    void testRejectRequest_Successfully() {
+    void testRejectRequestSuccessfully() {
         Long id = recommendationRequest.getId();
         when(recommendationRequestRepository.findById(id)).thenReturn(Optional.of(recommendationRequest));
         when(recommendationRequestRepository.save(any(RecommendationRequest.class)))
@@ -273,7 +273,7 @@ public class RecommendationRequestServiceTest {
     }
 
     @Test
-    void testRejectRequest_AlreadyRejectedRequest() {
+    void testRejectRequestAlreadyRejectedRequest() {
         Long id = recommendationRequest.getId();
         recommendationRequest.setStatus(RequestStatus.REJECTED);
         recommendationRequest.setRejectionReason(rejectionDto.reason());
@@ -290,7 +290,7 @@ public class RecommendationRequestServiceTest {
     }
 
     @Test
-    void testRejectRequest_NotFoundRequest() {
+    void testRejectRequestNotFoundRequest() {
         Long id = 5L;
         when(recommendationRequestRepository.findById(id)).thenReturn(Optional.empty());
 
@@ -304,7 +304,7 @@ public class RecommendationRequestServiceTest {
     }
 
     @Test
-    void testGetRequestsWithFiltersByStatusAndRequesterAndReceiver_Successfully() {
+    void testGetRequestsWithFiltersByStatusAndRequesterAndReceiverSuccessfully() {
         RecommendationRequest request1 = createRequest(1L, requester, receiver, RequestStatus.ACCEPTED);
         RecommendationRequest request2 = createRequest(2L, requester, receiver, RequestStatus.PENDING);
         RecommendationRequest request3 = createRequest(3L, requester, receiver, RequestStatus.REJECTED);
@@ -323,7 +323,7 @@ public class RecommendationRequestServiceTest {
     }
 
     @Test
-    void testGetRequestsWithFiltersByUser_Successfully() {
+    void testGetRequestsWithFiltersByUserSuccessfully() {
         RecommendationRequest request1 = createRequest(1L, requester, receiver, RequestStatus.ACCEPTED);
         RecommendationRequest request2 = createRequest(2L, requester, receiver, RequestStatus.PENDING);
         RecommendationRequest request3 = createRequest(3L, receiver, requester, RequestStatus.REJECTED);
@@ -339,7 +339,7 @@ public class RecommendationRequestServiceTest {
     }
 
     @Test
-    void testGetRequestsWithFiltersByStatus_NotFoundRequest() {
+    void testGetRequestsWithFiltersByStatusNotFoundRequest() {
         RecommendationRequest request1 = createRequest(1L, requester, receiver, RequestStatus.ACCEPTED);
         RecommendationRequest request2 = createRequest(2L, requester, receiver, RequestStatus.PENDING);
         RecommendationRequest request3 = createRequest(3L, receiver, requester, RequestStatus.PENDING);

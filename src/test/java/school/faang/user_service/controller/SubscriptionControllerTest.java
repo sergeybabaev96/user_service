@@ -10,9 +10,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import school.faang.user_service.dto.SubscriptionUserFilterDto;
+import school.faang.user_service.controller.subscription.SubscriptionController;
+import school.faang.user_service.dto.subscription.SubscriptionUserFilterDto;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.service.impl.SubscriptionServiceImpl;
+import school.faang.user_service.service.subscription.SubscriptionServiceImpl;
 
 import static org.mockito.Mockito.when;
 
