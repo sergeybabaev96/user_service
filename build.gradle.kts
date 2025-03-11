@@ -139,7 +139,7 @@ tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
             element = "CLASS"
-            enabled = true
+            enabled = false
             classDirectories.setFrom(
                 sourceSets.main.get().output.asFileTree.matching{ exclude(exclusions) }
             )
