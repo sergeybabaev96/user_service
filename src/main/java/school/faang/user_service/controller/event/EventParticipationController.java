@@ -35,9 +35,10 @@ public class EventParticipationController {
         return eventParticipationService.getParticipantsCount(eventId);
     }
 
-    private static void validateId(Long id) {
-        if (id == null || id <= 0) {
+    private static void validateId(long id) {
+        if (id <= 0)
             throw new DataValidationException("Id is less than or equal to zero");
-        }
     }
+
+
 }
