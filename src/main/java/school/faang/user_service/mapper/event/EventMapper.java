@@ -35,6 +35,8 @@ public interface EventMapper {
     @Mapping(target = "ratings", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(source = "eventType", target = "type")
+    @Mapping(source = "eventStatus", target = "status")
     void updateEventFromDTO(EventDTO source, @MappingTarget Event target);
 
     List<EventDTO> eventsToEventDTOs(List<Event> events);

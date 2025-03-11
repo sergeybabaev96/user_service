@@ -83,11 +83,17 @@ public class EventService {
 
     public List<EventDTO> getOwnedEvents(Long ownerId) {
         List<Event> userEvents = eventRepository.findAllByUserId(ownerId);
+        if (userEvents.isEmpty()) {
+            throw new DataValidationException("Owner haven`t events");
+        }
         return eventMapper.eventsToEventDTOs(userEvents);
     }
 
     public List<EventDTO> getParticipatedEvents(Long userId) {
         List<Event> userEvents = eventRepository.findParticipatedEventsByUserId(userId);
+        if (userEvents.isEmpty()) {
+            throw new DataValidationException("Haven`t participated events");
+        }
         return eventMapper.eventsToEventDTOs(userEvents);
     }
 

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.event.EventDTO;
+import school.faang.user_service.dto.event.EventFilterDTO;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
@@ -41,9 +42,6 @@ class EventServiceTest {
     private EventDTO mockEventDTO;
     private Event mockEvent;
 
-    //TODO названия Positive \ Negative PositiveиЧтоДелает
-    //сначала позитивные потом негативные
-    //сначала верифай потом все ассерт
     @BeforeEach
     void setUp() {
         mockUser = new User();
@@ -72,7 +70,7 @@ class EventServiceTest {
     }
 
     @Test
-    void create_shouldCreateEventWhenValid() {
+    void positiveCreate_shouldCreateEventWhenValid() {
         validDTO();
         when(userRepository.findById(mockUser.getId())).thenReturn(Optional.of(mockUser));
         when(eventMapper.eventDTOToEvent(mockEventDTO)).thenReturn(mockEvent);
@@ -83,16 +81,7 @@ class EventServiceTest {
     }
 
     @Test
-    void create_shouldThrowExceptionWhenOwnerNotFound() {
-        when(userRepository.findById(mockUser.getId())).thenReturn(Optional.empty());
-        DataValidationException thrown = assertThrows(DataValidationException.class, () -> {
-            eventService.create(mockEventDTO);
-        });
-        assertEquals("Owner not found", thrown.getMessage());
-    }
-
-    @Test
-    void getById_shouldReturnEventDTOWhenFound() {
+    void positiveGetById_shouldReturnEventDTOWhenFound() {
         when(eventRepository.findById(1L)).thenReturn(Optional.of(mockEvent));
         when(eventMapper.eventToEventDTO(mockEvent)).thenReturn(mockEventDTO);
         EventDTO result = eventService.getById(1L);
@@ -100,16 +89,7 @@ class EventServiceTest {
     }
 
     @Test
-    void getById_shouldThrowExceptionWhenEventNotFound() {
-        when(eventRepository.findById(1L)).thenReturn(Optional.empty());
-        DataValidationException thrown = assertThrows(DataValidationException.class, () -> {
-            eventService.getById(1L);
-        });
-        assertEquals("Event not found", thrown.getMessage());
-    }
-
-    @Test
-    void update_shouldUpdateEventWhenValid() {
+    void positiveUpdate_shouldUpdateEventWhenValid() {
         validDTO();
         when(eventRepository.findById(1L)).thenReturn(Optional.of(mockEvent));
         when(userRepository.findById(mockEventDTO.getOwnerId())).thenReturn(Optional.of(mockUser));
@@ -121,7 +101,84 @@ class EventServiceTest {
     }
 
     @Test
-    void update_shouldThrowExceptionWhenEventNotFound() {
+    void positiveDelete_shouldDeleteEventWhenExists() {
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(mockEvent));
+        eventService.delete(1L);
+        verify(eventRepository).delete(mockEvent);
+    }
+
+    @Test
+    void positiveGetOwnedEvents_shouldGetOwnedEvents() {
+        List<Event> events = List.of(new Event());
+        List<EventDTO> eventDTOs = List.of(new EventDTO());
+
+        when(eventRepository.findAllByUserId(mockUser.getId())).thenReturn(events);
+        when(eventMapper.eventsToEventDTOs(events)).thenReturn(eventDTOs);
+
+        List<EventDTO> result = eventService.getOwnedEvents(mockUser.getId());
+        verify(eventRepository, times(1)).findAllByUserId(mockUser.getId());
+        verify(eventMapper, times(1)).eventsToEventDTOs(events);
+        assertEquals(eventDTOs, result);
+    }
+
+    @Test
+    void positiveGetParticipatedEvents_shouldGetParticipatedEvents() {
+        List<Event> events = List.of(new Event());
+        List<EventDTO> eventDTOs = List.of(new EventDTO());
+        when(eventRepository.findParticipatedEventsByUserId(mockUser.getId())).thenReturn(events);
+        when(eventMapper.eventsToEventDTOs(events)).thenReturn(eventDTOs);
+        List<EventDTO> result = eventService.getParticipatedEvents(mockUser.getId());
+        verify(eventRepository, times(1)).findParticipatedEventsByUserId(mockUser.getId());
+        verify(eventMapper, times(1)).eventsToEventDTOs(events);
+        assertEquals(eventDTOs, result);
+    }
+    @Test
+    void positiveTestGetEventsByFilter_shouldGetEventsByFilter() {
+        EventFilterDTO filter = new EventFilterDTO();
+        filter.setLocation("New York");
+
+        Event event1 = new Event();
+        EventDTO eventDTO1 = new EventDTO();
+        eventDTO1.setLocation("New York");
+
+        Event event2 = new Event();
+        EventDTO eventDTO2 = new EventDTO();
+        eventDTO2.setLocation("Los Angeles");
+
+        List<Event> events = List.of(event1, event2);
+        List<EventDTO> eventDTOs = List.of(eventDTO1, eventDTO2);
+
+        when(eventRepository.findAll()).thenReturn(events);
+        when(eventMapper.eventsToEventDTOs(events)).thenReturn(eventDTOs);
+
+        List<EventDTO> result = eventService.getEventsByFilter(filter);
+        verify(eventRepository, times(1)).findAll();
+        verify(eventMapper, times(1)).eventsToEventDTOs(events);
+        assertEquals(1, result.size());
+        assertEquals("New York", result.get(0).getLocation());
+
+    }
+
+    @Test
+    void negativeCreate_shouldThrowExceptionWhenOwnerNotFound() {
+        when(userRepository.findById(mockUser.getId())).thenReturn(Optional.empty());
+        DataValidationException thrown = assertThrows(DataValidationException.class, () -> {
+            eventService.create(mockEventDTO);
+        });
+        assertEquals("Owner not found", thrown.getMessage());
+    }
+
+    @Test
+    void negativeGetById_shouldThrowExceptionWhenEventNotFound() {
+        when(eventRepository.findById(1L)).thenReturn(Optional.empty());
+        DataValidationException thrown = assertThrows(DataValidationException.class, () -> {
+            eventService.getById(1L);
+        });
+        assertEquals("Event not found", thrown.getMessage());
+    }
+
+    @Test
+    void negativeUpdate_shouldThrowExceptionWhenEventNotFound() {
         when(eventRepository.findById(1L)).thenReturn(Optional.empty());
         DataValidationException thrown = assertThrows(DataValidationException.class, () -> {
             eventService.update(1L, mockEventDTO);
@@ -130,14 +187,7 @@ class EventServiceTest {
     }
 
     @Test
-    void delete_shouldDeleteEventWhenExists() {
-        when(eventRepository.findById(1L)).thenReturn(Optional.of(mockEvent));
-        eventService.delete(1L);
-        verify(eventRepository).delete(mockEvent);
-    }
-
-    @Test
-    void delete_shouldThrowExceptionWhenEventNotFound() {
+    void negativeDelete_shouldThrowExceptionWhenEventNotFound() {
         when(eventRepository.findById(1L)).thenReturn(Optional.empty());
         DataValidationException thrown = assertThrows(DataValidationException.class, () -> {
             eventService.delete(1L);
