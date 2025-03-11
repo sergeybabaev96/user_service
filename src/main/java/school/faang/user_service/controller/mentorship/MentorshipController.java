@@ -1,12 +1,11 @@
 package school.faang.user_service.controller.mentorship;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.MentorshipDto;
 import school.faang.user_service.service.MentorshipService;
@@ -20,26 +19,26 @@ public class MentorshipController {
     private final MentorshipService mentorshipService;
 
     @GetMapping("/mentors/{mentorId}/mentees")
-    @ResponseStatus(HttpStatus.OK)
-    public List<MentorshipDto> getMentees(@PathVariable("mentorId") long mentorId) {
-        return mentorshipService.getMentees(mentorId);
+    public ResponseEntity<List<MentorshipDto>> getMentees(@PathVariable("mentorId") long mentorId) {
+        List<MentorshipDto> mentees = mentorshipService.getMentees(mentorId);
+        return ResponseEntity.ok(mentees);
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/mentees/{menteeId}/mentors")
-    public List<MentorshipDto> getMentors(@PathVariable("menteeId") long menteeId) {
-        return mentorshipService.getMentors(menteeId);
+    public ResponseEntity<List<MentorshipDto>> getMentors(@PathVariable("menteeId") long menteeId) {
+        List<MentorshipDto> mentors = mentorshipService.getMentors(menteeId);
+        return ResponseEntity.ok(mentors);
     }
 
     @DeleteMapping("/mentors/{mentorId}/mentees/{menteeId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteMentee(@PathVariable("menteeId") long menteeId, @PathVariable("mentorId") long mentorId) {
+    public ResponseEntity<Void> deleteMentee(@PathVariable("menteeId") long menteeId, @PathVariable("mentorId") long mentorId) {
         mentorshipService.deleteMentee(menteeId, mentorId);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/mentees/{menteeId}/mentors/{mentorId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteMentor(@PathVariable("menteeId") long menteeId, @PathVariable("mentorId") long mentorId) {
+    public ResponseEntity<Void> deleteMentor(@PathVariable("menteeId") long menteeId, @PathVariable("mentorId") long mentorId) {
         mentorshipService.deleteMentor(menteeId, mentorId);
+        return ResponseEntity.noContent().build();
     }
 }
