@@ -1,6 +1,5 @@
 package school.faang.user_service.controller.career;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.CareerDto;

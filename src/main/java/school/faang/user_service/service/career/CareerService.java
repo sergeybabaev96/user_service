@@ -2,7 +2,6 @@ package school.faang.user_service.service.career;
 
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.annotations.DialectOverride;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.CareerDto;
 import school.faang.user_service.entity.Career;
@@ -35,18 +34,6 @@ public class CareerService {
     public CareerDto addCareer(long userId, CareerDto careerDto) {
         checkCareerDto(careerDto);
 
-/*
-        if (careerDto.getFrom() == null
-                || careerDto.getCompany() == null || careerDto.getCompany().isBlank()
-                || careerDto.getPosition() == null || careerDto.getPosition().isBlank()) {
-            throw new DataValidationException("Career fields can't be empty");
-        }
-
-        if (careerDto.getFrom().isAfter(LocalDate.now())) {
-            throw new DataValidationException("Career start can't be in the future");
-        }
-*/
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataValidationException("The user with id  " + userId + " can't be found."));
 
@@ -58,16 +45,6 @@ public class CareerService {
 
     public CareerDto updateCareer(long userId, CareerDto careerDto) {
         checkCareerDto(careerDto);
-        /*
-        if (careerDto.getFrom() == null
-                || careerDto.getCompany() == null || careerDto.getCompany().isBlank()
-                || careerDto.getPosition() == null || careerDto.getPosition().isBlank()) {
-            throw new DataValidationException("Career fields can't be empty");
-        }
-        if (careerDto.getFrom().isAfter(LocalDate.now())) {
-            throw new DataValidationException("Career start can't be in the future");
-        }
-*/
 
         Career existingCareer = careerRepository.findById(careerDto.getId())
                 .orElseThrow(() -> new DataValidationException("Career with id "
