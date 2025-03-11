@@ -1,7 +1,5 @@
 package school.faang.user_service.mapper;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Spy;
@@ -21,13 +19,7 @@ class RecommendationRequestMapperTest {
     @Spy
     private RecommendationRequestMapper recommendationRequestMapper = Mappers.getMapper(RecommendationRequestMapper.class);
 
-    @BeforeEach
-    void init() {
-        SkillRequestMapper skillRequestMapper = Mappers.getMapper(SkillRequestMapper.class);
-    }
-
     @Test
-    @DisplayName("Проверка маппинга из DTO в RecommendationRequest")
     void toRecommendationRequest() {
         // arrange
         RecommendationRequestDto dto = new RecommendationRequestDto();
@@ -121,7 +113,7 @@ class RecommendationRequestMapperTest {
         // assert
         assertNotNull(dtoList, "Список DTO не должен быть null");
         assertEquals(requestList.size(), dtoList.size(), "Проверка размера списка DTO");
-        // Проверяем маппинг каждого элемента
+
         for (int i = 0; i < requestList.size(); i++) {
             RecommendationRequest req = requestList.get(i);
             RecommendationRequestDto dto = dtoList.get(i);
