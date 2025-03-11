@@ -96,8 +96,8 @@ public class RecommendationService {
         for (SkillOfferDto skill : recommendationDto.getSkillOffers()) {
             for (Skill receiverSkill : receiverSkills) {
                 if (skill.getSkillId() == receiverSkill.getId()) {
-                    userSkillGuarantee.setUser(optionalReceiver.get());
-                    userSkillGuarantee.setGuarantor(optionalGarantor.get());
+                    optionalReceiver.ifPresent(userSkillGuarantee::setUser);
+                    optionalGarantor.ifPresent(userSkillGuarantee::setGuarantor);
                     userSkillGuarantee.setSkill(receiverSkill);
                 }
             }
