@@ -2,8 +2,10 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.exception.MentorshipNotFoundException;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.mentorship.MentorshipRepository;
 
@@ -30,18 +32,27 @@ public class MentorshipService {
                 .toList();
     }
 
+    @Transactional
     public void deleteMentee(Long menteeId, Long mentorId) {
-        int deletedRows = mentorshipRepository.deleteMenteeFromMentor(menteeId, mentorId);
-        if (deletedRows == 0) {
-            throw new IllegalArgumentException("No mentorship relationship found to delete");
+        User mentor = mentorshipRepository.findById(mentorId)
+                .orElseThrow(() -> new MentorshipNotFoundException("Mentor not found: " + mentorId));
+        boolean removed = mentor.getMentees().removeIf(mentee -> mentee.getId().equals(menteeId));
+        if (!removed) {
+            throw new MentorshipNotFoundException("No mentorship relationship found for mentor "
+                    + mentorId + " and mentee " + menteeId);
         }
+        mentorshipRepository.save(mentor);
     }
 
+    @Transactional
     public void deleteMentor(Long menteeId, Long mentorId) {
-        int deletedRows = mentorshipRepository.deleteMentorFromMentee(menteeId, mentorId);
-        if (deletedRows == 0) {
-            throw new IllegalArgumentException("No mentorship relationship found to delete");
+        User mentee = mentorshipRepository.findById(menteeId)
+                .orElseThrow(() -> new MentorshipNotFoundException("Mentee not found: " + menteeId));
+        boolean removed = mentee.getMentors().removeIf(mentor -> mentor.getId().equals(mentorId));
+        if (!removed) {
+            throw new MentorshipNotFoundException("No mentorship relationship found for mentee "
+                    + menteeId + " and mentor " + mentorId);
         }
+        mentorshipRepository.save(mentee);
     }
-
 }
