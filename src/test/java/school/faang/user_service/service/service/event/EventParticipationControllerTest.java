@@ -10,6 +10,8 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.event.EventParticipationService;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class EventParticipationControllerTest {
 
@@ -17,24 +19,31 @@ public class EventParticipationControllerTest {
     private EventParticipationService eventParticipationService;
 
     @InjectMocks
-    EventParticipationController eventParticipationController;
-
+    private EventParticipationController eventParticipationController;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this); // Инициализация моков
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void testUnregisterParticipantPositiveEventId() {
-        assertThrows(DataValidationException.class,
-                () -> eventParticipationService.registerParticipant(-1, 11));
-    }
-//
-//    @Test
-//    public void testUnregisterParticipantPositiveUserId() {
-//
-//    }
-//
-}
+    public void testInvalidRegisterParticipant() {
 
+        long invalidEventId = -1;
+        long invalidUserId = -1;
+
+        assertThrows(DataValidationException.class,
+                () -> eventParticipationController.registerParticipant(invalidEventId, invalidUserId));
+    }
+
+    @Test
+    public void testValidRegisterParticipant() {
+
+        long validEventId = 1;
+        long validUserId = 1;
+
+        eventParticipationController.registerParticipant(validEventId, validUserId);
+
+        verify(eventParticipationService, times(1)).registerParticipant(validEventId, validUserId);
+    }
+}
