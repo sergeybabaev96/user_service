@@ -53,7 +53,7 @@ public class RecommendationService {
         if (optional.isPresent()) {
             Recommendation lastRecommendation = optional.get();
             if (ChronoUnit.MONTHS.between(lastRecommendation.getCreatedAt(), LocalDateTime.now()) < 6) {
-                throw new DataValidationException("6 months has not passed yet");
+                throw new DataValidationException();
             }
         }
         return true;
@@ -62,7 +62,7 @@ public class RecommendationService {
     private boolean checkSkillExist(RecommendationDto recommendation) {
         for (SkillOfferDto skill : recommendation.getSkillOffers()) {
             if (!skillRepository.existsById(skill.getSkillId())) {
-                throw new DataValidationException("Skill is not in the database");
+                throw new DataValidationException();
             }
         }
         return true;
