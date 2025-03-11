@@ -12,11 +12,11 @@ import java.util.List;
 public class SkillRequestService {
     private final SkillRequestRepository skillRequestRepository;
 
-    public List<SkillRequest> findAllByRequestId(long requestId) {
+    public List<SkillRequest> getSkillRequestsByRequestId(long requestId) {
         return skillRequestRepository.findAllByRequestId(requestId);
     }
 
-    public void create(long requestId, long skillId) {
+    public void createSkillRequest(long requestId, long skillId) {
         skillRequestRepository.create(requestId, skillId);
     }
 }

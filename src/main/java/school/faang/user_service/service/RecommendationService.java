@@ -11,8 +11,9 @@ import school.faang.user_service.repository.recommendation.RecommendationReposit
 public class RecommendationService {
     private final RecommendationRepository recommendationRepository;
 
-    public Recommendation findById(long recommendationId) {
+    public Recommendation findRecommendationById(long recommendationId) {
         return recommendationRepository.findById(recommendationId)
-                .orElseThrow(() -> new DataRetrievalFailureException("Recommendation is not found"));
+                .orElseThrow(() -> new DataRetrievalFailureException(
+                        "Recommendation with id %d is not found".formatted(recommendationId)));
     }
 }

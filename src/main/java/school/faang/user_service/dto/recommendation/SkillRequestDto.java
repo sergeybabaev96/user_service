@@ -1,5 +1,4 @@
 package school.faang.user_service.dto.recommendation;
 
-public record SkillRequestDto(
-        long skillId) {
+public record SkillRequestDto(long skillId) {
 }

@@ -11,12 +11,13 @@ import school.faang.user_service.repository.UserRepository;
 public class UserService {
     private final UserRepository userRepository;
 
-    public boolean existsById(long userId) {
+    public boolean doesUserExist(long userId) {
         return userRepository.existsById(userId);
     }
 
-    public User findById(long userId) {
+    public User getUserById(long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new DataRetrievalFailureException("User is not found"));
+                .orElseThrow(() -> new DataRetrievalFailureException(
+                        "User with id %d is not found".formatted(userId)));
     }
 }

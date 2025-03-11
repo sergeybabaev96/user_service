@@ -1,6 +1,6 @@
 package school.faang.user_service.filter.recommendation;
 
-import jakarta.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import school.faang.user_service.dto.recommendation.RequestFilterDto;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 
