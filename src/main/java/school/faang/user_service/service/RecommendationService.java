@@ -1,10 +1,13 @@
 package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.dto.analytic.RecommendationAnalyticDto;
 import school.faang.user_service.dto.recommendation.CreateRecommendationRequest;
 import school.faang.user_service.dto.recommendation.CreateRecommendationResponse;
 import school.faang.user_service.dto.recommendation.GetAllRecommendationsResponse;
@@ -21,6 +24,7 @@ import school.faang.user_service.repository.recommendation.RecommendationReposit
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import school.faang.user_service.validator.RecommendationValidator;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,8 +38,11 @@ public class RecommendationService {
     private final SkillRepository skillRepository;
     private final UserRepository userRepository;
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
-
+    private final KafkaTemplate<String, RecommendationAnalyticDto> recommendationCreateTemplate;
     private final RecommendationValidator recommendationValidator;
+
+    @Value("${recommendation.analytic.recommendation-topic}")
+    private String recommendationTopic;
 
     @Transactional
     public CreateRecommendationResponse create(CreateRecommendationRequest createRequest) {
@@ -54,6 +61,10 @@ public class RecommendationService {
         recommendation.setId(recommendationId);
 
         saveSkillOffers(recommendation, createRequest.getSkillIds());
+        RecommendationAnalyticDto recommendationAnalyticDto = new RecommendationAnalyticDto(
+                recommendationId, recommendation.getAuthor().getId(), recommendation.getReceiver().getId(),
+                LocalDateTime.now());
+        recommendationCreateTemplate.send(recommendationTopic, recommendationAnalyticDto);
 
         return recommendationMapper.toCreateResponse(recommendation);
     }
