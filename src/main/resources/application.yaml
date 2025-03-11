@@ -27,6 +27,7 @@ spring:
         achievement-channel: achievement_channel
         follower-channel: follower_channel
         user-ban-channel: user_ban
+        recommendation-mentorship-offered: recommendation_mentorship_offered
 
   mvc:
     servlet:
