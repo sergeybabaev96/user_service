@@ -7,9 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mapstruct.factory.Mappers;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,6 +14,7 @@ import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.test.util.ReflectionTestUtils;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.dto.recommendation.RejectionDto;
+import school.faang.user_service.dto.recommendation.RequestFilterDto;
 import school.faang.user_service.dto.recommendation.SkillRequestDto;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.Skill;
@@ -24,18 +22,22 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.entity.recommendation.SkillRequest;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.filter.recommendation.AdjustableRecommendationRequestAnswer;
 import school.faang.user_service.filter.recommendation.RecommendationRequestFilter;
+import school.faang.user_service.filter.recommendation.ReturnEmptyStreamRecommendationRequestAnswer;
 import school.faang.user_service.mapper.RecommendationRequestMapper;
 import school.faang.user_service.mapper.SkillRequestMapper;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -66,16 +68,25 @@ public class RecommendationRequestServiceTest {
     private SkillRequestMapper skillRequestMapper = Mappers.getMapper(SkillRequestMapper.class);
 
     @Mock
-    private List<RecommendationRequestFilter> filters;
+    private RecommendationRequestFilter recommendationRequestFilter1;
 
-    @Captor
-    private ArgumentCaptor<RecommendationRequestDto> recommendationRequestDtoCaptor;
+    @Mock
+    private RecommendationRequestFilter recommendationRequestFilter2;
 
-    @InjectMocks
     private RecommendationRequestService recommendationRequestService;
 
     @BeforeEach
     void setUp() {
+        recommendationRequestService = new RecommendationRequestService(
+                userService,
+                recommendationRequestRepository,
+                skillRequestService,
+                skillService,
+                recommendationRequestMapper,
+                skillRequestMapper,
+                List.of(recommendationRequestFilter1, recommendationRequestFilter2)
+        );
+
         ReflectionTestUtils.setField(
                 recommendationRequestService,
                 "recommendationRequestMinDistanceMonths",
@@ -152,14 +163,14 @@ public class RecommendationRequestServiceTest {
         setLatestRequest(recommendationRequest, Optional.of(latestRequest));
         when(skillService.doesSkillExists(skillId)).thenReturn(true);
 
-        var expectedRecommendationRequestEntity = RecommendationRequest.builder()
+        var expectedResult = RecommendationRequest.builder()
                 .id(5L)
                 .requester(requester)
                 .receiver(receiver)
                 .message(recommendationRequest.getMessage())
                 .build();
         when(recommendationRequestRepository.save(any(RecommendationRequest.class)))
-                .thenReturn(expectedRecommendationRequestEntity);
+                .thenReturn(expectedResult);
 
         // Act
         var result = recommendationRequestService.create(recommendationRequest);
@@ -167,10 +178,118 @@ public class RecommendationRequestServiceTest {
         // Assert
         verify(skillRequestService, times(skillRequests.size()))
                 .createSkillRequest(anyLong(), anyLong());
-        assertEquals(expectedRecommendationRequestEntity.getId(), result.getId());
-        assertEquals(expectedRecommendationRequestEntity.getMessage(), result.getMessage());
-        checkUsersEqual(expectedRecommendationRequestEntity.getRequester(), requester);
-        checkUsersEqual(expectedRecommendationRequestEntity.getReceiver(), receiver);
+        assertEquals(expectedResult.getId(), result.getId());
+        assertEquals(expectedResult.getMessage(), result.getMessage());
+        checkUsersEqual(expectedResult.getRequester(), requester);
+        checkUsersEqual(expectedResult.getReceiver(), receiver);
+    }
+
+    @Test
+    public void testGetRequests_AllFiltersAreNotApplicable_ReturnsOriginalRequests() {
+        // Arrange
+        var filterDto = new RequestFilterDto();
+
+        var recommendationRequests = List.of(
+                RecommendationRequest.builder().message("Java").build(),
+                RecommendationRequest.builder().message("Kotlin").build());
+        when(recommendationRequestRepository.findAllWithSkills()).thenReturn(recommendationRequests);
+
+        when(recommendationRequestFilter1.isApplicable(filterDto)).thenReturn(false);
+        when(recommendationRequestFilter2.isApplicable(filterDto)).thenReturn(false);
+
+        // Act
+        var result = recommendationRequestService.getRequests(filterDto);
+
+        // Assert
+        var expectedResult = recommendationRequestMapper.toDtos(recommendationRequests);
+        assertIterableEquals(
+                expectedResult.stream().map(RecommendationRequestDto::getId).toList(),
+                result.stream().map(RecommendationRequestDto::getId).toList());
+        assertIterableEquals(
+                expectedResult.stream().map(RecommendationRequestDto::getMessage).toList(),
+                result.stream().map(RecommendationRequestDto::getMessage).toList());
+    }
+
+    @Test
+    public void testGetRequests_AllRequestsAreNotMatched_ReturnsEmptyList() {
+        // Arrange
+        var filterDto = new RequestFilterDto();
+        filterDto.setMessagePattern("Test");
+
+        var recommendationRequests = List.of(
+                RecommendationRequest.builder().message("Java").build(),
+                RecommendationRequest.builder().message("Kotlin").build());
+        when(recommendationRequestRepository.findAllWithSkills()).thenReturn(recommendationRequests);
+
+        when(recommendationRequestFilter1.isApplicable(filterDto)).thenReturn(true);
+        when(recommendationRequestFilter2.isApplicable(filterDto)).thenReturn(true);
+
+        when(recommendationRequestFilter1.apply(any(), any())).thenAnswer(
+                new ReturnEmptyStreamRecommendationRequestAnswer());
+        when(recommendationRequestFilter2.apply(any(), any())).thenAnswer(
+                new ReturnEmptyStreamRecommendationRequestAnswer());
+
+        // Act
+        var result = recommendationRequestService.getRequests(filterDto);
+
+        // Assert
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetRequests_SomeRequestsAreMatched_ReturnsNotEmptyList() {
+        // Arrange
+        var messagePatternToSearch = "Java";
+        var statusToSearch = RequestStatus.PENDING;
+        var filterDto = new RequestFilterDto();
+        filterDto.setMessagePattern(messagePatternToSearch);
+        filterDto.setStatus(statusToSearch);
+
+        var recommendationRequests = List.of(
+                RecommendationRequest.builder()
+                        .id(1L)
+                        .message("JavaScript")
+                        .status(RequestStatus.PENDING)
+                        .build(),
+                RecommendationRequest.builder()
+                        .id(2L)
+                        .message("Java")
+                        .status(RequestStatus.PENDING)
+                        .build(),
+                RecommendationRequest.builder()
+                        .id(3L)
+                        .message("Python")
+                        .status(RequestStatus.PENDING)
+                        .build());
+        when(recommendationRequestRepository.findAllWithSkills()).thenReturn(recommendationRequests);
+
+        when(recommendationRequestFilter1.isApplicable(filterDto)).thenReturn(true);
+        when(recommendationRequestFilter2.isApplicable(filterDto)).thenReturn(true);
+
+        when(recommendationRequestFilter1.apply(any(), any())).thenAnswer(
+                new AdjustableRecommendationRequestAnswer(
+                        request -> request.getMessage().contains(messagePatternToSearch)));
+        when(recommendationRequestFilter2.apply(any(), any())).thenAnswer(
+                new AdjustableRecommendationRequestAnswer(
+                        request -> request.getStatus() == statusToSearch));
+
+        List<RecommendationRequestDto> expectedResult = new ArrayList<>();
+        expectedResult.add(recommendationRequestMapper.toDto(recommendationRequests.get(0)));
+        expectedResult.add(recommendationRequestMapper.toDto(recommendationRequests.get(1)));
+
+        // Act
+        var result = recommendationRequestService.getRequests(filterDto);
+
+        // Assert
+        assertIterableEquals(
+                expectedResult.stream().map(RecommendationRequestDto::getId).toList(),
+                result.stream().map(RecommendationRequestDto::getId).toList());
+        assertIterableEquals(
+                expectedResult.stream().map(RecommendationRequestDto::getMessage).toList(),
+                result.stream().map(RecommendationRequestDto::getMessage).toList());
+        assertIterableEquals(
+                expectedResult.stream().map(RecommendationRequestDto::getStatus).toList(),
+                result.stream().map(RecommendationRequestDto::getStatus).toList());
     }
 
     @Test
@@ -301,7 +420,9 @@ public class RecommendationRequestServiceTest {
         return new RejectionDto("Test reason");
     }
 
-    private RecommendationRequest prepareRecommendationRequestForRejectionTest(RequestStatus requestStatus, long requestId) {
+    private RecommendationRequest prepareRecommendationRequestForRejectionTest(
+            RequestStatus requestStatus,
+            long requestId) {
         var recommendationRequest = RecommendationRequest.builder()
                 .status(requestStatus)
                 .build();
