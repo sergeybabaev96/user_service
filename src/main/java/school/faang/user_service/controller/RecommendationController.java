@@ -14,22 +14,20 @@ public class RecommendationController {
     private final RecommendationService recommendationService;
     public RecommendationDto giveRecommendation(RecommendationDto recommendation) {
         validateRecommendation(recommendation);
-        recommendationService.create(recommendation);
-        return recommendation;
+        return recommendationService.create(recommendation);
     }
 
     public RecommendationDto updateRecommendation(RecommendationDto updated) {
         validateRecommendation(updated);
-        recommendationService.update(updated);
-        return updated;
+        return recommendationService.update(updated);
     }
 
     public void deleteRecommendation(long id) {
         recommendationService.delete(id);
     }
 
-    public List<RecommendationDto> getAllUserRecommendations(long recieverId) {
-        return recommendationService.getAllUserRecommendations(recieverId);
+    public List<RecommendationDto> getAllUserRecommendations(long receiverId) {
+        return recommendationService.getAllUserRecommendations(receiverId);
     }
 
     public List<RecommendationDto> getAllGivenRecommendations(long authorId) {
