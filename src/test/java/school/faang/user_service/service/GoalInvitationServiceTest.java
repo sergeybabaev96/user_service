@@ -2,6 +2,7 @@ package school.faang.user_service.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -13,7 +14,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -31,6 +33,7 @@ import school.faang.user_service.repository.goal.GoalInvitationRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 public class GoalInvitationServiceTest {
@@ -79,36 +82,26 @@ public class GoalInvitationServiceTest {
         mockGoalInvitationDto = createGoalInvitationDto(mockGoal.getId(), mockInviter.getId(), mockInvited.getId());
     }
 
-    private static GoalInvitationDto createGoalInvitationDto(Long goalId, Long inviterId, Long invitedId) {
-        GoalInvitationDto dto = new GoalInvitationDto();
-        dto.setId(1L);
-        dto.setGoalId(goalId);
-        dto.setInviterId(inviterId);
-        dto.setInvitedId(invitedId);
-        return dto;
-    }
-
     @ParameterizedTest
-    @CsvSource({
-            ", 1, 1, 'Goal is required'",
-            "1, , 1, 'InviterId is required'",
-            "1, 1, , 'InvitedId is required'"
-    })
-    void testCreateMissingFields(Long goalId, Long inviterId, Long invitedId, String expectedMessage) {
+    @MethodSource("provideInvalidGoalInvitationInputs")
+    @DisplayName("Negative: error when required fields are missing")
+    void testCreateNegativeMissingFields(Long goalId, Long inviterId, Long invitedId, String expectedMessage) {
         GoalInvitationDto goalInvitationDto = createGoalInvitationDto(goalId, inviterId, invitedId);
 
         assertExceptionOnCreate(NullPointerException.class, goalInvitationDto, expectedMessage);
     }
 
     @Test
-    void testCreateSameInviterAndInvited() {
+    @DisplayName("Negative: error when inviter and invited have the same value")
+    void testCreateNegativeSameInviterAndInvited() {
         GoalInvitationDto goalInvitationDto = createGoalInvitationDto(1L, 1L, 1L);
 
         assertExceptionOnCreate(IllegalArgumentException.class, goalInvitationDto, "Inviter and invited must not be same person");
     }
 
     @Test
-    void testCreateNoGoal() {
+    @DisplayName("Negative: error when goal value is missing")
+    void testCreateNegativeNoGoal() {
         when(goalService.findById(1L)).thenReturn(Optional.empty());
         GoalInvitationDto goalInvitationDto = createGoalInvitationDto(1L, 2L, 3L);
 
@@ -116,7 +109,8 @@ public class GoalInvitationServiceTest {
     }
 
     @Test
-    void testCreateNoInviter() {
+    @DisplayName("Negative: error when inviter value is missing")
+    void testCreateNegativeNoInviter() {
         when(goalService.findById(1L)).thenReturn(Optional.of(new Goal()));
         when(userService.findById(2L)).thenReturn(Optional.empty());
         GoalInvitationDto goalInvitationDto = createGoalInvitationDto(1L, 2L, 3L);
@@ -125,7 +119,8 @@ public class GoalInvitationServiceTest {
     }
 
     @Test
-    void testCreateNoInvited() {
+    @DisplayName("Negative: error when invited value is missing")
+    void testCreateNegativeNoInvited() {
         when(goalService.findById(1L)).thenReturn(Optional.of(new Goal()));
         when(userService.findById(2L)).thenReturn(Optional.of(new User()));
         when(userService.findById(3L)).thenReturn(Optional.empty());
@@ -135,6 +130,7 @@ public class GoalInvitationServiceTest {
     }
 
     @Test
+    @DisplayName("Positive: successful creation of GoalInvitation")
     void testCreateSuccess() {
         when(goalInvitationMapper.toEntity(mockGoalInvitationDto)).thenReturn(mockGoalInvitation);
         when(goalService.findById(1L)).thenReturn(Optional.of(mockGoal));
@@ -150,7 +146,8 @@ public class GoalInvitationServiceTest {
     }
 
     @Test
-    void testAcceptNoGoalInvitation() {
+    @DisplayName("Negative: error when goalInvitation value is missing")
+    void testAcceptNegativeNoGoalInvitation() {
         Long idForSearch = mockGoalInvitation.getId();
         String expectedMessage = "GoalInvitation with id = " + idForSearch + " does not exist";
         when(goalInvitationRepository.findById(idForSearch)).thenReturn(Optional.empty());
@@ -159,7 +156,8 @@ public class GoalInvitationServiceTest {
     }
 
     @Test
-    void testAcceptNoGoal() {
+    @DisplayName("Negative: error when goal value is missing")
+    void testAcceptNegativeNoGoal() {
         Long idForSearch = mockGoalInvitation.getId();
         String expectedMessage = "Goal with id = " + idForSearch + " does not exist";
 
@@ -170,7 +168,8 @@ public class GoalInvitationServiceTest {
     }
 
     @Test
-    void testAcceptMaxGoalCountException() {
+    @DisplayName("Negative: error when goals exceeds max limit")
+    void testAcceptNegativeMaxGoalCountExceeded() {
         Long idForSearch = mockGoalInvitation.getId();
         mockGoalInvitation.getInvited().setGoals(List.of(new Goal(), new Goal(), new Goal()));
 
@@ -181,7 +180,8 @@ public class GoalInvitationServiceTest {
     }
 
     @Test
-    void testAcceptGoalAlreadyExistException() {
+    @DisplayName("Negative: error when trying to accept al already existing goal")
+    void testAcceptNegativeGoalAlreadyExists() {
         Long idForSearch = mockGoalInvitation.getId();
         List<Goal> goals = new ArrayList<>();
         goals.add(mockGoal);
@@ -194,6 +194,7 @@ public class GoalInvitationServiceTest {
     }
 
     @Test
+    @DisplayName("Positive: goal accepted successfully")
     void testAcceptSuccess() {
         long idForSearch = mockGoalInvitation.getId();
         when(goalInvitationRepository.findById(idForSearch)).thenReturn(Optional.of(mockGoalInvitation));
@@ -211,6 +212,7 @@ public class GoalInvitationServiceTest {
     }
 
     @Test
+    @DisplayName("Positive: goal rejected successfully")
     void testRejectedSuccess() {
         long idForSearch = mockGoalInvitation.getId();
         when(goalInvitationRepository.findById(idForSearch)).thenReturn(Optional.of(mockGoalInvitation));
@@ -240,4 +242,20 @@ public class GoalInvitationServiceTest {
         assertEquals(ExpectedMessage, exception.getMessage());
     }
 
+    private static GoalInvitationDto createGoalInvitationDto(Long goalId, Long inviterId, Long invitedId) {
+        GoalInvitationDto dto = new GoalInvitationDto();
+        dto.setId(1L);
+        dto.setGoalId(goalId);
+        dto.setInviterId(inviterId);
+        dto.setInvitedId(invitedId);
+        return dto;
+    }
+
+    private static Stream<Arguments> provideInvalidGoalInvitationInputs () {
+        return Stream.of(
+                Arguments.of(null, 1L, 1L, "Goal is required"),
+                Arguments.of(1L, null, 1L, "InviterId is required"),
+                Arguments.of(1L, 1L, null, "InvitedId is required")
+        );
+    }
 }
