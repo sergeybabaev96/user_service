@@ -49,13 +49,13 @@ public class EventParticipationServiceTest {
     @Test
     @DisplayName("Registration error - Event not found")
     public void testRegisterParticipantEventNotFound() {
-        validationData(EVENT_NOT_FOUND);
+        validationEventNotFound();
     }
 
     @Test
     @DisplayName("Registration error - User not found")
     public void testRegisterParticipantUserNotFound() {
-        validationData(USER_NOT_FOUND);
+        validationUserNotFound();
     }
 
     @Test
@@ -93,13 +93,13 @@ public class EventParticipationServiceTest {
     @Test
     @DisplayName("Unregister error - Event not found")
     public void testUnregisterParticipantEventNotFound() {
-        validationData(EVENT_NOT_FOUND);
+        validationEventNotFound();
     }
 
     @Test
     @DisplayName("Unregister error - Event not found")
     public void testUnregisterParticipantUserNotFound() {
-        validationData(USER_NOT_FOUND);
+        validationUserNotFound();
     }
 
     @Test
@@ -139,7 +139,7 @@ public class EventParticipationServiceTest {
     @Test
     @DisplayName("Error get participant -  Event not found")
     public void testGetParticipantEventNotFound() {
-        validationData(EVENT_NOT_FOUND);
+        validationEventNotFound();
     }
 
     @Test
@@ -167,7 +167,7 @@ public class EventParticipationServiceTest {
     @Test
     @DisplayName("Error get participant count - Event not found")
     public void testGetParticipantCountEventNotFound() {
-        validationData(EVENT_NOT_FOUND);
+        validationEventNotFound();
     }
 
     @Test
@@ -211,15 +211,27 @@ public class EventParticipationServiceTest {
         doNothing().when(userValidator).checkUserExistsById(EventParticipationServiceTest.USER_ID);
     }
 
-    private void validationData(String errorMessage) {
-        doThrow(new EntityNotFoundException(errorMessage))
+    private void validationEventNotFound() {
+        doThrow(new EntityNotFoundException(EventParticipationServiceTest.EVENT_NOT_FOUND))
                 .when(eventValidator).checkEventExistsById(anyLong());
         EntityNotFoundException exception = assertThrows(
                 EntityNotFoundException.class,
                 () -> eventValidator.checkEventExistsById(anyLong())
         );
 
-        assertEquals(errorMessage, exception.getMessage());
+        assertEquals(EventParticipationServiceTest.EVENT_NOT_FOUND, exception.getMessage());
+        verify(eventParticipationRepository, never()).register(anyLong(), anyLong());
+    }
+
+    private void validationUserNotFound() {
+        doThrow(new EntityNotFoundException(EventParticipationServiceTest.USER_NOT_FOUND))
+                .when(userValidator).checkUserExistsById(anyLong());
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> userValidator.checkUserExistsById(anyLong())
+        );
+
+        assertEquals(EventParticipationServiceTest.USER_NOT_FOUND, exception.getMessage());
         verify(eventParticipationRepository, never()).register(anyLong(), anyLong());
     }
 }
