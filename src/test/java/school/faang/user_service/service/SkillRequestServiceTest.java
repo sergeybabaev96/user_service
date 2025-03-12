@@ -25,7 +25,7 @@ public class SkillRequestServiceTest {
     private SkillRequestService skillRequestService;
 
     @Test
-    public void testCreateSkillRequest_Pass_data_to_repository() {
+    public void testCreateSkillRequest_PassDataToRepository_Success() {
         long requestId = 1L;
         long skillId = 2L;
 
@@ -35,7 +35,7 @@ public class SkillRequestServiceTest {
     }
 
     @Test
-    public void testGetSkillRequestsByRequestId_request_data_from_repository() {
+    public void testGetSkillRequestsByRequestId_RequestDataFromRepository_ReturnsSkillRequests() {
         var requestId = 10L;
         var skillRequest1 = new SkillRequest();
         skillRequest1.setId(1);
