@@ -23,7 +23,7 @@ public class EducationService {
     private final EducationMapper educationMapper;
 
     public EducationCreateDto addEducation(long userId, @NonNull EducationCreateDto educationDto) throws DataValidationException {
-        yearFromValidation(educationDto);
+        validateYearFrom(educationDto);
 
         User user = findUser(userId);
 
@@ -35,10 +35,10 @@ public class EducationService {
     }
 
     public EducationCreateDto updateEducation(long userId, @NonNull EducationCreateDto educationDto) throws DataValidationException {
-        yearFromValidation(educationDto);
-        Education education = getById(educationDto.getId());
+        validateYearFrom(educationDto);
+        Education education = educationMapper.toEducation(getById(educationDto.getId()));
 
-        updateEducationValidation(userId, education.getUser().getId());
+        validateUser(userId, education.getUser().getId());
         User user = findUser(userId);
         education.setUser(user);
 
@@ -46,22 +46,23 @@ public class EducationService {
         return educationMapper.toEducationDto(updatedEducation);
     }
 
-    public Education getById(long educationId) throws DataValidationException {
+    public EducationCreateDto getById(long educationId) throws DataValidationException {
 
-        return educationRepository.findById(educationId).orElseThrow(() -> {
+        Education education = educationRepository.findById(educationId).orElseThrow(() -> {
             log.error("Ошибка: данные об образовании по ID {} не найдены", educationId);
             return new DataValidationException("Education is not found");
         });
+        return educationMapper.toEducationDto(education);
     }
 
-    private static void yearFromValidation(@NonNull EducationCreateDto educationDto) throws DataValidationException {
+    private void validateYearFrom(@NonNull EducationCreateDto educationDto) throws DataValidationException {
         if (educationDto.getYearFrom() > Year.now().getValue()) {
             log.error("Ошибка: год начала обучения не может быть больше текущего года");
             throw new DataValidationException("The start date of studies is too late");
         }
     }
 
-    private static void updateEducationValidation(long userId, long userIdInEntity) throws DataValidationException {
+    private void validateUser(long userId, long userIdInEntity) throws DataValidationException {
         if (userId != userIdInEntity) {
             log.error("Ошибка: пользователь с ID {} пытается обновить информацию по другому пользователю", userId);
             throw new DataValidationException("User tried update other user's data");
