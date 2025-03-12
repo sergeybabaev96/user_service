@@ -40,5 +40,4 @@ public class EventParticipationController {
             throw new DataValidationException("Id is less than or equal to zero");
         }
     }
-
 }
