@@ -2,7 +2,7 @@ package school.faang.user_service.controller.mentorship;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.UserViewDto;
 import school.faang.user_service.service.mentorship.MentorshipService;
 
 import java.util.List;
@@ -12,11 +12,11 @@ import java.util.List;
 public class MentorshipController {
     private final MentorshipService mentorshipService;
 
-    public List<UserDto> getMentees(long mentorId) {
+    public List<UserViewDto> getMentees(long mentorId) {
         return mentorshipService.getMentees(mentorId);
     }
 
-    public List<UserDto> getMentors(long userId) {
+    public List<UserViewDto> getMentors(long userId) {
         return mentorshipService.getMentors(userId);
     }
 

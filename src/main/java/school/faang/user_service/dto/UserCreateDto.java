@@ -5,8 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class UserDto {
-    private Long id;
+public class UserCreateDto {
     private String username;
     private List<Long> menteesIds;
     private List<Long> mentorsIds;

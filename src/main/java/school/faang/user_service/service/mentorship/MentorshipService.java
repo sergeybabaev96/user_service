@@ -3,7 +3,7 @@ package school.faang.user_service.service.mentorship;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.UserViewDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.UserMapper;
@@ -18,7 +18,7 @@ public class MentorshipService {
     private final MentorshipRepository mentorshipRepository;
     private final UserMapper userMapper;
 
-    public List<UserDto> getMentees(long userId) {
+    public List<UserViewDto> getMentees(long userId) {
         log.info("Получение всех менти для пользователя с ID {}", userId);
 
         User user = getUser(userId);
@@ -28,7 +28,7 @@ public class MentorshipService {
                 .toList();
     }
 
-    public List<UserDto> getMentors(long userId) {
+    public List<UserViewDto> getMentors(long userId) {
         log.info("Получение всех менторов для пользователя с ID {}", userId);
 
         User user = getUser(userId);
@@ -71,14 +71,14 @@ public class MentorshipService {
         log.info("Ментор {} успешно удален у менти {}", mentorId, menteeId);
     }
 
-    private UserDto mapUserToUserDto(User user) {
+    private UserViewDto mapUserToUserDto(User user) {
         List<Long> menteesIds = user.getMentees().stream()
                 .map(User::getId)
                 .toList();
         List<Long> mentorsIds = user.getMentors().stream()
                 .map(User::getId)
                 .toList();
-        UserDto userDto = userMapper.toDto(user);
+        UserViewDto userDto = userMapper.toViewDto(user);
         userDto.setMenteesIds(menteesIds);
         userDto.setMentorsIds(mentorsIds);
         return userDto;
