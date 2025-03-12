@@ -5,21 +5,16 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
-import school.faang.user_service.entity.User;
-import school.faang.user_service.repository.UserRepository;
 
 @SpringBootApplication
 @EnableFeignClients("school.faang.user_service.client")
 @RequiredArgsConstructor
 @Slf4j
-public class UserServiceApplication implements CommandLineRunner {
-
-    private final UserRepository userRepository;
+public class UserServiceApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(UserServiceApplication.class, args);
@@ -32,7 +27,4 @@ public class UserServiceApplication implements CommandLineRunner {
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return objectMapper;
     }
-
-    @Override
-    public void run(String... args) throws Exception {}
 }

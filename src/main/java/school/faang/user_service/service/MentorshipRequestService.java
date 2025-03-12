@@ -33,11 +33,12 @@ public class MentorshipRequestService {
     private final List<MentorshipRequestFilter> filters;
 
     @Transactional
-    public void requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
+    public MentorshipRequestDto requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
 
         validateMentorshipRequest(mentorshipRequestDto);
         MentorshipRequest request = mentorshipRequestMapper.toEntity(mentorshipRequestDto);
-        mentorshipRequestRepository.save(request);
+        MentorshipRequest response = mentorshipRequestRepository.save(request);
+        return mentorshipRequestMapper.toDto(response);
     }
 
     private void validateMentorshipRequest(MentorshipRequestDto mentorshipRequestDto) {
