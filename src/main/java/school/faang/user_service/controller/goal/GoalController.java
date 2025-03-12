@@ -1,4 +1,4 @@
-package school.faang.user_service.controller;
+package school.faang.user_service.controller.goal;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.SearchGoalDto;
-import school.faang.user_service.service.goal.GoalServiceImpl;
+import school.faang.user_service.service.goal.GoalService;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ import java.util.List;
 @RequestMapping("/goal")
 @RequiredArgsConstructor
 public class GoalController {
-    private final GoalServiceImpl goalService;
+    private final GoalService goalService;
 
     @PostMapping()
     public ResponseEntity<GoalDto> createGoal(@RequestParam Long userId,
