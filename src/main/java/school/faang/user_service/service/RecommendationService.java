@@ -53,6 +53,7 @@ public class RecommendationService {
         var createdRecommendation = recommendationRepository.findByAuthorIdAndReceiverId(
                 recommendation.getAuthorId(),
                 recommendation.getReceiverId());
+
         if (createdRecommendation.isEmpty()) {
             throw new DataValidationException(
                     "Recommendation is not created (author id: %d, receiver id: %d)".formatted(
