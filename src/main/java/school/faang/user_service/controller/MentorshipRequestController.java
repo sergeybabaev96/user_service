@@ -38,13 +38,15 @@ public class MentorshipRequestController {
     public ResponseEntity<?> requestMentorship(@RequestBody MentorshipRequestDto mentorshipRequestDto) {
         try {
             validateMentorshipRequest(mentorshipRequestDto);
-            MentorshipRequestDto mentorshipResponseDto = mentorshipRequestService.requestMentorship(mentorshipRequestDto);
+            MentorshipRequestDto mentorshipResponseDto = mentorshipRequestService
+                    .requestMentorship(mentorshipRequestDto);
 
             log.info("Mentorship request created successfully for DTO: {}", mentorshipRequestDto);
             return ResponseEntity.ok(mentorshipResponseDto);
         } catch (IllegalArgumentException e) {
             String errorMessage = String.format(
-                    "Failed to create mentorship request. Reason: %s. Request data: [requesterId=%d, receiverId=%d, description=%s, status=%s]",
+                    "Failed to create mentorship request. Reason: %s. Request data: [requesterId=%d, receiverId=%d, " +
+                            "description=%s, status=%s]",
                     e.getMessage(),
                     mentorshipRequestDto.getRequesterId(),
                     mentorshipRequestDto.getReceiverId(),
@@ -90,12 +92,14 @@ public class MentorshipRequestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(String.format("Request with ID %d not found: %s", requestId, e.getMessage()));
         } catch (MentorshipAlreadyExistsException e) {
-            String messageWarn = String.format("Conflict while accepting request with ID %d: %s", requestId, e.getMessage());
+            String messageWarn = String.format("Conflict while accepting request with ID %d: %s",
+                    requestId, e.getMessage());
             log.warn(messageWarn);
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(messageWarn);
         } catch (Exception e) {
-            String messageError = String.format("Unexpected error while accepting request with ID %d: %s", requestId, e.getMessage());
+            String messageError = String.format("Unexpected error while accepting request with ID %d: %s",
+                    requestId, e.getMessage());
             log.error(messageError);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(messageError);

@@ -44,8 +44,8 @@ public class MentorshipRequestService {
     private void validateMentorshipRequest(MentorshipRequestDto mentorshipRequestDto) {
         Long requesterId = mentorshipRequestDto.getRequesterId();
         Long receiverId = mentorshipRequestDto.getReceiverId();
-        if (requesterId == null || receiverId == null ||
-                !userRepository.existsById(requesterId) || !userRepository.existsById(receiverId)) {
+        if (requesterId == null || receiverId == null
+                || !userRepository.existsById(requesterId) || !userRepository.existsById(receiverId)) {
             log.info("Both users need to be registered or IDs cannot be null");
             throw new IllegalArgumentException("User is not existed or is null");
         }
