@@ -40,21 +40,21 @@ public class GoalController {
     }
 
     @DeleteMapping("/{goalId}")
-    public ResponseEntity deleteGoal(@PathVariable("goalId") long goalId) {
+    public ResponseEntity<Void> deleteGoal(@PathVariable("goalId") long goalId) {
         goalService.deleteGoal(goalId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/find-subtasks/{goalId}")
     public ResponseEntity<List<GoalDto>>
-    findSubtasksByGoalId(@PathVariable long goalId, @NonNull SearchGoalDto searchGoal) {
+    findSubtasksByGoalId(@PathVariable("goalId") long goalId, @NonNull SearchGoalDto searchGoal) {
         List<GoalDto> subTasks = goalService.findSubtasksByGoalId(goalId, searchGoal);
         return ResponseEntity.ok(subTasks);
     }
 
     @GetMapping("/find-goals-by-user/{userId}")
     public ResponseEntity<List<GoalDto>>
-    getGoalsByUser(@PathVariable long userId, @NonNull SearchGoalDto searchGoal) {
+    getGoalsByUser(@PathVariable("userId") long userId, @NonNull SearchGoalDto searchGoal) {
         List<GoalDto> goalsByUser = goalService.getGoalsByUser(userId, searchGoal);
         return ResponseEntity.ok(goalsByUser);
     }

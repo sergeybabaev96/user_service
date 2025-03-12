@@ -2,7 +2,10 @@ package school.faang.user_service.mapper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.goal.Goal;
@@ -15,7 +18,9 @@ import java.util.List;
 @Slf4j
 public abstract class GoalMapperDecorator implements GoalMapper {
     @Autowired
-    private GoalMapper goalMapper;
+    @Lazy
+    @Qualifier("delegate")
+    private GoalMapper delegate;
 
     @Autowired
     public GoalRepository goalRepository;
@@ -25,31 +30,25 @@ public abstract class GoalMapperDecorator implements GoalMapper {
 
     @Override
     public GoalDto toDto(Goal goal) {
-        GoalDto dto = goalMapper.toDto(goal);
-        dto.setParentId(mapParentToParentId(goal));
-        dto.setSkillIds(mapSkillsToAchieveToSkillIds(goal.getSkillsToAchieve()));
-        return goalMapper.toDto(goal);
+        return delegate.toDto(goal);
     }
 
     @Override
     public Goal toEntity(GoalDto goalDto) {
-        Goal entity = goalMapper.toEntity(goalDto);
-        entity.setParent(mapParentIdToParent(goalDto.getParentId()));
-        entity.setSkillsToAchieve(mapSkillIdsToSkillsToAchieve(goalDto.getSkillIds()));
-        return goalMapper.toEntity(goalDto);
+        return delegate.toEntity(goalDto);
     }
 
     @Override
     public Goal update(@MappingTarget Goal goal, GoalDto goalDto) {
-        Goal updatedGoal = goalMapper.update(goal, goalDto);
-        updatedGoal.setParent(mapParentIdToParent(goalDto.getParentId()));
-        return goalMapper.update(goal, goalDto);
+        return delegate.update(goal, goalDto);
     }
 
-    private Long mapParentToParentId(Goal goal) {
+    @Named("mapParentToParentId")
+    public Long mapParentToParentId(Goal goal) {
         return goal.getId();
     }
 
+    @Named("mapParentIdToParent")
     public Goal mapParentIdToParent(Long parentId) {
         return goalRepository.findById(parentId)
                 .orElseThrow(() -> {
@@ -59,11 +58,13 @@ public abstract class GoalMapperDecorator implements GoalMapper {
                 );
     }
 
-    private List<Long> mapSkillsToAchieveToSkillIds(List<Skill> skillsToAchieve) {
+    @Named("mapSkillsToAchieveToSkillIds")
+    public List<Long> mapSkillsToAchieveToSkillIds(List<Skill> skillsToAchieve) {
         return skillsToAchieve.stream().map(Skill::getId).toList();
     }
 
-    private List<Skill> mapSkillIdsToSkillsToAchieve(List<Long> skillIds) {
+    @Named("mapSkillIdsToSkillsToAchieve")
+    public List<Skill> mapSkillIdsToSkillsToAchieve(List<Long> skillIds) {
         return skillRepository.findAllById(skillIds);
     }
 }
