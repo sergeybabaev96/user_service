@@ -42,7 +42,7 @@ public class EventService {
 
     public EventDto create(EventDto eventDto) {
         User owner = validateOwnerAndSkills(eventDto);
-        Event entity = eventMapper.toEntity(eventDto);
+        Event entity = eventMapper.toEntity(eventDto, skillRepository);
         entity.setOwner(owner);
         entity = eventRepository.save(entity);
 
@@ -83,7 +83,7 @@ public class EventService {
 
         Event existingEvent = eventRepository.getReferenceById(eventId);
 
-        eventMapper.updateEventFormDto(eventDto, existingEvent);
+        eventMapper.updateEventFormDto(eventDto, existingEvent, skillRepository);
         existingEvent = eventRepository.save(existingEvent);
 
         return eventMapper.toDto(existingEvent);
@@ -126,15 +126,15 @@ public class EventService {
         return owner;
     }
 
-    private void validateEventID(long eventId){
-        if(!eventRepository.existsById(eventId)){
+    private void validateEventID(long eventId) {
+        if (!eventRepository.existsById(eventId)) {
             log.error(EVENT_NOT_FOUND_LOG_DETAIL, eventId);
             throw new DataValidationException(EVENT_NOT_FOUND_LOG);
         }
     }
 
-    private void validateMismatched(long eventId){
-        if(!eventRepository.existsById(eventId)){
+    private void validateMismatched(long eventId) {
+        if (!eventRepository.existsById(eventId)) {
             log.error(EVENT_ID_MISMATCH_DETAIL, eventId);
             throw new DataValidationException(EVENT_ID_MISMATCH);
         }
