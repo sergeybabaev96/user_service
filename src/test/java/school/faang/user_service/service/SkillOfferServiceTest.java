@@ -34,8 +34,6 @@ public class SkillOfferServiceTest {
     private UserRepository userRepository;
     @Mock
     private SkillRepository skillRepository;
-    @Mock
-    private UserSkillGuarantee userSkillGuarantee;
 
     @InjectMocks
     private SkillOfferService skillOfferService;
@@ -143,7 +141,7 @@ public class SkillOfferServiceTest {
         Assertions.assertEquals("Skill not found", exception.getMessage());
     }
 
-    @DisplayName("Негативный тест с наличием автора в гарантах")
+    @DisplayName("Тест с наличием автора в гарантах")
     @Test
     void saveSkillsOfferWhenGuarantorIsNotAddedTest() {
         Mockito.when(userRepository.findById(author.getId()))

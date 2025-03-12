@@ -122,11 +122,9 @@ public class RecommendationValidatorTest {
 
         recommendationCreateDto.setSkillOffers(null);
 
-
         Exception exception = Assertions.assertThrows(DataValidationException.class, () ->
             recommendationValidator.validate(recommendationCreateDto));
         Assertions.assertEquals("Skill offers list is null", exception.getMessage());
-
 
         Mockito.verify(userRepository, Mockito.times(1))
                 .findById(author.getId());
@@ -140,11 +138,9 @@ public class RecommendationValidatorTest {
 
         recommendationCreateDto.setSkillOffers(List.of());
 
-
         Exception exception = Assertions.assertThrows(DataValidationException.class, () ->
                 recommendationValidator.validate(recommendationCreateDto));
         Assertions.assertEquals("Skill offer is Empty", exception.getMessage());
-
 
         Mockito.verify(userRepository, Mockito.times(1))
                 .findById(author.getId());
@@ -162,9 +158,7 @@ public class RecommendationValidatorTest {
                 recommendationValidator.validate(recommendationCreateDto));
         Assertions.assertEquals("Skill offer not found", exception.getMessage());
 
-
         Mockito.verify(userRepository, Mockito.times(1))
                 .findById(author.getId());
     }
-
 }
