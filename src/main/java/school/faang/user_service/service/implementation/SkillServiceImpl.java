@@ -99,6 +99,26 @@ public class SkillServiceImpl implements SkillService {
         return skillMapper.toDto(skill);
     }
 
+    @Override
+    public List<Skill> findAllSkillsById(List<Long> skillIds) {
+        return skillRepository.findAllById(skillIds);
+    }
+
+    @Override
+    public List<Skill> findSkillsByUserId(Long userId) {
+        return skillRepository.findAllByUserId(userId);
+    }
+
+    @Override
+    public List<Skill> findSkillsByGoalId(Long goalId) {
+        return skillRepository.findSkillsByGoalId(goalId);
+    }
+
+    @Override
+    public void saveAllSkills(List<Skill> skills) {
+        skillRepository.saveAll(skills);
+    }
+
     private void validateSkill(SkillDto skillDto) {
         if (Objects.isNull(skillDto)) {
             throw new DataValidationException("Skill data is null");
