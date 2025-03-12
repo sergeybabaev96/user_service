@@ -19,6 +19,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.PersonUserMapper;
 import school.faang.user_service.repository.CountryRepository;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.country.CountryService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,20 +35,20 @@ class UserServiceParsingCvsTest {
     @Mock
     private PersonUserMapper personUserMapper;
     @Mock
-    private CountryRepository countryRepository;
+    private CountryService countryService;
 
     @InjectMocks
     private UserService userService;
     @Spy
-    private UserService userServiceMock = new UserService(userRepository, personUserMapper, countryRepository);
+    private UserService userServiceMock = new UserService(userRepository, personUserMapper, countryService);
 
     @ParameterizedTest
     @CsvSource({"1", "12", "121"})
-    @DisplayName("Positive. Create Users from List<Person>")
+    @DisplayName("createUsers(). Positive. Create Users from List<Person>")
     public void  createUsersFromListPersonPositive(int size) {
         List<Person> persons = new ArrayList<>();
-        for ( int i = 0; i < size; i++ ) {
-            persons.add( new Person() );
+        for (int i = 0; i < size; i++) {
+            persons.add(new Person());
         }
 
         Mockito.doReturn(new User()).when(userServiceMock).createUser(any(Person.class));
@@ -57,7 +58,7 @@ class UserServiceParsingCvsTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    @DisplayName("Negative. Create Users from List<Person>, when list is null and empty")
+    @DisplayName("createUsers(). Negative. Create Users from List<Person>, when list is null and empty")
     public void  createUsersFromListPersonWhenListIsNullOrEmpty(List<Person> persons) {
         List<User> users = userServiceMock.createUsers(persons);
         Mockito.verify(userServiceMock,Mockito.never()).createUser(any(Person.class));
@@ -65,40 +66,25 @@ class UserServiceParsingCvsTest {
 
 
     @Test
-    @DisplayName("Negative. Create User from Person, when Person is null")
+    @DisplayName("createUser(). Negative. Create User from Person, when Person is null")
     public void createUserFromPersonWhenPersonIsNull() {
         assertThrows(RuntimeException.class, () -> userService.createUser(null) );
     }
 
     @Test
-    @DisplayName("Positive. Create User from Person, when Country is already in DB")
-    public void createUserFromPersonWhenPersonExistCountry() {
+    @DisplayName("createUser(). Positive. Create User from Person")
+    public void createUserFromPerson() {
         String countryName = "Test Country";
         Person person = getPersonWithCountry(countryName);
         Country country = new Country(1, countryName, List.of());
 
         Mockito.when(personUserMapper.toUser(any(Person.class))).thenReturn(new User());
-        Mockito.when(countryRepository.findAll()).thenReturn(List.of(country));
+        Mockito.when(countryService.getOrCreateCountry(countryName)).thenReturn(country);
+
         User result = userService.createUser(person);
 
-        Mockito.verify(countryRepository, Mockito.never()).save(any(Country.class));
         Mockito.verify(userRepository, Mockito.times(1)).save(any(User.class));
-    }
-
-    @Test
-    @DisplayName("Positive. Create User from Person, when Country is NOT already in DB")
-    public void createUserFromPersonWhenPersonNotExistCountry() {
-        String countryNameInPerson = "Test Country";
-        String countryNameInDB = "Other Country";
-        Person person = getPersonWithCountry(countryNameInPerson);
-        Country country = new Country(1, countryNameInDB, List.of());
-
-        Mockito.when(personUserMapper.toUser(any(Person.class))).thenReturn(new User());
-        Mockito.when(countryRepository.findAll()).thenReturn(List.of(country));
-        User result = userService.createUser(person);
-
-        Mockito.verify(countryRepository, Mockito.times(1)).save(any(Country.class));
-        Mockito.verify(userRepository, Mockito.times(1)).save(any(User.class));
+        Mockito.verify(countryService, Mockito.times(1)).getOrCreateCountry(countryName);
     }
 
 
