@@ -58,13 +58,13 @@ public class RecommendationValidator {
         }
 
         Optional<Long> absentSkillOffer = skillOffers.stream()
-                .map(SkillOfferCreateDto:: getSkillId)
+                .map(SkillOfferCreateDto::getSkillId)
                 .filter(skillId -> !skillRepository.existsById(skillId))
                 .findFirst();
-            if (absentSkillOffer.isPresent()) {
-                log.error("Навык с ID {} не найден в системе", absentSkillOffer.get());
-                throw new DataValidationException("Skill offer not found");
-            }
+        if (absentSkillOffer.isPresent()) {
+            log.error("Навык с ID {} не найден в системе", absentSkillOffer.get());
+            throw new DataValidationException("Skill offer not found");
+        }
     }
 
     /**
@@ -78,7 +78,7 @@ public class RecommendationValidator {
         LocalDateTime sixMonthsAgo = LocalDateTime.now().minusMonths(6);
         LocalDateTime lastRecommendationDate = getUpdateAtCreateRecommendation(recommendation);
 
-        if (lastRecommendationDate.isBefore(sixMonthsAgo)) {
+        if (lastRecommendationDate.isAfter(sixMonthsAgo)) {
             log.error("Ошибка валидации: рекомендация обновлена слишком рано");
             throw new DataValidationException("Updated recommendation too early");
         }
@@ -104,16 +104,14 @@ public class RecommendationValidator {
      * @return Optional<LocalDateTime> - дата последнего обновления рекомендации
      */
     private LocalDateTime getUpdateAtCreateRecommendation(RecommendationCreateDto recommendation) {
-        User recommendationAuthor  = getUser(recommendation.getAuthorId());
+        User recommendationAuthor = getUser(recommendation.getAuthorId());
         return recommendationAuthor.getRecommendationsGiven().stream()
                 .filter(existingRecommendation -> {
                     User receiver = existingRecommendation.getReceiver();
                     return receiver.getId().equals(recommendation.getReceiverId());
                 })
-                .findFirst()
-                .map(Recommendation::getUpdatedAt)
-                .orElseThrow(() ->
-                        new DataValidationException("Update date is not found"));
+                .findFirst().map(Recommendation::getUpdatedAt)
+                .orElseThrow(() -> new DataValidationException("Update date is not found"));
     }
 
     /**

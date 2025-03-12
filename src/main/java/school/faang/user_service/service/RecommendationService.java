@@ -87,7 +87,7 @@ public class RecommendationService {
         recommendationRepository.save(recommendationEntity);
         skillOfferService.saveSkillsOffer(recommendation, recommendationId);
 
-        return recommendationMapper.toDto(recommendationEntity);
+        return recommendationMapper.toViewDto(recommendationEntity);
     }
 
     /**
@@ -114,7 +114,7 @@ public class RecommendationService {
                     return new EntityNotFoundException("Recommendation not found");
 
                 });
-        return recommendationMapper.toDto(recommendationEntity);
+        return recommendationMapper.toViewDto(recommendationEntity);
     }
 
     /**
@@ -138,7 +138,7 @@ public class RecommendationService {
     public Page<RecommendationViewDto> getAllUserRecommendations(long receiverId,@NonNull Pageable pageable) {
         Page<Recommendation> recommendationPage =
                 recommendationRepository.findAllByReceiverId(receiverId, pageable);
-        return recommendationPage.map(recommendationMapper::toDto);
+        return recommendationPage.map(recommendationMapper::toViewDto);
     }
 
     /**
@@ -149,7 +149,7 @@ public class RecommendationService {
     public Page<RecommendationViewDto> getAllCreatedRecommendation(long authorId, @NonNull Pageable pageable) {
         Page<Recommendation> recommendationPage = recommendationRepository
                 .findAllByAuthorId(authorId, pageable);
-        return recommendationPage.map(recommendationMapper::toDto);
+        return recommendationPage.map(recommendationMapper::toViewDto);
     }
 
     /**
@@ -177,10 +177,10 @@ public class RecommendationService {
         long authorId = recommendation.getAuthorId();
         User author = getUser(authorId);
 
-        Recommendation recommendationEntity = recommendationMapper.CreateDtoToEntity(recommendation);
+        Recommendation recommendationEntity = recommendationMapper.createDtoToEntity(recommendation);
         recommendationEntity.setReceiver(receiver);
         recommendationEntity.setAuthor(author);
-        List<SkillOffer> skillOffers = SkillOffersToEntity(recommendation);
+        List<SkillOffer> skillOffers = skillOffersToEntity(recommendation);
         recommendationEntity.setSkillOffers(skillOffers);
         return recommendationEntity;
     }
@@ -191,7 +191,7 @@ public class RecommendationService {
      * @return List<SkillOffer> - список предложенных навыков
      * @throws DataValidationException если навык не найден
      */
-    private List<SkillOffer> SkillOffersToEntity(RecommendationCreateDto recommendation) {
+    private List<SkillOffer> skillOffersToEntity(RecommendationCreateDto recommendation) {
         List<Long> skillOfferIds = recommendation.getSkillOffers().stream()
                 .map(SkillOfferCreateDto::getSkillId)
                 .toList();

@@ -81,7 +81,8 @@ public class RecommendationController {
      * @param receiverId идентификатор пользователя
      * @return Page рекомендаций
      */
-    public Page<RecommendationViewDto> getAllUserRecommendations(long receiverId, @NonNull Pageable pageable) {
+    public Page<RecommendationViewDto> getAllUserRecommendations(long receiverId,
+                                                                 @NonNull Pageable pageable) {
         return recommendationService.getAllUserRecommendations(receiverId, pageable);
     }
 
@@ -91,7 +92,8 @@ public class RecommendationController {
      * @param authorId идентификатор пользователя
      * @return Page рекомендаций
      */
-    public Page<RecommendationViewDto> getAllCreatedRecommendation(long authorId, @NonNull Pageable pageable) {
+    public Page<RecommendationViewDto> getAllCreatedRecommendation(long authorId,
+                                                                   @NonNull Pageable pageable) {
         return recommendationService.getAllCreatedRecommendation(authorId,pageable);
     }
 }
