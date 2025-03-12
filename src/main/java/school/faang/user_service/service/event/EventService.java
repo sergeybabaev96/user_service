@@ -3,8 +3,9 @@ package school.faang.user_service.service.event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.event.EventDto;
+import school.faang.user_service.dto.event.EventCreateDto;
 import school.faang.user_service.dto.event.EventFilterDto;
+import school.faang.user_service.dto.event.EventViewDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
@@ -39,11 +40,10 @@ public class EventService {
      * Создает новое событие на основе переданного DTO.
      *
      * @param eventDto DTO события, содержащее данные для создания.
-     * @return Созданное событие в виде {@link EventDto}.
+     * @return Созданное событие в виде {@link EventViewDto}.
      * @throws DataValidationException если пользователь не обладает необходимыми навыками.
      */
-    public EventDto create(EventDto eventDto) {
-        log.info("Creating event with data: {}", eventDto);
+    public EventViewDto create(EventCreateDto eventDto) {
         validateUserSkills(eventDto);
         Event event = eventMapper.toEntity(eventDto);
         User user = getUserById(eventDto.getOwnerId());
@@ -51,7 +51,6 @@ public class EventService {
         List<Skill> relatedSkills = mapSkillIdsToEntities(eventDto.getRelatedSkillsId());
         event.setRelatedSkills(relatedSkills);
         Event savedEvent = eventRepository.save(event);
-        log.info("Event created successfully with ID: {}", savedEvent.getId());
         return eventMapper.toDto(savedEvent);
     }
 
@@ -59,11 +58,10 @@ public class EventService {
      * Получает событие по его идентификатору.
      *
      * @param eventId Идентификатор события.
-     * @return Событие в виде {@link EventDto}.
+     * @return Событие в виде {@link EventViewDto}.
      * @throws DataValidationException если событие не найдено.
      */
-    public EventDto getEvent(long eventId) {
-        log.info("Fetching event with ID: {}", eventId);
+    public EventViewDto getEvent(long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> {
                     log.error("Event not found with ID: {}", eventId);
@@ -76,10 +74,15 @@ public class EventService {
      * Получает список событий, соответствующих заданному фильтру.
      *
      * @param eventFilterDto DTO фильтра, содержащее критерии поиска.
-     * @return Список событий в виде {@link List<EventDto>}.
+     * @return Список событий в виде {@link List<EventViewDto>}
      */
-    public List<EventDto> getEventsByFilter(EventFilterDto eventFilterDto) {
-        log.info("Fetching events by filter: {}", eventFilterDto);
+    public List<EventViewDto> getEventsByFilter(EventFilterDto eventFilterDto) {
+        if (eventFilterDto == null) {
+            return eventRepository.findAll().stream()
+                    .map(eventMapper::toDto)
+                    .toList();
+        }
+
         Stream<Event> allEvents = eventRepository.findAll().stream();
 
         for (EventFilter eventFilter : eventFilters) {
@@ -88,11 +91,9 @@ public class EventService {
             }
         }
 
-        List<EventDto> filteredEvents = allEvents
+        return allEvents
                 .map(eventMapper::toDto)
                 .toList();
-        log.info("Found {} events matching the filter", filteredEvents.size());
-        return filteredEvents;
     }
 
     /**
@@ -102,29 +103,25 @@ public class EventService {
      * @throws DataValidationException если событие не найдено.
      */
     public void deleteEvent(long eventId) {
-        log.info("Deleting event with ID: {}", eventId);
-        eventRepository.findById(eventId)
-                .orElseThrow(() -> {
-                    log.error("Event not found with ID: {}", eventId);
-                    return new DataValidationException("Event not found with ID: " + eventId);
-                });
+        if (eventRepository.existsById(eventId)) {
+            log.error("Event not found with ID: {}", eventId);
+            throw new DataValidationException("Event not found with ID: " + eventId);
+        }
+
         eventRepository.deleteById(eventId);
-        log.info("Event deleted successfully with ID: {}", eventId);
     }
 
     /**
      * Обновляет существующее событие на основе переданного DTO.
      *
      * @param eventDto DTO события, содержащее обновленные данные.
-     * @return Обновленное событие в виде {@link EventDto}.
+     * @return Обновленное событие в виде {@link EventViewDto}.
      * @throws DataValidationException если событие не прошло валидацию.
      */
-    public EventDto updateEvent(EventDto eventDto) {
-        log.info("Updating event with data: {}", eventDto);
+    public EventViewDto updateEvent(EventCreateDto eventDto) {
         Event event = eventMapper.toEntity(eventDto);
-        validation(event);
+        verifyUserEventAccess(event);
         Event updatedEvent = eventRepository.save(event);
-        log.info("Event updated successfully with ID: {}", updatedEvent.getId());
         return eventMapper.toDto(updatedEvent);
     }
 
@@ -132,32 +129,26 @@ public class EventService {
      * Получает список событий, созданных конкретным пользователем.
      *
      * @param userId Идентификатор пользователя.
-     * @return Список событий в виде {@link List<EventDto>}.
+     * @return Список событий в виде {@link List<EventViewDto>}.
      */
-    public List<EventDto> getOwnerEvent(long userId) {
-        log.info("Fetching events for owner with ID: {}", userId);
+    public List<EventViewDto> getOwnerEvent(long userId) {
         List<Event> events = eventRepository.findAllByUserId(userId);
-        List<EventDto> eventDtos = events.stream()
+        return events.stream()
                 .map(eventMapper::toDto)
                 .toList();
-        log.info("Found {} events for owner with ID: {}", eventDtos.size(), userId);
-        return eventDtos;
     }
 
     /**
      * Получает список событий, в которых участвовал конкретный пользователь.
      *
      * @param userId Идентификатор пользователя.
-     * @return Список событий в виде {@link List<EventDto>}.
+     * @return Список событий в виде {@link List<EventViewDto>}.
      */
-    public List<EventDto> getParticipatedEvents(long userId) {
-        log.info("Fetching participated events for user with ID: {}", userId);
+    public List<EventViewDto> getParticipatedEvents(long userId) {
         List<Event> events = eventRepository.findParticipatedEventsByUserId(userId);
-        List<EventDto> eventDtos = events.stream()
+        return events.stream()
                 .map(eventMapper::toDto)
                 .toList();
-        log.info("Found {} participated events for user with ID: {}", eventDtos.size(), userId);
-        return eventDtos;
     }
 
     /**
@@ -168,7 +159,6 @@ public class EventService {
      * @throws DataValidationException если навык не найден.
      */
     private List<Skill> mapSkillIdsToEntities(List<Long> skillIds) {
-        log.debug("Mapping skill IDs to entities: {}", skillIds);
         return skillIds.stream()
                 .map(id -> skillRepository.findById(id)
                         .orElseThrow(() -> {
@@ -186,7 +176,6 @@ public class EventService {
      * @throws DataValidationException если пользователь не найден.
      */
     private User getUserById(Long userId) {
-        log.debug("Fetching user with ID: {}", userId);
         return userRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.error("User not found with ID: {}", userId);
@@ -200,15 +189,16 @@ public class EventService {
      * @param event Событие для валидации.
      * @throws DataValidationException если пользователь не может проводить событие.
      */
-    private void validation(Event event) {
-        log.debug("Validating event: {}", event);
+    private void verifyUserEventAccess(Event event) {
         User owner = event.getOwner();
         List<Skill> skillsOwner = owner.getSkills();
-        for (Skill skill : skillsOwner) {
-            if (!skill.getEvents().contains(event)) {
-                log.error("User cannot carry out this event: {}", event);
-                throw new DataValidationException("User cannot carry out this event - " + event);
-            }
+
+        boolean hasAccess = skillsOwner.stream()
+                .anyMatch(skill -> skill.getEvents().contains(event));
+
+        if (!hasAccess) {
+            log.error("User cannot carry out this event: {}", event);
+            throw new DataValidationException("User cannot carry out this event - " + event);
         }
     }
 
@@ -218,12 +208,10 @@ public class EventService {
      * @param eventDto DTO события.
      * @throws DataValidationException если пользователь не обладает необходимыми навыками.
      */
-    private void validateUserSkills(EventDto eventDto) {
-        log.debug("Validating user skills for event: {}", eventDto);
-        List<Long> requiredSkillIds = eventDto.getRelatedSkillsId();
+    private void validateUserSkills(EventCreateDto eventDto) {
+        List<Long> relatedSkillsIds = eventDto.getRelatedSkillsId();
 
-        if (requiredSkillIds == null || requiredSkillIds.isEmpty()) {
-            log.debug("No required skills specified for event");
+        if (relatedSkillsIds == null || relatedSkillsIds.isEmpty()) {
             return;
         }
 
@@ -233,9 +221,9 @@ public class EventService {
                     return new DataValidationException("User not found with ID: " + eventDto.getOwnerId());
                 });
 
-        List<Skill> requiredSkills = skillRepository.findAllById(requiredSkillIds);
+        List<Skill> relatedSkills = skillRepository.findAllById(relatedSkillsIds);
 
-        if (!user.getSkills().containsAll(requiredSkills)) {
+        if (user.getSkills().retainAll(relatedSkills)) {
             log.error("User does not possess required skills for event: {}", eventDto);
             throw new DataValidationException("User does not possess required skills.");
         }

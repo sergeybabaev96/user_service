@@ -5,7 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
-import school.faang.user_service.dto.event.EventDto;
+import school.faang.user_service.dto.event.EventCreateDto;
+import school.faang.user_service.dto.event.EventViewDto;
 import school.faang.user_service.dto.event.EventFilterDto;
 import school.faang.user_service.service.event.EventService;
 
@@ -29,11 +30,11 @@ public class EventController {
      * Создает новое событие.
      *
      * @param event DTO события, содержащее данные для создания.
-     * @return Созданное событие в виде {@link EventDto}.
+     * @return Созданное событие в виде {@link EventViewDto}.
      */
-    public EventDto create(@Valid EventDto event) {
+    public EventViewDto create(@Valid EventCreateDto event) {
         log.info("Creating event with title: {}", event.getTitle());
-        EventDto createdEvent = eventService.create(event);
+        EventViewDto createdEvent = eventService.create(event);
         log.info("Event created successfully with ID: {}", createdEvent.getId());
         return createdEvent;
     }
@@ -42,11 +43,11 @@ public class EventController {
      * Получает событие по его идентификатору.
      *
      * @param eventId Идентификатор события.
-     * @return Событие в виде {@link EventDto}.
+     * @return Событие в виде {@link EventViewDto}.
      */
-    public EventDto getEvent(long eventId) {
+    public EventViewDto getEvent(long eventId) {
         log.info("Fetching event with ID: {}", eventId);
-        EventDto event = eventService.getEvent(eventId);
+        EventViewDto event = eventService.getEvent(eventId);
         log.info("Event fetched successfully: {}", event);
         return event;
     }
@@ -55,11 +56,11 @@ public class EventController {
      * Получает список событий, соответствующих заданному фильтру.
      *
      * @param filter DTO фильтра, содержащее критерии поиска.
-     * @return Список событий в виде {@link List<EventDto>}.
+     * @return Список событий в виде {@link List<EventViewDto>}.
      */
-    public List<EventDto> getEventsByFilter(@Valid EventFilterDto filter) {
+    public List<EventViewDto> getEvents(@Valid EventFilterDto filter) {
         log.info("Fetching events with filter: {}", filter);
-        List<EventDto> events = eventService.getEventsByFilter(filter);
+        List<EventViewDto> events = eventService.getEventsByFilter(filter);
         log.info("Fetched {} events", events.size());
         return events;
     }
@@ -79,11 +80,10 @@ public class EventController {
      * Обновляет существующее событие.
      *
      * @param event DTO события, содержащее обновленные данные.
-     * @return Обновленное событие в виде {@link EventDto}.
+     * @return Обновленное событие в виде {@link EventViewDto}.
      */
-    public EventDto updateEvent(@Valid EventDto event) {
-        log.info("Updating event with ID: {}", event.getId());
-        EventDto updatedEvent = eventService.updateEvent(event);
+    public EventViewDto updateEvent(@Valid EventCreateDto event) {
+        EventViewDto updatedEvent = eventService.updateEvent(event);
         log.info("Event updated successfully: {}", updatedEvent);
         return updatedEvent;
     }
@@ -92,11 +92,11 @@ public class EventController {
      * Получает список событий, созданных конкретным пользователем.
      *
      * @param userId Идентификатор пользователя.
-     * @return Список событий в виде {@link List<EventDto>}.
+     * @return Список событий в виде {@link List<EventViewDto>}.
      */
-    public List<EventDto> getOwnerEvent(long userId) {
+    public List<EventViewDto> getOwnerEvent(long userId) {
         log.info("Fetching events for owner with ID: {}", userId);
-        List<EventDto> events = eventService.getOwnerEvent(userId);
+        List<EventViewDto> events = eventService.getOwnerEvent(userId);
         log.info("Fetched {} events for owner", events.size());
         return events;
     }
@@ -105,11 +105,11 @@ public class EventController {
      * Получает список событий, в которых участвовал конкретный пользователь.
      *
      * @param userId Идентификатор пользователя.
-     * @return Список событий в виде {@link List<EventDto>}.
+     * @return Список событий в виде {@link List<EventViewDto>}.
      */
-    public List<EventDto> getParticipatedEvents(long userId) {
+    public List<EventViewDto> getParticipatedEvents(long userId) {
         log.info("Fetching events participated by user with ID: {}", userId);
-        List<EventDto> events = eventService.getParticipatedEvents(userId);
+        List<EventViewDto> events = eventService.getParticipatedEvents(userId);
         log.info("Fetched {} participated events", events.size());
         return events;
     }

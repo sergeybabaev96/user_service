@@ -16,7 +16,7 @@ import java.util.List;
  * @author Zhltsk-V
  */
 @Data
-public class EventDto {
+public class EventViewDto {
     @NotNull(message = "Id cannot be null")
     private Long id;
 
@@ -33,12 +33,14 @@ public class EventDto {
     @NotNull(message = "Owner ID cannot be null")
     private Long ownerId;
 
+    @NotBlank(message = "Description cannot be blank")
     @NotNull(message = "Description cannot be null")
     private String description;
 
     @NotNull(message = "Related skills ID list cannot be null")
     private List<Long> relatedSkillsId;
 
+    @NotBlank(message = "Location cannot be blank")
     @NotNull(message = "Location cannot be null")
     private String location;
 
