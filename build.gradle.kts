@@ -3,6 +3,7 @@ plugins {
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
     id("org.jsonschema2pojo") version "1.2.1"
+    id("io.swagger.core.v3.swagger-gradle-plugin") version "2.2.29"
     kotlin("jvm")
     jacoco
     application
@@ -106,6 +107,7 @@ tasks.jacocoTestReport {
     dependsOn(tasks.test)
     reports {
         xml.required.set(true)
+        xml.outputLocation.set(layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml"))
         html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco/test/html"))
         csv.required.set(false)
     }
