@@ -28,11 +28,9 @@ public class EventUtil {
 
     public boolean checkOwnerSkills(User eventOwner, EventDTO event) {
         if (event.getRelatedSkills() != null) {
-            //преобразуем навыки пользователя в их id, для дальнейшего сравнения
             List<Long> ownerSkillsIDs = eventOwner.getSkills().stream()
                     .map(Skill::getId)
                     .toList();
-            //Проверяем, есть ли в навыках пользователя навык, который связан с объявленными навыками события
             return event.getRelatedSkills().stream()
                     .anyMatch(ownerSkillsIDs::contains);
         } else {

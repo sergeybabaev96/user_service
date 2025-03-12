@@ -36,7 +36,6 @@ public class EventService {
                 .orElseThrow(() -> new DataValidationException("Owner not found"));
         if (eventUtil.isValid(event) && eventUtil.checkOwnerSkills(eventOwner, event)) {
             Event entityEvent = eventMapper.eventDTOToEvent(event);
-            //убеждаемся что владелец точно установился для формирования правильных связей в БД.
             entityEvent.setOwner(userRepository.findById(event.getOwnerId())
                     .orElseThrow(() -> new DataValidationException("Owner not found")));
             eventRepository.save(entityEvent);
@@ -53,10 +52,8 @@ public class EventService {
     }
 
     public EventDTO update(Long eventId, EventDTO event) {
-        // Получаем существующее событие
         Event updatedEvent = eventRepository.findById(eventId)
                 .orElseThrow(() -> new DataValidationException("Event not found"));
-        // Проверяем, что переданный DTO действительно соответствует обновляемой сущности
         if (!eventId.equals(event.getId())) {
             throw new DataValidationException("Mismatched event ID");
         }
@@ -65,11 +62,8 @@ public class EventService {
         if (!eventUtil.checkOwnerSkills(eventOwner, event) || !eventUtil.isValid(event)) {
             log.error("Event was not accept a validator or not check skills : \n {}", event);
         }
-        // Используем маппер для обновления существующего объекта
         eventMapper.updateEventFromDTO(event, updatedEvent);
-        // Устанавливаем владельца, так как маппер его игнорирует
         updatedEvent.setOwner(eventOwner);
-        // Сохраняем обновленное событие
         eventRepository.save(updatedEvent);
         return eventMapper.eventToEventDTO(updatedEvent);
     }

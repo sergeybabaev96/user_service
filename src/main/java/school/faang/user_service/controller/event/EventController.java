@@ -10,28 +10,27 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/event")
+@RequestMapping("/events")
 public class EventController {
 
     private final EventService eventService;
 
-    @PostMapping("/create")
+    @PostMapping
     public EventDTO create(@RequestBody EventDTO eventDTO) {
-        eventService.create(eventDTO);
-        return eventDTO;
+        return eventService.create(eventDTO);
     }
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     public EventDTO getEvent(@PathVariable Long id) {
         return eventService.getById(id);
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public EventDTO update(@PathVariable Long id, @RequestBody EventDTO eventDTO) {
             return eventService.update(id, eventDTO);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         eventService.delete(id);
     }
