@@ -15,6 +15,7 @@ import school.faang.user_service.repository.recommendation.RecommendationRequest
 import school.faang.user_service.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
