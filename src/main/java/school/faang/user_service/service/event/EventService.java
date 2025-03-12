@@ -98,7 +98,13 @@ public class EventService {
     }
 
     public List<EventDTO> getEventsByFilter(EventFilterDTO filter) {
+        if (filter == null) {
+            throw new DataValidationException("Filter is empty");
+        }
         List<Event> eventsList = eventRepository.findAll();
+        if (eventsList.isEmpty()){
+            throw new DataValidationException("Nothing to show");
+        }
         Stream<EventDTO> filteredEventDTOs = eventMapper.eventsToEventDTOs(eventsList).stream()
                 .filter(eventDTO ->
                         eventDTO.getLocation()

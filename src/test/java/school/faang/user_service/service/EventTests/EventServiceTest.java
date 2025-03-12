@@ -18,6 +18,7 @@ import school.faang.user_service.service.event.EventService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -132,6 +133,7 @@ class EventServiceTest {
         verify(eventMapper, times(1)).eventsToEventDTOs(events);
         assertEquals(eventDTOs, result);
     }
+
     @Test
     void positiveTestGetEventsByFilter_shouldGetEventsByFilter() {
         EventFilterDTO filter = new EventFilterDTO();
@@ -162,37 +164,64 @@ class EventServiceTest {
     @Test
     void negativeCreate_shouldThrowExceptionWhenOwnerNotFound() {
         when(userRepository.findById(mockUser.getId())).thenReturn(Optional.empty());
-        DataValidationException thrown = assertThrows(DataValidationException.class, () -> {
-            eventService.create(mockEventDTO);
-        });
+        DataValidationException thrown = assertThrows(DataValidationException.class,
+                () -> eventService.create(mockEventDTO));
         assertEquals("Owner not found", thrown.getMessage());
     }
 
     @Test
     void negativeGetById_shouldThrowExceptionWhenEventNotFound() {
         when(eventRepository.findById(1L)).thenReturn(Optional.empty());
-        DataValidationException thrown = assertThrows(DataValidationException.class, () -> {
-            eventService.getById(1L);
-        });
+        DataValidationException thrown = assertThrows(DataValidationException.class,
+                () -> eventService.getById(1L));
         assertEquals("Event not found", thrown.getMessage());
     }
 
     @Test
     void negativeUpdate_shouldThrowExceptionWhenEventNotFound() {
         when(eventRepository.findById(1L)).thenReturn(Optional.empty());
-        DataValidationException thrown = assertThrows(DataValidationException.class, () -> {
-            eventService.update(1L, mockEventDTO);
-        });
+        DataValidationException thrown = assertThrows(DataValidationException.class,
+                () -> eventService.update(1L, mockEventDTO));
         assertEquals("Event not found", thrown.getMessage());
     }
 
     @Test
     void negativeDelete_shouldThrowExceptionWhenEventNotFound() {
         when(eventRepository.findById(1L)).thenReturn(Optional.empty());
-        DataValidationException thrown = assertThrows(DataValidationException.class, () -> {
-            eventService.delete(1L);
-        });
+        DataValidationException thrown = assertThrows(DataValidationException.class,
+                () -> eventService.delete(1L));
         assertEquals("Event not found", thrown.getMessage());
+    }
+
+    @Test
+    void negativeGetOwnedEvents_shouldThrowExceptionWhenOwnerDontHaveEvents() {
+        when(eventRepository.findAllByUserId(mockUser.getId())).thenReturn(Collections.emptyList());
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> eventService.getOwnedEvents(mockUser.getId()));
+        assertEquals("Owner haven`t events", exception.getMessage());
+    }
+
+    @Test
+    void negativeGetParticipatedEvents_shouldThrowExceptionWhenUserDontHavePartEvents() {
+        when(eventRepository.findParticipatedEventsByUserId(mockUser.getId())).thenReturn(Collections.emptyList());
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> eventService.getParticipatedEvents(mockUser.getId()));
+        assertEquals("Haven`t participated events", exception.getMessage());
+    }
+
+    @Test
+    void negativeTestGetEventsByFilter_shouldThrowExceptionWhenFilterIsNull() {
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> eventService.getEventsByFilter(null));
+        assertEquals("Filter is empty", exception.getMessage());
+    }
+
+    @Test
+    void negativeTestGetEventsByFilter_shouldThrowExceptionWhenEventsIsEmpty() {
+        when(eventRepository.findAll()).thenReturn(Collections.emptyList());
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> eventService.getEventsByFilter(new EventFilterDTO()));
+        assertEquals("Nothing to show", exception.getMessage());
     }
 
 }
