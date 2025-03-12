@@ -20,7 +20,6 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -38,8 +37,8 @@ public class GoalService {
     public void createGoal(Long userId, GoalDto goal) {
         validateByExistsUserOnId(userId);
         validateByCountGoals(userId);
+        validateByExistsGoalSkills(goal);
         Goal goalEntity = goalMapper.goalDtoToGoal(goal, getSkillsByIds(goal.skillIds()));
-        validateByExistsGoalSkills(goalEntity);
         goalRepository.save(goalEntity);
         log.info("User {} accepted new goal {}", userId, goalEntity.getTitle());
     }
@@ -54,9 +53,9 @@ public class GoalService {
         Goal existingGoal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new EntityNotFoundException("Goal not found"));
         validateByCompletionStatus(existingGoal);
+        validateByExistsGoalSkills(goal);
         Goal updatedGoal = goalMapper.goalDtoToGoal(goal, getSkillsByIds(goal.skillIds()));
         updatedGoal.setId(existingGoal.getId());
-        validateByExistsGoalSkills(updatedGoal);
         goalRepository.save(updatedGoal);
         log.info("{} goal updated", goalId);
 
@@ -108,7 +107,7 @@ public class GoalService {
     }
 
     private void validateByCompletionStatus(Goal goal) {
-        if (goal.getStatus() == GoalStatus.COMPLETED) {
+        if (goal.getStatus().equals(GoalStatus.COMPLETED)) {
             throw new GoalAlreadyCompletedException("Goal is already completed");
         }
     }
@@ -119,9 +118,11 @@ public class GoalService {
         }
     }
 
-    private void validateByExistsGoalSkills(Goal goal) {
-        boolean isContained = new HashSet<>(goal.getSkillsToAchieve()).containsAll(skillRepository.findAll());
-        if (!isContained) {
+    private void validateByExistsGoalSkills(GoalDto goalDto) {
+        List<Long> idsSkillsOnRepository = skillRepository.findAllById(goalDto.skillIds()).stream()
+                .map(Skill::getId)
+                .toList();
+        if (!idsSkillsOnRepository.equals(goalDto.skillIds())) {
             throw new IllegalArgumentException("Goal contains non-existent skills");
         }
     }

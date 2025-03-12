@@ -11,7 +11,7 @@ public class GoalTitleFilter implements GoalFilter {
 
     @Override
     public boolean isApplicable(SearchGoalDto searchGoalDto) {
-        return searchGoalDto.title() != null;
+        return searchGoalDto.title() != null && !searchGoalDto.title().isBlank();
     }
 
     @Override
