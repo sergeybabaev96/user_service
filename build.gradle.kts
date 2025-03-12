@@ -95,10 +95,26 @@ kotlin {
     jvmToolchain(17)
 }
 
+/**
+ * JaCoCo settings
+ */
+
 jacoco {
     toolVersion = "0.8.9"
     reportsDirectory.set(layout.buildDirectory.dir("$buildDir/reports/jacoco"))
 }
+
+val exclusions = listOf(
+    "**/UserServiceApplication*",
+    "**/controller/**",
+    "**/mapper/**",
+    "**/entity/**",
+    "**/dto/**",
+    "**/exception/**",
+    "**/com/json/**",
+    "**/client/**",
+    "**/config/**"
+)
 
 tasks.test {
     finalizedBy(tasks.jacocoTestReport)
@@ -117,7 +133,6 @@ tasks.jacocoTestReport {
         html.required.set(true)
         html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
     }
-    dependsOn(tasks.test)
 }
 
 tasks.jacocoTestCoverageVerification {
@@ -125,6 +140,9 @@ tasks.jacocoTestCoverageVerification {
         rule {
             element = "CLASS"
             enabled = false
+            classDirectories.setFrom(
+                sourceSets.main.get().output.asFileTree.matching{ exclude(exclusions) }
+            )
             limit {
                 minimum = 0.7.toBigDecimal()
             }
