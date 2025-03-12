@@ -54,7 +54,7 @@ public class RecommendationValidator {
 
         if (skillOffers.isEmpty()) {
             log.error("Ошибка валидации: отсутствуют навыки в рекомендации");
-            throw new DataValidationException("Skill offer is not found");
+            throw new DataValidationException("Skill offer is Empty");
         }
 
         Optional<Long> absentSkillOffer = skillOffers.stream()
