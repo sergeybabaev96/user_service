@@ -7,8 +7,9 @@ import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.filter.Filter;
-import school.faang.user_service.mapper.SubscriberMapper;
+import school.faang.user_service.exception.ErrorMessage;
+import school.faang.user_service.filter.subscriber.SubscriberFilter;
+import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.SubscriptionRepository;
 
 import java.util.Collections;
@@ -22,84 +23,97 @@ public class SubscriptionService {
 
 
     private final SubscriptionRepository subscriptionRepository;
-    private final List<Filter> subscriberFilters;
-    private final SubscriberMapper subscriberMapper;
+    private final List<SubscriberFilter> subscriberFilters;
+    private final UserMapper userMapper;
 
     public void followUser(long followerId, long followeeId) {
+        validateUserExists(followeeId);
+        validateUserExists(followerId);
         validateSubscriptionOnYourself(followerId, followeeId,
-                ServiceLogMessages.SUBSCRIBING_ON_YOURSELF_ERROR_MSG);
-        validateSubscription(followerId, followeeId,
-                ServiceLogMessages.ALREADY_SUBSCRIBED_ERROR_MSG);
+                ErrorMessage.SUBSCRIBING_ON_YOURSELF_ERROR_MSG);
+        validateSubscription(followerId, followeeId, true);
         subscriptionRepository.followUser(followerId, followeeId);
     }
 
     public void unfollowUser(long followerId, long followeeId) {
+        validateUserExists(followeeId);
+        validateUserExists(followerId);
         validateSubscriptionOnYourself(followerId, followeeId,
-                ServiceLogMessages.UNSUBSCRIBING_FROM_YOURSELF_ERROR_MSG);
-        validateSubscription(followerId, followeeId,
-                ServiceLogMessages.IMPOSSIBLE_TO_UNFOLLOW_ERROR_MSG);
+                ErrorMessage.UNSUBSCRIBING_FROM_YOURSELF_ERROR_MSG);
+        validateSubscription(followerId, followeeId, false);
         subscriptionRepository.unfollowUser(followerId, followeeId);
     }
 
     public List<UserDto> getFollowers(long followeeId, UserFilterDto filters) {
-        Stream<User> followers = subscriptionRepository.findByFollowerId(followeeId);
+        validateUserExists(followeeId);
+        Stream<User> followers = subscriptionRepository.findByFolloweeId(followeeId);
         return filterUsers(filters, followers);
     }
 
     public int getFollowersCount(long followeeId) {
+        validateUserExists(followeeId);
         return subscriptionRepository.findFollowersAmountByFolloweeId(followeeId);
     }
 
     public List<UserDto> getFollowing(long followerId, UserFilterDto filters) {
+        validateUserExists(followerId);
         Stream<User> following = subscriptionRepository.findByFollowerId(followerId);
         return filterUsers(filters, following);
     }
 
     public int getFollowingCount(long followerId) {
+        validateUserExists(followerId);
         return subscriptionRepository.findFolloweesAmountByFollowerId(followerId);
     }
 
-    private void validateSubscriptionOnYourself(long followerId, long followeeId, String errorMessage) {
-        if (followerId != followeeId) {
-            log.error(errorMessage);
-            throw new DataValidationException(errorMessage);
+    private void validateSubscriptionOnYourself(long followerId, long followeeId, ErrorMessage errorMessage) {
+        if (followerId == followeeId) {
+            log.error(errorMessage.getMessage());
+            throw new DataValidationException(errorMessage.getMessage());
         }
     }
 
-    private void validateSubscription(long followerId, long followeeId, String errorMessage) {
-        if (subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
-            log.error(errorMessage);
-            throw new DataValidationException(errorMessage);
+    private void validateSubscription(long followerId, long followeeId, boolean isFollowAction) {
+        boolean isSubscribed = subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
+        if (isFollowAction && isSubscribed) {
+            log.error(ErrorMessage.ALREADY_SUBSCRIBED_ERROR_MSG.getMessage());
+            throw new DataValidationException(ErrorMessage.ALREADY_SUBSCRIBED_ERROR_MSG.getMessage());
+        }
+        if (!isFollowAction && !isSubscribed) {
+            log.error(ErrorMessage.IMPOSSIBLE_TO_UNFOLLOW_ERROR_MSG.getMessage());
+            throw new DataValidationException(ErrorMessage.IMPOSSIBLE_TO_UNFOLLOW_ERROR_MSG.getMessage());
+        }
+    }
+
+    private void validateUserExists(long userId) {
+        if (!subscriptionRepository.existsById(userId)) {
+            log.error(ErrorMessage.USER_DOES_NOT_EXIST_BY_ID_ERROR_MSG.getMessage(), userId);
+            throw new DataValidationException(ErrorMessage.USER_DOES_NOT_EXIST.getMessage());
         }
     }
 
     private List<UserDto> filterUsers(UserFilterDto filters, Stream<User> users) {
-        List<Filter> applicableFilters = getApplicableFilters(filters);
+        List<SubscriberFilter> applicableFilters = getApplicableFilters(filters);
 
         if (applicableFilters.isEmpty()) {
             return Collections.emptyList();
         }
 
         Stream<User> filteredUsers = applyFilters(applicableFilters, filters, users);
-        return mapUsersToDto(filteredUsers);
+        return userMapper.toDtoList(filteredUsers.toList());
     }
 
-    private List<Filter> getApplicableFilters(UserFilterDto filters) {
+    private List<SubscriberFilter> getApplicableFilters(UserFilterDto filters) {
         return subscriberFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .toList();
     }
 
-    private Stream<User> applyFilters(List<Filter> filters, UserFilterDto filterDto, Stream<User> users) {
+    private Stream<User> applyFilters(List<SubscriberFilter> filters, UserFilterDto filterDto, Stream<User> users) {
         Stream<User> result = users;
-        for (Filter filter : filters) {
+        for (SubscriberFilter filter : filters) {
             result = filter.apply(result, filterDto);
         }
         return result;
-    }
-
-    private List<UserDto> mapUsersToDto(Stream<User> users) {
-        return users.map(subscriberMapper::toDto)
-                .toList();
     }
 }
