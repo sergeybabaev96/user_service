@@ -63,15 +63,15 @@ public class RecommendationService {
 
     public void delete(Long id) {
         if (id == null) {
-            throw new DataValidationException("Id не должен быть null");
+            throw new DataValidationException("Id cant be null");
         }
         recommendationRepository.deleteById(id);
-        log.info("Рекомендация id: {} была удалена", id);
+        log.info("Recommendation id: {} has been removed", id);
     }
 
     public List<RecommendationDto> getAllGivenRecommendation(Long authorId) {
         if (authorId == null) {
-            throw new DataValidationException("Id автора не может быть null");
+            throw new DataValidationException("The author's ID cannot be null");
         }
         Pageable pageable = PageRequest.of(0, 10);
         Page<Recommendation> recommendationPage = recommendationRepository.findAllByAuthorId(authorId, pageable);
@@ -127,7 +127,7 @@ public class RecommendationService {
         skillOfferRepository.deleteAllByRecommendationId(recommendation.getId());
         for (SkillOffer skillOffer : recommendation.getSkillOffers()) {
             if (skillOffer.getSkill() == null) {
-                throw new DataValidationException("Скилл не может быть null");
+                throw new DataValidationException("Skill can't be null");
             }
             skillOfferRepository.create(skillOffer.getSkill().getId(), recommendation.getId());
             if (skillOffersOfReceiver.contains(skillOffer)) {

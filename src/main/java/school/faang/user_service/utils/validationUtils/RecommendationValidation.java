@@ -9,14 +9,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class RecommendationValidation {
-    private static final String CONTENT_NULL_EXCEPTION = "Содержание рекомендации не может быть null";
-    private static final String CONTENT_EMPTY_EXCEPTION = "Содержание рекомендации не может быть пустым";
-    private static final String DATE_EXCEPTION = "Невозможно дать рекомендацию этому пользователю, поскольку " +
-            "последняя рекомендация была предложена менее 6 месяцев назад.";
-    private static final String DATE_NULL_EXCEPTION = "Дата рекомендации не может быть null";
-    private static final String RECOMMENDATION_NULL_EXCEPTION = "Рекомендация не может быть null";
-    private static final String SKILL_OFFER_VALID_EXCEPTION = "Предложение о приобретении навыка с идентификатором: " +
-            "%d недействительно.";
+    private static final String CONTENT_NULL_EXCEPTION = "The content of the recommendation cannot be null";
+    private static final String CONTENT_EMPTY_EXCEPTION = "The content of the recommendation cannot be empty";
+    private static final String DATE_EXCEPTION = "It is not possible to give a recommendation to this user because the"+
+            " last recommendation was offered less than 6 months ago.";
+    private static final String DATE_NULL_EXCEPTION = "The date of the recommendation cannot be null";
+    private static final String RECOMMENDATION_NULL_EXCEPTION = "The recommendation cannot be null";
+    private static final String SKILL_OFFER_VALID_EXCEPTION = "An offer to purchase a skill with the ID: " +
+            "%d is invalid.";
     private static final int MOUNT_COUNT_LIMIT = 6;
 
     public static void validateRecommendationContent(String content) {
