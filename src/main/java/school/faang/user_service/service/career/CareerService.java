@@ -32,7 +32,7 @@ public class CareerService {
 
     public CareerDto updateCareer(long userId, CareerDto careerDto) {
         validateFromDateBeforeNow(careerDto);
-        Career existingCareer = careerRepository.findById(careerDto.getId()).orElseThrow(() ->
+        Career existingCareer = careerRepository.findById(careerDto.id()).orElseThrow(() ->
                 new EntityNotFoundException("Career not found."));
         if(existingCareer.getUser().getId() != userId) {
             throw new DataValidationException("User cannot update someone else's career.");
@@ -50,9 +50,9 @@ public class CareerService {
     }
 
     private void validateFromDateBeforeNow(CareerDto careerDto){
-        if(!careerDto.getFrom().isBefore(LocalDate.now())) {
+        if(!careerDto.from().isBefore(LocalDate.now())) {
             throw new DataValidationException("Career start date must be in the past. Current value: " +
-                    careerDto.getFrom());
+                    careerDto.from());
         }
     }
 }
