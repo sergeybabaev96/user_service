@@ -22,9 +22,7 @@ public class EventParticipationService {
     public void registerParticipant(long eventId, long userId) {
         List<User> users = eventParticipationRepository.findAllParticipantsByEventId(eventId);
 
-        boolean isUserNotRegistered = users == null || users.stream()
-                .noneMatch(user -> user.getId().equals(userId));
-        if (isUserNotRegistered) {
+        if (isUserNotRegistered(users, userId)) {
             eventParticipationRepository.register(eventId, userId);
             log.info("Пользователь {} успешно зарегистрирован на событие {}", userId, eventId);
         } else {
@@ -34,9 +32,8 @@ public class EventParticipationService {
 
     public void unregisterParticipant(long eventId, long userId) {
         List<User> users = eventParticipationRepository.findAllParticipantsByEventId(eventId);
-        boolean isUserRegistered = users.stream()
-                .anyMatch(user -> user.getId().equals(userId));
-        if (isUserRegistered) {
+
+        if (isUserRegistered(users, userId)) {
             eventParticipationRepository.unregister(eventId, userId);
             log.info("Пользователь {} отменил регистрацию на событие {}", userId, eventId);
         } else {
@@ -51,5 +48,15 @@ public class EventParticipationService {
 
     public long getParticipantsCount(long eventId) {
         return eventParticipationRepository.countParticipants(eventId);
+    }
+
+    private boolean isUserNotRegistered(List<User> users, long userId) {
+        return users == null || users.stream()
+                .noneMatch(user -> user.getId().equals(userId));
+    }
+
+    private boolean isUserRegistered(List<User> users, long userId) {
+        return users.stream()
+                .anyMatch(user -> user.getId().equals(userId));
     }
 }
