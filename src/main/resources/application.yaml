@@ -23,6 +23,19 @@ spring:
       channel:
         profile-view: profile_view_channel
 
+profile-pic:
+  maxSize: 5242880
+  largePhotoSize: 1080
+  smallPhotoSize: 170
+
+services:
+  s3:
+    endpoint: http://localhost:9000
+    accessKey: user
+    secretKey: password
+    region: bucket_region
+    bucketName: user-avatar
+
 server:
   port: 8080
 
