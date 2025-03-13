@@ -1,179 +1,127 @@
 package school.faang.user_service.service.avatar;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
-import school.faang.user_service.dto.avatar.UploadAvatarRequest;
-import school.faang.user_service.dto.avatar.UploadAvatarResponse;
-import school.faang.user_service.dto.avatar.GetAvatarResponse;
 import school.faang.user_service.dto.avatar.DeleteAvatarResponse;
+import school.faang.user_service.dto.avatar.GetAvatarResponse;
+import school.faang.user_service.dto.avatar.UploadAvatarResponse;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
-import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.UserService;
+import school.faang.user_service.service.resource.ResourseService;
+import school.faang.user_service.service.s3.S3Service;
+import school.faang.user_service.validator.ResourseValidator;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Optional;
-import java.util.UUID;
+import java.io.ByteArrayInputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class AvatarServiceTest {
+public class AvatarServiceTest {
 
-    @Mock
-    private AmazonS3 s3Client;
-
-    @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private MultipartFile file;
-
-    @InjectMocks
+    private UserService userService;
+    private S3Service s3Service;
+    private ResourseService resourseService;
+    private ResourseValidator resourseValidator;
     private AvatarService avatarService;
-
-    private User testUser;
-    private String testFileId;
-    private String testMediumFileId;
-    private String testSmallFileId;
 
     @BeforeEach
     void setUp() {
-        testUser = new User();
-        testUser.setId(1L);
-        testUser.setUserProfilePic(new UserProfilePic());
-
-        testFileId = String.format("avatars/%d/%s.png", testUser.getId(), UUID.randomUUID());
-        testMediumFileId = String.format("avatars/%d/%s_medium.png", testUser.getId(), UUID.randomUUID());
-        testSmallFileId = String.format("avatars/%d/%s_small.png", testUser.getId(), UUID.randomUUID());
+        userService = mock(UserService.class);
+        s3Service = mock(S3Service.class);
+        resourseService = mock(ResourseService.class);
+        resourseValidator = mock(ResourseValidator.class);
+        avatarService = new AvatarService(userService, s3Service, resourseService, resourseValidator);
     }
 
-    @Disabled
     @Test
-    void uploadAvatar_Success() throws IOException {
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+    void uploadAvatarShouldUploadFilesAndSaveUserProfilePic() throws Exception {
+        Long userId = 1L;
+        MultipartFile file = mock(MultipartFile.class);
+        byte[] fileBytes = new byte[]{1, 2, 3};
+        String format = "png";
+
         when(file.getOriginalFilename()).thenReturn("avatar.png");
         when(file.getContentType()).thenReturn("image/png");
-        when(file.getSize()).thenReturn(4L * 1024 * 1024);
-        when(file.getBytes()).thenReturn(new byte[]{1, 2, 3, 4});
+        when(file.getSize()).thenReturn(1024L);
+        when(file.getBytes()).thenReturn(fileBytes);
+        when(resourseValidator.getFileExtension(file)).thenReturn(format);
 
-        doNothing().when(s3Client).putObject(any(PutObjectRequest.class)); // -
+        byte[] mediumImage = new byte[]{4, 5};
+        byte[] smallImage = new byte[]{6, 7};
+        when(resourseService.resize(fileBytes, 1080, format)).thenReturn(mediumImage);
+        when(resourseService.resize(fileBytes, 170, format)).thenReturn(smallImage);
 
-        UploadAvatarRequest request = new UploadAvatarRequest(file);
-        UploadAvatarResponse response = avatarService.uploadAvatar(testUser.getId(), request); // -
+        User user = new User();
+        when(userService.findUserById(userId)).thenReturn(user);
 
-        assertNotNull(response);
-        assertTrue(response.getFileId().contains("avatars/"));
-        assertTrue(response.getMediumFileId().contains("avatars/"));
-        assertTrue(response.getSmallFileId().contains("avatars/"));
-
-        verify(userRepository, times(1)).save(any(User.class));
-        verify(s3Client, times(3)).putObject(any(PutObjectRequest.class));
-    }
-
-    @Disabled
-    @Test
-    void uploadAvatar_FailsWhenFileTooLarge() {
-        when(file.getSize()).thenReturn(6L * 1024 * 1024);
-
-        UploadAvatarRequest request = new UploadAvatarRequest(file);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                avatarService.uploadAvatar(testUser.getId(), request)
-        );
-
-        assertEquals("File size exceeds the maximum limit of 5MB!", exception.getMessage()); // -
-    }
-
-    @Test
-    void getAvatar_Success() throws MalformedURLException {
-        testUser.getUserProfilePic().setFileId(testFileId);
-        testUser.getUserProfilePic().setMediumFileId(testMediumFileId);
-        testUser.getUserProfilePic().setSmallFileId(testSmallFileId);
-
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-        when(s3Client.generatePresignedUrl(any(GeneratePresignedUrlRequest.class)))
-                .thenReturn(new URL("http://example.com/avatar.png"));
-
-        GetAvatarResponse response = avatarService.getAvatar(testUser.getId());
+        UploadAvatarResponse response = avatarService.uploadAvatar(userId, file);
 
         assertNotNull(response);
-        assertTrue(response.getAvatarUrl().contains("http://example.com"));
-        assertTrue(response.getMediumAvatarUrl().contains("http://example.com"));
-        assertTrue(response.getSmallAvatarUrl().contains("http://example.com"));
+        assertTrue(response.getFileId().contains("avatars/" + userId));
+
+        verify(resourseValidator).validate(file);
+        verify(s3Service, times(3)).
+                uploadFile(anyString(), any(ByteArrayInputStream.class), anyLong(), anyString());
+        verify(userService).findUserById(userId);
     }
 
     @Test
-    void getAvatar_FailsWhenUserNotFound() {
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.empty());
+    void getAvatarShouldReturnPresignedUrls() {
+        Long userId = 1L;
+        User user = new User();
+        UserProfilePic pic = new UserProfilePic();
+        pic.setFileId("file.png");
+        pic.setMediumFileId("file_medium.png");
+        pic.setSmallFileId("file_small.png");
+        user.setUserProfilePic(pic);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                avatarService.getAvatar(testUser.getId())
-        );
+        when(userService.findUserById(userId)).thenReturn(user);
+        when(s3Service.generatePresignedUrl("file.png")).thenReturn("http://s3/file.png");
+        when(s3Service.generatePresignedUrl("file_medium.png")).thenReturn("http://s3/file_medium.png");
+        when(s3Service.generatePresignedUrl("file_small.png")).thenReturn("http://s3/file_small.png");
 
-        assertEquals("User not found", exception.getMessage());
+        GetAvatarResponse response = avatarService.getAvatar(userId);
+
+        assertEquals("http://s3/file.png", response.getAvatarUrl());
+        assertEquals("http://s3/file_medium.png", response.getMediumAvatarUrl());
+        assertEquals("http://s3/file_small.png", response.getSmallAvatarUrl());
     }
 
     @Test
-    void getAvatar_FailsWhenNoAvatar() {
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+    void deleteAvatarShouldDeleteFilesAndClearProfilePic() {
+        Long userId = 1L;
+        User user = new User();
+        UserProfilePic pic = new UserProfilePic();
+        pic.setFileId("file.png");
+        pic.setMediumFileId("file_medium.png");
+        pic.setSmallFileId("file_small.png");
+        user.setUserProfilePic(pic);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                avatarService.getAvatar(testUser.getId())
-        );
+        when(userService.findUserById(userId)).thenReturn(user);
 
-        assertEquals("User does not have an avatar", exception.getMessage());
-    }
-
-    @Disabled
-    @Test
-    void deleteAvatar_Success() {
-        testUser.getUserProfilePic().setFileId(testFileId);
-        testUser.getUserProfilePic().setMediumFileId(testMediumFileId);
-        testUser.getUserProfilePic().setSmallFileId(testSmallFileId);
-
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-        doNothing().when(s3Client).deleteObject(anyString(), anyString());
-
-        DeleteAvatarResponse response = avatarService.deleteAvatar(testUser.getId()); // -
+        DeleteAvatarResponse response = avatarService.deleteAvatar(userId);
 
         assertTrue(response.isSuccess());
         assertEquals("Avatar deleted successfully", response.getMessage());
-
-        verify(userRepository, times(1)).save(any(User.class));
-        verify(s3Client, times(3)).deleteObject(anyString(), anyString());
+        verify(s3Service).deleteFile("file.png");
+        verify(s3Service).deleteFile("file_medium.png");
+        verify(s3Service).deleteFile("file_small.png");
     }
 
     @Test
-    void deleteAvatar_FailsWhenUserNotFound() {
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.empty());
+    void deleteAvatarShouldReturnFalseIfNoAvatar() {
+        Long userId = 1L;
+        User user = new User();
+        user.setUserProfilePic(null);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                avatarService.deleteAvatar(testUser.getId())
-        );
+        when(userService.findUserById(userId)).thenReturn(user);
 
-        assertEquals("User not found", exception.getMessage());
-    }
-
-    @Test
-    void deleteAvatar_FailsWhenNoAvatar() {
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-
-        DeleteAvatarResponse response = avatarService.deleteAvatar(testUser.getId());
+        DeleteAvatarResponse response = avatarService.deleteAvatar(userId);
 
         assertFalse(response.isSuccess());
         assertEquals("User has no avatar", response.getMessage());
+        verify(s3Service, never()).deleteFile(anyString());
     }
 }
