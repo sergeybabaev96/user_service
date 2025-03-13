@@ -1,8 +1,8 @@
-package school.faang.user_service.mapper;
+package school.faang.user_service.mapper.skill;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import school.faang.user_service.dto.recommendation.SkillOfferDto;
+import school.faang.user_service.dto.skill.SkillOfferDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.entity.recommendation.SkillOffer;
