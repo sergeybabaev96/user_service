@@ -2,8 +2,6 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
@@ -28,13 +26,10 @@ public class RecommendationService {
     private final SkillOfferRepository skillOfferRepository;
     private final RecommendationMapper recommendationMapper;
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
+    private final RecommendationValidation validation;
 
     public RecommendationDto create(RecommendationDto recommendationDto) {
-        RecommendationValidation.validateRecommendationContent(recommendationDto.getContent());
-        RecommendationValidation.validateSkills(recommendationDto, skillOfferRepository.findAllSkillOffers());
-        LocalDateTime lastRecommendationDate = getLastRecommendationDate(recommendationDto);
-        RecommendationValidation.validateRecommendationDate(lastRecommendationDate);
-
+        validateRecommendationDto(recommendationDto);
         Recommendation recommendation = recommendationMapper.toRecommendation(recommendationDto);
 
         recommendation = createRecommendation(recommendation);
@@ -46,12 +41,12 @@ public class RecommendationService {
     private Recommendation createRecommendation(Recommendation recommendation) {
         Long authorId = recommendation.getAuthor().getId();
         Long receiverId = recommendation.getReceiver().getId();
+        String content = recommendation.getContent();
         if (authorId == null) {
             throw new DataValidationException("Id of author can't be null");
         } else if (receiverId == null) {
             throw new DataValidationException("Id of receiver can't be null");
         }
-        String content = recommendation.getContent();
         Long recommendationId = recommendationRepository.create(authorId, receiverId, content);
 
         recommendation.setId(recommendationId);
@@ -67,19 +62,8 @@ public class RecommendationService {
         }
     }
 
-    private LocalDateTime getLastRecommendationDate(RecommendationDto recommendationDto) {
-        return recommendationRepository.
-                findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(recommendationDto.getAuthorId(),
-                        recommendationDto.getReceiverId()).map(Recommendation::getCreatedAt).orElse(null);
-    }
-
     public RecommendationDto update(RecommendationDto recommendationDto) {
-        RecommendationValidation.validateRecommendationContent(recommendationDto.getContent());
-        RecommendationValidation.validateSkills(recommendationDto, skillOfferRepository.findAllSkillOffers());
-        LocalDateTime lastRecommendation = recommendationRepository.
-                findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(recommendationDto.getAuthorId(),
-                        recommendationDto.getReceiverId()).map(Recommendation::getCreatedAt).orElse(null);
-        RecommendationValidation.validateRecommendationDate(lastRecommendation);
+        validateRecommendationDto(recommendationDto);
 
         Recommendation recommendation = recommendationMapper.toRecommendation(recommendationDto);
 
@@ -134,14 +118,15 @@ public class RecommendationService {
         if (receiverId == null) {
             throw new DataValidationException("Id пользователя не может быть null");
         }
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Recommendation> recommendationPage = recommendationRepository.findAllByReceiverId(receiverId, pageable);
-        List<Recommendation> recommendationList = recommendationPage.getContent();
+        Pageable pageable = Pageable.unpaged();
+        List<Recommendation> recommendationList =
+                recommendationRepository.findAllByAuthorId(receiverId, pageable).getContent();
+
         return recommendationMapper.toRecommendationDtoList(recommendationList);
     }
 
-    private void createAndSaveSkillOffer(Recommendation recommendation, SkillOffer skillOffer,
-                                         List<SkillOffer> skillOfferListOfReceiver) {
+    private void createAndSaveSkillOffer(Recommendation recommendation,
+                                         SkillOffer skillOffer, List<SkillOffer> skillOfferListOfReceiver) {
         if (skillOffer.getSkill() == null) {
             throw new DataValidationException("Skill can't be null");
         }
@@ -160,5 +145,20 @@ public class RecommendationService {
 
         skillOffer.getSkill().setGuarantees(List.of(userSkillGuarantee));
         userSkillGuaranteeRepository.save(userSkillGuarantee);
+    }
+
+    private void validateRecommendationDto(RecommendationDto recommendationDto) {
+        validation.validateRecommendationContent(recommendationDto.getContent());
+        validation.validateSkills(recommendationDto, skillOfferRepository.findAllSkillOffers());
+        LocalDateTime lastRecommendationDate = getLastRecommendationDate(recommendationDto);
+        validation.validateRecommendationDate(lastRecommendationDate);
+    }
+
+    private LocalDateTime getLastRecommendationDate(RecommendationDto recommendationDto) {
+        return recommendationRepository
+                .findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(recommendationDto.getAuthorId(),
+                        recommendationDto.getReceiverId())
+                .map(Recommendation::getCreatedAt)
+                .orElse(null);
     }
 }

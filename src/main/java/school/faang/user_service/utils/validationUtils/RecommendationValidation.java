@@ -19,7 +19,7 @@ public class RecommendationValidation {
             "%d is invalid.";
     private static final int MOUNT_COUNT_LIMIT = 6;
 
-    public static void validateRecommendationContent(String content) {
+    public void validateRecommendationContent(String content) {
         if (content == null) {
             throw new DataValidationException(CONTENT_NULL_EXCEPTION);
         } else if (content.isBlank()) {
@@ -27,7 +27,7 @@ public class RecommendationValidation {
         }
     }
 
-    public static void validateRecommendationDate(LocalDateTime lastRecommendation) {
+    public void validateRecommendationDate(LocalDateTime lastRecommendation) {
         if (lastRecommendation == null) {
             throw new DataValidationException(DATE_NULL_EXCEPTION);
         } else if (lastRecommendation.isAfter(LocalDateTime.now().minusMonths(MOUNT_COUNT_LIMIT))) {
@@ -35,7 +35,7 @@ public class RecommendationValidation {
         }
     }
 
-    public static void validateSkills(RecommendationDto recommendationDto, List<SkillOffer> allSkillOffers) {
+    public void validateSkills(RecommendationDto recommendationDto, List<SkillOffer> allSkillOffers) {
         if (recommendationDto == null) {
             throw new DataValidationException(RECOMMENDATION_NULL_EXCEPTION);
         }
