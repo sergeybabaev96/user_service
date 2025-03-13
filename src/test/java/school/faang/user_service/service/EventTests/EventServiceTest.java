@@ -34,15 +34,13 @@ class EventServiceTest {
     private EventMapper eventMapper;
     @InjectMocks
     private EventService eventService;
-    private User user;
-    private EventDTO eventDto;
-    private Event event;
+    private final User user = getUserWithSkills();
+    private final Event event = getValidEvent();
+    private EventDTO eventDto = getValidEventDTO();
+
 
     @Test
     void positiveCreate_shouldCreateEventWhenValid() {
-        user = getUserWithSkills();
-        event = getValidEvent();
-        eventDto = getValidEventDTO();
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(eventMapper.eventDTOToEvent(eventDto)).thenReturn(event);
         when(eventMapper.eventToEventDTO(event)).thenReturn(eventDto);
@@ -53,8 +51,6 @@ class EventServiceTest {
 
     @Test
     void positiveGetById_shouldReturnEventDTOWhenFound() {
-        event = getValidEvent();
-        eventDto = getValidEventDTO();
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
         when(eventMapper.eventToEventDTO(event)).thenReturn(eventDto);
         EventDTO result = eventService.getById(1L);
@@ -63,9 +59,6 @@ class EventServiceTest {
 
     @Test
     void positiveUpdate_shouldUpdateEventWhenValid() {
-        user = getUserWithSkills();
-        event = getValidEvent();
-        eventDto = getValidEventDTO();
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
         when(userRepository.findById(eventDto.getOwnerId())).thenReturn(Optional.of(user));
         when(eventMapper.eventToEventDTO(event)).thenReturn(eventDto);
@@ -77,7 +70,6 @@ class EventServiceTest {
 
     @Test
     void positiveDelete_shouldDeleteEventWhenExists() {
-        event = getValidEvent();
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
         eventService.delete(1L);
         verify(eventRepository).delete(event);
@@ -85,10 +77,6 @@ class EventServiceTest {
 
     @Test
     void positiveGetOwnedEvents_shouldGetOwnedEvents() {
-        user = getUserWithSkills();
-        event = getValidEvent();
-        eventDto = getValidEventDTO();
-
         List<Event> events = List.of(new Event());
         List<EventDTO> eventDTOs = List.of(new EventDTO());
 
@@ -103,9 +91,6 @@ class EventServiceTest {
 
     @Test
     void positiveGetParticipatedEvents_shouldGetParticipatedEvents() {
-        user = getUserWithSkills();
-        event = getValidEvent();
-        eventDto = getValidEventDTO();
         List<Event> events = List.of(new Event());
         List<EventDTO> eventDTOs = List.of(new EventDTO());
         when(eventRepository.findParticipatedEventsByUserId(user.getId())).thenReturn(events);
@@ -118,17 +103,15 @@ class EventServiceTest {
 
     @Test
     void positiveTestGetEventsByFilter_shouldGetEventsByFilter() {
-        event = getValidEvent();
-        eventDto = getValidEventDTO();
         String filterParam = "New York";
         EventFilterDTO filter = getEventFilter(filterParam);
 
-        Event firstEvent = new Event();
-        EventDTO firstEventDto = new EventDTO();
+        Event firstEvent = getValidEvent();
+        EventDTO firstEventDto = getValidEventDTO();
         firstEventDto.setLocation("New York");
 
-        Event secondEvent = new Event();
-        EventDTO secondEventDto = new EventDTO();
+        Event secondEvent = getValidEvent();
+        EventDTO secondEventDto = getValidEventDTO();
         secondEventDto.setLocation("Los Angeles");
 
         List<Event> events = List.of(firstEvent, secondEvent);
@@ -147,9 +130,6 @@ class EventServiceTest {
 
     @Test
     void negativeCreate_shouldThrowExceptionWhenOwnerNotFound() {
-        user = getUserWithSkills();
-        event = getValidEvent();
-        eventDto = getValidEventDTO();
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
         DataValidationException thrown = assertThrows(DataValidationException.class,
                 () -> eventService.create(eventDto));
@@ -182,7 +162,6 @@ class EventServiceTest {
 
     @Test
     void negativeGetOwnedEvents_shouldThrowExceptionWhenOwnerDontHaveEvents() {
-        user = getUserWithSkills();
         when(eventRepository.findAllByUserId(user.getId())).thenReturn(Collections.emptyList());
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> eventService.getOwnedEvents(user.getId()));
@@ -191,7 +170,6 @@ class EventServiceTest {
 
     @Test
     void negativeGetParticipatedEvents_shouldThrowExceptionWhenUserDontHavePartEvents() {
-        user = getUserWithSkills();
         when(eventRepository.findParticipatedEventsByUserId(user.getId())).thenReturn(Collections.emptyList());
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> eventService.getParticipatedEvents(user.getId()));
