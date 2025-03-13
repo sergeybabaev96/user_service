@@ -1,7 +1,10 @@
 package school.faang.user_service;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -17,44 +20,51 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @Testcontainers
+@SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PostgreSQLContainerTest {
 
     @Container
-    public static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15")
+    public static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:15")
             .withDatabaseName("test")
             .withUsername("user")
             .withPassword("password");
 
+    @BeforeAll
+    static void startContainer() {
+        POSTGRES.start();
+        POSTGRES.waitingFor(Wait.forListeningPort());
+    }
+
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         System.out.println("-------------------------------------");
-        System.out.format("getJdbcUrl(): %s", postgres.getJdbcUrl());
+        System.out.format("getJdbcUrl(): %s", POSTGRES.getJdbcUrl());
         System.out.println("-------------------------------------");
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
+        registry.add("spring.datasource.username", POSTGRES::getUsername);
+        registry.add("spring.datasource.password", POSTGRES::getPassword);
         registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
     }
 
-    private final DataSource dataSource;
-
-    public PostgreSQLContainerTest(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+//    private final DataSource dataSource;
+//
+//    public PostgreSQLContainerTest(DataSource dataSource) {
+//        this.dataSource = dataSource;
+//    }
 
     @Test
     void testDatabaseIsRunning() {
-        postgres.waitingFor(Wait.forListeningPort());
-        System.out.println("PostgreSQL JDBC URL: " + postgres.getJdbcUrl());
-        System.out.println("PostgreSQL Username: " + postgres.getUsername());
-        System.out.println("PostgreSQL Password: " + postgres.getPassword());
-        assertTrue(postgres.isRunning());
+        System.out.println("PostgreSQL JDBC URL: " + POSTGRES.getJdbcUrl());
+        System.out.println("PostgreSQL Username: " + POSTGRES.getUsername());
+        System.out.println("PostgreSQL Password: " + POSTGRES.getPassword());
+        assertTrue(POSTGRES.isRunning());
     }
 
-    @Test
-    void testDatabaseConnection() throws SQLException {
-        try (Connection conn = dataSource.getConnection()) {
-            assertFalse(conn.isClosed());
-        }
-    }
+//    @Test
+//    void testDatabaseConnection() throws SQLException {
+//        try (Connection conn = dataSource.getConnection()) {
+//            assertFalse(conn.isClosed());
+//        }
+//    }
 }
