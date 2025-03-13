@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.MentorshipRequestDto;
 import school.faang.user_service.dto.RequestFilterDto;
+import school.faang.user_service.dto.RejectionDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.filter.RequestFilter;
@@ -28,7 +29,8 @@ public class MentorshipRequestService {
     private static final int MIN_DESCRIPTION_LENGTH = 10;
     private static final int REQUEST_COOLDOWN_MONTHS = 3;
 
-    private static final String ERROR_NULL_DTO = "MentorshipRequestDto can't be null.";
+    private static final String ERROR_NULL_MENTORSHIP_REQUEST_DTO = "MentorshipRequestDto can't be null.";
+    private static final String ERROR_NULL_REJECTION_DTO = "RejectionDto cant be null";
     private static final String ERROR_SHORT_DESCRIPTION = String.format("Description should be at least %d characters long.\n",
             MIN_DESCRIPTION_LENGTH);
     private static final String ERROR_SELF_REQUEST = "You cannot request mentorship from yourself.";
@@ -38,6 +40,8 @@ public class MentorshipRequestService {
     private static final String ERROR_NULL_REQUEST_DTO = "RequestFilterDto cant be null";
     private static final String ERROR_ABSENT_REQUEST = "The request %d was not found.";
     private static final String ERROR_ALREADY_MENTOR = "User is already a mentor for the requester.";
+    private static final String ERROR_EMPTY_REJECTION = "Rejection reason cannot be empty";
+    private static final String INFO_REJECTION_REASON = "Request {} rejected. Reason: {}";
 
     private final MentorshipRequestRepository mentorshipRequestRepository;
     private final MentorshipRequestMapper mentorshipRequestMapper;
@@ -117,7 +121,21 @@ public class MentorshipRequestService {
         mentorshipRequestRepository.save(mentorshipRequest);
     }
 
+    public void rejectRequest(long id, RejectionDto rejection) {
+        Objects.requireNonNull(rejection, ERROR_NULL_REJECTION_DTO);
+
+        if (rejection.getRejectionReason() == null || rejection.getRejectionReason().isBlank()) {
+            throw new IllegalArgumentException(ERROR_EMPTY_REJECTION);
+        }
+        MentorshipRequest mentorshipRequest = mentorshipRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(String.format(ERROR_ABSENT_REQUEST, id)));
+        mentorshipRequest.setStatus(RequestStatus.REJECTED);
+        mentorshipRequest.setRejectionReason(rejection.getRejectionReason());
+        log.info(INFO_REJECTION_REASON, id, rejection.getRejectionReason());
+        mentorshipRequestRepository.save(mentorshipRequest);
+    }
+
     private void validateMentorshipRequestDto(MentorshipRequestDto mentorshipRequestDto) {
-        Objects.requireNonNull(mentorshipRequestDto, ERROR_NULL_DTO);
+        Objects.requireNonNull(mentorshipRequestDto, ERROR_NULL_MENTORSHIP_REQUEST_DTO);
     }
 }
