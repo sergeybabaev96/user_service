@@ -1,30 +1,32 @@
 package school.faang.user_service.filter.goal;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.goal.SearchGoalDto;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
 
-import java.util.stream.Stream;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
 public class GoalStatusFilterTest {
-    private final GoalStatusFilter filter = new GoalStatusFilter();
-    private final Goal firstGoal = new Goal();
-    private final Goal secondGoal = new Goal();
-    private final Goal thirdGoal = new Goal();
 
-    @BeforeEach
-    public void setUp() {
-        firstGoal.setStatus(GoalStatus.ACTIVE);
-        secondGoal.setStatus(GoalStatus.COMPLETED);
-        thirdGoal.setStatus(GoalStatus.ACTIVE);
-    }
+    private final GoalStatusFilter filter = new GoalStatusFilter();
+    private final Goal firstGoal = Goal.builder()
+            .status(GoalStatus.ACTIVE)
+            .build();
+    private final Goal secondGoal = Goal.builder()
+            .status(GoalStatus.COMPLETED)
+            .build();
+    private final Goal thirdGoal = Goal.builder()
+            .status(GoalStatus.ACTIVE)
+            .build();
 
     @Test
     public void testPositiveApplicable() {

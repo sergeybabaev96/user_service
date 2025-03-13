@@ -1,6 +1,7 @@
 package school.faang.user_service.service.goal;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +23,7 @@ import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -35,6 +37,60 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class GoalServiceTest {
+
+    private final Long userId = 1L;
+    private final Long goalId = 1L;
+    private final Goal existingGoal = new Goal();
+    private final User firstUser = User.builder()
+            .id(userId)
+            .build();
+    private final User secondUser = User.builder()
+            .id(2L)
+            .build();
+    private final Skill firstSkill = Skill.builder()
+            .id(1L)
+            .build();
+    private final Skill secondSkill = Skill.builder()
+            .id(2L)
+            .build();
+    private final Skill thirdSkill = Skill.builder()
+            .id(3L)
+            .build();
+    private final GoalDto firstGoalDto = GoalDto.builder()
+            .id(goalId)
+            .title("title")
+            .status(GoalStatus.ACTIVE)
+            .skillIds(List.of(1L, 2L, 3L))
+            .build();
+    private final GoalDto secondGoalDto = GoalDto.builder()
+            .parentId(goalId)
+            .title("title")
+            .status(GoalStatus.ACTIVE)
+            .skillIds(Collections.emptyList())
+            .build();
+    private final GoalDto thirdGoalDto = GoalDto.builder()
+            .status(GoalStatus.COMPLETED)
+            .skillIds(List.of(1L, 2L, 3L))
+            .build();
+    private final Goal goalEntity = Goal.builder()
+            .id(goalId)
+            .title("title")
+            .status(GoalStatus.ACTIVE)
+            .skillsToAchieve(List.of(firstSkill, secondSkill, thirdSkill))
+            .users(List.of(firstUser))
+            .build();
+    private final Goal firstGoal = Goal.builder()
+            .parent(goalEntity)
+            .title("title")
+            .status(GoalStatus.ACTIVE)
+            .build();
+    private final Goal secondGoal = Goal.builder()
+            .parent(goalEntity)
+            .title("title")
+            .status(GoalStatus.COMPLETED)
+            .build();
+    private final Stream<Goal> goals = Stream.of(firstGoal, secondGoal);
+    private final SearchGoalDto searchGoalDto = new SearchGoalDto("title", GoalStatus.ACTIVE);
 
     @InjectMocks
     private GoalService goalService;
@@ -52,68 +108,53 @@ public class GoalServiceTest {
     private GoalMapperImpl goalMapper;
 
     @Mock
-    private List<GoalFilter> goalFilters;
+    private GoalFilter goalFilterTitle;
 
-    private final Long userId = 1L;
-    private final GoalDto goalDto = new GoalDto(
-            1L, "description", null, "title", GoalStatus.ACTIVE, List.of(1L, 2L, 3L));
-    private final Long goalId = 1L;
-    private final SearchGoalDto searchGoalDto = new SearchGoalDto("title", GoalStatus.ACTIVE);
+    @Mock
+    private GoalFilter goalFilterStatus;
 
     @Mock
     private Stream<Goal> goalStream;
+
+    @BeforeEach
+    public void setUp() {
+        goalService = new GoalService(goalRepository, userRepository, skillRepository,
+                goalMapper, List.of(goalFilterTitle, goalFilterStatus));
+    }
 
     @Test
     public void testNegativeCreateByDoesntExistUser() {
         when(userRepository.existsById(userId)).thenReturn(false);
 
-        assertThrows(EntityNotFoundException.class, () -> goalService.createGoal(userId, goalDto));
+        assertThrows(EntityNotFoundException.class, () -> goalService.createGoal(userId, firstGoalDto));
     }
 
     @Test
     public void testNegativeCreateByCountGoalsIsFull() {
-        when(userRepository.existsById(userId)).thenReturn(true);
-        when(goalRepository.findGoalsByUserId(userId)).thenReturn(goalStream);
+        includeNegativeCreateByCountGoalIsFull();
         when(goalStream.count()).thenReturn((long) GoalConstants.MAX_COUNT_GOALS_PER_USER);
 
-        assertThrows(SkillLimitExceededException.class, () -> goalService.createGoal(userId, goalDto));
+        assertThrows(SkillLimitExceededException.class, () -> goalService.createGoal(userId, firstGoalDto));
     }
 
     @Test
     public void testNegativeCreateByDoesntExistSkills() {
-        when(userRepository.existsById(userId)).thenReturn(true);
-        when(goalRepository.findGoalsByUserId(userId)).thenReturn(goalStream);
+        includeNegativeCreateByCountGoalIsFull();
         when(goalStream.count()).thenReturn(0L);
-        Skill firstSkill = new Skill();
-        firstSkill.setId(1L);
-        Skill secondSkill = new Skill();
-        secondSkill.setId(2L);
-        when(skillRepository.findAllById(goalDto.skillIds())).thenReturn(List.of(firstSkill, secondSkill));
+        when(skillRepository.findAllById(firstGoalDto.skillIds())).thenReturn(List.of(firstSkill, secondSkill));
 
-        assertThrows(IllegalArgumentException.class, () -> goalService.createGoal(userId, goalDto));
+        assertThrows(IllegalArgumentException.class, () -> goalService.createGoal(userId, firstGoalDto));
     }
 
     @Test
     public void testPositiveCreateWithSuccessSaveGoal() {
-        Goal goalEntity = new Goal();
-        goalEntity.setId(1L);
-        goalEntity.setDescription("description");
-        goalEntity.setTitle("title");
-        goalEntity.setStatus(GoalStatus.ACTIVE);
-        goalEntity.setSkillsToAchieve(List.of());
-        Skill firstSkill = new Skill();
-        firstSkill.setId(1L);
-        Skill secondSkill = new Skill();
-        secondSkill.setId(2L);
-        Skill thirdSkill = new Skill();
-        thirdSkill.setId(3L);
-        when(userRepository.existsById(userId)).thenReturn(true);
-        when(goalRepository.findGoalsByUserId(userId)).thenReturn(goalStream);
-        when(goalStream.count()).thenReturn(0L);
-        when(skillRepository.findAllById(goalDto.skillIds())).thenReturn(List.of(firstSkill, secondSkill, thirdSkill));
+        includeNegativeCreateByDoesntExistSkills();
+        when(skillRepository.findAllById(firstGoalDto.skillIds()))
+                .thenReturn(List.of(firstSkill, secondSkill, thirdSkill));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(firstUser));
         when(goalRepository.save(goalEntity)).thenReturn(goalEntity);
 
-        goalService.createGoal(userId, goalDto);
+        goalService.createGoal(userId, firstGoalDto);
 
         verify(goalRepository, times(1)).save(goalEntity);
     }
@@ -130,106 +171,112 @@ public class GoalServiceTest {
         when(goalRepository.existsById(goalId)).thenReturn(true);
 
         goalService.deleteGoal(goalId);
-    }
 
+        verify(goalRepository, times(1)).deleteById(goalId);
+    }
 
     @Test
     public void testNegativeUpdateWhenGoalNotExist() {
         when(goalRepository.findById(goalId)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> goalService.updateGoal(goalId, goalDto));
+        assertThrows(EntityNotFoundException.class, () -> goalService.updateGoal(goalId, firstGoalDto));
     }
 
     @Test
     public void testNegativeUpdateWhenStatusIsCompleted() {
-        Goal existingGoal = new Goal();
         existingGoal.setStatus(GoalStatus.COMPLETED);
-
         when(goalRepository.findById(goalId)).thenReturn(Optional.of(existingGoal));
 
-        assertThrows(GoalAlreadyCompletedException.class, () -> goalService.updateGoal(goalId, goalDto));
+        assertThrows(GoalAlreadyCompletedException.class, () -> goalService.updateGoal(goalId, firstGoalDto));
     }
 
     @Test
     public void testNegativeUpdateByDoesntExistSkills() {
-        Goal existingGoal = new Goal();
-        existingGoal.setStatus(GoalStatus.ACTIVE);
+        includeNegativeUpdateByDoesntExistSkills();
+        when(skillRepository.findAllById(firstGoalDto.skillIds())).thenReturn(List.of());
 
-        when(goalRepository.findById(goalId)).thenReturn(Optional.of(existingGoal));
-        when(skillRepository.findAllById(goalDto.skillIds())).thenReturn(List.of());
-
-        assertThrows(IllegalArgumentException.class, () -> goalService.updateGoal(goalId, goalDto));
-    }
-
-
-    public void testPositiveUpdateWithSuccessSaveGoal() {
-        Goal existingGoal = new Goal();
-        existingGoal.setStatus(GoalStatus.ACTIVE);
-
-        Skill skill1 = new Skill();
-        skill1.setId(1L);
-        Skill skill2 = new Skill();
-        skill2.setId(2L);
-        Skill skill3 = new Skill();
-        skill3.setId(3L);
-        List<Skill> skills = List.of(skill1, skill2, skill3);
-
-        User user1 = new User();
-        user1.setId(1L);
-        User user2 = new User();
-        user2.setId(2L);
-        List<User> users = List.of(user1, user2);
-
-        when(goalRepository.findById(goalId)).thenReturn(Optional.of(existingGoal));
-        when(skillRepository.findAllById(goalDto.skillIds())).thenReturn(skills);
-        when(goalRepository.findUsersByGoalId(goalId)).thenReturn(users);
-
-        goalService.updateGoal(goalId, goalDto);
-
-        verify(goalRepository, times(1)).save(existingGoal);
-        verify(userRepository, times(1)).save(user1);
-        verify(userRepository, times(1)).save(user2);
-        assertEquals(GoalStatus.COMPLETED, existingGoal.getStatus());
+        assertThrows(IllegalArgumentException.class, () -> goalService.updateGoal(goalId, firstGoalDto));
     }
 
     @Test
-    public void testFindSubtasksByGoalIdNotExist() {
+    public void testPositiveUpdateWithSuccessSaveGoal() {
+        includeNegativeUpdateByDoesntExistSkills();
+        List<Skill> skills = List.of(firstSkill, secondSkill, thirdSkill);
+        List<User> users = List.of(firstUser, secondUser);
+        when(skillRepository.findAllById(firstGoalDto.skillIds())).thenReturn(skills);
+        when(goalRepository.findUsersByGoalId(goalId)).thenReturn(users);
+        when(goalRepository.save(existingGoal)).thenReturn(existingGoal);
+
+        goalService.updateGoal(goalId, thirdGoalDto);
+
+        verify(goalRepository, times(1)).save(existingGoal);
+        verify(userRepository, times(1)).save(firstUser);
+        verify(userRepository, times(1)).save(secondUser);
+        assertEquals(GoalStatus.COMPLETED, existingGoal.getStatus());
+        assertEquals(existingGoal.getSkillsToAchieve(), skills);
+        assertEquals(firstUser.getSkills(), skills);
+        assertEquals(secondUser.getSkills(), skills);
+    }
+
+    @Test
+    public void testNegativeFindSubtasksByGoalIdNotExist() {
         when(goalRepository.existsById(goalId)).thenReturn(false);
 
         assertThrows(EntityNotFoundException.class, () -> goalService.findSubtasksByGoalId(goalId, searchGoalDto));
     }
 
-
-    public void testFindSubtasksByGoalIdExist() {
-        Goal parentGoal = new Goal();
-        parentGoal.setId(goalId);
-        Goal goal1 = new Goal();
-        goal1.setParent(parentGoal);
-        goal1.setTitle("title");
-        goal1.setStatus(GoalStatus.ACTIVE);
-        Goal goal2 = new Goal();
-        goal2.setParent(parentGoal);
-        goal2.setTitle("name");
-        goal2.setStatus(GoalStatus.ACTIVE);
-        Stream<Goal> goals = Stream.of(goal1, goal2);
+    @Test
+    public void testPositiveFindSubtasksByGoalIdExist() {
         when(goalRepository.existsById(goalId)).thenReturn(true);
         when(goalRepository.findByParent(goalId)).thenReturn(goals);
-        when(goalFilters.get(0).isApplicable(any())).thenReturn(true);
-        when(goalFilters.get(0).apply(goals, any())).thenReturn(Stream.of(goal1));
+        when(goalFilterTitle.isApplicable(any())).thenReturn(true);
+        when(goalFilterStatus.isApplicable(any())).thenReturn(true);
+        when(goalFilterTitle.apply(any(), any())).thenReturn(Stream.of(firstGoal, secondGoal));
+        when(goalFilterStatus.apply(any(), any())).thenReturn(Stream.of(firstGoal));
 
-        List<GoalDto> filteredGoals = goalService.findSubtasksByGoalId(1L, searchGoalDto);
+        List<GoalDto> filteredGoals = goalService.findSubtasksByGoalId(goalId, searchGoalDto);
+
         assertEquals(1, filteredGoals.size());
+        assertEquals(secondGoalDto, filteredGoals.get(0));
     }
 
     @Test
-    public void testGetGoalsByUserIdNotExist() {
+    public void testNegativeGetGoalsByUserIdNotExist() {
         when(userRepository.existsById(userId)).thenReturn(false);
 
         assertThrows(EntityNotFoundException.class, () -> goalService.getGoalsByUserId(goalId, searchGoalDto));
     }
 
     @Test
-    public void testGetGoalsByUserIdExist() {
+    public void testPositiveGetGoalsByUserIdExist() {
+        List<User> users = List.of(firstUser);
+        firstGoal.setUsers(users);
+        secondGoal.setUsers(users);
+        when(userRepository.existsById(userId)).thenReturn(true);
+        when(goalRepository.findGoalsByUserId(userId)).thenReturn(goals);
+        when(goalFilterTitle.isApplicable(any())).thenReturn(true);
+        when(goalFilterStatus.isApplicable(any())).thenReturn(true);
+        when(goalFilterTitle.apply(any(), any())).thenReturn(Stream.of(firstGoal, secondGoal));
+        when(goalFilterStatus.apply(any(), any())).thenReturn(Stream.of(firstGoal));
 
+        List<GoalDto> filteredGoals = goalService.getGoalsByUserId(userId, searchGoalDto);
+
+        assertEquals(1, filteredGoals.size());
+        assertEquals(secondGoalDto, filteredGoals.get(0));
+    }
+
+    private void includeNegativeCreateByCountGoalIsFull() {
+        when(userRepository.existsById(userId)).thenReturn(true);
+        when(goalRepository.findGoalsByUserId(userId)).thenReturn(goalStream);
+    }
+
+    private void includeNegativeCreateByDoesntExistSkills() {
+        includeNegativeCreateByCountGoalIsFull();
+        when(goalStream.count()).thenReturn(0L);
+    }
+
+    private void includeNegativeUpdateByDoesntExistSkills() {
+        existingGoal.setStatus(GoalStatus.ACTIVE);
+        when(goalRepository.findById(goalId)).thenReturn(Optional.of(existingGoal));
     }
 }

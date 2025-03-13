@@ -19,6 +19,7 @@ import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +40,13 @@ public class GoalService {
         validateByCountGoals(userId);
         validateByExistsGoalSkills(goal);
         Goal goalEntity = goalMapper.goalDtoToGoal(goal, getSkillsByIds(goal.skillIds()));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        if (goalEntity.getUsers() == null) {
+            goalEntity.setUsers(new ArrayList<>());
+        }
+        goalEntity.getUsers().add(user);
+        goalEntity.setSkillsToAchieve(skillRepository.findAllById(goal.skillIds()));
         goalRepository.save(goalEntity);
         log.info("User {} accepted new goal {}", userId, goalEntity.getTitle());
     }
@@ -54,19 +62,22 @@ public class GoalService {
                 .orElseThrow(() -> new EntityNotFoundException("Goal not found"));
         validateByCompletionStatus(existingGoal);
         validateByExistsGoalSkills(goal);
-        Goal updatedGoal = goalMapper.goalDtoToGoal(goal, getSkillsByIds(goal.skillIds()));
-        updatedGoal.setId(existingGoal.getId());
-        goalRepository.save(updatedGoal);
+        existingGoal.setStatus(goal.status());
+        existingGoal.setSkillsToAchieve(skillRepository.findAllById(goal.skillIds()));
+        goalRepository.save(existingGoal);
         log.info("{} goal updated", goalId);
 
-        if (updatedGoal.getStatus() == GoalStatus.COMPLETED) {
+        if (existingGoal.getStatus() == GoalStatus.COMPLETED) {
             List<User> users = goalRepository.findUsersByGoalId(goalId);
-            achieveSkillsByUsers(users, updatedGoal);
+            achieveSkillsByUsers(users, existingGoal);
         }
     }
 
     private void achieveSkillsByUsers(List<User> users, Goal goal) {
         users.forEach(user -> {
+            if (user.getSkills() == null) {
+                user.setSkills(new ArrayList<>());
+            }
             List<Skill> skills = user.getSkills();
             skills.addAll(goal.getSkillsToAchieve());
             user.setSkills(skills);

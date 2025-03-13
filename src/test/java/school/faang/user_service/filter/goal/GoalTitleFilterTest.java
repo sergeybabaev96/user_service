@@ -1,7 +1,8 @@
 package school.faang.user_service.filter.goal;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.goal.SearchGoalDto;
 import school.faang.user_service.entity.goal.Goal;
 
@@ -12,24 +13,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
 public class GoalTitleFilterTest {
+
     private final GoalTitleFilter filter = new GoalTitleFilter();
-    private final Goal firstGoal = new Goal();
-    private final Goal secondGoal = new Goal();
-    private final Goal thirdGoal = new Goal();
-    private final Goal fourthGoal = new Goal();
     private final String firstTitle = "title";
+    private final String secondTitle = "another title";
     private final String thirdTitle = "tiTlE";
     private final String fourthTitle = "Title";
-
-    @BeforeEach
-    public void setUp() {
-        String secondTitle = "another title";
-        firstGoal.setTitle(firstTitle);
-        secondGoal.setTitle(secondTitle);
-        thirdGoal.setTitle(thirdTitle);
-        fourthGoal.setTitle(fourthTitle);
-    }
+    private final Goal firstGoal = Goal.builder()
+            .title(firstTitle)
+            .build();
+    private final Goal secondGoal = Goal.builder()
+            .title(secondTitle)
+            .build();
+    private final Goal thirdGoal = Goal.builder()
+            .title(thirdTitle)
+            .build();
+    private final Goal fourthGoal = Goal.builder()
+            .title(fourthTitle)
+            .build();
 
     @Test
     public void testPositiveApplicable() {
