@@ -8,23 +8,21 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.education.EducationMapper;
 import school.faang.user_service.repository.EducationRepository;
-import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.user.UserService;
 
 import java.time.Year;
 
 @Service
 @RequiredArgsConstructor
 public class EducationService {
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final EducationRepository educationRepository;
     private final EducationMapper educationMapper;
 
     public EducationDto addEducation(long userId, EducationDto educationDto) {
         validateYearFrom(educationDto.getYearFrom());
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new DataValidationException("User not found"));
-
+        User user = userService.getUserById(userId);
         Education education = educationMapper.toEducation(educationDto);
         education.setUser(user);
 
