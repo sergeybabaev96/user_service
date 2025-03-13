@@ -11,9 +11,8 @@ import school.faang.user_service.filter.RequestFilter;
 import school.faang.user_service.mapper.RequestFilterMapper;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,7 +40,6 @@ public class MentorshipRequestService {
     private final MentorshipRequestRepository mentorshipRequestRepository;
     private final MentorshipRequestMapper mentorshipRequestMapper;
     private final UserService userService;
-    private final MentorshipRequestFilter mentorshipRequestFilter;
     private final RequestFilterMapper requestFilterMapper;
     private final List<RequestFilter> filters;
 
@@ -85,9 +83,6 @@ public class MentorshipRequestService {
         mentorshipRequestRepository.save(mentorshipRequest);
     }
 
-    public List<RequestFilterDto> getRequests(RequestFilterDto filterRequest) {
-        List<MentorshipRequest> requests = new ArrayList<>();
-        mentorshipRequestRepository.findAll().forEach(requests::add);
     public List<RequestFilterDto> getRequests(RequestFilterDto filterRequestDto) {
         Objects.requireNonNull(filterRequestDto, ERROR_NULL_REQUEST_DTO);
         Stream<MentorshipRequest> requestStream = StreamSupport.stream(mentorshipRequestRepository.findAll()
