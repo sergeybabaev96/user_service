@@ -33,9 +33,8 @@ public class SkillService {
 
     public List<SkillDto> getUserSkills(Long userId) {
        List<Skill> skills = skillRepository.findAllByUserId(userId);
-       List<SkillDto> skillDtos = skills.stream().map(skillMapper::skillToSkillDto)
+        return skills.stream().map(skillMapper::skillToSkillDto)
                .toList();
-       return skillDtos;
     }
 
     public List<SkillCandidateDto> getOfferedSkills(Long userId) {
