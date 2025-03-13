@@ -1,15 +1,14 @@
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:9999/fake
+    username: fakeuser
+    password: fakepass
+  jpa:
+    hibernate:
+      ddl-auto: update
   test:
     database:
       replace: none
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
 
 server:
   port: 8080
