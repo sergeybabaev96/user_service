@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.MentorshipRequestDto;
+import school.faang.user_service.dto.RequestFilterDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
+import school.faang.user_service.filter.RequestFilter;
+import school.faang.user_service.mapper.RequestFilterMapper;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 
@@ -15,6 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
@@ -31,9 +35,13 @@ public class MentorshipRequestService {
     private static final String ERROR_TOO_FREQUENT_REQUESTS = String.format("You can only request mentorship once every %d months.\n",
             REQUEST_COOLDOWN_MONTHS);
 
+    private static final String ERROR_NULL_REQUEST_DTO = "RequestFilterDto cant be null";
+
     private final MentorshipRequestRepository mentorshipRequestRepository;
     private final MentorshipRequestMapper mentorshipRequestMapper;
     private final UserService userService;
+    private final RequestFilterMapper requestFilterMapper;
+    private final List<RequestFilter> filters;
 
     public void requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
         validateMentorshipRequestDto(mentorshipRequestDto);
@@ -73,6 +81,19 @@ public class MentorshipRequestService {
         mentorshipRequest.setReceiver(userService.findById(mentorshipRequestDto.getReceiverId()));
         mentorshipRequest.setStatus(RequestStatus.PENDING);
         mentorshipRequestRepository.save(mentorshipRequest);
+    }
+
+    public List<RequestFilterDto> getRequests(RequestFilterDto filterRequestDto) {
+        Objects.requireNonNull(filterRequestDto, ERROR_NULL_REQUEST_DTO);
+        Stream<MentorshipRequest> requestStream = StreamSupport.stream(mentorshipRequestRepository.findAll()
+                .spliterator(), false);
+
+        for (RequestFilter filter : filters) {
+            if (filter.isApplicable(filterRequestDto)) {
+                requestStream = filter.apply(requestStream, filterRequestDto);
+            }
+        }
+        return requestFilterMapper.toListDto(requestStream.toList());
     }
 
     private void validateMentorshipRequestDto(MentorshipRequestDto mentorshipRequestDto) {
