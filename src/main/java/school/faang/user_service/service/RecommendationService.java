@@ -2,6 +2,7 @@ package school.faang.user_service.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
@@ -19,6 +20,7 @@ import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecommendationService {
@@ -37,19 +39,18 @@ public class RecommendationService {
                         recommendation.getReceiver().getId()
                 ).orElseThrow(EntityNotFoundException::new);
         if (oldRecommendation.getCreatedAt().plusMonths(6).isAfter(recommendation.getCreatedAt())) {
+            log.info("Автор {} даёт рекомендацию {} ранее, чем через 6 месяцев",
+                    recommendation.getAuthor().getId(),
+                    recommendation.getId()
+            );
             throw new DataValidationException(
-                    "the author " + recommendation.getAuthor().getId()
-                            + " gives a recommendation " + recommendation.getId()
-                            + " earlier than 6 months after his last recommendation to this user"
+                    "the author %s gives a recommendation %d"
+                            + " earlier than 6 months after his last recommendation to this user",
+                    recommendation.getAuthor().getId(),
+                    recommendation.getId()
             );
         }
-        recommendation.getSkillOffers().forEach(
-                skillOffer -> {
-                    if (!skillOfferRepository.existsById(skillOffer.getId())) {
-                        throw new DataValidationException("Skill" + skillOffer.getSkill().getId() + " does not exist");
-                    }
-                }
-        );
+
         Long createdRecommendationId = recommendationRepository.create(
                 recommendation.getAuthor().getId(),
                 recommendation.getReceiver().getId(),
@@ -58,14 +59,18 @@ public class RecommendationService {
         List<SkillOffer> skillOffers = recommendation.getSkillOffers();
 
         if (skillOffers == null || skillOffers.isEmpty()) {
+            log.info("Список Предложений Навыков пуст");
             throw new DataValidationException("Skill offers is empty");
         }
 
         for (SkillOffer skillOffer : skillOffers) {
             skillRepository.findById(skillOffer.getSkill().getId())
                     .orElseThrow(
-                            () -> new DataValidationException(
-                                    "Skill " + skillOffer.getSkill().getId() + " does not exist")
+                            () -> {
+                                log.info("Навык {} не существует", skillOffer.getSkill().getId());
+                                return new DataValidationException(
+                                        "Skill %s does not exist", skillOffer.getSkill().getId());
+                            }
                     );
 
             skillOfferRepository.create(skillOffer.getSkill().getId(), recommendation.getId());
@@ -85,6 +90,10 @@ public class RecommendationService {
                         recommendation.getReceiver().getId()
                 ).orElseThrow(EntityNotFoundException::new);
         if (oldRecommendation.getCreatedAt().plusMonths(6).isAfter(recommendation.getCreatedAt())) {
+            log.info("Автор {} дал рекомендацию {} ранее, чем через 6 месяцев",
+                    recommendation.getAuthor().getId(),
+                    recommendation.getId()
+            );
             throw new DataValidationException(
                     "the author %s gives a recommendation %d " +
                             "earlier than 6 months after his last recommendation to this user",
@@ -92,13 +101,6 @@ public class RecommendationService {
                     recommendation.getId()
             );
         }
-        recommendation.getSkillOffers().forEach(
-                skillOffer -> {
-                    if (!skillOfferRepository.existsById(skillOffer.getId())) {
-                        throw new DataValidationException("Skill" + skillOffer.getSkill().getId() + " does not exist");
-                    }
-                }
-        );
         recommendationRepository.update(
                 recommendation.getAuthor().getId(),
                 recommendation.getReceiver().getId(),
@@ -109,8 +111,11 @@ public class RecommendationService {
         for (SkillOffer skillOffer : recommendation.getSkillOffers()) {
             skillRepository.findById(skillOffer.getSkill().getId())
                     .orElseThrow(
-                            () -> new DataValidationException(
-                                    "Skill " + skillOffer.getSkill().getId() + " does not exist")
+                            () -> {
+                                log.info("Навык {} не существует", skillOffer.getSkill().getId());
+                                return new DataValidationException(
+                                        "Skill %d does not exist", skillOffer.getSkill().getId());
+                            }
                     );
 
             skillOfferRepository.create(skillOffer.getSkill().getId(), recommendation.getId());
@@ -143,18 +148,20 @@ public class RecommendationService {
         User author = recommendation.getAuthor();
         List<SkillOffer> skillOffers = recommendation.getSkillOffers();
         if (skillOffers == null || skillOffers.isEmpty()) {
+            log.info("Рекомендация {} не содержит ни одно предложение навыка", recommendation.getId());
             throw new DataValidationException("Рекомендация должна содержать хотя бы один скилл.");
         }
 
         for (SkillOffer offer : skillOffers) {
             Skill skill = skillRepository.findById(offer.getSkill().getId())
-                    .orElseThrow(() -> new DataValidationException("Скилл с ID " + offer.getSkill().getId() + " не найден."));
+                    .orElseThrow(() -> {
+                        log.info("Навык {} не существует", offer.getSkill().getId());
+                        return new DataValidationException("Скилл с ID %d не найден.", offer.getSkill().getId());
+                    });
 
-            // Проверяем, есть ли этот скилл у получателя рекомендации
             boolean receiverHasSkill = receiver.getSkills().contains(skill);
 
             if (receiverHasSkill) {
-                // Если скилл у пользователя уже есть, добавляем автора как гаранта, если его там нет
                 UserSkillGuarantee guarantee = userSkillGuaranteeRepository
                         .findByUserAndSkill(receiver, skill)
                         .orElse(null);
@@ -170,7 +177,6 @@ public class RecommendationService {
                     userSkillGuaranteeRepository.save(guarantee);
                 }
             } else {
-                // Если у пользователя нет скилла, создаём новый SkillOffer
                 SkillOffer newSkillOffer = new SkillOffer();
                 newSkillOffer.setSkill(skill);
                 newSkillOffer.setRecommendation(recommendation);

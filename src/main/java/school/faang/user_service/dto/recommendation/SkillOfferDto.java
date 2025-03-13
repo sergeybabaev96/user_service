@@ -1,9 +1,10 @@
 package school.faang.user_service.dto.recommendation;
 
-import lombok.Builder;
 
-@Builder
+import lombok.Data;
+
+@Data
 public class SkillOfferDto {
-    long id;
-    String skillId;
+    private long id;
+    private String skillId;
 }
