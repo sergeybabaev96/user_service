@@ -14,7 +14,7 @@ public interface UserMapper {
     @Mapping(target = "menteeIds", expression = "java(UserMapper.toIds(user.getMentees()))")
     UserDto toDto(User user);
   
-    static List<Long> toIds(List<User> users) {
+    default List<Long> toIds(List<User> users) {
         return users == null ? List.of() : users.stream().map(User::getId).toList();
     }
 
