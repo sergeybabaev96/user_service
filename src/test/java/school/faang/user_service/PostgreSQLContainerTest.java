@@ -30,7 +30,9 @@ public class PostgreSQLContainerTest {
             .withUsername("user")
             .withPassword("password");
 
-    static {
+    @BeforeAll
+    static void init() {
+        System.out.println("✅ Запуска POSTGRES");
         POSTGRES.start();
         POSTGRES.waitingFor(Wait.forListeningPort());
     }
@@ -43,14 +45,17 @@ public class PostgreSQLContainerTest {
 
         System.out.println("✅ Используемый хост: " + host);
         System.out.println("✅ Используемый порт: " + mappedPort);
+        System.out.println("✅ Оригинальный JDBC URL: " +  POSTGRES.getJdbcUrl());
         System.out.println("✅ Используемый JDBC URL: " + jdbcUrl);
+        System.out.println("✅ POSTGRES.getUsername(): " + POSTGRES.getUsername());
+        System.out.println("✅ POSTGRES.getPassword(): " + POSTGRES.getPassword());
 
         registry.add("spring.datasource.url", () -> jdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
 
         System.out.println("-------------------------------------");
-        System.out.format("getJdbcUrl(): %s", POSTGRES.getJdbcUrl());
+        System.out.format("getJdbcUrl(): %s%n", POSTGRES.getJdbcUrl());
         System.out.println("-------------------------------------");
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
@@ -64,10 +69,10 @@ public class PostgreSQLContainerTest {
 
     @Test
     void testDatabaseIsRunning() {
-        System.out.println("PostgreSQL JDBC URL: " + POSTGRES.getJdbcUrl());
-        System.out.println("PostgreSQL Port: " + POSTGRES.getFirstMappedPort());
-        System.out.println("PostgreSQL Username: " + POSTGRES.getUsername());
-        System.out.println("PostgreSQL Password: " + POSTGRES.getPassword());
+        System.out.println("✅ PostgreSQL JDBC URL: " + POSTGRES.getJdbcUrl());
+        System.out.println("✅ PostgreSQL Port: " + POSTGRES.getFirstMappedPort());
+        System.out.println("✅ PostgreSQL Username: " + POSTGRES.getUsername());
+        System.out.println("✅ PostgreSQL Password: " + POSTGRES.getPassword());
         assertTrue(POSTGRES.isRunning());
     }
 
