@@ -58,7 +58,7 @@ dependencies {
     /**
      * Utils & Logging
      */
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.slf4j:slf4j-api:2.0.5")
     implementation("ch.qos.logback:logback-classic:1.4.6")
@@ -96,6 +96,13 @@ dependencies {
      * Thumbnail generation
      */
     implementation("net.coobird:thumbnailator:0.4.20")
+
+    /**
+     * Api for elastic search
+     */
+    implementation("co.elastic.clients:elasticsearch-java:8.6.2")
+    implementation("jakarta.json:jakarta.json-api:2.0.1")
+
 
     /**
      * Kafka Events

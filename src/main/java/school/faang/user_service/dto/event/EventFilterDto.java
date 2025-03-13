@@ -17,5 +17,4 @@ public class EventFilterDto {
     private String location;
     private EventType eventType;
     private EventStatus eventStatus;
-
 }

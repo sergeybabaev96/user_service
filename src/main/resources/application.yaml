@@ -66,6 +66,12 @@ dicebear:
   readTimeoutSeconds: 10
   token: YOUR_API_KEY
 
+elastic-search:
+  url: localhost:9200
+  username: user
+  password: password
+
+
 avatar:
   bucketName: user-avatars
 
