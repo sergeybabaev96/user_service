@@ -33,6 +33,13 @@ public class PostgreSQLContainerTest {
     static {
         System.out.println("✅ Запуска POSTGRES");
         POSTGRES.start();
+
+        System.setProperty("spring.datasource.url", POSTGRES.getJdbcUrl());
+        System.out.println("✅ spring.datasource.url: " + POSTGRES.getJdbcUrl());
+        System.setProperty("spring.datasource.username", POSTGRES.getUsername());
+        System.out.println("✅ spring.datasource.username: " + POSTGRES.getUsername());
+        System.setProperty("spring.datasource.password", POSTGRES.getPassword());
+        System.out.println("✅ spring.datasource.password: " + POSTGRES.getPassword());
     }
     @BeforeAll
     static void init() {
