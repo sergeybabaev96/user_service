@@ -10,6 +10,7 @@ import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.filter.RequestFilter;
 import school.faang.user_service.mapper.RequestFilterMapper;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
+import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 
 import java.time.LocalDateTime;
@@ -34,8 +35,9 @@ public class MentorshipRequestService {
     private static final String ERROR_USER_NOT_FOUND = "User with the given ID(s): %s was not found.";
     private static final String ERROR_TOO_FREQUENT_REQUESTS = String.format("You can only request mentorship once every %d months.\n",
             REQUEST_COOLDOWN_MONTHS);
-
     private static final String ERROR_NULL_REQUEST_DTO = "RequestFilterDto cant be null";
+    private static final String ERROR_ABSENT_REQUEST = "The request %d was not found.";
+    private static final String ERROR_ALREADY_MENTOR = "User is already a mentor for the requester.";
 
     private final MentorshipRequestRepository mentorshipRequestRepository;
     private final MentorshipRequestMapper mentorshipRequestMapper;
@@ -75,7 +77,6 @@ public class MentorshipRequestService {
                 throw new IllegalArgumentException(ERROR_TOO_FREQUENT_REQUESTS);
             }
         }
-
         MentorshipRequest mentorshipRequest = mentorshipRequestMapper.toEntity(mentorshipRequestDto);
         mentorshipRequest.setRequester(userService.findById(mentorshipRequestDto.getRequesterId()));
         mentorshipRequest.setReceiver(userService.findById(mentorshipRequestDto.getReceiverId()));
@@ -94,6 +95,26 @@ public class MentorshipRequestService {
             }
         }
         return requestFilterMapper.toListDto(requestStream.toList());
+    }
+
+    public void acceptRequest(long id) {
+        MentorshipRequest mentorshipRequest = mentorshipRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(String.format(ERROR_ABSENT_REQUEST, id)));
+
+        User receiver = mentorshipRequest.getReceiver();
+        User requester = mentorshipRequest.getRequester();
+
+        if (receiver.equals(requester)) {
+            throw new IllegalArgumentException(ERROR_SELF_REQUEST);
+        }
+
+        if (receiver.getMentors().contains(requester)) {
+            throw new IllegalArgumentException(ERROR_ALREADY_MENTOR);
+        }
+        receiver.getMentors().add(requester);
+        mentorshipRequest.setStatus(RequestStatus.ACCEPTED);
+        mentorshipRequest.setReceiver(receiver);
+        mentorshipRequestRepository.save(mentorshipRequest);
     }
 
     private void validateMentorshipRequestDto(MentorshipRequestDto mentorshipRequestDto) {
