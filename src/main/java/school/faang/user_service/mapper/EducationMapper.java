@@ -1,13 +1,13 @@
 package school.faang.user_service.mapper;
 
 import org.mapstruct.Mapper;
-import school.faang.user_service.dto.EducationCreateDto;
+import school.faang.user_service.dto.EducationViewDto;
 import school.faang.user_service.entity.Education;
 
 @Mapper(componentModel = "spring")
 public interface EducationMapper {
 
-    Education toEducation(EducationCreateDto educationDto);
+    Education toEducation(EducationViewDto educationDto);
 
-    EducationCreateDto toEducationDto(Education education);
+    EducationViewDto toEducationDto(Education education);
 }

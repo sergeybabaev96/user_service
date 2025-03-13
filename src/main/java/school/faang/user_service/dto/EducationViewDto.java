@@ -3,7 +3,7 @@ package school.faang.user_service.dto;
 import lombok.Data;
 
 @Data
-public class EducationCreateDto {
+public class EducationViewDto {
     private Long id;
     private Integer yearFrom;
     private Integer yearTo;

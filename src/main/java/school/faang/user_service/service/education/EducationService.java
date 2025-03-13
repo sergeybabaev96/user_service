@@ -4,7 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.EducationCreateDto;
+import school.faang.user_service.dto.EducationViewDto;
 import school.faang.user_service.entity.Education;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
@@ -22,7 +22,7 @@ public class EducationService {
     private final EducationRepository educationRepository;
     private final EducationMapper educationMapper;
 
-    public EducationCreateDto addEducation(long userId, @NonNull EducationCreateDto educationDto) throws DataValidationException {
+    public EducationViewDto addEducation(long userId, @NonNull EducationViewDto educationDto) throws DataValidationException {
         validateYearFrom(educationDto);
 
         User user = findUser(userId);
@@ -30,13 +30,15 @@ public class EducationService {
         Education education = educationMapper.toEducation(educationDto);
         education.setUser(user);
 
-        Education updatedEducation = educationRepository.save(education);
-        return educationMapper.toEducationDto(updatedEducation);
+        education = educationRepository.save(education);
+        return educationMapper.toEducationDto(education);
     }
 
-    public EducationCreateDto updateEducation(long userId, @NonNull EducationCreateDto educationDto) throws DataValidationException {
+    public EducationViewDto updateEducation(long userId, @NonNull EducationViewDto educationDto) throws DataValidationException {
         validateYearFrom(educationDto);
-        Education education = educationMapper.toEducation(getById(educationDto.getId()));
+
+        educationDto = getById(educationDto.getId());
+        Education education = educationMapper.toEducation(educationDto);
 
         validateUser(userId, education.getUser().getId());
         User user = findUser(userId);
@@ -46,7 +48,7 @@ public class EducationService {
         return educationMapper.toEducationDto(updatedEducation);
     }
 
-    public EducationCreateDto getById(long educationId) throws DataValidationException {
+    public EducationViewDto getById(long educationId) throws DataValidationException {
 
         Education education = educationRepository.findById(educationId).orElseThrow(() -> {
             log.error("Ошибка: данные об образовании по ID {} не найдены", educationId);
@@ -55,7 +57,7 @@ public class EducationService {
         return educationMapper.toEducationDto(education);
     }
 
-    private void validateYearFrom(@NonNull EducationCreateDto educationDto) throws DataValidationException {
+    private void validateYearFrom(@NonNull EducationViewDto educationDto) throws DataValidationException {
         if (educationDto.getYearFrom() > Year.now().getValue()) {
             log.error("Ошибка: год начала обучения не может быть больше текущего года");
             throw new DataValidationException("The start date of studies is too late");
