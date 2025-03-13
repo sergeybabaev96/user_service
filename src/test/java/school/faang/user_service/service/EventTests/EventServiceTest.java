@@ -1,6 +1,5 @@
 package school.faang.user_service.service.EventTests;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -27,105 +26,113 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EventServiceTest {
-    //TODO разобраться с тестами
+    @Mock
     private EventRepository eventRepository;
+    @Mock
     private UserRepository userRepository;
+    @Mock
     private EventMapper eventMapper;
+    @InjectMocks
     private EventService eventService;
-    private User mockUser;
-    private EventDTO mockEventDTO;
-    private Event mockEvent;
-
-    @BeforeEach
-    void setUp() {
-        mockUser = new User();
-        mockUser.setId(1L);
-        mockEventDTO = new EventDTO();
-        mockEvent = new Event();
-        mockEvent.setId(1L);
-        mockEvent.setOwner(mockUser);
-
-    }
+    private User user;
+    private EventDTO eventDto;
+    private Event event;
 
     @Test
     void positiveCreate_shouldCreateEventWhenValid() {
-        validDTO();
-        when(userRepository.findById(mockUser.getId())).thenReturn(Optional.of(mockUser));
-        when(eventMapper.eventDTOToEvent(mockEventDTO)).thenReturn(mockEvent);
-        when(eventMapper.eventToEventDTO(mockEvent)).thenReturn(mockEventDTO);
-        EventDTO result = eventService.create(mockEventDTO);
-        verify(eventRepository).save(mockEvent);
+        user = getUserWithSkills();
+        event = getValidEvent();
+        eventDto = getValidEventDTO();
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(eventMapper.eventDTOToEvent(eventDto)).thenReturn(event);
+        when(eventMapper.eventToEventDTO(event)).thenReturn(eventDto);
+        EventDTO result = eventService.create(eventDto);
+        verify(eventRepository).save(event);
         assertNotNull(result);
     }
 
     @Test
     void positiveGetById_shouldReturnEventDTOWhenFound() {
-        when(eventRepository.findById(1L)).thenReturn(Optional.of(mockEvent));
-        when(eventMapper.eventToEventDTO(mockEvent)).thenReturn(mockEventDTO);
+        event = getValidEvent();
+        eventDto = getValidEventDTO();
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(eventMapper.eventToEventDTO(event)).thenReturn(eventDto);
         EventDTO result = eventService.getById(1L);
-        assertEquals(mockEventDTO, result);
+        assertEquals(eventDto, result);
     }
 
     @Test
     void positiveUpdate_shouldUpdateEventWhenValid() {
-        validDTO();
-        when(eventRepository.findById(1L)).thenReturn(Optional.of(mockEvent));
-        when(userRepository.findById(mockEventDTO.getOwnerId())).thenReturn(Optional.of(mockUser));
-        when(eventMapper.eventToEventDTO(mockEvent)).thenReturn(mockEventDTO);
-        doNothing().when(eventMapper).updateEventFromDTO(mockEventDTO, mockEvent);
-        EventDTO result = eventService.update(1L, mockEventDTO);
-        verify(eventRepository).save(mockEvent);
+        user = getUserWithSkills();
+        event = getValidEvent();
+        eventDto = getValidEventDTO();
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepository.findById(eventDto.getOwnerId())).thenReturn(Optional.of(user));
+        when(eventMapper.eventToEventDTO(event)).thenReturn(eventDto);
+        doNothing().when(eventMapper).updateEventFromDTO(eventDto, event);
+        EventDTO result = eventService.update(1L, eventDto);
+        verify(eventRepository).save(event);
         assertNotNull(result);
     }
 
     @Test
     void positiveDelete_shouldDeleteEventWhenExists() {
-        when(eventRepository.findById(1L)).thenReturn(Optional.of(mockEvent));
+        event = getValidEvent();
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
         eventService.delete(1L);
-        verify(eventRepository).delete(mockEvent);
+        verify(eventRepository).delete(event);
     }
 
     @Test
     void positiveGetOwnedEvents_shouldGetOwnedEvents() {
+        user = getUserWithSkills();
+        event = getValidEvent();
+        eventDto = getValidEventDTO();
+
         List<Event> events = List.of(new Event());
         List<EventDTO> eventDTOs = List.of(new EventDTO());
 
-        when(eventRepository.findAllByUserId(mockUser.getId())).thenReturn(events);
+        when(eventRepository.findAllByUserId(user.getId())).thenReturn(events);
         when(eventMapper.eventsToEventDTOs(events)).thenReturn(eventDTOs);
 
-        List<EventDTO> result = eventService.getOwnedEvents(mockUser.getId());
-        verify(eventRepository, times(1)).findAllByUserId(mockUser.getId());
+        List<EventDTO> result = eventService.getOwnedEvents(user.getId());
+        verify(eventRepository, times(1)).findAllByUserId(user.getId());
         verify(eventMapper, times(1)).eventsToEventDTOs(events);
         assertEquals(eventDTOs, result);
     }
 
     @Test
     void positiveGetParticipatedEvents_shouldGetParticipatedEvents() {
+        user = getUserWithSkills();
+        event = getValidEvent();
+        eventDto = getValidEventDTO();
         List<Event> events = List.of(new Event());
         List<EventDTO> eventDTOs = List.of(new EventDTO());
-        when(eventRepository.findParticipatedEventsByUserId(mockUser.getId())).thenReturn(events);
+        when(eventRepository.findParticipatedEventsByUserId(user.getId())).thenReturn(events);
         when(eventMapper.eventsToEventDTOs(events)).thenReturn(eventDTOs);
-        List<EventDTO> result = eventService.getParticipatedEvents(mockUser.getId());
-        verify(eventRepository, times(1)).findParticipatedEventsByUserId(mockUser.getId());
+        List<EventDTO> result = eventService.getParticipatedEvents(user.getId());
+        verify(eventRepository, times(1)).findParticipatedEventsByUserId(user.getId());
         verify(eventMapper, times(1)).eventsToEventDTOs(events);
         assertEquals(eventDTOs, result);
     }
 
     @Test
     void positiveTestGetEventsByFilter_shouldGetEventsByFilter() {
-        EventFilterDTO filter = new EventFilterDTO();
-        filter.setLocation("New York");
+        event = getValidEvent();
+        eventDto = getValidEventDTO();
+        String filterParam = "New York";
+        EventFilterDTO filter = getEventFilter(filterParam);
 
-        Event event1 = new Event();
-        EventDTO eventDTO1 = new EventDTO();
-        eventDTO1.setLocation("New York");
+        Event firstEvent = new Event();
+        EventDTO firstEventDto = new EventDTO();
+        firstEventDto.setLocation("New York");
 
-        Event event2 = new Event();
-        EventDTO eventDTO2 = new EventDTO();
-        eventDTO2.setLocation("Los Angeles");
+        Event secondEvent = new Event();
+        EventDTO secondEventDto = new EventDTO();
+        secondEventDto.setLocation("Los Angeles");
 
-        List<Event> events = List.of(event1, event2);
-        List<EventDTO> eventDTOs = List.of(eventDTO1, eventDTO2);
+        List<Event> events = List.of(firstEvent, secondEvent);
+        List<EventDTO> eventDTOs = List.of(firstEventDto, secondEventDto);
 
         when(eventRepository.findAll()).thenReturn(events);
         when(eventMapper.eventsToEventDTOs(events)).thenReturn(eventDTOs);
@@ -140,11 +147,12 @@ class EventServiceTest {
 
     @Test
     void negativeCreate_shouldThrowExceptionWhenOwnerNotFound() {
-        when(userRepository.findById(mockUser.getId())).thenReturn(Optional.empty());
+        user = getUserWithSkills();
+        event = getValidEvent();
+        eventDto = getValidEventDTO();
+        when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
         DataValidationException thrown = assertThrows(DataValidationException.class,
-                () -> {
-                    eventService.create(mockEventDTO);
-                });
+                () -> eventService.create(eventDto));
         assertEquals("Owner not found", thrown.getMessage());
     }
 
@@ -160,7 +168,7 @@ class EventServiceTest {
     void negativeUpdate_shouldThrowExceptionWhenEventNotFound() {
         when(eventRepository.findById(1L)).thenReturn(Optional.empty());
         DataValidationException thrown = assertThrows(DataValidationException.class,
-                () -> eventService.update(1L, mockEventDTO));
+                () -> eventService.update(1L, eventDto));
         assertEquals("Event not found", thrown.getMessage());
     }
 
@@ -174,17 +182,19 @@ class EventServiceTest {
 
     @Test
     void negativeGetOwnedEvents_shouldThrowExceptionWhenOwnerDontHaveEvents() {
-        when(eventRepository.findAllByUserId(mockUser.getId())).thenReturn(Collections.emptyList());
+        user = getUserWithSkills();
+        when(eventRepository.findAllByUserId(user.getId())).thenReturn(Collections.emptyList());
         DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> eventService.getOwnedEvents(mockUser.getId()));
+                () -> eventService.getOwnedEvents(user.getId()));
         assertEquals("Owner haven`t events", exception.getMessage());
     }
 
     @Test
     void negativeGetParticipatedEvents_shouldThrowExceptionWhenUserDontHavePartEvents() {
-        when(eventRepository.findParticipatedEventsByUserId(mockUser.getId())).thenReturn(Collections.emptyList());
+        user = getUserWithSkills();
+        when(eventRepository.findParticipatedEventsByUserId(user.getId())).thenReturn(Collections.emptyList());
         DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> eventService.getParticipatedEvents(mockUser.getId()));
+                () -> eventService.getParticipatedEvents(user.getId()));
         assertEquals("Haven`t participated events", exception.getMessage());
     }
 
@@ -202,22 +212,42 @@ class EventServiceTest {
                 () -> eventService.getEventsByFilter(new EventFilterDTO()));
         assertEquals("Nothing to show", exception.getMessage());
     }
-    private void validDTO() {
-        mockEventDTO = EventDTO.builder()
+    private EventDTO getValidEventDTO() {
+        eventDto = EventDTO.builder()
                 .id(1L)
-                .ownerId(mockUser.getId())
+                .ownerId(1L)
                 .title("title")
                 .startDate(LocalDateTime.now().plusHours(1))
                 .relatedSkills(List.of(101L, 102L))
                 .build();
-        List<Skill> skills = new ArrayList<>();
-        Skill skill101 = new Skill();
-        skill101.setId(101L);
-        Skill skill102 = new Skill();
-        skill102.setId(102L);
-        skills.add(skill101);
-        skills.add(skill102);
-        mockUser.setSkills(skills);
+        return eventDto;
+    }
+    private EventFilterDTO getEventFilter(String locationFilter){
+        EventFilterDTO filterDTO = new EventFilterDTO();
+        filterDTO.setLocation(locationFilter);
+        return filterDTO;
+    }
+    private User getUserWithSkills(){
+        List<Skill> skills = getSkills();
+        User user = new User();
+        user.setId(1L);
+        user.setSkills(skills);
+        return user;
     }
 
+    private List<Skill> getSkills(){
+        List<Skill> skills = new ArrayList<>();
+        Skill firstSkill = new Skill();
+        firstSkill.setId(101L);
+        Skill secondSkill = new Skill();
+        secondSkill.setId(102L);
+        skills.add(firstSkill);
+        skills.add(secondSkill);
+        return skills;
+    }
+    private Event getValidEvent(){
+        Event event = new Event();
+        event.setOwner(user);
+        return event;
+    }
 }
