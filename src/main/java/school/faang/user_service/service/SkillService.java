@@ -25,23 +25,24 @@ public class SkillService {
         if (skillRepository.existsByTitle(skill.getTitle())) {
             throw new DataValidationException("Skill title already exists");
         }
+
         Skill entity = skillMapper.toEntity(skill);
         entity = skillRepository.save(entity);
         return skillMapper.toDto(entity);
     }
 
     public List<SkillDto> getUserSkills(long userId) {
-        List<Skill> skills = skillRepository.findAllByUserId(userId);
-        return skills.stream().map(skillMapper::toDto).collect(Collectors.toList());
+        return skillRepository.findAllByUserId(userId).stream().
+                map(skillMapper::toDto).collect(Collectors.toList());
     }
 
     public List<SkillCandidateDto> getOfferedSkills(long userId) {
-        List<Skill> skills = skillRepository.findSkillsOfferedToUser(userId);
-        return skills.stream().map(skillMapper::toSkillCandidateDto).collect(Collectors.toList());
+        return skillRepository.findAllByUserId(userId).stream().
+                map(skillMapper::toSkillCandidateDto).collect(Collectors.toList());
     }
 
     public SkillDto acquireSkillFromOffers(long skillId, long userId) {
-        if (skillRepository.findUserSkill(skillId, userId) != null) {
+        if (skillRepository.findUserSkill(skillId, userId).isPresent()) {
             throw new DataValidationException("Skill already exists");
         }
 
