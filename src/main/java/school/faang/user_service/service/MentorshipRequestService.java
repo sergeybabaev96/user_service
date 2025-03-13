@@ -51,6 +51,7 @@ public class MentorshipRequestService {
             log.error(ERROR_SHORT_DESCRIPTION);
             throw new IllegalArgumentException(ERROR_SHORT_DESCRIPTION);
         }
+
         List<Long> missingUser = Stream.of(mentorshipRequestDto.getRequesterId(), mentorshipRequestDto.getReceiverId())
                 .filter(id -> !mentorshipRequestRepository.existsById(id))
                 .toList();
@@ -61,58 +62,62 @@ public class MentorshipRequestService {
             log.info(String.format(ERROR_USER_NOT_FOUND, missingIds));
             throw new IllegalArgumentException(String.format(ERROR_USER_NOT_FOUND, missingIds));
         }
-    }
 
-    LocalDateTime threeMouthAgo = LocalDateTime.now().minusMonths(REQUEST_COOLDOWN_MONTHS);
-    Optional<MentorshipRequest> recentRequest = mentorshipRequestRepository
-            .findLatestRequest(mentorshipRequestDto.getRequesterId(), mentorshipRequestDto.getReceiverId());
-        if(recentRequest.isPresent())
-
-    {
-        if (recentRequest.get().getCreatedAt().isAfter(threeMouthAgo)) {
-            log.error(ERROR_TOO_FREQUENT_REQUESTS);
-            throw new IllegalArgumentException(ERROR_TOO_FREQUENT_REQUESTS);
+        if (mentorshipRequestDto.getRequesterId().equals(mentorshipRequestDto.getReceiverId())) {
+            log.error(ERROR_SELF_REQUEST);
+            throw new IllegalArgumentException(ERROR_SELF_REQUEST);
         }
-    }
 
-    MentorshipRequest mentorshipRequest = mentorshipRequestMapper.toEntity(mentorshipRequestDto);
+        LocalDateTime threeMouthAgo = LocalDateTime.now().minusMonths(REQUEST_COOLDOWN_MONTHS);
+        Optional<MentorshipRequest> recentRequest = mentorshipRequestRepository
+                .findLatestRequest(mentorshipRequestDto.getRequesterId(), mentorshipRequestDto.getReceiverId());
+        if (recentRequest.isPresent()) {
+            if (recentRequest.get().getCreatedAt().isAfter(threeMouthAgo)) {
+                log.error(ERROR_TOO_FREQUENT_REQUESTS);
+                throw new IllegalArgumentException(ERROR_TOO_FREQUENT_REQUESTS);
+            }
+        }
+        MentorshipRequest mentorshipRequest = mentorshipRequestMapper.toEntity(mentorshipRequestDto);
         mentorshipRequest.setRequester(userService.findById(mentorshipRequestDto.getRequesterId()));
         mentorshipRequest.setReceiver(userService.findById(mentorshipRequestDto.getReceiverId()));
         mentorshipRequest.setStatus(RequestStatus.PENDING);
         mentorshipRequestRepository.save(mentorshipRequest);
-}
+    }
 
-public List<RequestFilterDto> getRequests(RequestFilterDto filterRequestDto) {
-    Objects.requireNonNull(filterRequestDto, ERROR_NULL_REQUEST_DTO);
-    Stream<MentorshipRequest> requestStream = StreamSupport.stream(mentorshipRequestRepository.findAll()
-            .spliterator(), false);
+    public List<RequestFilterDto> getRequests(RequestFilterDto filterRequestDto) {
+        Objects.requireNonNull(filterRequestDto, ERROR_NULL_REQUEST_DTO);
+        Stream<MentorshipRequest> requestStream = StreamSupport.stream(mentorshipRequestRepository.findAll()
+                .spliterator(), false);
 
-    for (RequestFilter filter : filters) {
-        if (filter.isApplicable(filterRequestDto)) {
-            requestStream = filter.apply(requestStream, filterRequestDto);
+        for (RequestFilter filter : filters) {
+            if (filter.isApplicable(filterRequestDto)) {
+                requestStream = filter.apply(requestStream, filterRequestDto);
+            }
         }
+        return requestFilterMapper.toListDto(requestStream.toList());
     }
-    return requestFilterMapper.toListDto(requestStream.toList());
-}
 
-private void validateMentorshipRequestDto(MentorshipRequestDto mentorshipRequestDto) {
-    Objects.requireNonNull(mentorshipRequestDto, ERROR_NULL_DTO);
-}
+    public void acceptRequest(long id) {
+        MentorshipRequest mentorshipRequest = mentorshipRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(String.format(ERROR_ABSENT_REQUEST, id)));
 
+        User receiver = mentorshipRequest.getReceiver();
+        User requester = mentorshipRequest.getRequester();
 
-public void acceptRequest(long id) {
-    MentorshipRequest mentorshipRequest = mentorshipRequestRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException(String.format(ERROR_ABSENT_REQUEST, id)));
+        if (receiver.equals(requester)) {
+            throw new IllegalArgumentException(ERROR_SELF_REQUEST);
+        }
 
-    User receiver = mentorshipRequest.getReceiver();
-    User requester = mentorshipRequest.getRequester();
-
-    if (receiver.getMentors().contains(requester)) {
-        throw new IllegalArgumentException(ERROR_ALREADY_MENTOR);
+        if (receiver.getMentors().contains(requester)) {
+            throw new IllegalArgumentException(ERROR_ALREADY_MENTOR);
+        }
+        receiver.getMentors().add(requester);
+        mentorshipRequest.setStatus(RequestStatus.ACCEPTED);
+        mentorshipRequest.setReceiver(receiver);
+        mentorshipRequestRepository.save(mentorshipRequest);
     }
-    receiver.getMentors().add(requester);
-    mentorshipRequest.setStatus(RequestStatus.ACCEPTED);
-    mentorshipRequest.setReceiver(receiver);
-    mentorshipRequestRepository.save(mentorshipRequest);
-}
+
+    private void validateMentorshipRequestDto(MentorshipRequestDto mentorshipRequestDto) {
+        Objects.requireNonNull(mentorshipRequestDto, ERROR_NULL_DTO);
+    }
 }
