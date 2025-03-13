@@ -78,20 +78,18 @@ public class EventService {
      */
     public List<EventViewDto> getEventsByFilter(EventFilterDto eventFilterDto) {
         if (eventFilterDto == null) {
-            return eventRepository.findAll().stream()
-                    .map(eventMapper::toDto)
-                    .toList();
+            eventFilterDto = new EventFilterDto();
         }
 
-        Stream<Event> allEvents = eventRepository.findAll().stream();
+        var events = eventRepository.findAll().stream();
 
         for (EventFilter eventFilter : eventFilters) {
             if (eventFilter.isApplicable(eventFilterDto)) {
-                allEvents = eventFilter.apply(allEvents, eventFilterDto);
+                events = eventFilter.apply(events, eventFilterDto);
             }
         }
 
-        return allEvents
+        return events
                 .map(eventMapper::toDto)
                 .toList();
     }
@@ -132,8 +130,8 @@ public class EventService {
      * @return Список событий в виде {@link List<EventViewDto>}.
      */
     public List<EventViewDto> getOwnerEvent(long userId) {
-        List<Event> events = eventRepository.findAllByUserId(userId);
-        return events.stream()
+        return eventRepository.findAllByUserId(userId)
+                .stream()
                 .map(eventMapper::toDto)
                 .toList();
     }
@@ -145,8 +143,8 @@ public class EventService {
      * @return Список событий в виде {@link List<EventViewDto>}.
      */
     public List<EventViewDto> getParticipatedEvents(long userId) {
-        List<Event> events = eventRepository.findParticipatedEventsByUserId(userId);
-        return events.stream()
+        return eventRepository.findParticipatedEventsByUserId(userId)
+                .stream()
                 .map(eventMapper::toDto)
                 .toList();
     }
