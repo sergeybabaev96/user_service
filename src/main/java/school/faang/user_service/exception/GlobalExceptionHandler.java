@@ -76,9 +76,10 @@ public class GlobalExceptionHandler {
         if (isLoggable(loggingLevel)) {
             e.getConstraintViolations()
                     .forEach(violation -> {
-                        errors.put(violation.getRootBeanClass().toString(), violation.getRootBean().toString());
+                        errors.put(violation.getRootBeanClass().getSimpleName(), violation.getRootBean().toString());
                         errors.put(violation.getPropertyPath().toString(), violation.getMessage());
                     });
+
             logging(loggingLevel, errors);
         }
         return errors;
@@ -93,13 +94,12 @@ public class GlobalExceptionHandler {
         if (isLoggable(loggingLevel)) {
             Throwable rootCause = e.getRootCause();
             if (null != rootCause) {
-                errors.put("DataIntegrityViolationException: Root cause", rootCause.toString());
-
                 if (rootCause instanceof org.hibernate.exception.ConstraintViolationException hibernateException) {
                     subHandleHibernateConstraintViolationException(hibernateException, errors);
                 } else if (rootCause instanceof java.sql.SQLException sqlException) {
                     subHandleSQLException(sqlException, errors);
                 } else {
+                    errors.put("DataIntegrityViolationException: Root cause", rootCause.toString());
                     subHandleException(e, errors);
                 }
             }
@@ -156,7 +156,7 @@ public class GlobalExceptionHandler {
 
     private void subHandleSQLException(SQLException sqlException, Map<String, String> errors) {
         String title = "SQLException: ";
-        errors.put(title + "error", sqlException.getClass().toString());
+        errors.put(title + "error", sqlException.getClass().getSimpleName());
         errors.put(title + "message", sqlException.getMessage());
         errors.put(title + "code", String.valueOf(sqlException.getErrorCode()));
         errors.put(title + "state", sqlException.getSQLState());
@@ -164,7 +164,7 @@ public class GlobalExceptionHandler {
 
     private void subHandleHibernateConstraintViolationException(org.hibernate.exception.ConstraintViolationException  hibernateEcxeption, Map<String, String> errors) {
         String title = "Hibernate ConstraintViolationException: ";
-        errors.put(title + "error", hibernateEcxeption.getClass().toString());
+        errors.put(title + "error", hibernateEcxeption.getClass().getSimpleName());
         errors.put(title + "message", hibernateEcxeption.getSQLException().getMessage());
         errors.put(title + "Violation of validation", hibernateEcxeption.getConstraintName());
     }
@@ -186,7 +186,7 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new LinkedHashMap<>();
 
         errors.put(ERROR_FIELD_INFO, info);
-        errors.put(ERROR_FIELD_EXCEPTION, e.getClass().toString());
+        errors.put(ERROR_FIELD_EXCEPTION, e.getClass().getSimpleName());
         errors.put(ERROR_FIELD_MESSAGE, e.getMessage());
 
         return errors;
