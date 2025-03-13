@@ -18,7 +18,7 @@ public interface UserMapper {
         return users == null ? List.of() : users.stream().map(User::getId).toList();
     }
 
-    static List<UserDto> usersToUserDtos(List<User> users) {
+    static List<UserDto> usersToUserDto(List<User> users) {
         return users.stream()
                 .map(user -> new UserDto(user.getId(), user.getUsername(), user.getEmail()))
                 .toList();

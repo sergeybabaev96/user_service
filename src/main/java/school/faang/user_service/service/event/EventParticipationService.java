@@ -16,24 +16,32 @@ public class EventParticipationService {
     private final EventParticipationRepository eventParticipationRepository;
 
     public void registerParticipant(long eventId, long userId) {
-        List<User> participants = eventParticipationRepository.findAllParticipantsByEventId(eventId);
-        if (participants.stream().anyMatch(user -> user.getId() == userId)) {
+        boolean isAlreadyRegistered = eventParticipationRepository.findAllParticipantsByEventId(eventId)
+                .stream()
+                .anyMatch(user -> user.getId() == userId);
+
+        if (isAlreadyRegistered) {
             throw new DataValidationException("User is already registered for this event.");
         }
+
         eventParticipationRepository.register(eventId, userId);
     }
 
     public void unregisterParticipant(long eventId, long userId) {
-        List<User> participants = eventParticipationRepository.findAllParticipantsByEventId(eventId);
-        if (participants.stream().noneMatch(user -> user.getId() == userId)) {
+        boolean isRegistered = eventParticipationRepository.findAllParticipantsByEventId(eventId)
+                .stream()
+                .anyMatch(user -> user.getId() == userId);
+
+        if (!isRegistered) {
             throw new DataValidationException("User is not registered for this event.");
         }
+
         eventParticipationRepository.unregister(eventId, userId);
     }
 
     public List<UserDto> getParticipants(long eventId) {
         List<User> participants = eventParticipationRepository.findAllParticipantsByEventId(eventId);
-        return UserMapper.usersToUserDtos(participants);
+        return UserMapper.usersToUserDto(participants);
     }
 
     public int getParticipantsCount(long eventId) {
