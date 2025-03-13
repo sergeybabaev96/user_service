@@ -1,9 +1,7 @@
 spring:
-  datasource:
-    url: jdbc:tc:postgresql:15:///testdb
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-    username: test
-    password: test
+  test:
+    database:
+      replace: none
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -12,9 +10,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
-  h2:
-    console: true
-    path: /h2-console
 
 server:
   port: 8080
