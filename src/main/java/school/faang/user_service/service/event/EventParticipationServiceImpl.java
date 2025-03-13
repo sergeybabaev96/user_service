@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.exception.EventExistException;
+import school.faang.user_service.exception.EventNotFoundException;
 import school.faang.user_service.exception.EventParticipationException;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.event.EventParticipationRepository;
@@ -40,7 +40,7 @@ public class EventParticipationServiceImpl implements EventParticipationService 
         }
     }
 
-    public List<UserDto> getParticipant(long eventId) {
+    public List<UserDto> getParticipants(long eventId) {
         isEventExist(eventId);
         List<User> participants = participationRepository.findAllParticipantsByEventId(eventId);
         return userMapper.toUserDtoList(participants);
@@ -58,7 +58,7 @@ public class EventParticipationServiceImpl implements EventParticipationService 
 
     private void isEventExist(long eventId) {
         if (!eventRepository.existsById(eventId)) {
-            throw new EventExistException("Event with id = %d does not exist.".formatted(eventId));
+            throw new EventNotFoundException("Event with id = %d does not exist.".formatted(eventId));
         }
     }
 }

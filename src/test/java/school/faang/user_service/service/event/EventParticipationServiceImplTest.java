@@ -8,7 +8,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.exception.EventExistException;
+import school.faang.user_service.exception.EventNotFoundException;
 import school.faang.user_service.exception.EventParticipationException;
 import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.repository.event.EventParticipationRepository;
@@ -25,8 +25,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class EventParticipationServiceImplTest {
-    private final long EVENT_ID = 1L;
-    private final long USER_ID = 1L;
+    private static final long EVENT_ID = 1L;
+    private static final long USER_ID = 1L;
 
     @Mock
     private EventRepository eventRepository;
@@ -43,7 +43,7 @@ class EventParticipationServiceImplTest {
     @Test
     void testRegisterParticipantWhenEventDoesNotExist() {
         when(eventRepository.existsById(EVENT_ID)).thenReturn(false);
-        assertThrows(EventExistException.class, () -> participationService.registerParticipant(EVENT_ID, USER_ID));
+        assertThrows(EventNotFoundException.class, () -> participationService.registerParticipant(EVENT_ID, USER_ID));
     }
 
     @Test
@@ -66,7 +66,7 @@ class EventParticipationServiceImplTest {
     @Test
     void testUnregisterParticipantWhenEventDoesNotExists() {
         when(eventRepository.existsById(EVENT_ID)).thenReturn(false);
-        assertThrows(EventExistException.class, () -> participationService.unregisterParticipant(EVENT_ID, USER_ID));
+        assertThrows(EventNotFoundException.class, () -> participationService.unregisterParticipant(EVENT_ID, USER_ID));
     }
 
     @Test
@@ -81,38 +81,42 @@ class EventParticipationServiceImplTest {
     void testUnregisterParticipant() {
         when(eventRepository.existsById(EVENT_ID)).thenReturn(true);
         when(participationRepository.findAllParticipantsByEventId(EVENT_ID))
-                .thenReturn(List.of(User.builder().id(USER_ID).build()));
+                .thenReturn(List.of(
+                        User.builder()
+                                .id(USER_ID)
+                                .build()
+                ));
         participationService.unregisterParticipant(EVENT_ID, USER_ID);
         verify(participationRepository, times(1)).unregister(EVENT_ID, USER_ID);
     }
 
 
     @Test
-    void testGetParticipantWhenEventDoesNotExists() {
+    void testGetParticipantsWhenEventDoesNotExists() {
         when(eventRepository.existsById(EVENT_ID)).thenReturn(false);
-        assertThrows(EventExistException.class, () -> participationService.getParticipant(EVENT_ID));
+        assertThrows(EventNotFoundException.class, () -> participationService.getParticipants(EVENT_ID));
     }
 
     @Test
-    void testGetParticipantWhenEventExistsButHasNoUsers() {
+    void testGetParticipantsWhenEventExistsButHasNoUsers() {
         when(eventRepository.existsById(EVENT_ID)).thenReturn(true);
         List<UserDto> userDtos = List.of();
-        assertEquals(userDtos, participationService.getParticipant(EVENT_ID));
+        assertEquals(userDtos, participationService.getParticipants(EVENT_ID));
     }
 
     @Test
-    void testGetParticipantWhenEventExistsAndHasUsers() {
+    void testGetParticipantsWhenEventExistsAndHasUsers() {
         when(eventRepository.existsById(EVENT_ID)).thenReturn(true);
         when(participationRepository.findAllParticipantsByEventId(EVENT_ID))
                 .thenReturn(List.of(User.builder().id(USER_ID).build()));
         List<UserDto> userDtos = List.of(new UserDto(USER_ID));
-        assertEquals(userDtos, participationService.getParticipant(EVENT_ID));
+        assertEquals(userDtos, participationService.getParticipants(EVENT_ID));
     }
 
     @Test
     void testGetParticipantsCountWhenEventDoesNotExist() {
         when(eventRepository.existsById(EVENT_ID)).thenReturn(false);
-        assertThrows(EventExistException.class, () -> participationService.getParticipantsCount(EVENT_ID));
+        assertThrows(EventNotFoundException.class, () -> participationService.getParticipantsCount(EVENT_ID));
     }
 
     @Test

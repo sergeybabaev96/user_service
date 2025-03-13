@@ -12,8 +12,8 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class EventParticipationControllerTest {
-    private final long EVENT_ID = 1L;
-    private final long USER_ID = 1L;
+    private static final long EVENT_ID = 1L;
+    private static final long USER_ID = 1L;
 
     @Mock
     private EventParticipationService participationService;
@@ -36,7 +36,7 @@ class EventParticipationControllerTest {
     @Test
     void testGetParticipant() {
         participationController.getParticipant(EVENT_ID);
-        verify(participationService, times(1)).getParticipant(EVENT_ID);
+        verify(participationService, times(1)).getParticipants(EVENT_ID);
     }
 
     @Test

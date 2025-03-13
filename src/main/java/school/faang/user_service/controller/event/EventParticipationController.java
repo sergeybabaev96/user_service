@@ -21,7 +21,7 @@ public class EventParticipationController {
     }
 
     public List<UserDto> getParticipant(long eventId) {
-        return participationService.getParticipant(eventId);
+        return participationService.getParticipants(eventId);
     }
 
     public long getParticipantsCount(long eventId) {
