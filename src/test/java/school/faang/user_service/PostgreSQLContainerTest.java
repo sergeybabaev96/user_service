@@ -37,12 +37,22 @@ public class PostgreSQLContainerTest {
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
+        int mappedPort = POSTGRES.getMappedPort(5432);
+        String host = POSTGRES.getHost();
+        String jdbcUrl = String.format("jdbc:postgresql://%s:%d/%s", host, mappedPort, POSTGRES.getDatabaseName());
+
+        System.out.println("✅ Используемый хост: " + host);
+        System.out.println("✅ Используемый порт: " + mappedPort);
+        System.out.println("✅ Используемый JDBC URL: " + jdbcUrl);
+
+        registry.add("spring.datasource.url", () -> jdbcUrl);
+        registry.add("spring.datasource.username", POSTGRES::getUsername);
+        registry.add("spring.datasource.password", POSTGRES::getPassword);
+
         System.out.println("-------------------------------------");
         System.out.format("getJdbcUrl(): %s", POSTGRES.getJdbcUrl());
         System.out.println("-------------------------------------");
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
-        registry.add("spring.datasource.username", POSTGRES::getUsername);
-        registry.add("spring.datasource.password", POSTGRES::getPassword);
         registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
     }
 
