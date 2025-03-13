@@ -61,20 +61,22 @@ public class AvatarServiceTest {
         assertNotNull(response);
         assertTrue(response.getFileId().contains("avatars/" + userId));
 
-        verify(resourseValidator).validate(file);
-        verify(s3Service, times(3)).
-                uploadFile(anyString(), any(ByteArrayInputStream.class), anyLong(), anyString());
-        verify(userService).findUserById(userId);
+        verify(resourseValidator)
+                .validate(file);
+        verify(s3Service, times(3))
+                .uploadFile(anyString(), any(ByteArrayInputStream.class), anyLong(), anyString());
+        verify(userService)
+                .findUserById(userId);
     }
 
     @Test
     void getAvatarShouldReturnPresignedUrls() {
-        Long userId = 1L;
-        User user = new User();
         UserProfilePic pic = new UserProfilePic();
         pic.setFileId("file.png");
         pic.setMediumFileId("file_medium.png");
         pic.setSmallFileId("file_small.png");
+        Long userId = 1L;
+        User user = new User();
         user.setUserProfilePic(pic);
 
         when(userService.findUserById(userId)).thenReturn(user);
@@ -91,12 +93,12 @@ public class AvatarServiceTest {
 
     @Test
     void deleteAvatarShouldDeleteFilesAndClearProfilePic() {
-        Long userId = 1L;
-        User user = new User();
         UserProfilePic pic = new UserProfilePic();
         pic.setFileId("file.png");
         pic.setMediumFileId("file_medium.png");
         pic.setSmallFileId("file_small.png");
+        Long userId = 1L;
+        User user = new User();
         user.setUserProfilePic(pic);
 
         when(userService.findUserById(userId)).thenReturn(user);
@@ -105,9 +107,12 @@ public class AvatarServiceTest {
 
         assertTrue(response.isSuccess());
         assertEquals("Avatar deleted successfully", response.getMessage());
-        verify(s3Service).deleteFile("file.png");
-        verify(s3Service).deleteFile("file_medium.png");
-        verify(s3Service).deleteFile("file_small.png");
+        verify(s3Service)
+                .deleteFile("file.png");
+        verify(s3Service)
+                .deleteFile("file_medium.png");
+        verify(s3Service)
+                .deleteFile("file_small.png");
     }
 
     @Test
@@ -122,6 +127,7 @@ public class AvatarServiceTest {
 
         assertFalse(response.isSuccess());
         assertEquals("User has no avatar", response.getMessage());
-        verify(s3Service, never()).deleteFile(anyString());
+        verify(s3Service, never())
+                .deleteFile(anyString());
     }
 }

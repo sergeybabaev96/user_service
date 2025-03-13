@@ -50,10 +50,20 @@ public class AvatarService {
             );
 
             byte[] mediumImage = resourseService.resize(file.getBytes(), 1080, format);
-            s3Service.uploadFile(mediumFileId, new ByteArrayInputStream(mediumImage), mediumImage.length, "image/" + format);
+            s3Service.uploadFile(
+                    mediumFileId,
+                    new ByteArrayInputStream(mediumImage),
+                    mediumImage.length,
+                    "image/" + format
+            );
 
             byte[] smallImage = resourseService.resize(file.getBytes(), 170, format);
-            s3Service.uploadFile(smallFileId, new ByteArrayInputStream(smallImage), smallImage.length, "image/" + format);
+            s3Service.uploadFile(
+                    smallFileId,
+                    new ByteArrayInputStream(smallImage),
+                    smallImage.length,
+                    "image/" + format
+            );
 
             UserProfilePic userProfilePic = new UserProfilePic();
             userProfilePic.setFileId(fileId);
