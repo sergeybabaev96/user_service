@@ -30,6 +30,10 @@ public class PostgreSQLContainerTest {
             .withUsername("user")
             .withPassword("password");
 
+    static {
+        System.out.println("✅ Запуска POSTGRES");
+        POSTGRES.start();
+    }
     @BeforeAll
     static void init() {
         System.out.println("✅ Запуска POSTGRES");
