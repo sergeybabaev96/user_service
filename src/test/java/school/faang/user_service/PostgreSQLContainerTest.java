@@ -30,8 +30,7 @@ public class PostgreSQLContainerTest {
             .withUsername("user")
             .withPassword("password");
 
-    @BeforeAll
-    static void startContainer() {
+    static {
         POSTGRES.start();
         POSTGRES.waitingFor(Wait.forListeningPort());
     }
@@ -56,6 +55,7 @@ public class PostgreSQLContainerTest {
     @Test
     void testDatabaseIsRunning() {
         System.out.println("PostgreSQL JDBC URL: " + POSTGRES.getJdbcUrl());
+        System.out.println("PostgreSQL Port: " + POSTGRES.getFirstMappedPort());
         System.out.println("PostgreSQL Username: " + POSTGRES.getUsername());
         System.out.println("PostgreSQL Password: " + POSTGRES.getPassword());
         assertTrue(POSTGRES.isRunning());
