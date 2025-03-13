@@ -13,8 +13,7 @@ import school.faang.user_service.service.event.EventParticipationService;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,10 +28,11 @@ public class EventParticipationServiceTest {
     @Mock
     private EventParticipationRepository eventParticipationRepository;
 
+    private static final long eventId = 1L;
+    private static final long userId = 1L;
+
     @Test
     public void testRegisterParticipantWhenUserNotRegistered() {
-        long eventId = 1L;
-        long userId = 1L;
 
         when(eventParticipationRepository.findAllParticipantsByEventId(eventId))
                 .thenReturn(List.of());
@@ -45,30 +45,26 @@ public class EventParticipationServiceTest {
 
     @Test
     public void testRegisterParticipantWhenUserAlreadyRegistered() {
-        long eventId = 1L;
-        long userId = 1L;
         User user = new User();
         user.setId(userId);
-        List<User> participants = List.of(user);
 
         when(eventParticipationRepository.findAllParticipantsByEventId(eventId))
-        .thenReturn(participants);
+                .thenReturn(List.of(user));
 
         assertThrows(DataValidationException.class, () -> {
             eventParticipationService.registerParticipant(eventId, userId);
-
-            verify(eventParticipationRepository, never()).register(eventId, userId);
         });
+
+        verify(eventParticipationRepository, never()).register(eventId, userId);
     }
 
     @Test
     public void testUnregisterParticipantWhenUserRegistered() {
-        long eventId = 1L;
-        long userId = 1L;
         User user = new User();
         user.setId(userId);
+
         when(eventParticipationRepository.findAllParticipantsByEventId(eventId))
-        .thenReturn(List.of(user));
+                .thenReturn(List.of(user));
 
         eventParticipationService.unregisterParticipant(eventId, userId);
 
@@ -78,28 +74,52 @@ public class EventParticipationServiceTest {
 
     @Test
     public void testUnregisterParticipantWhenUserNotRegistered() {
-        long eventId = 1L;
-        long userId = 1L;
-
-        List<User> participants = List.of();
         when(eventParticipationRepository.findAllParticipantsByEventId(eventId))
-        .thenReturn(participants);
+                .thenReturn(List.of());
 
         assertThrows(DataValidationException.class, () -> {
             eventParticipationService.unregisterParticipant(eventId, userId);
-            verify(eventParticipationRepository, never()).unregister(eventId, userId);
         });
+
+        verify(eventParticipationRepository, never()).unregister(eventId, userId);
     }
 
+    @Test
+    public void testGetParticipants() {
+        User firstUser = User.builder()
+                .id(1L)
+                .username("Kicha")
+                .email("kicha@gmail.com")
+                .build();
+
+        UserDto userDto1 = new UserDto(1L, "Kicha", "kicha@gmail.com");
+
+        when(eventParticipationRepository.findAllParticipantsByEventId(eventId))
+                .thenReturn(List.of(firstUser));
+
+        List<UserDto> result = eventParticipationService.getParticipants(eventId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(userDto1, result.get(0));
+    }
 
     @Test
     public void testGetParticipants_EmptyList() {
-        long eventId = 1L;
         when(eventParticipationRepository.findAllParticipantsByEventId(eventId)).thenReturn(List.of());
-
         List<UserDto> result = eventParticipationService.getParticipants(eventId);
 
         assertEquals(List.of(), result);
     }
 
+    @Test
+    public void testGetParticipantsCount() {
+        int expectedCount = 1;
+        when(eventParticipationRepository.countParticipants(eventId)).thenReturn(expectedCount);
+
+        int result = eventParticipationService.getParticipantsCount(eventId);
+
+        assertEquals(expectedCount, result);
+        verify(eventParticipationRepository, times(1)).countParticipants(eventId);
+    }
 }

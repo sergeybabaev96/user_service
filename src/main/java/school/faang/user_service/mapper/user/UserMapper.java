@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 
+import java.util.Collections;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
@@ -19,6 +20,9 @@ public interface UserMapper {
     }
 
     static List<UserDto> usersToUserDto(List<User> users) {
+        if (users == null || users.isEmpty()) {
+            return Collections.emptyList();
+        }
         return users.stream()
                 .map(user -> new UserDto(user.getId(), user.getUsername(), user.getEmail()))
                 .toList();
