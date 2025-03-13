@@ -65,6 +65,7 @@ public class SkillService {
         if (offers < MIN_SKILL_OFFERS) {
             return null;
         }
+        skillRepository.assignSkillToUser(skillId, userId);
         return skillMapper.skillToSkillDto(offeredSkill.get());
     }
 
