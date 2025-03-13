@@ -37,7 +37,7 @@ public class EventParticipationController {
     }
 
     private static void validateId(long id) {
-        if (id <= 0) {
+        if (id < 0) {
             throw new DataValidationException("Id is less than or equal to zero");
         }
     }
