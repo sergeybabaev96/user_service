@@ -10,6 +10,8 @@ import school.faang.user_service.entity.event.Event;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Mapper(componentModel = "spring")
 public interface EventMapper {
 
@@ -29,8 +31,8 @@ public interface EventMapper {
     @Mapping(target = "updatedAt", ignore = true)
     Event eventDTOToEvent(EventDTO eventDTO);
 
-    @Mapping(target = "id", ignore = true) // Игнорируем изменение ID
-    @Mapping(target = "owner", ignore = true) // Владелец устанавливается отдельно
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "owner", ignore = true)
     @Mapping(target = "attendees", ignore = true)
     @Mapping(target = "ratings", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -46,19 +48,17 @@ public interface EventMapper {
     default List<Long> mapSkillsToIds(List<Skill> skills) {
         return skills == null ? null : skills.stream()
                 .map(Skill::getId)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     default List<Skill> mapIdsToSkills(List<Long> skillIds) {
         if (skillIds == null) return null;
         return skillIds.stream()
                 .map(id -> {
-                    Skill skill = new Skill();  // Создаем новый объект Skill
-                    // Присваиваем ID вручную для гарантии что
-                    // @GeneratedValue(strategy = GenerationType.IDENTITY) отработает верно
+                    Skill skill = new Skill();
                     skill.setId(id);
                     return skill;
                 })
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 }
