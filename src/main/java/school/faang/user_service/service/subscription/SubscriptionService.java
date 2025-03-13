@@ -1,5 +1,6 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.subscription;
 
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import school.faang.user_service.exception.ErrorMessage;
 import school.faang.user_service.filter.subscriber.SubscriberFilter;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.SubscriptionRepository;
+import school.faang.user_service.repository.UserRepository;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,72 +23,79 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class SubscriptionService {
 
-
     private final SubscriptionRepository subscriptionRepository;
+    private final UserRepository userRepository;
     private final List<SubscriberFilter> subscriberFilters;
     private final UserMapper userMapper;
 
+    @Transactional
     public void followUser(long followerId, long followeeId) {
-        validateUserExists(followeeId);
         validateUserExists(followerId);
-        validateSubscriptionOnYourself(followerId, followeeId,
-                ErrorMessage.SUBSCRIBING_ON_YOURSELF_ERROR_MSG);
+        validateUserExists(followeeId);
+        validateSubscriptionOnYourself(followerId, followeeId, true);
         validateSubscription(followerId, followeeId, true);
         subscriptionRepository.followUser(followerId, followeeId);
     }
 
+    @Transactional
     public void unfollowUser(long followerId, long followeeId) {
-        validateUserExists(followeeId);
         validateUserExists(followerId);
-        validateSubscriptionOnYourself(followerId, followeeId,
-                ErrorMessage.UNSUBSCRIBING_FROM_YOURSELF_ERROR_MSG);
+        validateUserExists(followeeId);
+        validateSubscriptionOnYourself(followerId, followeeId, false);
         validateSubscription(followerId, followeeId, false);
         subscriptionRepository.unfollowUser(followerId, followeeId);
     }
 
+    @Transactional(readOnly = true)
     public List<UserDto> getFollowers(long followeeId, UserFilterDto filters) {
         validateUserExists(followeeId);
         Stream<User> followers = subscriptionRepository.findByFolloweeId(followeeId);
         return filterUsers(filters, followers);
     }
 
+    @Transactional(readOnly = true)
     public int getFollowersCount(long followeeId) {
         validateUserExists(followeeId);
         return subscriptionRepository.findFollowersAmountByFolloweeId(followeeId);
     }
 
+    @Transactional(readOnly = true)
     public List<UserDto> getFollowing(long followerId, UserFilterDto filters) {
         validateUserExists(followerId);
         Stream<User> following = subscriptionRepository.findByFollowerId(followerId);
         return filterUsers(filters, following);
     }
 
+    @Transactional(readOnly = true)
     public int getFollowingCount(long followerId) {
         validateUserExists(followerId);
         return subscriptionRepository.findFolloweesAmountByFollowerId(followerId);
     }
 
-    private void validateSubscriptionOnYourself(long followerId, long followeeId, ErrorMessage errorMessage) {
+    private void validateSubscriptionOnYourself(long followerId, long followeeId, boolean isFollow) {
         if (followerId == followeeId) {
+            ErrorMessage errorMessage = isFollow
+                    ? ErrorMessage.SUBSCRIBING_ON_YOURSELF_ERROR_MSG
+                    : ErrorMessage.UNSUBSCRIBING_FROM_YOURSELF_ERROR_MSG;
             log.error(errorMessage.getMessage());
             throw new DataValidationException(errorMessage.getMessage());
         }
     }
 
-    private void validateSubscription(long followerId, long followeeId, boolean isFollowAction) {
+    private void validateSubscription(long followerId, long followeeId, boolean isFollow) {
         boolean isSubscribed = subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
-        if (isFollowAction && isSubscribed) {
+        if (isFollow && isSubscribed) {
             log.error(ErrorMessage.ALREADY_SUBSCRIBED_ERROR_MSG.getMessage());
             throw new DataValidationException(ErrorMessage.ALREADY_SUBSCRIBED_ERROR_MSG.getMessage());
         }
-        if (!isFollowAction && !isSubscribed) {
+        if (!isFollow && !isSubscribed) {
             log.error(ErrorMessage.IMPOSSIBLE_TO_UNFOLLOW_ERROR_MSG.getMessage());
             throw new DataValidationException(ErrorMessage.IMPOSSIBLE_TO_UNFOLLOW_ERROR_MSG.getMessage());
         }
     }
 
     private void validateUserExists(long userId) {
-        if (!subscriptionRepository.existsById(userId)) {
+        if (!userRepository.existsById(userId)) {
             log.error(ErrorMessage.USER_DOES_NOT_EXIST_BY_ID_ERROR_MSG.getMessage(), userId);
             throw new DataValidationException(ErrorMessage.USER_DOES_NOT_EXIST.getMessage());
         }
@@ -100,7 +109,7 @@ public class SubscriptionService {
         }
 
         Stream<User> filteredUsers = applyFilters(applicableFilters, filters, users);
-        return userMapper.toDtoList(filteredUsers.toList());
+        return userMapper.toListUserDto(filteredUsers.toList());
     }
 
     private List<SubscriberFilter> getApplicableFilters(UserFilterDto filters) {
