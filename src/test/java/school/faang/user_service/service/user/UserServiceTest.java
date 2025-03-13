@@ -29,11 +29,7 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private GoalRepository goalRepository;
-    @Mock
     private GoalService goalService;
-    @Mock
-    private EventRepository eventRepository;
     @Mock
     private EventService eventService;
     @Mock

@@ -26,7 +26,6 @@ public class UserService {
 
     private GoalService goalService;
     private EventService eventService;
-    private EventRepository eventRepository;
     private UserRepository userRepository;
     private MentorshipService mentorshipService;
 
