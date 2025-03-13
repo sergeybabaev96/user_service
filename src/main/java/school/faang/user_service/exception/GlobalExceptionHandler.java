@@ -2,6 +2,7 @@ package school.faang.user_service.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.event.Level;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 @Slf4j
 @RestControllerAdvice
@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleDataValidationException(DataValidationException e) {
         Map<String, String> errors = getErrorsMapWithExceptionTitle(e, INFO_VALIDATION_EXCEPTION);
 
-        logging(LoggingLevel.WARN, errors);
+        logging(Level.WARN, errors);
 
         return errors;
     }
@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleEntityNotFoundException(EntityNotFoundException e) {
         Map<String, String> errors = getErrorsMapWithExceptionTitle(e, "Entity not Found exception occurred");
 
-        logging(LoggingLevel.WARN, errors);
+        logging(Level.WARN, errors);
         return errors;
     }
 
@@ -48,7 +48,7 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, String> errors = getErrorsMapWithExceptionTitle(e, "Illegal argument exception occurred");
 
-        logging(LoggingLevel.WARN, errors);
+        logging(Level.WARN, errors);
         return errors;
     }
 
@@ -61,7 +61,7 @@ public class GlobalExceptionHandler {
             .getFieldErrors()
             .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 
-        logging(LoggingLevel.WARN, errors);
+        logging(Level.WARN, errors);
         return errors;
     }
 
@@ -76,7 +76,7 @@ public class GlobalExceptionHandler {
                     errors.put(violation.getPropertyPath().toString(), violation.getMessage());
                 });
 
-        logging(LoggingLevel.WARN, errors);
+        logging(Level.WARN, errors);
         return errors;
     }
 
@@ -98,7 +98,7 @@ public class GlobalExceptionHandler {
             }
         }
 
-        logging(LoggingLevel.WARN, errors);
+        logging(Level.WARN, errors);
         return errors;
     }
 
@@ -110,7 +110,7 @@ public class GlobalExceptionHandler {
         java.sql.SQLException sqlException = e.getSQLException();
         subHandleSQLException(sqlException, errors);
 
-        logging(LoggingLevel.ERROR, errors);
+        logging(Level.ERROR, errors);
         return errors;
     }
 
@@ -121,7 +121,7 @@ public class GlobalExceptionHandler {
 
         subHandleSQLException(e, errors);
 
-        logging(LoggingLevel.ERROR, errors);
+        logging(Level.ERROR, errors);
         return errors;
     }
 
@@ -132,7 +132,7 @@ public class GlobalExceptionHandler {
 
         subHandleException(e, errors);
 
-        logging(LoggingLevel.ERROR, errors);
+        logging(Level.ERROR, errors);
         return errors;
     }
 
@@ -177,26 +177,7 @@ public class GlobalExceptionHandler {
     }
 
 
-    private void logging(LoggingLevel level, Map<String, String> errors) {
-        errors.entrySet().forEach(
-                entry -> logging(level, entry));
-    }
-
-    private void logging(LoggingLevel level, Map.Entry<String, String> error) {
-        logging(level, String.format("%s: %s", error.getKey(), error.getValue()));
-    }
-
-    private void logging(LoggingLevel level, String errorMessage) {
-        level.command.accept(errorMessage);
-    }
-
-
-    public enum LoggingLevel {
-        INFO(log::info), DEBUG(log::debug), WARN(log::warn), ERROR(log::error);
-
-        final Consumer<String> command;
-        LoggingLevel(Consumer<String> command) {
-            this.command = command;
-        }
+    private void logging(org.slf4j.event.Level level, Map<String, String> errors) {
+        errors.forEach((key, value) -> log.makeLoggingEventBuilder(level).log("{}: {}", key, value));
     }
 }
