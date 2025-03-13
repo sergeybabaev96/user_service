@@ -1,7 +1,11 @@
 package school.faang.user_service.service.education;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.education.EducationDto;
 import school.faang.user_service.entity.Education;
 import school.faang.user_service.entity.User;
@@ -12,51 +16,86 @@ import school.faang.user_service.service.user.UserService;
 
 import java.time.Year;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EducationService {
+
     private final UserService userService;
     private final EducationRepository educationRepository;
     private final EducationMapper educationMapper;
 
-    public EducationDto addEducation(long userId, EducationDto educationDto) {
-        validateYearFrom(educationDto.getYearFrom());
+    @Transactional
+    public EducationDto addEducation(@NotNull long userId, @Valid EducationDto educationDto) {
+        log.info("Adding education for user with id: {}", userId);
 
-        User user = userService.getUserById(userId);
+        if (educationDto.yearFrom() > Year.now().getValue()) {
+            log.error("Validation failed: YearFrom cannot be in the future");
+            throw new DataValidationException("YearFrom cannot be in the future");
+        }
+
+        if (!userService.existsById(userId)) {
+            log.error("User not found with id: {}", userId);
+            throw new DataValidationException("User not found");
+        }
+
+        User user = userService.findById(userId);
+        log.info("User found with id: {}", userId);
+
         Education education = educationMapper.toEducation(educationDto);
         education.setUser(user);
 
         Education savedEducation = educationRepository.save(education);
+        log.info("Education added successfully with id: {}", savedEducation.getId());
+
         return educationMapper.toEducationDto(savedEducation);
     }
 
-    public EducationDto updateEducation(long userId, EducationDto educationDto) {
-        validateYearFrom(educationDto.getYearFrom());
+    @Transactional
+    public EducationDto updateEducation(@NotNull long userId, @Valid EducationDto educationDto) {
+        log.info("Updating education with id: {} for user with id: {}", educationDto.id(), userId);
 
-        Education education = educationRepository.findById(educationDto.getId())
-                .orElseThrow(() -> new DataValidationException("Education not found"));
+        if (educationDto.yearFrom() > Year.now().getValue()) {
+            log.error("Validation failed: YearFrom cannot be in the future");
+            throw new DataValidationException("YearFrom cannot be in the future");
+        }
 
-        if (education.getUser().getId() != userId) {
-            throw new DataValidationException("User can only update their own education");
+        if (educationDto.yearTo() != null && educationDto.yearTo() < educationDto.yearFrom()) {
+            log.error("Validation failed: YearTo cannot be less than YearFrom");
+            throw new DataValidationException("YearTo cannot be less than YearFrom");
+        }
+
+        Education existingEducation = educationRepository.findById(educationDto.id())
+                .orElseThrow(() -> {
+                    log.error("Education not found with id: {}", educationDto.id());
+                    return new DataValidationException("Education not found");
+                });
+
+        if (existingEducation.getUser().getId() != userId) {
+            log.error("User mismatch: Education does not belong to user with id: {}", userId);
+            throw new DataValidationException("User mismatch");
         }
 
         Education updatedEducation = educationMapper.toEducation(educationDto);
-        updatedEducation.setUser(education.getUser());
+        updatedEducation.setUser(existingEducation.getUser());
 
         Education savedEducation = educationRepository.save(updatedEducation);
+        log.info("Education updated successfully with id: {}", savedEducation.getId());
+
         return educationMapper.toEducationDto(savedEducation);
     }
 
     public EducationDto getById(long educationId) {
-        Education education = educationRepository.findById(educationId)
-                .orElseThrow(() -> new DataValidationException("Education not found"));
+        log.info("Fetching education with id: {}", educationId);
 
-        return educationMapper.toEducationDto(education);
-    }
-
-    private void validateYearFrom(Integer yearFrom) {
-        if (yearFrom != null && yearFrom > Year.now().getValue()) {
-            throw new DataValidationException("YearFrom cannot be in the future");
-        }
+        return educationRepository.findById(educationId)
+                .map(education -> {
+                    log.info("Education fetched successfully with id: {}", educationId);
+                    return educationMapper.toEducationDto(education);
+                })
+                .orElseThrow(() -> {
+                    log.error("Education not found with id: {}", educationId);
+                    return new DataValidationException("Education not found");
+                });
     }
 }

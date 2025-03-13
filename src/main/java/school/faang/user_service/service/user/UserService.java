@@ -11,8 +11,12 @@ import school.faang.user_service.repository.UserRepository;
 public class UserService {
     private final UserRepository userRepository;
 
-    public User getUserById(long userId) {
+    public User findById(long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new DataValidationException("User not found"));
+    }
+
+    public boolean existsById(long userId) {
+        return userRepository.existsById(userId);
     }
 }
