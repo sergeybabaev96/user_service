@@ -4,6 +4,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.0"
     id("org.jsonschema2pojo") version "1.2.1"
     kotlin("jvm")
+    jacoco
 }
 
 group = "faang.school"
@@ -92,4 +93,73 @@ tasks.bootJar {
 }
 kotlin {
     jvmToolchain(17)
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.test {
+    outputs.upToDateWhen { false }  // To always rerun tests
+}
+
+// This task generates coverage report in xml format
+// The report will be in build\jacocoHtml\index.html
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)   // To start task after tests
+
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+}
+
+// This task verifies tests
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.test)      // To start task after tests
+
+    violationRules {
+        rule {
+            element = "CLASS"
+            // Classes to test
+            // Example:
+            // includes = listOf(
+            //    "school.faang.user_service.RecommendationRequestService",
+            //    "school.faang.user_service.SkillRequestService",
+            //    "school.faang.user_service.SkillService",
+            //    "school.faang.user_service.exception.*",
+            //    )
+            includes = listOf(
+                "school.faang.user_service.RecommendationRequestService",
+                "school.faang.user_service.SkillRequestService",
+                "school.faang.user_service.SkillService",
+                "school.faang.user_service.SkillService",
+                )
+
+            limit {
+                counter = "LINE"    // Check line coverage
+                value = "COVEREDRATIO"  // Set minimum coverage in percents
+                minimum = "0.75".toBigDecimal() // Percentage value
+            }
+
+            limit {
+                counter = "BRANCH"      // Check branch coverage
+                value = "COVEREDRATIO"
+                minimum = "0.75".toBigDecimal()
+            }
+
+            limit {
+                counter = "INSTRUCTION" // Check instruction (all byte-code instructions) coverage
+                value = "COVEREDRATIO"
+                minimum = "0.75".toBigDecimal()
+            }
+        }
+    }
+}
+
+// Set dependencies for task "check" to run JaCoCo by one command ./gradlew check
+tasks.check {
+    dependsOn(tasks.jacocoTestReport)
+    dependsOn(tasks.jacocoTestCoverageVerification)
 }
