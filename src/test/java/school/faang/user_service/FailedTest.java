@@ -10,6 +10,10 @@ public class FailedTest {
     public void testThatShouldFail() {
         fail("Этот тест должен упасть");
     }
+    @Test
+    public void secondTestThatShouldFail() {
+        fail("Этот тест должен упасть");
+    }
 
     public void testThatAlwaysPasses() {
         assertTrue(true, "Этот тест всегда должен проходить");
