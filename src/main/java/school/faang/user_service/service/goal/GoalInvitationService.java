@@ -95,7 +95,7 @@ public class GoalInvitationService {
                 .collect(Collectors.toList());
     }
 
-    private void validateInvitation(GoalInvitation invitation) {
+    public void validateInvitation(GoalInvitation invitation) {
         if (invitation.getInviter() == null || invitation.getInvited() == null) {
             throw new InvalidInvitationException("Inviter and invited user must be specified.");
         }
@@ -112,7 +112,7 @@ public class GoalInvitationService {
         }
     }
 
-    private void validateAcceptance(GoalInvitation invitation) {
+    public void validateAcceptance(GoalInvitation invitation) {
         if (invitation.getStatus() != RequestStatus.PENDING) {
             throw new InvalidInvitationException("Invitation is already processed.");
         }
@@ -127,7 +127,7 @@ public class GoalInvitationService {
         }
     }
 
-    private GoalInvitation getInvitationById(Long id) {
+    public GoalInvitation getInvitationById(Long id) {
         return goalInvitationRepository.findById(id)
                 .orElseThrow(() -> new InvalidInvitationException("Invitation not found."));
     }
