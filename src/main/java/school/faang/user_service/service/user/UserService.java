@@ -231,4 +231,9 @@ public class UserService {
         user.setTelegramChatId(telegramChatId);
         return userRepository.save(user);
     }
+
+    @Transactional(readOnly = true)
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
 }

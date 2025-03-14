@@ -59,6 +59,8 @@ dependencies {
      * Utils & Logging
      */
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.17.0")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.0")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.slf4j:slf4j-api:2.0.5")
     implementation("ch.qos.logback:logback-classic:1.4.6")
@@ -100,9 +102,9 @@ dependencies {
     /**
      * Api for elastic search
      */
-    implementation("co.elastic.clients:elasticsearch-java:8.6.2")
+    implementation("co.elastic.clients:elasticsearch-java")
     implementation("jakarta.json:jakarta.json-api:2.0.1")
-
+    implementation("org.springframework.data:spring-data-elasticsearch")
 
     /**
      * Kafka Events

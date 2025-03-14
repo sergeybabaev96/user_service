@@ -68,7 +68,7 @@ dicebear:
 
 elastic-search:
   url: localhost:9200
-  username: user
+  username: elastic
   password: password
 
 

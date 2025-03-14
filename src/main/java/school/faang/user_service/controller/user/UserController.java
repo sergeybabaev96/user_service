@@ -21,6 +21,7 @@ import school.faang.user_service.dto.avatar.AvatarType;
 import school.faang.user_service.dto.user.UserRegistrationDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapper;
+import school.faang.user_service.service.elastic.UserElasticService;
 import school.faang.user_service.service.user.UserAvatarService;
 import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.validation.image.ValidImage;
@@ -35,6 +36,7 @@ public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
     private final UserAvatarService userAvatarService;
+    private final UserElasticService userElasticService;
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserDto> getUser(@PathVariable @Positive long userId) {

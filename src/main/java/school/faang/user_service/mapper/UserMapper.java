@@ -1,11 +1,13 @@
 package school.faang.user_service.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import school.faang.user_service.dto.SubscriptionUserDto;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.user.UserRegistrationDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.dto.elastic_search.UserDocument;
 
 import java.util.List;
 
@@ -27,4 +29,8 @@ public interface UserMapper {
 
     UserRegistrationDto toRegistrationDto(User user);
 
+    @Mapping(target = "country", source = "country.title")
+    UserDocument toDocument(User user);
+
+    List<UserDocument> toDocumentList(List<User> users);
 }
