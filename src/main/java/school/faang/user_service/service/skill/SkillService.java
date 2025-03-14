@@ -29,7 +29,7 @@ public class SkillService {
     private final SkillMapper skillMapper;
 
     public boolean isAllSkillsExist(List<Long> skillIds) {
-       return skillIds.stream().allMatch(skillRepository::existsById);
+        return skillIds.stream().allMatch(skillRepository::existsById);
     }
 
     public void assignSkillToUser (long skillId, long userId) {
