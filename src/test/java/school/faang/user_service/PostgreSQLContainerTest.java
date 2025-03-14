@@ -52,8 +52,7 @@ public class PostgreSQLContainerTest {
     static void configureProperties(DynamicPropertyRegistry registry) {
         int mappedPort = POSTGRES.getMappedPort(5432);
         String host = POSTGRES.getHost();
-        //String jdbcUrl = String.format("jdbc:postgresql://%s:%d/%s", host, mappedPort, POSTGRES.getDatabaseName());
-        String jdbcUrl = POSTGRES.getJdbcUrl();
+        String jdbcUrl = String.format("jdbc:postgresql://%s:%d/%s", host, mappedPort, POSTGRES.getDatabaseName());
 
         System.out.println("✅ Используемый хост: " + host);
         System.out.println("✅ Используемый порт: " + mappedPort);
