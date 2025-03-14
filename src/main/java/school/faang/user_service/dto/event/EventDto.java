@@ -1,6 +1,5 @@
 package school.faang.user_service.dto.event;
 
-
 import school.faang.user_service.entity.event.EventStatus;
 import school.faang.user_service.entity.event.EventType;
 
