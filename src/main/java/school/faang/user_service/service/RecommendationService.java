@@ -2,6 +2,7 @@ package school.faang.user_service.service;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -228,5 +229,11 @@ public class RecommendationService {
 
     private Pageable getInitialPageRequest() {
         return PageRequest.of(0, pageSize);
+    }
+    
+    public Recommendation findRecommendationById(long recommendationId) {
+        return recommendationRepository.findById(recommendationId)
+                .orElseThrow(() -> new DataRetrievalFailureException(
+                        "Recommendation with id %d is not found".formatted(recommendationId)));
     }
 }
