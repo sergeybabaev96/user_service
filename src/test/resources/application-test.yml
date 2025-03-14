@@ -1,8 +1,9 @@
 spring:
   datasource:
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 5
+    url: jdbc:tc:postgresql:13:///testdb
+    username: testuser
+    password: testpass
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
