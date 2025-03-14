@@ -6,12 +6,11 @@ import org.springframework.stereotype.Service;
 import school.faang.user_service.config.goal.GoalInvitationConfig;
 import school.faang.user_service.dto.goal.GoalInvitationDto;
 import school.faang.user_service.dto.goal.InvitationFilterDto;
-import school.faang.user_service.entity.goal.GoalInvitation;
 import school.faang.user_service.entity.RequestStatus;
+import school.faang.user_service.entity.goal.GoalInvitation;
 import school.faang.user_service.exception.InvalidInvitationException;
 import school.faang.user_service.mapper.GoalInvitationMapper;
 import school.faang.user_service.repository.goal.GoalInvitationRepository;
-import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.user.UserService;
 
 import java.util.List;
@@ -23,7 +22,7 @@ import java.util.stream.Collectors;
 public class GoalInvitationService {
 
     private final GoalInvitationRepository goalInvitationRepository;
-    private final GoalRepository goalRepository;
+    private final GoalService goalService;
     private final UserService userService;
     private final GoalInvitationMapper goalInvitationMapper;
     private final GoalInvitationConfig goalInvitationConfig;
@@ -66,9 +65,9 @@ public class GoalInvitationService {
         log.info("Fetching invitations with filter: {}", filter);
 
         List<GoalInvitation> invitations = goalInvitationRepository.findByInviterIdAndInvitedIdAndStatus(
-                filter.getInviterId(),
-                filter.getInvitedId(),
-                filter.getStatus()
+                filter.inviterId(),
+                filter.inviterId(),
+                filter.status()
         );
 
         log.info("Found {} invitations", invitations.size());
@@ -89,13 +88,13 @@ public class GoalInvitationService {
         userService.validateUserExists(invitation.getInviter().getId());
         userService.validateUserExists(invitation.getInvited().getId());
 
-        if (!goalRepository.existsById(invitation.getGoal().getId())) {
+        if (!goalService.existsById(invitation.getGoal().getId())) {
             throw new InvalidInvitationException("Goal does not exist.");
         }
     }
 
     private void validateAcceptance(GoalInvitation invitation) {
-        if (goalRepository.countActiveGoalsPerUser(invitation.getInvited().getId()) >=
+        if (goalService.countActiveGoalsPerUser(invitation.getInvited().getId()) >=
                 goalInvitationConfig.getMaxActiveGoals()) {
             throw new InvalidInvitationException("User has reached the maximum number of active goals.");
         }
