@@ -3,6 +3,7 @@ package school.faang.user_service.service;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,7 +20,6 @@ import school.faang.user_service.service.mentorship.MentorshipService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.Mockito.doReturn;
 
@@ -27,6 +27,9 @@ import static org.mockito.Mockito.doReturn;
 public class MentorshipServiceTest {
     @Mock
     private MentorshipRepository mentorshipRepository;
+
+    @Mock
+    private UserService userService;
 
     @Spy
     private UserMapper userMapper;
@@ -37,12 +40,9 @@ public class MentorshipServiceTest {
     private long menteeId;
     private long mentorId;
     private long userId;
-
     private User user;
     private User mentor;
     private User mentee;
-    private List<User> mentees;
-    private List<User> mentors;
 
     @BeforeEach
     public void init() {
@@ -61,11 +61,11 @@ public class MentorshipServiceTest {
         mentee.setId(menteeId);
         mentee.setMentees(new ArrayList<>());
 
-        mentees = new ArrayList<>();
+        List<User> mentees = new ArrayList<>();
         mentees.add(mentee);
         mentor.setMentees(mentees);
 
-        mentors = new ArrayList<>();
+        List<User> mentors = new ArrayList<>();
         mentors.add(mentor);
         mentee.setMentors(mentors);
 
@@ -74,13 +74,11 @@ public class MentorshipServiceTest {
     }
 
     @Test
+    @DisplayName("Получение менти пользователя (позитивный сценарий)")
     public void testGetMenteesPositive() {
-        Mockito.when(mentorshipRepository.findById(userId))
-                .thenReturn(Optional.of(user));
-
-        UserViewDto menteeDto = new UserViewDto();
-
-        doReturn(menteeDto)
+        Mockito.when(userService.getUser(userId))
+                .thenReturn(user);
+        doReturn(new UserViewDto())
                 .when(userMapper)
                 .toViewDto(mentee);
 
@@ -89,24 +87,22 @@ public class MentorshipServiceTest {
     }
 
     @Test
-    public void testGetMenteesIsEmpty() {
+    @DisplayName("Проверка получения пустого списка менти")
+    public void testGetMenteesEmptyList() {
         user.setMentees(new ArrayList<>());
-
-        Mockito.when(mentorshipRepository.findById(userId))
-                .thenReturn(Optional.of(user));
+        Mockito.when(userService.getUser(userId))
+                .thenReturn(user);
 
         List<UserViewDto> result = mentorshipService.getMentees(user.getId());
         Assertions.assertEquals(0, result.size());
     }
 
     @Test
+    @DisplayName("Получение менторов пользователя (позитивный сценарий)")
     public void testGetMentorsPositive() {
-        Mockito.when(mentorshipRepository.findById(userId))
-                .thenReturn(Optional.of(user));
-
-        UserViewDto mentorDto = new UserViewDto();
-
-        doReturn(mentorDto)
+        Mockito.when(userService.getUser(userId))
+                .thenReturn(user);
+        doReturn(new UserViewDto())
                 .when(userMapper)
                 .toViewDto(mentor);
 
@@ -115,20 +111,21 @@ public class MentorshipServiceTest {
     }
 
     @Test
-    public void testGetMentorsIsEmpty() {
+    @DisplayName("Проверка получения пустого списка менторов")
+    public void testGetMentorsEmptyList() {
         user.setMentors(new ArrayList<>());
-
-        Mockito.when(mentorshipRepository.findById(userId))
-                .thenReturn(Optional.of(user));
+        Mockito.when(userService.getUser(userId))
+                .thenReturn(user);
 
         List<UserViewDto> result = mentorshipService.getMentors(user.getId());
         Assertions.assertEquals(0, result.size());
     }
 
     @Test
+    @DisplayName("Успешное удаление менти у ментора")
     public void testDeleteMenteeSuccess() {
-        Mockito.when(mentorshipRepository.findById(mentorId))
-                .thenReturn(Optional.of(mentor));
+        Mockito.when(userService.getUser(mentorId))
+                .thenReturn(mentor);
 
         mentorshipService.deleteMentee(menteeId, mentorId);
 
@@ -136,10 +133,10 @@ public class MentorshipServiceTest {
     }
 
     @Test
+    @DisplayName("Удаление несуществующего менти вызывает исключение")
     public void testDeleteMenteeInvalidMentee() {
-        doReturn(Optional.of(mentor))
-                .when(mentorshipRepository)
-                .findById(mentorId);
+        Mockito.when(userService.getUser(mentorId))
+                .thenReturn(mentor);
 
         Exception exception = Assert.assertThrows(DataValidationException.class,
                 () -> mentorshipService.deleteMentee(userId, mentorId));
@@ -147,20 +144,10 @@ public class MentorshipServiceTest {
     }
 
     @Test
-    public void testDeleteMenteeInvalidUser() {
-        doReturn(Optional.empty())
-                .when(mentorshipRepository)
-                .findById(mentorId);
-        Exception exception = Assert.assertThrows(DataValidationException.class,
-                () -> mentorshipService.deleteMentee(menteeId, mentorId));
-        Assertions.assertEquals("Пользователь не найден", exception.getMessage());
-    }
-
-    @Test
+    @DisplayName("Успешное удаление ментора у менти")
     public void testDeleteMentorSuccess() {
-        doReturn(Optional.of(mentee))
-                .when(mentorshipRepository)
-                .findById(menteeId);
+        Mockito.when(userService.getUser(menteeId))
+                .thenReturn(mentee);
 
         mentorshipService.deleteMentor(menteeId, mentorId);
 
@@ -168,23 +155,13 @@ public class MentorshipServiceTest {
     }
 
     @Test
+    @DisplayName("Удаление несуществующего ментора вызывает исключение")
     public void testDeleteMentorInvalidMentor() {
-        doReturn(Optional.of(mentee))
-                .when(mentorshipRepository)
-                .findById(menteeId);
+        Mockito.when(userService.getUser(menteeId))
+                .thenReturn(mentee);
 
         Exception exception = Assert.assertThrows(DataValidationException.class,
                 () -> mentorshipService.deleteMentor(menteeId, userId));
         Assertions.assertEquals("Ментор не найден", exception.getMessage());
-    }
-
-    @Test
-    public void testDeleteMentorInvalidUser() {
-        doReturn(Optional.empty())
-                .when(mentorshipRepository)
-                .findById(menteeId);
-        Exception exception = Assert.assertThrows(DataValidationException.class,
-                () -> mentorshipService.deleteMentor(menteeId, mentorId));
-        Assertions.assertEquals("Пользователь не найден", exception.getMessage());
     }
 }
