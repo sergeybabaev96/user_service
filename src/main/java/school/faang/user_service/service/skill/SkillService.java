@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.skill;
 
 import lombok.Data;
 import org.springframework.stereotype.Service;
@@ -21,6 +21,8 @@ public class SkillService {
     public static final int MIN_SKILL_OFFERS = 3;
     private final SkillRepository skillRepository;
     private final SkillMapper skillMapper;
+    private final SkillOfferService skillOfferService;
+    private final SkillUserGuarantee skillUserGuarantee;
 
     public SkillDto create(SkillDto skillDto) {
         if (skillRepository.existsByTitle(skillDto.getTitle())) {
@@ -55,17 +57,13 @@ public class SkillService {
         if (skillRepository.findUserSkill(skillId, userId).isPresent()) {
             return null;
         }
-        List<Skill> offeredSkills = skillRepository.findSkillsOfferedToUser(userId);
-        Optional<Skill> offeredSkill = findSkillById(skillId,offeredSkills);
-        if (offeredSkill.isEmpty()) {
-            return null;
-        }
-        int offers = offeredSkills.stream().filter(skill -> skill.getId() == skillId).toArray().length;
-        if (offers < MIN_SKILL_OFFERS) {
+        if (skillOfferService.checkAmountOffersToSkill(skillId, userId)) {
             return null;
         }
         skillRepository.assignSkillToUser(skillId, userId);
-        return skillMapper.skillToSkillDto(offeredSkill.get());
+        skillUserGuarantee.addUserSkillGuarantee(skillId, userId);
+
+        return skillMapper.skillToSkillDto(skillRepository.findUserSkill(skillId, userId).get());
     }
 
     private Optional<Skill> findSkillById(Long id, List<Skill> skills) {
