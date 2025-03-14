@@ -55,99 +55,146 @@ public class MentorshipServiceTest {
         mentor2.setUsername("Ivan");
     }
 
-        @Test
-        public void shouldReturnMenteesList() {
-            when(mentorshipRepository.findAllMenteesByMentorId(1L))
-                    .thenReturn(List.of(mentee1, mentee2));
-            when(mentorshipMapper.toDto(mentee1)).thenReturn(mentor1);
-            when(mentorshipMapper.toDto(mentee2)).thenReturn(mentor2);
+    @Test
+    public void shouldReturnMenteesList() {
+        when(mentorshipRepository.findAllMenteesByMentorId(1L))
+                .thenReturn(List.of(mentee1, mentee2));
+        when(mentorshipMapper.toDto(mentee1)).thenReturn(mentor1);
+        when(mentorshipMapper.toDto(mentee2)).thenReturn(mentor2);
 
-            List<MentorshipDto> result = mentorshipService.getMentees(1L);
+        List<MentorshipDto> result = mentorshipService.getMentees(1L);
 
-            verify(mentorshipRepository, times(1)).findAllMenteesByMentorId(1L);
-            verify(mentorshipMapper, times(1)).toDto(mentee1);
+        verify(mentorshipRepository, times(1)).findAllMenteesByMentorId(1L);
+        verify(mentorshipMapper, times(1)).toDto(mentee1);
 
-            assertNotNull(result);
-            assertEquals(2, result.size());
-            assertEquals("Filipp", result.get(0).getUsername());
-            assertEquals("Ivan", result.get(1).getUsername());
-        }
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Filipp", result.get(0).getUsername());
+        assertEquals("Ivan", result.get(1).getUsername());
+    }
 
-        @Test
-        public void shouldReturnEmptyListNoMentees() {
-            when(mentorshipRepository.findAllMenteesByMentorId(1L))
-                    .thenReturn(Collections.emptyList());
+    @Test
+    public void shouldReturnEmptyListNoMentees() {
+        when(mentorshipRepository.findAllMenteesByMentorId(1L))
+                .thenReturn(Collections.emptyList());
 
-            List<MentorshipDto> result = mentorshipService.getMentees(1L);
+        List<MentorshipDto> result = mentorshipService.getMentees(1L);
 
-            verify(mentorshipRepository, times(1)).findAllMenteesByMentorId(1L);
-            verifyNoInteractions(mentorshipMapper);
+        verify(mentorshipRepository, times(1)).findAllMenteesByMentorId(1L);
+        verifyNoInteractions(mentorshipMapper);
 
-            assertNotNull(result);
-            assertTrue(result.isEmpty());
-        }
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
 
-        @Test
-        void shouldReturnEmptyListForMenteesWhenRepositoryReturnsNull() {
-            when(mentorshipRepository.findAllMenteesByMentorId(1L))
-                    .thenReturn(null);
+    @Test
+    void shouldReturnEmptyListForMenteesWhenRepositoryReturnsNull() {
+        when(mentorshipRepository.findAllMenteesByMentorId(1L))
+                .thenReturn(null);
 
-            List<MentorshipDto> result = mentorshipService.getMentees(1L);
+        List<MentorshipDto> result = mentorshipService.getMentees(1L);
 
-            verify(mentorshipRepository, times(1)).findAllMenteesByMentorId(1L);
-            verifyNoInteractions(mentorshipMapper);
+        verify(mentorshipRepository, times(1)).findAllMenteesByMentorId(1L);
+        verifyNoInteractions(mentorshipMapper);
 
-            assertNotNull(result);
-            assertTrue(result.isEmpty());
-        }
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
 
-        @Test
-        void shouldReturnMentorsList() {
+    @Test
+    void shouldReturnMentorsList() {
+        when(userRepository.findAllById(Collections.singleton(1L)))
+                .thenReturn(List.of(mentee1, mentee2));
+        when(mentorshipMapper.toDto(mentee1)).thenReturn(mentor1);
+        when(mentorshipMapper.toDto(mentee2)).thenReturn(mentor2);
 
-            when(userRepository.findAllById(Collections.singleton(1L)))
-                    .thenReturn(List.of(mentee1, mentee2));
-            when(mentorshipMapper.toDto(mentee1)).thenReturn(mentor1);
-            when(mentorshipMapper.toDto(mentee2)).thenReturn(mentor2);
+        List<MentorshipDto> result = mentorshipService.getMentors(1L);
 
-            List<MentorshipDto> result = mentorshipService.getMentors(1L);
+        verify(userRepository, times(1)).findAllById(Collections.singleton(1L));
+        verify(mentorshipMapper, times(2)).toDto(any(User.class));
 
-            verify(userRepository, times(1)).findAllById(Collections.singleton(1L));
-            verify(mentorshipMapper, times(2)).toDto(any(User.class));
-
-            assertNotNull(result);
-            assertEquals(2, result.size());
-            assertEquals("Filipp", result.get(0).getUsername());
-            assertEquals("Ivan", result.get(1).getUsername());
-        }
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Filipp", result.get(0).getUsername());
+        assertEquals("Ivan", result.get(1).getUsername());
+    }
 
 
-        @Test
-        void shouldReturnEmptyListWhenNoMentors() {
+    @Test
+    void shouldReturnEmptyListWhenNoMentors() {
+        when(userRepository.findAllById(Collections.singleton(1L)))
+                .thenReturn(Collections.emptyList());
 
-            when(userRepository.findAllById(Collections.singleton(1L)))
-                    .thenReturn(Collections.emptyList());
+        List<MentorshipDto> result = mentorshipService.getMentors(1L);
 
-            List<MentorshipDto> result = mentorshipService.getMentors(1L);
+        verify(userRepository, times(1)).findAllById(Collections.singleton(1L));
+        verifyNoInteractions(mentorshipMapper);
 
-            verify(userRepository, times(1)).findAllById(Collections.singleton(1L));
-            verifyNoInteractions(mentorshipMapper);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
 
-            assertNotNull(result);
-            assertTrue(result.isEmpty());
-        }
+    @Test
+    void shouldReturnEmptyListForMentorsWhenRepositoryReturnsNull() {
+        when(userRepository.findAllById(Collections.singleton(1L)))
+                .thenReturn(null);
 
-        @Test
-        void shouldReturnEmptyListForMentorsWhenRepositoryReturnsNull() {
+        List<MentorshipDto> result = mentorshipService.getMentors(1L);
 
-            when(userRepository.findAllById(Collections.singleton(1L)))
-                    .thenReturn(null);
+        verify(userRepository, times(1)).findAllById(Collections.singleton(1L));
+        verifyNoInteractions(mentorshipMapper);
 
-            List<MentorshipDto> result = mentorshipService.getMentors(1L);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
 
-            verify(userRepository, times(1)).findAllById(Collections.singleton(1L));
-            verifyNoInteractions(mentorshipMapper);
+    @Test
+    void deleteMentee_ShouldDeleteMentee_WhenMenteeExists() {
+        when(mentorshipRepository.findAllMenteesByMentorId(1L))
+                .thenReturn(Collections.singletonList(mentee1));
 
-            assertNotNull(result);
-            assertTrue(result.isEmpty());
-        }
+        mentorshipService.deleteMentee(1L, 1L);
+
+        verify(mentorshipRepository, times(1)).deleteById(1L);
+        assertTrue(true);
+    }
+
+    @Test
+    void deleteMentee_ShouldThrowException_WhenNoMenteesFound() {
+        when(mentorshipRepository.findAllMenteesByMentorId(1L))
+                .thenReturn(Collections.emptyList());
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+                mentorshipService.deleteMentee(1L, 1L)
+        );
+
+        verify(mentorshipRepository, never()).deleteById(anyLong());
+        assertEquals("У этого ментора нет менторов", exception.getMessage());
+    }
+
+    @Test
+    void deleteMentor_ShouldDeleteMentor_WhenMentorExists() {
+        when(userRepository.findAllById(Collections.singleton(2L)))
+                .thenReturn(Collections.singletonList(mentee1));
+        when(mentorshipMapper.toDto(mentee1))
+                .thenReturn(mentor1);
+
+        mentorshipService.deleteMentor(2L, 1L);
+
+        verify(mentorshipRepository, times(1)).deleteById(1L);
+        assertTrue(true);
+    }
+
+    @Test
+    void deleteMentor_ShouldThrowException_WhenNoMentorsFound() {
+        when(userRepository.findAllById(Collections.singleton(2L)))
+                .thenReturn(Collections.emptyList());
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+                mentorshipService.deleteMentor(2L, 1L)
+        );
+
+        verify(mentorshipRepository, never()).deleteById(anyLong());
+        assertEquals("У данного менти нет менторов.", exception.getMessage());
+    }
 }

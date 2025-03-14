@@ -12,6 +12,4 @@ public interface MentorshipMapper {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "username", source = "username")
     MentorshipDto toDto(User user);
-
-
 }
