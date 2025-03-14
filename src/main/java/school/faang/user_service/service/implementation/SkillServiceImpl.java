@@ -1,5 +1,7 @@
 package school.faang.user_service.service.implementation;
 
+import jakarta.validation.constraints.NotBlank;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import school.faang.user_service.repository.UserSkillGuaranteeRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import school.faang.user_service.service.SkillService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -50,7 +53,8 @@ public class SkillServiceImpl implements SkillService {
 
     @Override
     public List<SkillDto> getUserSkills(Long userId) {
-        List<Skill> skills = skillRepository.findAllByUserId(userId);
+        List<Skill> skills = Optional.ofNullable(skillRepository.findAllByUserId(userId))
+                .orElseGet(ArrayList::new);
         return skills.stream()
                 .map(skillMapper::toDto)
                 .toList();
@@ -87,6 +91,8 @@ public class SkillServiceImpl implements SkillService {
         skillRepository.assignSkillToUser(skillId, userId);
 
         List<UserSkillGuarantee> guarantees = offers.stream()
+                .filter(offer -> Objects.nonNull(offer.getRecommendation().getReceiver())
+                        && Objects.nonNull(offer.getRecommendation().getAuthor()))
                 .map(offer -> UserSkillGuarantee.builder()
                         .user(offer.getRecommendation().getReceiver())
                         .skill(offer.getSkill())
@@ -101,21 +107,24 @@ public class SkillServiceImpl implements SkillService {
 
     @Override
     public List<Skill> findAllSkillsById(List<Long> skillIds) {
-        return skillRepository.findAllById(skillIds);
+        return Optional.of(skillRepository.findAllById(skillIds))
+                .orElseGet(ArrayList::new);
     }
 
     @Override
     public List<Skill> findSkillsByUserId(Long userId) {
-        return skillRepository.findAllByUserId(userId);
+        return Optional.ofNullable(skillRepository.findAllByUserId(userId))
+                .orElseGet(ArrayList::new);
     }
 
     @Override
     public List<Skill> findSkillsByGoalId(Long goalId) {
-        return skillRepository.findSkillsByGoalId(goalId);
+        return Optional.ofNullable(skillRepository.findSkillsByGoalId(goalId))
+                .orElseGet(ArrayList::new);
     }
 
     @Override
-    public void saveAllSkills(List<Skill> skills) {
+    public void saveAllSkills(@NonNull @NotBlank List<Skill> skills) {
         skillRepository.saveAll(skills);
     }
 
