@@ -9,10 +9,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-import school.faang.user_service.dto.payment.Currency;
-import school.faang.user_service.dto.payment.PaymentResponse;
+import school.faang.user_service.dto.payment.CurrencyDto;
+import school.faang.user_service.dto.payment.PaymentResponseDto;
 import school.faang.user_service.dto.payment.PaymentStatus;
 import school.faang.user_service.dto.promotion.UserDto;
+import school.faang.user_service.dto.promotion.UserPromotionRequestDto;
 import school.faang.user_service.entity.promotion.user.UserPromotion;
 import school.faang.user_service.model.promotion.PromotionPriority;
 import school.faang.user_service.model.promotion.user.UserPromotionType;
@@ -58,14 +59,16 @@ public class StartUserPromotionTest {
     private final UserPromotionType userPromotionType = UserPromotionType.TEN_PERCENT_OF_USERS;
     private final PromotionPriority promotionPriority = PromotionPriority.PRIORITY_MEDIUM;
     private final UserDto userDto = new UserDto(1L, 1L, "name", "city");
-    private final PaymentResponse successResponse = new PaymentResponse(PaymentStatus.SUCCESS, 1, 2L,
-            BigDecimal.ONE, Currency.USD, "message");
+    private final PaymentResponseDto successResponse = new PaymentResponseDto(PaymentStatus.SUCCESS, 1,
+            2L, BigDecimal.ONE, CurrencyDto.USD, "message");
+    private final UserPromotionRequestDto userPromotionRequestDto = new UserPromotionRequestDto(startDate, endDate,
+            userPromotionType, promotionPriority);
+    private final CurrencyDto currencyDto = CurrencyDto.EUR;
 
     @Test
     public void testProcessStartUserPromotion_nullUserDto() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processStartUserPromotion(null, startDate, endDate,
-                        userPromotionType, promotionPriority)
+                userPromotionService.processStartUserPromotion(null, userPromotionRequestDto, currencyDto)
         );
         assertEquals(USER_DTO_CANNOT_BE_NULL, illegalArgumentException.getMessage());
     }
@@ -73,8 +76,8 @@ public class StartUserPromotionTest {
     @Test
     public void testProcessStartUserPromotion_nullStartDateEndDate() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processStartUserPromotion(userDto, null, null,
-                        userPromotionType, promotionPriority)
+                userPromotionService.processStartUserPromotion(userDto, new UserPromotionRequestDto(
+                        null, null, userPromotionType, promotionPriority), currencyDto)
         );
         assertEquals(DATE_CANNOT_BE_NULL, illegalArgumentException.getMessage());
     }
@@ -82,8 +85,9 @@ public class StartUserPromotionTest {
     @Test
     public void testProcessStartUserPromotion_startDateAfterEndDate() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processStartUserPromotion(userDto, LocalDateTime.now().plusMinutes(1),
-                        LocalDateTime.now(), userPromotionType, promotionPriority)
+                userPromotionService.processStartUserPromotion(userDto, new UserPromotionRequestDto(
+                        LocalDateTime.now().plusMinutes(1), LocalDateTime.now(),
+                        userPromotionType, promotionPriority), currencyDto)
         );
         assertEquals(START_DATE_CANNOT_BE_AFTER_END_DATE, illegalArgumentException.getMessage());
     }
@@ -92,7 +96,8 @@ public class StartUserPromotionTest {
     public void testProcessStartUserPromotion_nullUserId() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
                 userPromotionService.processStartUserPromotion(new UserDto(1L, null, "name",
-                        "city"), startDate, endDate, userPromotionType, promotionPriority)
+                        "city"), new UserPromotionRequestDto(startDate, endDate,
+                        userPromotionType, promotionPriority), currencyDto)
         );
         assertEquals(USER_ID_CANNOT_BE_NULL, illegalArgumentException.getMessage());
     }
@@ -100,8 +105,8 @@ public class StartUserPromotionTest {
     @Test
     public void testProcessStartUserPromotion_nullPromotionType() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processStartUserPromotion(userDto, startDate, endDate,
-                        null, promotionPriority)
+                userPromotionService.processStartUserPromotion(userDto, new UserPromotionRequestDto(startDate,
+                        endDate, null, promotionPriority), currencyDto)
         );
         assertEquals(USER_PROMOTION_TYPE_CANNOT_BE_NULL, illegalArgumentException.getMessage());
     }
@@ -109,8 +114,8 @@ public class StartUserPromotionTest {
     @Test
     public void testProcessStartUserPromotion_nullPromotionPriority() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processStartUserPromotion(userDto, startDate, endDate,
-                        userPromotionType, null)
+                userPromotionService.processStartUserPromotion(userDto, new UserPromotionRequestDto(startDate,
+                        endDate, userPromotionType, null), currencyDto)
         );
         assertEquals(PROMOTION_PRIORITY_CANNOT_BE_NULL, illegalArgumentException.getMessage());
     }
@@ -119,11 +124,10 @@ public class StartUserPromotionTest {
     public void testProcessStartUserPromotion_callFindCountByUserIdAndSaveCount() {
         when(userPromotionCountRepository.save(any())).thenReturn(null);
         when(userPromotionCountRepository.findCountByUserId(anyLong())).thenReturn(null);
-        when(restTemplate.postForObject(anyString(), any(), eq(PaymentResponse.class)))
+        when(restTemplate.postForObject(anyString(), any(), eq(PaymentResponseDto.class)))
                 .thenReturn(successResponse);
 
-        userPromotionService.processStartUserPromotion(userDto, startDate, endDate,
-                userPromotionType, promotionPriority);
+        userPromotionService.processStartUserPromotion(userDto, userPromotionRequestDto, currencyDto);
 
         verify(userPromotionCountRepository, times(2))
                 .findCountByUserId(anyLong());
@@ -133,18 +137,17 @@ public class StartUserPromotionTest {
 
     @Test
     public void testProcessStartUserPromotion_saveUserPromotion() {
-        when(restTemplate.postForObject(anyString(), any(), eq(PaymentResponse.class)))
+        when(restTemplate.postForObject(anyString(), any(), eq(PaymentResponseDto.class)))
                 .thenReturn(successResponse);
         when(userPromotionCountRepository.findCountByUserId(anyLong())).thenReturn(null);
 
-        userPromotionService.processStartUserPromotion(userDto, startDate, endDate,
-                userPromotionType, promotionPriority);
+        userPromotionService.processStartUserPromotion(userDto, userPromotionRequestDto, currencyDto);
 
         ArgumentCaptor<UserPromotion> captor = ArgumentCaptor.forClass(UserPromotion.class);
         verify(userPromotionRepository).save(captor.capture());
 
         UserPromotion capturedUserPromotion = captor.getValue();
-        assertEquals(userDto.userId(), capturedUserPromotion.getUserId());
+        assertEquals(userDto.userId(), capturedUserPromotion.getUser().getId());
         assertEquals(userPromotionType.getUserPercentage(), capturedUserPromotion.getPercentage());
         assertEquals(startDate, capturedUserPromotion.getStartDate());
         assertEquals(endDate, capturedUserPromotion.getEndDate());
@@ -153,11 +156,11 @@ public class StartUserPromotionTest {
 
     @Test
     public void testProcessStartUserPromotion_successfulPayment() {
-        when(restTemplate.postForObject(anyString(), any(), eq(PaymentResponse.class)))
+        when(restTemplate.postForObject(anyString(), any(), eq(PaymentResponseDto.class)))
                 .thenReturn(successResponse);
 
         ResponseEntity<String> response = userPromotionService.processStartUserPromotion(userDto,
-                startDate, endDate, userPromotionType, promotionPriority
+                userPromotionRequestDto, currencyDto
         );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -166,11 +169,11 @@ public class StartUserPromotionTest {
 
     @Test
     public void testProcessStartUserPromotion_failedPayment() {
-        when(restTemplate.postForObject(anyString(), any(), eq(PaymentResponse.class)))
+        when(restTemplate.postForObject(anyString(), any(), eq(PaymentResponseDto.class)))
                 .thenReturn(null);
 
         ResponseEntity<String> response = userPromotionService.processStartUserPromotion(userDto,
-                startDate, endDate, userPromotionType, promotionPriority
+                userPromotionRequestDto, currencyDto
         );
 
         assertEquals(HttpStatus.PAYMENT_REQUIRED, response.getStatusCode());

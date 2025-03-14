@@ -6,10 +6,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import school.faang.user_service.dto.payment.Currency;
-import school.faang.user_service.dto.payment.PaymentRequest;
-import school.faang.user_service.dto.payment.PaymentResponse;
+import org.springframework.beans.factory.annotation.Value;
+import school.faang.user_service.dto.payment.CurrencyDto;
+import school.faang.user_service.dto.payment.PaymentRequestDto;
+import school.faang.user_service.dto.payment.PaymentResponseDto;
 import school.faang.user_service.dto.payment.PaymentStatus;
+import school.faang.user_service.dto.promotion.UserPromotionRequestDto;
 import school.faang.user_service.dto.promotion.UserDto;
 import school.faang.user_service.entity.promotion.user.UserPromotion;
 import school.faang.user_service.entity.promotion.user.UserPromotionCount;
@@ -36,10 +38,10 @@ public class UserPromotionService {
             "startDate=%s, endDate=%s already exists in DB";
     public static final String NO_USER_PROMOTION_FOUND = "No promotion found for userId=%d, startDate=%s," +
             " endDate=%s, userPercentage=%d and feedRank=%d";
-    public static final String CANT_UPDATE_USER_PROMOTION_TYPE = "Can't update promotionType for userId=%d, " +
+    public static final String CANT_UPDATE_USER_PROMOTION_TYPE = "Can't update userPromotionType for userId=%d, " +
             "startDate=%s, endDate=%s and promotionPriority=%s.";
     public static final String CANT_UPDATE_USER_PROMOTION_PRIORITY = "Can't update promotionPriority for " +
-            "userId=%d, startDate=%s, endDate=%s and promotionType=%s.";
+            "userId=%d, startDate=%s, endDate=%s and userPromotionType=%s.";
     public static final String PAYMENT_FAILED_FOR_USER = "Payment failed for user with ID: {}";
     public static final String PAYMENT_SUCCESSFUL_FOR_USER = "Payment successful for user with ID: {}";
     public static final String CALCULATED_PRICE_DIFFERENCE_FOR_USER = "Calculated priceDifference for userID: {} is: {}";
@@ -54,17 +56,16 @@ public class UserPromotionService {
     private final RestTemplate restTemplate;
     private final UserPromotionRepository userPromotionRepository;
     private final UserPromotionCountRepository userPromotionCountRepository;
-
-    private PaymentResponse processPayment(Long entityId, BigDecimal amount) {
-        PaymentRequest paymentRequest = new PaymentRequest(entityId, amount, Currency.USD);
-        log.info("Initiating payment request: {}", paymentRequest);
-        return restTemplate.postForObject("http://localhost:9081/api/payment",
-                paymentRequest, PaymentResponse.class);
-    }
+    @Value("${payment.api.url}")
+    private String paymentApiUrl;
 
     public ResponseEntity<String> processStartUserPromotion(
-            UserDto userDto, LocalDateTime startDate, LocalDateTime endDate,
-            UserPromotionType promotionType, PromotionPriority promotionPriority) {
+            UserDto userDto, UserPromotionRequestDto promotionRequestDto, CurrencyDto currencyDto) {
+
+        LocalDateTime startDate = promotionRequestDto.startDate();
+        LocalDateTime endDate = promotionRequestDto.endDate();
+        UserPromotionType promotionType = promotionRequestDto.userPromotionType();
+        PromotionPriority promotionPriority = promotionRequestDto.promotionPriority();
 
         validateUserDto(userDto);
         log.info(VALIDATING_USER_PROMOTION, userDto.userId());
@@ -74,7 +75,7 @@ public class UserPromotionService {
                 startDate, endDate, promotionType.getUserPercentage(), promotionPriority.getFeedRank());
         log.info("Calculated promotion price for userID: {} is: {}", userDto.userId(), promotionPrice);
 
-        PaymentResponse paymentResponse = processPayment(userDto.userId(), promotionPrice);
+        PaymentResponseDto paymentResponse = processPayment(userDto.userId(), promotionPrice, currencyDto);
         if (paymentResponse == null || paymentResponse.status() != PaymentStatus.SUCCESS) {
             log.error(PAYMENT_FAILED_FOR_USER, userDto.userId());
             return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body("Payment failed for user promotion");
@@ -83,7 +84,7 @@ public class UserPromotionService {
         updateUserPromotionCount(userDto.userId(), promotionPrice);
 
         try {
-            startUserPromotion(userDto, startDate, endDate, promotionType, promotionPriority);
+            startUserPromotion(userDto, promotionRequestDto);
         } catch (DuplicatePromotionException ex) {
             log.error("Error starting user promotion for userID: {}: {}", userDto.userId(), ex.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
@@ -92,15 +93,19 @@ public class UserPromotionService {
     }
 
     public ResponseEntity<String> processEndUserPromotion(
-            UserDto userDto, LocalDateTime startDate, LocalDateTime endDate,
-            UserPromotionType promotionType, PromotionPriority promotionPriority) {
+            UserDto userDto, UserPromotionRequestDto promotionRequestDto) {
+
+        LocalDateTime startDate = promotionRequestDto.startDate();
+        LocalDateTime endDate = promotionRequestDto.endDate();
+        UserPromotionType promotionType = promotionRequestDto.userPromotionType();
+        PromotionPriority promotionPriority = promotionRequestDto.promotionPriority();
 
         validateUserDto(userDto);
         log.info(VALIDATING_USER_PROMOTION, userDto.userId());
         PromotionValidation.validateUserPromotion(userDto.userId(), startDate,
                 endDate, promotionType, promotionPriority);
         try {
-            endUserPromotion(userDto, startDate, endDate, promotionType, promotionPriority);
+            endUserPromotion(userDto, promotionRequestDto);
         } catch (PromotionNotFoundException ex) {
             log.error("Error ending user promotion. userID: {}: {}", userDto.userId(), ex.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
@@ -109,26 +114,28 @@ public class UserPromotionService {
     }
 
     public ResponseEntity<String> processUpdateUserPromotionPriority(
-            UserDto userDto, LocalDateTime startDate, LocalDateTime endDate,
-            UserPromotionType promotionType, PromotionPriority newPromotionPriority) {
+            UserDto userDto, UserPromotionRequestDto promotionRequestDto, CurrencyDto currencyDto) {
+
+        LocalDateTime startDate = promotionRequestDto.startDate();
+        LocalDateTime endDate = promotionRequestDto.endDate();
+        UserPromotionType promotionType = promotionRequestDto.userPromotionType();
+        PromotionPriority newPromotionPriority = promotionRequestDto.promotionPriority();
 
         validateUserDto(userDto);
         log.info(VALIDATING_USER_PROMOTION, userDto.userId());
         PromotionValidation.validateUserPromotion(userDto.userId(), startDate,
                 endDate, promotionType, newPromotionPriority);
         BigDecimal priceDifference = calculateUserPromotionPriceDifferenceOnPriorityChange(
-                userDto.userId(), startDate, endDate, promotionType, newPromotionPriority);
+                userDto.userId(), promotionRequestDto);
 
         log.info(CALCULATED_PRICE_DIFFERENCE_FOR_USER, userDto.userId(), priceDifference);
         if (priceDifference.compareTo(BigDecimal.ZERO) > 0) {
-            PaymentResponse paymentResponse = processPayment(userDto.userId(), priceDifference);
+            PaymentResponseDto paymentResponse = processPayment(userDto.userId(), priceDifference, currencyDto);
             if (paymentResponse == null || paymentResponse.status() != PaymentStatus.SUCCESS) {
                 log.error(PAYMENT_FAILED_FOR_USER, userDto.userId());
                 return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body("Payment failed for promotion priority update");
             }
             log.info(PAYMENT_SUCCESSFUL_FOR_USER, userDto.userId());
-        } else {
-            //return money
         }
         userPromotionRepository.updateUserFeedRank(userDto.userId(), startDate, endDate,
                 promotionType.getUserPercentage(), newPromotionPriority.getFeedRank());
@@ -136,34 +143,39 @@ public class UserPromotionService {
     }
 
     public ResponseEntity<String> processUpdateUserPromotionType(
-            UserDto userDto, LocalDateTime startDate, LocalDateTime endDate,
-            UserPromotionType newPromotionType, PromotionPriority promotionPriority) {
+            UserDto userDto, UserPromotionRequestDto promotionRequestDto, CurrencyDto currencyDto) {
+
+        LocalDateTime startDate = promotionRequestDto.startDate();
+        LocalDateTime endDate = promotionRequestDto.endDate();
+        UserPromotionType newPromotionType = promotionRequestDto.userPromotionType();
+        PromotionPriority promotionPriority = promotionRequestDto.promotionPriority();
 
         validateUserDto(userDto);
         log.info(VALIDATING_USER_PROMOTION, userDto.userId());
         PromotionValidation.validateUserPromotion(userDto.userId(), startDate,
                 endDate, newPromotionType, promotionPriority);
         BigDecimal priceDifference = calculateUserPromotionPriceDifferenceOnTypeChange(
-                userDto.userId(), startDate, endDate, newPromotionType, promotionPriority);
+                userDto.userId(), promotionRequestDto);
 
         log.info(CALCULATED_PRICE_DIFFERENCE_FOR_USER, userDto.userId(), priceDifference);
         if (priceDifference.compareTo(BigDecimal.ZERO) > 0) {
-            PaymentResponse paymentResponse = processPayment(userDto.userId(), priceDifference);
+            PaymentResponseDto paymentResponse = processPayment(userDto.userId(), priceDifference, currencyDto);
             if (paymentResponse == null || paymentResponse.status() != PaymentStatus.SUCCESS) {
                 log.error(PAYMENT_FAILED_FOR_USER, userDto.userId());
                 return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body("Payment failed for promotion type update");
             }
             log.info(PAYMENT_SUCCESSFUL_FOR_USER, userDto.userId());
-        } else {
-            //return money
         }
         userPromotionRepository.updateUserPromotionPercentage(userDto.userId(), startDate, endDate,
                 newPromotionType.getUserPercentage(), promotionPriority.getFeedRank());
         return ResponseEntity.ok("User promotion type updated successfully");
     }
 
-    private void startUserPromotion(UserDto userDto, LocalDateTime startDate, LocalDateTime endDate,
-                                    UserPromotionType promotionType, PromotionPriority promotionPriority) {
+    private void startUserPromotion(UserDto userDto, UserPromotionRequestDto promotionRequestDto) {
+        LocalDateTime startDate = promotionRequestDto.startDate();
+        LocalDateTime endDate = promotionRequestDto.endDate();
+        UserPromotionType promotionType = promotionRequestDto.userPromotionType();
+        PromotionPriority promotionPriority = promotionRequestDto.promotionPriority();
 
         int promotionViewsPercentage = promotionType.getUserPercentage();
         int feedRank = promotionPriority.getFeedRank();
@@ -176,7 +188,6 @@ public class UserPromotionService {
         }
 
         UserPromotion userPromotionToSave = new UserPromotion();
-        userPromotionToSave.setUserId(userDto.userId());
         userPromotionToSave.setPercentage(promotionViewsPercentage);
         userPromotionToSave.setStartDate(startDate);
         userPromotionToSave.setEndDate(endDate);
@@ -184,8 +195,11 @@ public class UserPromotionService {
         userPromotionRepository.save(userPromotionToSave);
     }
 
-    private void endUserPromotion(UserDto userDto, LocalDateTime startDate, LocalDateTime endDate,
-                                  UserPromotionType promotionType, PromotionPriority promotionPriority) {
+    private void endUserPromotion(UserDto userDto, UserPromotionRequestDto promotionRequestDto) {
+        LocalDateTime startDate = promotionRequestDto.startDate();
+        LocalDateTime endDate = promotionRequestDto.endDate();
+        UserPromotionType promotionType = promotionRequestDto.userPromotionType();
+        PromotionPriority promotionPriority = promotionRequestDto.promotionPriority();
 
         int promotionViewsPercentage = promotionType.getUserPercentage();
         int feedRank = promotionPriority.getFeedRank();
@@ -220,8 +234,12 @@ public class UserPromotionService {
     }
 
     private BigDecimal calculateUserPromotionPriceDifferenceOnTypeChange(
-            Long userId, LocalDateTime startDate, LocalDateTime endDate,
-            UserPromotionType newPromotionType, PromotionPriority promotionPriority) {
+            Long userId, UserPromotionRequestDto promotionRequestDto) {
+
+        LocalDateTime startDate = promotionRequestDto.startDate();
+        LocalDateTime endDate = promotionRequestDto.endDate();
+        UserPromotionType newPromotionType = promotionRequestDto.userPromotionType();
+        PromotionPriority promotionPriority = promotionRequestDto.promotionPriority();
 
         Integer oldUserPercentage = userPromotionRepository.getUserPercentage(userId, startDate, endDate,
                 promotionPriority.getFeedRank());
@@ -243,8 +261,12 @@ public class UserPromotionService {
     }
 
     private BigDecimal calculateUserPromotionPriceDifferenceOnPriorityChange(
-            Long userId, LocalDateTime startDate, LocalDateTime endDate,
-            UserPromotionType promotionType, PromotionPriority newPromotionPriority) {
+            Long userId, UserPromotionRequestDto promotionRequestDto) {
+
+        LocalDateTime startDate = promotionRequestDto.startDate();
+        LocalDateTime endDate = promotionRequestDto.endDate();
+        UserPromotionType promotionType = promotionRequestDto.userPromotionType();
+        PromotionPriority newPromotionPriority = promotionRequestDto.promotionPriority();
 
         Integer oldFeedRank = userPromotionRepository.getUserFeedRank(userId, startDate, endDate,
                 promotionType.getUserPercentage());
@@ -263,6 +285,12 @@ public class UserPromotionService {
                 promotionType.getUserPercentage(), newPromotionPriority.getFeedRank())
                 .subtract(calculateUserPromotionPrice(userId, startDate, endDate,
                         promotionType.getUserPercentage(), oldFeedRank));
+    }
+
+    private PaymentResponseDto processPayment(Long entityId, BigDecimal amount, CurrencyDto currencyDto) {
+        PaymentRequestDto paymentRequest = new PaymentRequestDto(entityId, amount, currencyDto);
+        log.info("Initiating payment request: {}", paymentRequest);
+        return restTemplate.postForObject(paymentApiUrl, paymentRequest, PaymentResponseDto.class);
     }
 
     private void updateUserPromotionCount(long userId, BigDecimal cost) {

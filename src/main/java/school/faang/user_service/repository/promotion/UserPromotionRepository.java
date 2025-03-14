@@ -12,7 +12,7 @@ public interface UserPromotionRepository extends JpaRepository<UserPromotion, Lo
     @Query("""
             SELECT u
             FROM UserPromotion u
-            WHERE u.userId = :userId
+            WHERE u.user.id = :userId
                 AND u.startDate = :startDate
                 AND u.endDate = :endDate
                 AND u.percentage = :percentage
@@ -24,7 +24,7 @@ public interface UserPromotionRepository extends JpaRepository<UserPromotion, Lo
     @Query("""
             SELECT u
             FROM UserPromotion u
-            WHERE u.userId = :userId
+            WHERE u.user.id = :userId
                 AND u.startDate = :startDate
                 AND u.endDate = :endDate
             """)
@@ -35,7 +35,7 @@ public interface UserPromotionRepository extends JpaRepository<UserPromotion, Lo
     @Query("""
             UPDATE UserPromotion u
             SET u.percentage = :newPercentage
-            WHERE u.userId = :userId
+            WHERE u.user.id = :userId
                 AND u.startDate = :startDate
                 AND u.endDate = :endDate
                 AND u.feedRank = :feedRank
@@ -46,7 +46,7 @@ public interface UserPromotionRepository extends JpaRepository<UserPromotion, Lo
     @Query("""
             SELECT u.percentage
             FROM UserPromotion u
-            WHERE u.userId = :userId
+            WHERE u.user.id = :userId
                 AND u.startDate = :startDate
                 AND u.endDate = :endDate
                 AND u.feedRank = :feedRank
@@ -56,7 +56,7 @@ public interface UserPromotionRepository extends JpaRepository<UserPromotion, Lo
     @Query("""
             SELECT u.feedRank
             FROM UserPromotion u
-            WHERE u.userId = :userId
+            WHERE u.user.id = :userId
                 AND u.startDate = :startDate
                 AND u.endDate = :endDate
                 AND u.percentage = :percentage
@@ -68,7 +68,7 @@ public interface UserPromotionRepository extends JpaRepository<UserPromotion, Lo
     @Query("""
             UPDATE UserPromotion u
             SET u.feedRank = :newFeedRank
-            WHERE u.userId = :userId
+            WHERE u.user.id = :userId
                 AND u.startDate = :startDate
                 AND u.endDate = :endDate
                 AND u.percentage = :percentage

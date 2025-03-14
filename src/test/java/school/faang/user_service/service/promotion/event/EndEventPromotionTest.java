@@ -9,10 +9,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-import school.faang.user_service.dto.payment.Currency;
-import school.faang.user_service.dto.payment.PaymentResponse;
+import school.faang.user_service.dto.payment.CurrencyDto;
+import school.faang.user_service.dto.payment.PaymentResponseDto;
 import school.faang.user_service.dto.payment.PaymentStatus;
 import school.faang.user_service.dto.promotion.EventDto;
+import school.faang.user_service.dto.promotion.EventPromotionRequestDto;
+import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.promotion.event.EventPromotion;
 import school.faang.user_service.model.promotion.PromotionPriority;
 import school.faang.user_service.model.promotion.event.EventPromotionType;
@@ -54,16 +56,14 @@ public class EndEventPromotionTest {
     private final PromotionPriority promotionPriority = PromotionPriority.PRIORITY_MEDIUM;
     private final EventDto eventDto = new EventDto(1L, 1L, "title", "description",
             startDate, endDate, "location");
-    private final PaymentResponse successResponse = new PaymentResponse(PaymentStatus.SUCCESS, 1, 2L,
-            BigDecimal.ONE, Currency.USD, "message");
-    private final EventPromotion eventPromotion = new EventPromotion(1L, startDate, endDate, eventDto.eventId(),
-            eventPromotionType.getUserPercentage(), promotionPriority.getFeedRank());
-
+    private final EventPromotion eventPromotion = new EventPromotion(1L, startDate, endDate, Event.builder()
+            .id(eventDto.eventId()).build(), eventPromotionType.getUserPercentage(), promotionPriority.getFeedRank());
+    private final EventPromotionRequestDto eventPromotionRequestDto = new EventPromotionRequestDto(startDate, endDate,
+            eventPromotionType, promotionPriority);
     @Test
     public void testProcessEndEventPromotion_nullEventDto() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                eventPromotionService.processEndEventPromotion(null, startDate, endDate,
-                        eventPromotionType, promotionPriority)
+                eventPromotionService.processEndEventPromotion(null, eventPromotionRequestDto)
         );
         assertEquals(EVENT_DTO_CANNOT_BE_NULL, illegalArgumentException.getMessage());
     }
@@ -71,8 +71,8 @@ public class EndEventPromotionTest {
     @Test
     public void testProcessEndEventPromotion_nullStartDateEndDate() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                eventPromotionService.processEndEventPromotion(eventDto, null, null,
-                        eventPromotionType, promotionPriority)
+                eventPromotionService.processEndEventPromotion(eventDto, new EventPromotionRequestDto(null,
+                        null, eventPromotionType, promotionPriority))
         );
         assertEquals(DATE_CANNOT_BE_NULL, illegalArgumentException.getMessage());
     }
@@ -80,8 +80,8 @@ public class EndEventPromotionTest {
     @Test
     public void testProcessEndEventPromotion_startDateAfterEndDate() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                eventPromotionService.processEndEventPromotion(eventDto, LocalDateTime.now().plusMinutes(1),
-                        LocalDateTime.now(), eventPromotionType, promotionPriority)
+                eventPromotionService.processEndEventPromotion(eventDto, new EventPromotionRequestDto(
+                        LocalDateTime.now().plusMinutes(1), LocalDateTime.now(), eventPromotionType, promotionPriority))
         );
         assertEquals(START_DATE_CANNOT_BE_AFTER_END_DATE, illegalArgumentException.getMessage());
     }
@@ -90,8 +90,7 @@ public class EndEventPromotionTest {
     public void testProcessEndEventPromotion_nullEventId() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
                 eventPromotionService.processEndEventPromotion(new EventDto(1L, null, "title",
-                                "description", startDate, endDate, "location"), startDate, endDate,
-                        eventPromotionType, promotionPriority)
+                                "description", startDate, endDate, "location"), eventPromotionRequestDto)
         );
         assertEquals(EVENT_ID_CANNOT_BE_NULL, illegalArgumentException.getMessage());
     }
@@ -99,8 +98,8 @@ public class EndEventPromotionTest {
     @Test
     public void testProcessEndEventPromotion_nullPromotionType() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                eventPromotionService.processEndEventPromotion(eventDto, startDate, endDate,
-                        null, promotionPriority)
+                eventPromotionService.processEndEventPromotion(eventDto, new EventPromotionRequestDto(startDate,
+                        endDate, null, promotionPriority))
         );
         assertEquals(EVENT_PROMOTION_TYPE_CANNOT_BE_NULL, illegalArgumentException.getMessage());
     }
@@ -108,8 +107,8 @@ public class EndEventPromotionTest {
     @Test
     public void testProcessEndEventPromotion_nullPromotionPriority() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                eventPromotionService.processEndEventPromotion(eventDto, startDate, endDate,
-                        eventPromotionType, null)
+                eventPromotionService.processEndEventPromotion(eventDto, new EventPromotionRequestDto(startDate,
+                        endDate, eventPromotionType, null))
         );
         assertEquals(PROMOTION_PRIORITY_CANNOT_BE_NULL, illegalArgumentException.getMessage());
     }
@@ -119,8 +118,7 @@ public class EndEventPromotionTest {
         when(eventPromotionRepository.findSamePromotion(anyLong(), any(), any(), anyInt(), anyInt()))
                 .thenReturn(null);
 
-        eventPromotionService.processEndEventPromotion(eventDto, startDate, endDate,
-                eventPromotionType, promotionPriority);
+        eventPromotionService.processEndEventPromotion(eventDto, eventPromotionRequestDto);
 
         verify(eventPromotionRepository, times(1))
                 .findSamePromotion(eventDto.eventId(), startDate, endDate,
@@ -132,14 +130,13 @@ public class EndEventPromotionTest {
         when(eventPromotionRepository.findSamePromotion(anyLong(), any(), any(), anyInt(), anyInt()))
                 .thenReturn(eventPromotion);
 
-        eventPromotionService.processEndEventPromotion(eventDto, startDate, endDate,
-                eventPromotionType, promotionPriority);
+        eventPromotionService.processEndEventPromotion(eventDto, eventPromotionRequestDto);
 
         ArgumentCaptor<EventPromotion> captor = ArgumentCaptor.forClass(EventPromotion.class);
         verify(eventPromotionRepository).delete(captor.capture());
 
         EventPromotion capturedEventPromotion = captor.getValue();
-        assertEquals(eventDto.eventId(), capturedEventPromotion.getEventId());
+        assertEquals(eventDto.eventId(), capturedEventPromotion.getEvent().getId());
         assertEquals(eventPromotionType.getUserPercentage(), capturedEventPromotion.getPercentage());
         assertEquals(startDate, capturedEventPromotion.getStartDate());
         assertEquals(endDate, capturedEventPromotion.getEndDate());
@@ -152,7 +149,7 @@ public class EndEventPromotionTest {
                 .thenReturn(eventPromotion);
 
         ResponseEntity<String> response = eventPromotionService.processEndEventPromotion(eventDto,
-                startDate, endDate, eventPromotionType, promotionPriority
+                eventPromotionRequestDto
         );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());

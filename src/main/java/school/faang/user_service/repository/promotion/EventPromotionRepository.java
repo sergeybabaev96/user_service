@@ -12,7 +12,7 @@ public interface EventPromotionRepository extends JpaRepository<EventPromotion, 
     @Query("""
             SELECT e
             FROM EventPromotion e
-            WHERE e.eventId = :eventId
+            WHERE e.event.id = :eventId
                 AND e.startDate = :startDate
                 AND e.endDate = :endDate
                 AND e.percentage = :percentage
@@ -24,7 +24,7 @@ public interface EventPromotionRepository extends JpaRepository<EventPromotion, 
     @Query("""
             SELECT e
             FROM EventPromotion e
-            WHERE e.eventId = :eventId
+            WHERE e.event.id = :eventId
                 AND e.startDate = :startDate
                 AND e.endDate = :endDate
             """)
@@ -36,7 +36,7 @@ public interface EventPromotionRepository extends JpaRepository<EventPromotion, 
     @Query("""
             UPDATE EventPromotion e
             SET e.percentage = :newPercentage
-            WHERE e.eventId = :eventId
+            WHERE e.event.id = :eventId
                 AND e.startDate = :startDate
                 AND e.endDate = :endDate
                 AND e.feedRank = :feedRank
@@ -47,7 +47,7 @@ public interface EventPromotionRepository extends JpaRepository<EventPromotion, 
     @Query("""
             SELECT e.percentage
             FROM EventPromotion e
-            WHERE e.eventId = :eventId
+            WHERE e.event.id = :eventId
                 AND e.startDate = :startDate
                 AND e.endDate = :endDate
                 AND e.feedRank = :feedRank
@@ -57,7 +57,7 @@ public interface EventPromotionRepository extends JpaRepository<EventPromotion, 
     @Query("""
             SELECT e.feedRank
             FROM EventPromotion e
-            WHERE e.eventId = :eventId
+            WHERE e.event.id = :eventId
                 AND e.startDate = :startDate
                 AND e.endDate = :endDate
                 AND e.percentage = :percentage
@@ -69,7 +69,7 @@ public interface EventPromotionRepository extends JpaRepository<EventPromotion, 
     @Query("""
             UPDATE EventPromotion e
             SET e.feedRank = :newFeedRank
-            WHERE e.eventId = :eventId
+            WHERE e.event.id = :eventId
                 AND e.startDate = :startDate
                 AND e.endDate = :endDate
                 AND e.percentage = :percentage

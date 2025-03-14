@@ -5,12 +5,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import school.faang.user_service.entity.event.Event;
 
 import java.time.LocalDateTime;
 
@@ -32,8 +36,9 @@ public class EventPromotion {
     @Column(name = "end_date", columnDefinition = "TIMESTAMP", nullable = false)
     private LocalDateTime endDate;
 
-    @Column(name = "event_id", nullable = false)
-    private Long eventId;
+    @OneToOne
+    @JoinColumn(name = "event_id", nullable = false)
+    private Event event;
 
     @Column(name = "percentage", nullable = false)
     private Integer percentage;
