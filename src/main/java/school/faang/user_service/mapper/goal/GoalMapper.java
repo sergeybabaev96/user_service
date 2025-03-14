@@ -18,8 +18,6 @@ public interface GoalMapper {
 
     default List<Long> skillsToIds(List<Skill> skills) {
         return skills == null ? new ArrayList<>() :
-                skills.stream()
-                        .map(Skill::getId)
-                        .toList();
+                skills.stream().map(Skill::getId).toList();
     }
 }

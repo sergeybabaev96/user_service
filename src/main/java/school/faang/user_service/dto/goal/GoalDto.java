@@ -1,11 +1,13 @@
 package school.faang.user_service.dto.goal;
 
+import lombok.Builder;
 import lombok.Data;
 import school.faang.user_service.entity.goal.GoalStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Builder
 @Data
 public class GoalDto {
     private Long id;

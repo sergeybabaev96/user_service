@@ -11,7 +11,6 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.skill.SkillCandidateMapper;
 import school.faang.user_service.mapper.skill.SkillMapper;
 import school.faang.user_service.repository.SkillRepository;
-import school.faang.user_service.service.user.UserSkillGuaranteeService;
 
 import java.util.List;
 
@@ -27,12 +26,7 @@ public class SkillService {
     private final SkillMapper skillMapper;
 
     public boolean isAllSkillsExist(List<Long> skillIds) {
-        for (Long skillId : skillIds) {
-            if (!skillRepository.existsById(skillId)) {
-                return false;
-            }
-        }
-        return true;
+        return skillIds.stream().allMatch(skillRepository::existsById);
     }
 
     public void assignSkillToUser (long skillId, long userId) {

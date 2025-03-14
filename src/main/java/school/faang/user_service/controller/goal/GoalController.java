@@ -1,6 +1,12 @@
 package school.faang.user_service.controller.goal;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.GoalFilterDto;
@@ -11,52 +17,55 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/goal")
 public class GoalController {
     private final GoalService goalService;
 
-    public GoalDto createGoal(long userId, GoalDto goalDto) {
-        validateGoalDto(goalDto);
+    @PostMapping("/{userId}")
+    public GoalDto createGoal(@PathVariable long userId, @RequestBody GoalDto goalDto) {
+        validateStringField(goalDto.getTitle(), "title");
+        validateStringField(goalDto.getDescription(), "description");
+        primaryValidateId(goalDto.getParentId());
+
         return goalService.createGoal(userId, goalDto);
     }
 
-    public GoalDto updateGoal(long goalId, GoalDto goalDto) {
-        validateTextField("title", goalDto.getTitle());
+    @PutMapping("/{goalId}")
+    public GoalDto updateGoal(@PathVariable long goalId, @RequestBody GoalDto goalDto) {
+        validateStringField(goalDto.getTitle(), "title");
         return goalService.updateGoal(goalId, goalDto);
     }
 
-    public void deleteGoal(long goalId) {
+    @DeleteMapping("/{goalId}")
+    public void deleteGoal(@PathVariable long goalId) {
         goalService.deleteGoal(goalId);
     }
 
-    public List<GoalDto> findSubtasksByGoalId(long goalId, GoalFilterDto filter) {
-        validateFilter(filter);
-        return goalService.findSubtasksByGoalId(goalId, filter);
+    @PostMapping("/{goalId}/subtasks")
+    public List<GoalDto> getSubtasksByGoalId(@PathVariable long goalId, @RequestBody GoalFilterDto filter) {
+        validateGoalFilterDto(filter);
+        return goalService.getSubtasksByGoalId(goalId, filter);
     }
 
-    public List<GoalDto> getGoalsByUser(long userId, GoalFilterDto filter) {
-        validateFilter(filter);
-        return goalService.getGoalsByUser(userId, filter);
+    @PostMapping("/{userId}")
+    public List<GoalDto> getGoalsByUserId(@PathVariable long userId, @RequestBody GoalFilterDto filter) {
+        validateGoalFilterDto(filter);
+        return goalService.getGoalsByUserId(userId, filter);
     }
 
-    private void validateGoalDto(GoalDto goalDto) {
-        validateTextField("title", goalDto.getTitle());
-        validateTextField("description", goalDto.getDescription());
-        validateParentId(goalDto.getParentId());
+    private void primaryValidateId(long id) {
+        if (id < 0) {
+            throw new DataValidationException("Invalid id: " + id);
+        }
     }
 
-    private void validateTextField(String fieldName, String value) {
+    private void validateStringField(String value, String fieldName) {
         if (value == null || value.isBlank()) {
             throw new DataValidationException("Invalid " + fieldName + ": " + value);
         }
     }
 
-    private void validateParentId(long parentId) {
-        if (parentId < 0) {
-            throw new DataValidationException("Invalid parent id: " + parentId);
-        }
-    }
-
-    private void validateFilter(GoalFilterDto filter) {
+    private void validateGoalFilterDto(GoalFilterDto filter) {
         if (filter == null) {
             throw new DataValidationException("Filter cannot be null.");
         }
