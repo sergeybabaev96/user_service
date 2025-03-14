@@ -63,4 +63,22 @@ public class EventService {
         List<Event> participatedEvents = eventRepository.findParticipatedEventsByUserId(userId);
         return participatedEvents.stream().map(eventMapper::toEntity).toList();
     }
+
+    public EventDto getEvent(Long eventId) {
+        Event event = eventRepository.findById(eventId).orElse(null);
+        if (event == null) {
+            throw new DataValidationException("The event does not exist");
+        }
+        return eventMapper.eventToEventDto(event);
+    }
+
+    public List<EventDto> getEventsByFilter(EventFilterDto eventFilterDto) {
+        Stream<Event> allEvents = eventRepository.findAll().stream();
+        for (EventFilter eventFilter : eventFilters) {
+            if (eventFilter.isApplicable(eventFilterDto)) {
+                allEvents = eventFilter.apply(eventFilterDto, allEvents);
+            }
+        }
+        return allEvents.map(eventMapper::eventToEventDto).toList();
+    }
 }
