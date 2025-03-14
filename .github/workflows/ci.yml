@@ -2,9 +2,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "feature/pipline-BC-BJS2-40721" ]
+    branches: [ "feature/pipline-BC-BJS2-65211" ]
   pull_request:
-    branches: [ "feature/pipline-BC-BJS2-40721" ]
+    branches: [ "feature/pipline-BC-BJS2-65211" ]
 
 jobs:
   build:
@@ -23,7 +23,7 @@ jobs:
           distribution: 'corretto'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4  # Исправлено: uses вместо run
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build with Gradle
         run: ./gradlew build
@@ -33,7 +33,7 @@ jobs:
         run: ./gradlew test
 
       - name: Comment on PR if tests fail
-        if: ${{ failure() && github.event_name == 'pull_request' }}  # Шаг выполняется только при падении тестов и в контексте пулл-реквеста
+        if: ${{ failure() && github.event_name == 'pull_request' }}
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -44,7 +44,8 @@ jobs:
               issue_number: context.issue.number,
             });
 
-            const hasExistingComment = comments.some(comment => comment.body.includes("❌ Сборка завалилась из-за неудачных тестов."));
+            const hasExistingComment = comments.some(comment => comment.body.includes(
+            "❌ Сборка завалилась из-за неудачных тестов."));
 
             if (!hasExistingComment) {
               await github.rest.issues.createComment({
