@@ -21,4 +21,6 @@ public interface GoalInvitationRepository extends JpaRepository<GoalInvitation, 
             @Param("invitedId") Long invitedId,
             @Param("status") RequestStatus status
     );
+
+    List<GoalInvitation> findByInvitedId(Long invitedId);
 }

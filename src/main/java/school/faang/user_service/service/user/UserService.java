@@ -14,7 +14,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public void validateUserExists(Long userId) {
+    public void checkUserExists(Long userId) {
         if (!userRepository.existsById(userId)) {
             log.error("User with ID {} does not exist", userId);
             throw new DataValidationException("User does not exist.");

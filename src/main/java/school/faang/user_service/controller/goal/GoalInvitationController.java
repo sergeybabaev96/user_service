@@ -1,5 +1,7 @@
 package school.faang.user_service.controller.goal;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +21,7 @@ public class GoalInvitationController {
     private final GoalInvitationService goalInvitationService;
 
     @PostMapping
-    public void createInvitation(@RequestBody GoalInvitationDto invitationDto) {
+    public void createInvitation(@Valid @RequestBody GoalInvitationDto invitationDto) {
         log.info("Received request to create invitation: {}", invitationDto);
         goalInvitationService.createInvitation(invitationDto);
     }
@@ -38,13 +40,19 @@ public class GoalInvitationController {
 
     @GetMapping
     public List<GoalInvitationDto> getInvitations(
-            @RequestParam(required = false) Long inviterId,
-            @RequestParam(required = false) Long invitedId,
+            @RequestParam(required = false) @PositiveOrZero Long inviterId,
+            @RequestParam(required = false) @PositiveOrZero Long invitedId,
             @RequestParam(required = false) RequestStatus status) {
         log.info("Received request to fetch invitations with inviterId: {}, invitedId: {}, status: {}",
                 inviterId, invitedId, status);
 
         InvitationFilterDto filter = new InvitationFilterDto(inviterId, invitedId, status);
         return goalInvitationService.getInvitations(filter);
+    }
+
+    @GetMapping("/invited/{invitedUserId}")
+    public List<GoalInvitationDto> getInvitationsByInvitedUserId(@PathVariable Long invitedUserId) {
+        log.info("Received request to fetch invitations for invited user ID: {}", invitedUserId);
+        return goalInvitationService.getInvitationsByInvitedUserId(invitedUserId);
     }
 }

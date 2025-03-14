@@ -3,6 +3,7 @@ package school.faang.user_service.service.goal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.config.goal.GoalInvitationConfig;
 import school.faang.user_service.dto.goal.GoalInvitationDto;
 import school.faang.user_service.dto.goal.InvitationFilterDto;
@@ -27,6 +28,7 @@ public class GoalInvitationService {
     private final GoalInvitationMapper goalInvitationMapper;
     private final GoalInvitationConfig goalInvitationConfig;
 
+    @Transactional
     public void createInvitation(GoalInvitationDto invitationDto) {
         log.info("Creating invitation: {}", invitationDto);
 
@@ -39,10 +41,11 @@ public class GoalInvitationService {
         log.info("Invitation created successfully: {}", invitation);
     }
 
+    @Transactional
     public void acceptGoalInvitation(Long id) {
         log.info("Accepting invitation with ID: {}", id);
 
-        GoalInvitation invitation = findInvitationById(id);
+        GoalInvitation invitation = getInvitationById(id);
         validateAcceptance(invitation);
 
         invitation.setStatus(RequestStatus.ACCEPTED);
@@ -51,10 +54,15 @@ public class GoalInvitationService {
         log.info("Invitation accepted successfully: {}", invitation);
     }
 
+    @Transactional
     public void rejectGoalInvitation(Long id) {
         log.info("Rejecting invitation with ID: {}", id);
 
-        GoalInvitation invitation = findInvitationById(id);
+        GoalInvitation invitation = getInvitationById(id);
+        if (invitation.getStatus() != RequestStatus.PENDING) {
+            throw new InvalidInvitationException("Invitation is already processed.");
+        }
+
         invitation.setStatus(RequestStatus.REJECTED);
         goalInvitationRepository.save(invitation);
 
@@ -66,11 +74,22 @@ public class GoalInvitationService {
 
         List<GoalInvitation> invitations = goalInvitationRepository.findByInviterIdAndInvitedIdAndStatus(
                 filter.inviterId(),
-                filter.inviterId(),
+                filter.invitedId(),
                 filter.status()
         );
 
         log.info("Found {} invitations", invitations.size());
+        return invitations.stream()
+                .map(goalInvitationMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<GoalInvitationDto> getInvitationsByInvitedUserId(Long invitedUserId) {
+        log.info("Fetching invitations for invited user ID: {}", invitedUserId);
+
+        List<GoalInvitation> invitations = goalInvitationRepository.findByInvitedId(invitedUserId);
+
+        log.info("Found {} invitations for user ID: {}", invitations.size(), invitedUserId);
         return invitations.stream()
                 .map(goalInvitationMapper::toDto)
                 .collect(Collectors.toList());
@@ -85,8 +104,8 @@ public class GoalInvitationService {
             throw new InvalidInvitationException("Inviter and invited user cannot be the same.");
         }
 
-        userService.validateUserExists(invitation.getInviter().getId());
-        userService.validateUserExists(invitation.getInvited().getId());
+        userService.checkUserExists(invitation.getInviter().getId());
+        userService.checkUserExists(invitation.getInvited().getId());
 
         if (!goalService.existsById(invitation.getGoal().getId())) {
             throw new InvalidInvitationException("Goal does not exist.");
@@ -94,6 +113,10 @@ public class GoalInvitationService {
     }
 
     private void validateAcceptance(GoalInvitation invitation) {
+        if (invitation.getStatus() != RequestStatus.PENDING) {
+            throw new InvalidInvitationException("Invitation is already processed.");
+        }
+
         if (goalService.countActiveGoalsPerUser(invitation.getInvited().getId()) >=
                 goalInvitationConfig.getMaxActiveGoals()) {
             throw new InvalidInvitationException("User has reached the maximum number of active goals.");
@@ -104,7 +127,7 @@ public class GoalInvitationService {
         }
     }
 
-    private GoalInvitation findInvitationById(Long id) {
+    private GoalInvitation getInvitationById(Long id) {
         return goalInvitationRepository.findById(id)
                 .orElseThrow(() -> new InvalidInvitationException("Invitation not found."));
     }
