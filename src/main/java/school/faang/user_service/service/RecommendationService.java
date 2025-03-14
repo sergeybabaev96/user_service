@@ -44,7 +44,6 @@ public class RecommendationService {
     public RecommendationDto create(@NotNull RecommendationDto recommendation) {
         validateRecommendation(recommendation);
 
-        // This method does not return id of created entity!
         recommendationRepository.create(
                 recommendation.getAuthorId(),
                 recommendation.getReceiverId(),
@@ -213,7 +212,6 @@ public class RecommendationService {
                     recommendation.getAuthorId());
         }
 
-        // This method does not return id of created entity!
         skillOfferService.createSkillOffer(skillOfferDto.skillId(), recommendation.getId());
         var skillOffer = skillOfferService.findSkillOfferBySkillAndRecommendationIds(
                 skillOfferDto.skillId(),
