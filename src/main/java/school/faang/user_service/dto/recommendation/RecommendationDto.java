@@ -14,15 +14,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RecommendationDto {
     @Nullable
-    Long id;
+    private Long id;
     @NonNull
-    Long authorId;
+    private Long authorId;
     @NonNull
-    Long receiverId;
+    private Long receiverId;
     @NonNull
-    String content;
+    private String content;
     @Nullable
-    List<SkillOfferDto> skillOffers;
+    private List<SkillOfferDto> skillOffers;
     @Nullable
-    LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 }
