@@ -13,6 +13,11 @@ jobs:
       contents: read
       pull-requests: write
 
+    services:
+      docker:
+        image: docker:dind
+        options: --privileged
+
     steps:
       - uses: actions/checkout@v4
 
