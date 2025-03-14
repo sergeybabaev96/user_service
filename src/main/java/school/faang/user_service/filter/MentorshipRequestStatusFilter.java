@@ -10,11 +10,11 @@ import java.util.stream.Stream;
 public class MentorshipRequestStatusFilter implements MentorshipRequestFilter {
     @Override
     public boolean isApplicable(RequestFilterDto filter) {
-        return filter.getStatus() != null;
+        return filter.status() != null;
     }
 
     @Override
     public Stream<MentorshipRequest> apply(Stream<MentorshipRequest> requests, RequestFilterDto filter) {
-        return requests.filter(request -> request.getStatus() == filter.getStatus());
+        return requests.filter(request -> request.getStatus() == filter.status());
     }
 }

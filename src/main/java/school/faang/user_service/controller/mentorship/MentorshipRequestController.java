@@ -21,7 +21,7 @@ import java.util.List;
 public class MentorshipRequestController {
     private final MentorshipRequestService mentorshipRequestService;
 
-    @PostMapping("/")
+    @PostMapping("")
     public MentorshipRequestDto requestMentorship(@RequestBody MentorshipRequestDto requestDto) {
         return mentorshipRequestService.requestMentorship(requestDto);
     }

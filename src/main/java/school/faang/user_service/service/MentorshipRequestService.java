@@ -32,29 +32,29 @@ public class MentorshipRequestService {
     private static final int MONTHS_BETWEEN_REQUESTS = 3;
 
     public MentorshipRequestDto requestMentorship(MentorshipRequestDto requestDto) {
-        if (requestDto.getDescription() == null || requestDto.getDescription().isBlank()) {
+        if (requestDto.description() == null || requestDto.description().isBlank()) {
             log.error("requestMentorship description is null or empty");
-            throw new IllegalArgumentException("Description of request #" + requestDto.getId() + " is required");
+            throw new IllegalArgumentException("Description of request #" + requestDto.id() + " is required");
         }
 
-        User requester = userRepository.findById(requestDto.getRequesterId())
+        User requester = userRepository.findById(requestDto.requesterId())
                 .orElseThrow(() -> {
-                    log.error("requestMentorship requester for request #{} not found", requestDto.getId());
-                    return new IllegalArgumentException("Requester for request #" + requestDto.getId() + "  not found");
+                    log.error("requestMentorship requester for request #{} not found", requestDto.id());
+                    return new IllegalArgumentException("Requester for request #" + requestDto.id() + "  not found");
                 });
-        User receiver = userRepository.findById(requestDto.getReceiverId())
+        User receiver = userRepository.findById(requestDto.receiverId())
                 .orElseThrow(() -> {
-                    log.error("requestMentorship receiver for request #{} not found", requestDto.getId());
+                    log.error("requestMentorship receiver for request #{} not found", requestDto.id());
                     return new IllegalArgumentException("Receiver not found");
                 });
 
         if (Objects.equals(requester.getId(), receiver.getId())) {
-            log.error("requestMentorship for request #{} already requested", requestDto.getId());
-            throw new IllegalArgumentException("Requester and receiver cannot be the same person for request #" + requestDto.getId());
+            log.error("requestMentorship for request #{} already requested", requestDto.id());
+            throw new IllegalArgumentException("Requester and receiver cannot be the same person for request #" + requestDto.id());
         }
 
         Optional<MentorshipRequest> lastRequest = mentorshipRequestRepository.findLatestRequest(
-                requestDto.getRequesterId(), requestDto.getReceiverId()
+                requestDto.requesterId(), requestDto.receiverId()
         );
 
         lastRequest.ifPresent(request -> {
@@ -64,10 +64,10 @@ public class MentorshipRequestService {
             }
         });
 
-        log.info("requestMentorship #{} creating request", requestDto.getId());
-        long requesterId = requestDto.getRequesterId();
-        long receiverId = requestDto.getReceiverId();
-        String description = requestDto.getDescription();
+        log.info("requestMentorship #{} creating request", requestDto.id());
+        long requesterId = requestDto.requesterId();
+        long receiverId = requestDto.receiverId();
+        String description = requestDto.description();
         MentorshipRequest request = mentorshipRequestRepository.create(requesterId, receiverId, description);
 
         return mentorshipRequestMapper.toDto(request);
@@ -132,7 +132,7 @@ public class MentorshipRequestService {
 
         log.info("rejectRequest rejecting request #{}", requestId);
         request.setStatus(RequestStatus.REJECTED);
-        request.setRejectionReason(rejection.getReason());
+        request.setRejectionReason(rejection.reason());
         mentorshipRequestRepository.save(request);
 
         return mentorshipRequestMapper.toDto(request);
