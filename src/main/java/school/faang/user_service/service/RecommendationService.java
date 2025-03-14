@@ -41,31 +41,31 @@ public class RecommendationService {
     private int pageSize;
 
     @Transactional
-    public RecommendationDto create(@NotNull RecommendationDto recommendation) {
-        validateRecommendation(recommendation);
+    public RecommendationDto create(@NotNull RecommendationDto recommendationDto) {
+        validateRecommendation(recommendationDto);
 
         recommendationRepository.create(
-                recommendation.getAuthorId(),
-                recommendation.getReceiverId(),
-                recommendation.getContent());
+                recommendationDto.getAuthorId(),
+                recommendationDto.getReceiverId(),
+                recommendationDto.getContent());
 
         var createdRecommendation = recommendationRepository.findByAuthorIdAndReceiverId(
-                recommendation.getAuthorId(),
-                recommendation.getReceiverId());
+                recommendationDto.getAuthorId(),
+                recommendationDto.getReceiverId());
 
         if (createdRecommendation.isEmpty()) {
             throw new DataValidationException(
                     "Recommendation is not created (author id: %d, receiver id: %d)".formatted(
-                            recommendation.getAuthorId(),
-                            recommendation.getReceiverId()));
+                            recommendationDto.getAuthorId(),
+                            recommendationDto.getReceiverId()));
         }
 
         var createdRecommendationDto = recommendationMapper.toDto(createdRecommendation.get());
-        createdRecommendationDto.setSkillOffers(recommendation.getSkillOffers());
+        createdRecommendationDto.setSkillOffers(recommendationDto.getSkillOffers());
 
-        if (recommendation.getSkillOffers() != null) {
+        if (recommendationDto.getSkillOffers() != null) {
             var receiverSkills = skillService.findSkillsByUserId(createdRecommendationDto.getReceiverId());
-            recommendation.getSkillOffers()
+            recommendationDto.getSkillOffers()
                     .forEach(dto -> createSkillOffer(createdRecommendationDto, dto, receiverSkills));
         }
 
