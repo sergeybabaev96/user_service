@@ -117,7 +117,8 @@ tasks.jacocoTestReport {
                 "**/dto/**",
                 "**/entity/**",
                 "**/filter/**",
-                "**/mapper/**"
+                "**/mapper/**",
+                "**/student/**",
             )
         })
     )
