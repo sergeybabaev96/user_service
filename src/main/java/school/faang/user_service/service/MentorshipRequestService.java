@@ -34,23 +34,23 @@ public class MentorshipRequestService {
     public MentorshipRequestDto requestMentorship(MentorshipRequestDto requestDto) {
         if (requestDto.getDescription() == null || requestDto.getDescription().isBlank()) {
             log.error("requestMentorship description is null or empty");
-            throw new IllegalArgumentException("Description is required");
+            throw new IllegalArgumentException("Description of request #" + requestDto.getId() + " is required");
         }
 
         User requester = userRepository.findById(requestDto.getRequesterId())
                 .orElseThrow(() -> {
-                    log.error("requestMentorship requester not found");
-                    return new IllegalArgumentException("Requester not found");
+                    log.error("requestMentorship requester for request #{} not found", requestDto.getId());
+                    return new IllegalArgumentException("Requester for request #" + requestDto.getId() + "  not found");
                 });
         User receiver = userRepository.findById(requestDto.getReceiverId())
                 .orElseThrow(() -> {
-                    log.error("requestMentorship receiver not found");
+                    log.error("requestMentorship receiver for request #{} not found", requestDto.getId());
                     return new IllegalArgumentException("Receiver not found");
                 });
 
         if (Objects.equals(requester.getId(), receiver.getId())) {
-            log.error("requestMentorship already requested");
-            throw new IllegalArgumentException("Requester and receiver cannot be the same person");
+            log.error("requestMentorship for request #{} already requested", requestDto.getId());
+            throw new IllegalArgumentException("Requester and receiver cannot be the same person for request #" + requestDto.getId());
         }
 
         Optional<MentorshipRequest> lastRequest = mentorshipRequestRepository.findLatestRequest(
@@ -59,12 +59,12 @@ public class MentorshipRequestService {
 
         lastRequest.ifPresent(request -> {
             if (request.getCreatedAt().plusMonths(MONTHS_BETWEEN_REQUESTS).isAfter(LocalDateTime.now())) {
-                log.error("requestMentorship already requested in the last 3 months");
-                throw new IllegalArgumentException("You can only request mentorship once every 3 months");
+                log.error("requestMentorship for request #{} already requested in the last 3 months", request.getId());
+                throw new IllegalArgumentException("You can only request mentorship once every 3 months, request #" + request.getId());
             }
         });
 
-        log.info("requestMentorship creating request");
+        log.info("requestMentorship #{} creating request", requestDto.getId());
         long requesterId = requestDto.getRequesterId();
         long receiverId = requestDto.getReceiverId();
         String description = requestDto.getDescription();
@@ -92,24 +92,24 @@ public class MentorshipRequestService {
         MentorshipRequest request = mentorshipRequestRepository
                 .findById(requestId)
                 .orElseThrow(() -> {
-                    log.error("acceptRequest request not found");
-                    return new IllegalArgumentException("Request not found");
+                    log.error("acceptRequest for request #{} not found", requestId);
+                    return new IllegalArgumentException("Request #" + requestId + " not found");
                 });
 
         if (request.getStatus() != RequestStatus.PENDING) {
-            log.error("acceptRequest request already accepted or rejected");
-            throw new IllegalArgumentException("Request already accepted or rejected");
+            log.error("acceptRequest request #{} already accepted or rejected", requestId);
+            throw new IllegalArgumentException("Request #" + requestId + " already accepted or rejected");
         }
 
         User requester = request.getRequester();
         User receiver = request.getReceiver();
 
         if (receiver.getMentors().contains(requester)) {
-            log.error("acceptRequest requester is already a mentor");
-            throw new IllegalArgumentException("Requester is already a mentor");
+            log.error("acceptRequest requester is already a mentor, request #{}", requestId);
+            throw new IllegalArgumentException("Requester is already a mentor, request #" + requestId);
         }
 
-        log.info("acceptRequest accepting request");
+        log.info("acceptRequest accepting request #{}", requestId);
         receiver.getMentors().add(requester);
         request.setStatus(RequestStatus.ACCEPTED);
         mentorshipRequestRepository.save(request);
@@ -121,16 +121,16 @@ public class MentorshipRequestService {
         MentorshipRequest request = mentorshipRequestRepository
                 .findById(requestId)
                 .orElseThrow(() -> {
-                    log.error("rejectRequest request not found");
-                    return new IllegalArgumentException("Request not found");
+                    log.error("rejectRequest request #{}  not found", requestId);
+                    return new IllegalArgumentException("Request #" + requestId + " not found");
                 });
 
         if (request.getStatus() != RequestStatus.PENDING) {
-            log.error("rejectRequest request already accepted or rejected");
-            throw new IllegalArgumentException("Request already accepted or rejected");
+            log.error("rejectRequest request #{} already accepted or rejected", requestId);
+            throw new IllegalArgumentException("Request #" + requestId + "  already accepted or rejected");
         }
 
-        log.info("rejectRequest rejecting request");
+        log.info("rejectRequest rejecting request #{}", requestId);
         request.setStatus(RequestStatus.REJECTED);
         request.setRejectionReason(rejection.getReason());
         mentorshipRequestRepository.save(request);

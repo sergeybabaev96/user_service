@@ -17,11 +17,11 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/mentorship")
+@RequestMapping("/mentorships")
 public class MentorshipRequestController {
     private final MentorshipRequestService mentorshipRequestService;
 
-    @PostMapping("/request")
+    @PostMapping("/")
     public MentorshipRequestDto requestMentorship(@RequestBody MentorshipRequestDto requestDto) {
         return mentorshipRequestService.requestMentorship(requestDto);
     }
