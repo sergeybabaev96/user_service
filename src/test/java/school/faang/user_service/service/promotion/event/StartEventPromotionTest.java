@@ -1,32 +1,34 @@
 package school.faang.user_service.service.promotion.event;
 
-import jakarta.validation.constraints.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
-import school.faang.user_service.config.RestTemplateConfig;
 import school.faang.user_service.dto.payment.CurrencyDto;
-import school.faang.user_service.dto.payment.PaymentRequestDto;
 import school.faang.user_service.dto.payment.PaymentResponseDto;
 import school.faang.user_service.dto.payment.PaymentStatus;
-import school.faang.user_service.dto.promotion.EventDto;
-import school.faang.user_service.dto.promotion.EventPromotionRequestDto;
+import school.faang.user_service.dto.promotion.event.EventDto;
+import school.faang.user_service.dto.promotion.event.EventPromotionDto;
+import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.promotion.event.EventPromotion;
 import school.faang.user_service.model.promotion.PromotionPriority;
 import school.faang.user_service.model.promotion.event.EventPromotionType;
+import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.repository.promotion.EventPromotionCountRepository;
 import school.faang.user_service.repository.promotion.EventPromotionRepository;
 import school.faang.user_service.service.EventPromotionService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -44,6 +46,7 @@ import static school.faang.user_service.utils.validatonUtils.PromotionValidation
 import static school.faang.user_service.utils.validatonUtils.PromotionValidation.PROMOTION_PRIORITY_CANNOT_BE_NULL;
 import static school.faang.user_service.utils.validatonUtils.PromotionValidation.START_DATE_CANNOT_BE_AFTER_END_DATE;
 
+@TestPropertySource(properties = "payment.api.url=http://localhost:9081/api/payment")
 @ExtendWith(MockitoExtension.class)
 public class StartEventPromotionTest {
     @Mock
@@ -55,9 +58,11 @@ public class StartEventPromotionTest {
     @InjectMocks
     private EventPromotionService eventPromotionService;
 
-
-    @Spy
+    @Mock
     private RestTemplate restTemplate;
+
+    @Mock
+    private EventRepository eventRepository;
 
     private final LocalDateTime startDate = LocalDateTime.now();
     private final LocalDateTime endDate = LocalDateTime.now().plusMonths(2);
@@ -67,14 +72,19 @@ public class StartEventPromotionTest {
             startDate, endDate, "location");
     private final PaymentResponseDto successResponse = new PaymentResponseDto(PaymentStatus.SUCCESS, 1, 2L,
             BigDecimal.ONE, CurrencyDto.USD, "message");
-    private final EventPromotionRequestDto eventPromotionRequestDto = new EventPromotionRequestDto(startDate, endDate,
+    private final EventPromotionDto eventPromotionDto = new EventPromotionDto(startDate, endDate,
             eventPromotionType, promotionPriority);
     private final CurrencyDto currencyDto = CurrencyDto.EUR;
+
+    @BeforeEach
+    public void setup() {
+        ReflectionTestUtils.setField(eventPromotionService, "paymentApiUrl", "http://localhost:9081/api/payment");
+    }
 
     @Test
     public void testProcessStartEventPromotion_nullEventDto() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                eventPromotionService.processStartEventPromotion(null, eventPromotionRequestDto, currencyDto)
+                eventPromotionService.processStartEventPromotion(null, eventPromotionDto, currencyDto)
         );
         assertEquals(EVENT_DTO_CANNOT_BE_NULL, illegalArgumentException.getMessage());
     }
@@ -82,7 +92,7 @@ public class StartEventPromotionTest {
     @Test
     public void testProcessStartEventPromotion_nullStartDateEndDate() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                eventPromotionService.processStartEventPromotion(eventDto, new EventPromotionRequestDto(null,
+                eventPromotionService.processStartEventPromotion(eventDto, new EventPromotionDto(null,
                         null, eventPromotionType, promotionPriority), currencyDto)
         );
         assertEquals(DATE_CANNOT_BE_NULL, illegalArgumentException.getMessage());
@@ -91,7 +101,7 @@ public class StartEventPromotionTest {
     @Test
     public void testProcessStartEventPromotion_startDateAfterEndDate() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                eventPromotionService.processStartEventPromotion(eventDto, new EventPromotionRequestDto(
+                eventPromotionService.processStartEventPromotion(eventDto, new EventPromotionDto(
                         LocalDateTime.now().plusMinutes(1), LocalDateTime.now(),
                         eventPromotionType, promotionPriority), currencyDto)
         );
@@ -103,7 +113,7 @@ public class StartEventPromotionTest {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
                 eventPromotionService.processStartEventPromotion(new EventDto(1L, null, "title",
                                 "description", startDate, endDate, "location"),
-                        eventPromotionRequestDto, currencyDto)
+                        eventPromotionDto, currencyDto)
         );
         assertEquals(EVENT_ID_CANNOT_BE_NULL, illegalArgumentException.getMessage());
     }
@@ -111,7 +121,7 @@ public class StartEventPromotionTest {
     @Test
     public void testProcessStartEventPromotion_nullPromotionType() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                eventPromotionService.processStartEventPromotion(eventDto, new EventPromotionRequestDto(startDate,
+                eventPromotionService.processStartEventPromotion(eventDto, new EventPromotionDto(startDate,
                         endDate, null, promotionPriority), currencyDto)
         );
         assertEquals(EVENT_PROMOTION_TYPE_CANNOT_BE_NULL, illegalArgumentException.getMessage());
@@ -120,20 +130,23 @@ public class StartEventPromotionTest {
     @Test
     public void testProcessStartEventPromotion_nullPromotionPriority() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                eventPromotionService.processStartEventPromotion(eventDto, new EventPromotionRequestDto(startDate,
+                eventPromotionService.processStartEventPromotion(eventDto, new EventPromotionDto(startDate,
                         endDate, eventPromotionType, null), currencyDto)
         );
         assertEquals(PROMOTION_PRIORITY_CANNOT_BE_NULL, illegalArgumentException.getMessage());
     }
 
     @Test
-    public void testProcessStartEventPromotion_callFindCountByUserIdAndSaveCount() {
+    public void testProcessStartEventPromotion_callFindCountByEventIdAndSaveCount() {
+        Event mockEvent = new Event();
+        mockEvent.setId(eventDto.eventId());
         when(eventPromotionCountRepository.save(any())).thenReturn(null);
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.of(mockEvent));
         when(eventPromotionCountRepository.findCountByEventId(anyLong())).thenReturn(null);
         when(restTemplate.postForObject(anyString(), any(), eq(PaymentResponseDto.class)))
                 .thenReturn(successResponse);
 
-        eventPromotionService.processStartEventPromotion(eventDto, eventPromotionRequestDto, currencyDto);
+        eventPromotionService.processStartEventPromotion(eventDto, eventPromotionDto, currencyDto);
 
         verify(eventPromotionCountRepository, times(2))
                 .findCountByEventId(anyLong());
@@ -142,15 +155,18 @@ public class StartEventPromotionTest {
     }
 
     @Test
-    public void testProcessStartEventPromotion_saveUserPromotion() {
+    public void testProcessStartEventPromotion_saveEventPromotion() {
+        Event mockEvent = new Event();
+        mockEvent.setId(eventDto.eventId());
         when(restTemplate.postForObject(anyString(), any(), eq(PaymentResponseDto.class)))
                 .thenReturn(successResponse);
         when(eventPromotionCountRepository.findCountByEventId(anyLong())).thenReturn(null);
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.of(mockEvent));
 
-        eventPromotionService.processStartEventPromotion(eventDto, eventPromotionRequestDto, currencyDto);
+        eventPromotionService.processStartEventPromotion(eventDto, eventPromotionDto, currencyDto);
 
         ArgumentCaptor<EventPromotion> captor = ArgumentCaptor.forClass(EventPromotion.class);
-        verify(eventPromotionRepository).save(captor.capture());
+        verify(eventPromotionRepository, times(1)).save(captor.capture());
 
         EventPromotion capturedEventPromotion = captor.getValue();
         assertEquals(eventDto.eventId(), capturedEventPromotion.getEvent().getId());
@@ -162,11 +178,14 @@ public class StartEventPromotionTest {
 
     @Test
     public void testProcessStartEventPromotion_successfulPayment() {
+        Event mockEvent = new Event();
+        mockEvent.setId(eventDto.eventId());
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.of(mockEvent));
         when(restTemplate.postForObject(anyString(), any(), eq(PaymentResponseDto.class)))
                 .thenReturn(successResponse);
 
         ResponseEntity<String> response = eventPromotionService.processStartEventPromotion(eventDto,
-                eventPromotionRequestDto,currencyDto
+                eventPromotionDto, currencyDto
         );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -179,7 +198,7 @@ public class StartEventPromotionTest {
                 .thenReturn(null);
 
         ResponseEntity<String> response = eventPromotionService.processStartEventPromotion(eventDto,
-                eventPromotionRequestDto, currencyDto
+                eventPromotionDto, currencyDto
         );
 
         assertEquals(HttpStatus.PAYMENT_REQUIRED, response.getStatusCode());

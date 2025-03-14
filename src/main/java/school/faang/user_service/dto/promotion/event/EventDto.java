@@ -1,4 +1,4 @@
-package school.faang.user_service.dto.promotion;
+package school.faang.user_service.dto.promotion.event;
 
 import java.time.LocalDateTime;
 

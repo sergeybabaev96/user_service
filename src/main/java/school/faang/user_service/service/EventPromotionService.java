@@ -2,17 +2,17 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.beans.factory.annotation.Value;
 import school.faang.user_service.dto.payment.CurrencyDto;
 import school.faang.user_service.dto.payment.PaymentRequestDto;
 import school.faang.user_service.dto.payment.PaymentResponseDto;
 import school.faang.user_service.dto.payment.PaymentStatus;
-import school.faang.user_service.dto.promotion.EventDto;
-import school.faang.user_service.dto.promotion.EventPromotionRequestDto;
+import school.faang.user_service.dto.promotion.event.EventDto;
+import school.faang.user_service.dto.promotion.event.EventPromotionDto;
 import school.faang.user_service.entity.promotion.event.EventPromotion;
 import school.faang.user_service.entity.promotion.event.EventPromotionCount;
 import school.faang.user_service.exception.DuplicatePromotionException;
@@ -20,6 +20,7 @@ import school.faang.user_service.exception.PromotionNotFoundException;
 import school.faang.user_service.model.promotion.PromotionPriority;
 import school.faang.user_service.model.promotion.event.EventPromotionPricing;
 import school.faang.user_service.model.promotion.event.EventPromotionType;
+import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.repository.promotion.EventPromotionCountRepository;
 import school.faang.user_service.repository.promotion.EventPromotionRepository;
 import school.faang.user_service.utils.validatonUtils.PromotionValidation;
@@ -56,16 +57,17 @@ public class EventPromotionService {
     private final RestTemplate restTemplate;
     private final EventPromotionRepository eventPromotionRepository;
     private final EventPromotionCountRepository eventPromotionCountRepository;
+    private final EventRepository eventRepository;
     @Value("${payment.api.url}")
     private String paymentApiUrl;
 
     public ResponseEntity<String> processStartEventPromotion(
-            EventDto eventDto, EventPromotionRequestDto eventPromotionRequestDto, CurrencyDto currencyDto) {
+            EventDto eventDto, EventPromotionDto EventPromotionDto, CurrencyDto currencyDto) {
 
-        LocalDateTime startDate = eventPromotionRequestDto.startDate();
-        LocalDateTime endDate = eventPromotionRequestDto.endDate();
-        EventPromotionType promotionType = eventPromotionRequestDto.eventPromotionType();
-        PromotionPriority promotionPriority = eventPromotionRequestDto.promotionPriority();
+        LocalDateTime startDate = EventPromotionDto.startDate();
+        LocalDateTime endDate = EventPromotionDto.endDate();
+        EventPromotionType promotionType = EventPromotionDto.eventPromotionType();
+        PromotionPriority promotionPriority = EventPromotionDto.promotionPriority();
 
         validateEventDto(eventDto);
         log.info(VALIDATING_EVENT_PROMOTION, eventDto.eventId());
@@ -84,7 +86,7 @@ public class EventPromotionService {
         updateEventPromotionCount(eventDto.eventId(), promotionPrice);
 
         try {
-            startEventPromotion(eventDto, eventPromotionRequestDto);
+            startEventPromotion(eventDto, EventPromotionDto);
         } catch (DuplicatePromotionException ex) {
             log.error("Error starting event promotion for eventID: {}: {}", eventDto.eventId(), ex.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
@@ -93,19 +95,19 @@ public class EventPromotionService {
     }
 
     public ResponseEntity<String> processEndEventPromotion(
-            EventDto eventDto, EventPromotionRequestDto eventPromotionRequestDto) {
+            EventDto eventDto, EventPromotionDto EventPromotionDto) {
 
-        LocalDateTime startDate = eventPromotionRequestDto.startDate();
-        LocalDateTime endDate = eventPromotionRequestDto.endDate();
-        EventPromotionType promotionType = eventPromotionRequestDto.eventPromotionType();
-        PromotionPriority promotionPriority = eventPromotionRequestDto.promotionPriority();
+        LocalDateTime startDate = EventPromotionDto.startDate();
+        LocalDateTime endDate = EventPromotionDto.endDate();
+        EventPromotionType promotionType = EventPromotionDto.eventPromotionType();
+        PromotionPriority promotionPriority = EventPromotionDto.promotionPriority();
 
         validateEventDto(eventDto);
         log.info(VALIDATING_EVENT_PROMOTION, eventDto.eventId());
         PromotionValidation.validateEventPromotion(eventDto.eventId(), startDate,
                 endDate, promotionType, promotionPriority);
         try {
-            endEventPromotion(eventDto, eventPromotionRequestDto);
+            endEventPromotion(eventDto, EventPromotionDto);
         } catch (PromotionNotFoundException ex) {
             log.error("Error ending event promotion. eventID: {}: {}", eventDto.eventId(), ex.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
@@ -114,19 +116,19 @@ public class EventPromotionService {
     }
 
     public ResponseEntity<String> processUpdateEventPromotionType(
-            EventDto eventDto, EventPromotionRequestDto eventPromotionRequestDto, CurrencyDto currencyDto) {
+            EventDto eventDto, EventPromotionDto EventPromotionDto, CurrencyDto currencyDto) {
 
-        LocalDateTime startDate = eventPromotionRequestDto.startDate();
-        LocalDateTime endDate = eventPromotionRequestDto.endDate();
-        EventPromotionType newPromotionType = eventPromotionRequestDto.eventPromotionType();
-        PromotionPriority promotionPriority = eventPromotionRequestDto.promotionPriority();
+        LocalDateTime startDate = EventPromotionDto.startDate();
+        LocalDateTime endDate = EventPromotionDto.endDate();
+        EventPromotionType newPromotionType = EventPromotionDto.eventPromotionType();
+        PromotionPriority promotionPriority = EventPromotionDto.promotionPriority();
 
         validateEventDto(eventDto);
         log.info(VALIDATING_EVENT_PROMOTION, eventDto.eventId());
         PromotionValidation.validateEventPromotion(eventDto.eventId(), startDate,
                 endDate, newPromotionType, promotionPriority);
         BigDecimal priceDifference = calculateEventPromotionPriceDifferenceOnTypeChange(
-                eventDto.eventId(), eventPromotionRequestDto);
+                eventDto.eventId(), EventPromotionDto);
 
         log.info("Calculated priceDifference for eventID: {} is: {}", eventDto.eventId(), priceDifference);
         if (priceDifference.compareTo(BigDecimal.ZERO) > 0) {
@@ -143,19 +145,19 @@ public class EventPromotionService {
     }
 
     public ResponseEntity<String> processUpdateEventPromotionPriority(
-            EventDto eventDto, EventPromotionRequestDto eventPromotionRequestDto, CurrencyDto currencyDto) {
+            EventDto eventDto, EventPromotionDto EventPromotionDto, CurrencyDto currencyDto) {
 
-        LocalDateTime startDate = eventPromotionRequestDto.startDate();
-        LocalDateTime endDate = eventPromotionRequestDto.endDate();
-        EventPromotionType promotionType = eventPromotionRequestDto.eventPromotionType();
-        PromotionPriority newPromotionPriority = eventPromotionRequestDto.promotionPriority();
+        LocalDateTime startDate = EventPromotionDto.startDate();
+        LocalDateTime endDate = EventPromotionDto.endDate();
+        EventPromotionType promotionType = EventPromotionDto.eventPromotionType();
+        PromotionPriority newPromotionPriority = EventPromotionDto.promotionPriority();
 
         validateEventDto(eventDto);
         log.info(VALIDATING_EVENT_PROMOTION, eventDto.eventId());
         PromotionValidation.validateEventPromotion(eventDto.eventId(), startDate,
                 endDate, promotionType, newPromotionPriority);
         BigDecimal priceDifference = calculateEventPromotionPriceDifferenceOnPriorityChange(
-                eventDto.eventId(), eventPromotionRequestDto);
+                eventDto.eventId(), EventPromotionDto);
 
         log.info(CALCULATED_PRICE_DIFFERENCE_FOR_EVENT, eventDto.eventId(), priceDifference);
         if (priceDifference.compareTo(BigDecimal.ZERO) > 0) {
@@ -171,12 +173,12 @@ public class EventPromotionService {
         return ResponseEntity.ok("Event promotion priority updated successfully");
     }
 
-    private void startEventPromotion(EventDto eventDto, EventPromotionRequestDto eventPromotionRequestDto) {
+    private void startEventPromotion(EventDto eventDto, EventPromotionDto EventPromotionDto) {
 
-        LocalDateTime startDate = eventPromotionRequestDto.startDate();
-        LocalDateTime endDate = eventPromotionRequestDto.endDate();
-        EventPromotionType promotionType = eventPromotionRequestDto.eventPromotionType();
-        PromotionPriority promotionPriority = eventPromotionRequestDto.promotionPriority();
+        LocalDateTime startDate = EventPromotionDto.startDate();
+        LocalDateTime endDate = EventPromotionDto.endDate();
+        EventPromotionType promotionType = EventPromotionDto.eventPromotionType();
+        PromotionPriority promotionPriority = EventPromotionDto.promotionPriority();
 
         int promotionViewsPercentage = promotionType.getUserPercentage();
         int feedRank = promotionPriority.getFeedRank();
@@ -190,6 +192,7 @@ public class EventPromotionService {
         }
 
         EventPromotion eventPromotionToSave = new EventPromotion();
+        eventPromotionToSave.setEvent(eventRepository.findById(eventDto.eventId()).get());
         eventPromotionToSave.setPercentage(promotionViewsPercentage);
         eventPromotionToSave.setStartDate(startDate);
         eventPromotionToSave.setEndDate(endDate);
@@ -197,11 +200,11 @@ public class EventPromotionService {
         eventPromotionRepository.save(eventPromotionToSave);
     }
 
-    private void endEventPromotion(EventDto eventDto, EventPromotionRequestDto eventPromotionRequestDto) {
-        LocalDateTime startDate = eventPromotionRequestDto.startDate();
-        LocalDateTime endDate = eventPromotionRequestDto.endDate();
-        EventPromotionType promotionType = eventPromotionRequestDto.eventPromotionType();
-        PromotionPriority promotionPriority = eventPromotionRequestDto.promotionPriority();
+    private void endEventPromotion(EventDto eventDto, EventPromotionDto EventPromotionDto) {
+        LocalDateTime startDate = EventPromotionDto.startDate();
+        LocalDateTime endDate = EventPromotionDto.endDate();
+        EventPromotionType promotionType = EventPromotionDto.eventPromotionType();
+        PromotionPriority promotionPriority = EventPromotionDto.promotionPriority();
 
         int promotionViewsPercentage = promotionType.getUserPercentage();
         int feedRank = promotionPriority.getFeedRank();
@@ -235,12 +238,12 @@ public class EventPromotionService {
     }
 
     private BigDecimal calculateEventPromotionPriceDifferenceOnTypeChange(
-            Long eventId, EventPromotionRequestDto eventPromotionRequestDto) {
+            Long eventId, EventPromotionDto EventPromotionDto) {
 
-        LocalDateTime startDate = eventPromotionRequestDto.startDate();
-        LocalDateTime endDate = eventPromotionRequestDto.endDate();
-        EventPromotionType newPromotionType = eventPromotionRequestDto.eventPromotionType();
-        PromotionPriority promotionPriority = eventPromotionRequestDto.promotionPriority();
+        LocalDateTime startDate = EventPromotionDto.startDate();
+        LocalDateTime endDate = EventPromotionDto.endDate();
+        EventPromotionType newPromotionType = EventPromotionDto.eventPromotionType();
+        PromotionPriority promotionPriority = EventPromotionDto.promotionPriority();
 
         Integer oldUserPercentage = eventPromotionRepository.getUserPercentage(eventId, startDate, endDate,
                 promotionPriority.getFeedRank());
@@ -262,12 +265,12 @@ public class EventPromotionService {
     }
 
     private BigDecimal calculateEventPromotionPriceDifferenceOnPriorityChange(
-            Long eventId, EventPromotionRequestDto eventPromotionRequestDto) {
+            Long eventId, EventPromotionDto EventPromotionDto) {
 
-        LocalDateTime startDate = eventPromotionRequestDto.startDate();
-        LocalDateTime endDate = eventPromotionRequestDto.endDate();
-        EventPromotionType promotionType = eventPromotionRequestDto.eventPromotionType();
-        PromotionPriority newPromotionPriority = eventPromotionRequestDto.promotionPriority();
+        LocalDateTime startDate = EventPromotionDto.startDate();
+        LocalDateTime endDate = EventPromotionDto.endDate();
+        EventPromotionType promotionType = EventPromotionDto.eventPromotionType();
+        PromotionPriority newPromotionPriority = EventPromotionDto.promotionPriority();
 
         Integer oldFeedRank = eventPromotionRepository.getEventFeedRank(eventId, startDate, endDate,
                 promotionType.getUserPercentage());

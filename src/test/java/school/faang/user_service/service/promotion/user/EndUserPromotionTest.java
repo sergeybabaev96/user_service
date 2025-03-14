@@ -11,8 +11,8 @@ import org.springframework.http.ResponseEntity;
 import school.faang.user_service.dto.payment.CurrencyDto;
 import school.faang.user_service.dto.payment.PaymentResponseDto;
 import school.faang.user_service.dto.payment.PaymentStatus;
-import school.faang.user_service.dto.promotion.UserDto;
-import school.faang.user_service.dto.promotion.UserPromotionRequestDto;
+import school.faang.user_service.dto.promotion.user.UserDto;
+import school.faang.user_service.dto.promotion.user.UserPromotionDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.promotion.user.UserPromotion;
 import school.faang.user_service.model.promotion.PromotionPriority;
@@ -54,13 +54,13 @@ public class EndUserPromotionTest {
     private final UserDto userDto = new UserDto(1L, 1L, "name", "city");
     private final PaymentResponseDto successResponse = new PaymentResponseDto(PaymentStatus.SUCCESS, 1, 2L,
             BigDecimal.ONE, CurrencyDto.USD, "message");
-    private final UserPromotionRequestDto userPromotionRequestDto = new UserPromotionRequestDto(startDate, endDate,
+    private final UserPromotionDto userPromotionDto = new UserPromotionDto(startDate, endDate,
             userPromotionType, promotionPriority);
 
     @Test
     public void testProcessEndUserPromotion_nullUserDto() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processEndUserPromotion(null, new UserPromotionRequestDto(startDate,
+                userPromotionService.processEndUserPromotion(null, new UserPromotionDto(startDate,
                         endDate, userPromotionType, promotionPriority))
         );
         assertEquals(USER_DTO_CANNOT_BE_NULL, illegalArgumentException.getMessage());
@@ -69,7 +69,7 @@ public class EndUserPromotionTest {
     @Test
     public void testProcessEndUserPromotion_nullStartDateEndDate() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processEndUserPromotion(userDto,new UserPromotionRequestDto (null,
+                userPromotionService.processEndUserPromotion(userDto, new UserPromotionDto(null,
                         null, userPromotionType, promotionPriority))
         );
         assertEquals(DATE_CANNOT_BE_NULL, illegalArgumentException.getMessage());
@@ -78,7 +78,7 @@ public class EndUserPromotionTest {
     @Test
     public void testProcessEndUserPromotion_startDateAfterEndDate() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processEndUserPromotion(userDto, new UserPromotionRequestDto(
+                userPromotionService.processEndUserPromotion(userDto, new UserPromotionDto(
                         LocalDateTime.now().plusMinutes(1), LocalDateTime.now(), userPromotionType, promotionPriority))
         );
         assertEquals(START_DATE_CANNOT_BE_AFTER_END_DATE, illegalArgumentException.getMessage());
@@ -88,7 +88,7 @@ public class EndUserPromotionTest {
     public void testProcessEndUserPromotion_nullUserId() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
                 userPromotionService.processEndUserPromotion(new UserDto(1L, null, "name",
-                        "city"), userPromotionRequestDto)
+                        "city"), userPromotionDto)
         );
         assertEquals(USER_ID_CANNOT_BE_NULL, illegalArgumentException.getMessage());
     }
@@ -96,7 +96,7 @@ public class EndUserPromotionTest {
     @Test
     public void testProcessEndUserPromotion_nullPromotionType() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processEndUserPromotion(userDto, new UserPromotionRequestDto(startDate,
+                userPromotionService.processEndUserPromotion(userDto, new UserPromotionDto(startDate,
                         endDate, null, promotionPriority))
         );
         assertEquals(USER_PROMOTION_TYPE_CANNOT_BE_NULL, illegalArgumentException.getMessage());
@@ -105,7 +105,7 @@ public class EndUserPromotionTest {
     @Test
     public void testProcessEndUserPromotion_nullPromotionPriority() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processEndUserPromotion(userDto, new UserPromotionRequestDto(startDate,
+                userPromotionService.processEndUserPromotion(userDto, new UserPromotionDto(startDate,
                         endDate, userPromotionType, null))
         );
         assertEquals(PROMOTION_PRIORITY_CANNOT_BE_NULL, illegalArgumentException.getMessage());
@@ -116,7 +116,7 @@ public class EndUserPromotionTest {
         when(userPromotionRepository.findSamePromotion(anyLong(), any(), any(), anyInt(), anyInt()))
                 .thenReturn(null);
 
-        userPromotionService.processEndUserPromotion(userDto, userPromotionRequestDto);
+        userPromotionService.processEndUserPromotion(userDto, userPromotionDto);
 
         verify(userPromotionRepository, times(1))
                 .findSamePromotion(userDto.userId(), startDate, endDate,
@@ -129,7 +129,7 @@ public class EndUserPromotionTest {
                 .thenReturn(new UserPromotion(id, startDate, endDate, User.builder().id(userDto.userId()).build(),
                         userPromotionType.getUserPercentage(), promotionPriority.getFeedRank()));
 
-        userPromotionService.processEndUserPromotion(userDto, userPromotionRequestDto);
+        userPromotionService.processEndUserPromotion(userDto, userPromotionDto);
 
         ArgumentCaptor<UserPromotion> captor = ArgumentCaptor.forClass(UserPromotion.class);
         verify(userPromotionRepository).delete(captor.capture());
@@ -149,7 +149,7 @@ public class EndUserPromotionTest {
                         userPromotionType.getUserPercentage(), promotionPriority.getFeedRank()));
 
         ResponseEntity<String> response = userPromotionService.processEndUserPromotion(userDto,
-                userPromotionRequestDto
+                userPromotionDto
         );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());

@@ -2,17 +2,17 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.beans.factory.annotation.Value;
 import school.faang.user_service.dto.payment.CurrencyDto;
 import school.faang.user_service.dto.payment.PaymentRequestDto;
 import school.faang.user_service.dto.payment.PaymentResponseDto;
 import school.faang.user_service.dto.payment.PaymentStatus;
-import school.faang.user_service.dto.promotion.UserPromotionRequestDto;
-import school.faang.user_service.dto.promotion.UserDto;
+import school.faang.user_service.dto.promotion.user.UserDto;
+import school.faang.user_service.dto.promotion.user.UserPromotionDto;
 import school.faang.user_service.entity.promotion.user.UserPromotion;
 import school.faang.user_service.entity.promotion.user.UserPromotionCount;
 import school.faang.user_service.exception.DuplicatePromotionException;
@@ -20,6 +20,7 @@ import school.faang.user_service.exception.PromotionNotFoundException;
 import school.faang.user_service.model.promotion.PromotionPriority;
 import school.faang.user_service.model.promotion.user.UserPromotionPricing;
 import school.faang.user_service.model.promotion.user.UserPromotionType;
+import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.promotion.UserPromotionCountRepository;
 import school.faang.user_service.repository.promotion.UserPromotionRepository;
 import school.faang.user_service.utils.validatonUtils.PromotionValidation;
@@ -56,11 +57,12 @@ public class UserPromotionService {
     private final RestTemplate restTemplate;
     private final UserPromotionRepository userPromotionRepository;
     private final UserPromotionCountRepository userPromotionCountRepository;
+    private final UserRepository userRepository;
     @Value("${payment.api.url}")
     private String paymentApiUrl;
 
     public ResponseEntity<String> processStartUserPromotion(
-            UserDto userDto, UserPromotionRequestDto promotionRequestDto, CurrencyDto currencyDto) {
+            UserDto userDto, UserPromotionDto promotionRequestDto, CurrencyDto currencyDto) {
 
         LocalDateTime startDate = promotionRequestDto.startDate();
         LocalDateTime endDate = promotionRequestDto.endDate();
@@ -93,7 +95,7 @@ public class UserPromotionService {
     }
 
     public ResponseEntity<String> processEndUserPromotion(
-            UserDto userDto, UserPromotionRequestDto promotionRequestDto) {
+            UserDto userDto, UserPromotionDto promotionRequestDto) {
 
         LocalDateTime startDate = promotionRequestDto.startDate();
         LocalDateTime endDate = promotionRequestDto.endDate();
@@ -114,7 +116,7 @@ public class UserPromotionService {
     }
 
     public ResponseEntity<String> processUpdateUserPromotionPriority(
-            UserDto userDto, UserPromotionRequestDto promotionRequestDto, CurrencyDto currencyDto) {
+            UserDto userDto, UserPromotionDto promotionRequestDto, CurrencyDto currencyDto) {
 
         LocalDateTime startDate = promotionRequestDto.startDate();
         LocalDateTime endDate = promotionRequestDto.endDate();
@@ -143,7 +145,7 @@ public class UserPromotionService {
     }
 
     public ResponseEntity<String> processUpdateUserPromotionType(
-            UserDto userDto, UserPromotionRequestDto promotionRequestDto, CurrencyDto currencyDto) {
+            UserDto userDto, UserPromotionDto promotionRequestDto, CurrencyDto currencyDto) {
 
         LocalDateTime startDate = promotionRequestDto.startDate();
         LocalDateTime endDate = promotionRequestDto.endDate();
@@ -171,7 +173,7 @@ public class UserPromotionService {
         return ResponseEntity.ok("User promotion type updated successfully");
     }
 
-    private void startUserPromotion(UserDto userDto, UserPromotionRequestDto promotionRequestDto) {
+    private void startUserPromotion(UserDto userDto, UserPromotionDto promotionRequestDto) {
         LocalDateTime startDate = promotionRequestDto.startDate();
         LocalDateTime endDate = promotionRequestDto.endDate();
         UserPromotionType promotionType = promotionRequestDto.userPromotionType();
@@ -188,6 +190,7 @@ public class UserPromotionService {
         }
 
         UserPromotion userPromotionToSave = new UserPromotion();
+        userPromotionToSave.setUser(userRepository.findById(userDto.userId()).get());
         userPromotionToSave.setPercentage(promotionViewsPercentage);
         userPromotionToSave.setStartDate(startDate);
         userPromotionToSave.setEndDate(endDate);
@@ -195,7 +198,7 @@ public class UserPromotionService {
         userPromotionRepository.save(userPromotionToSave);
     }
 
-    private void endUserPromotion(UserDto userDto, UserPromotionRequestDto promotionRequestDto) {
+    private void endUserPromotion(UserDto userDto, UserPromotionDto promotionRequestDto) {
         LocalDateTime startDate = promotionRequestDto.startDate();
         LocalDateTime endDate = promotionRequestDto.endDate();
         UserPromotionType promotionType = promotionRequestDto.userPromotionType();
@@ -234,7 +237,7 @@ public class UserPromotionService {
     }
 
     private BigDecimal calculateUserPromotionPriceDifferenceOnTypeChange(
-            Long userId, UserPromotionRequestDto promotionRequestDto) {
+            Long userId, UserPromotionDto promotionRequestDto) {
 
         LocalDateTime startDate = promotionRequestDto.startDate();
         LocalDateTime endDate = promotionRequestDto.endDate();
@@ -261,7 +264,7 @@ public class UserPromotionService {
     }
 
     private BigDecimal calculateUserPromotionPriceDifferenceOnPriorityChange(
-            Long userId, UserPromotionRequestDto promotionRequestDto) {
+            Long userId, UserPromotionDto promotionRequestDto) {
 
         LocalDateTime startDate = promotionRequestDto.startDate();
         LocalDateTime endDate = promotionRequestDto.endDate();

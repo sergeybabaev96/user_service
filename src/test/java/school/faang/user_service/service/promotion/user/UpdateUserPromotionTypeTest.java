@@ -1,5 +1,6 @@
 package school.faang.user_service.service.promotion.user;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -7,12 +8,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 import school.faang.user_service.dto.payment.CurrencyDto;
 import school.faang.user_service.dto.payment.PaymentResponseDto;
 import school.faang.user_service.dto.payment.PaymentStatus;
-import school.faang.user_service.dto.promotion.UserDto;
-import school.faang.user_service.dto.promotion.UserPromotionRequestDto;
+import school.faang.user_service.dto.promotion.user.UserDto;
+import school.faang.user_service.dto.promotion.user.UserPromotionDto;
 import school.faang.user_service.exception.PromotionNotFoundException;
 import school.faang.user_service.model.promotion.PromotionPriority;
 import school.faang.user_service.model.promotion.user.UserPromotionType;
@@ -63,14 +65,19 @@ public class UpdateUserPromotionTypeTest {
     private final UserDto userDto = new UserDto(1L, 1L, "name", "city");
     private final PaymentResponseDto successResponse = new PaymentResponseDto(PaymentStatus.SUCCESS, 1,
             2L, BigDecimal.ONE, CurrencyDto.USD, "message");
-    private final UserPromotionRequestDto userPromotionRequestDto = new UserPromotionRequestDto(startDate, endDate,
+    private final UserPromotionDto userPromotionDto = new UserPromotionDto(startDate, endDate,
             userPromotionType, promotionPriority);
     private final CurrencyDto currencyDto = CurrencyDto.EUR;
+
+    @BeforeEach
+    public void setup() {
+        ReflectionTestUtils.setField(userPromotionService, "paymentApiUrl", "http://localhost:9081/api/payment");
+    }
 
     @Test
     public void testProcessUpdateUserPromotionType_nullUserDto() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processUpdateUserPromotionType(null, userPromotionRequestDto, currencyDto)
+                userPromotionService.processUpdateUserPromotionType(null, userPromotionDto, currencyDto)
         );
         assertEquals(USER_DTO_CANNOT_BE_NULL, illegalArgumentException.getMessage());
     }
@@ -78,7 +85,7 @@ public class UpdateUserPromotionTypeTest {
     @Test
     public void testProcessUpdateUserPromotionType_nullStartDateEndDate() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processUpdateUserPromotionType(userDto, new UserPromotionRequestDto(null,
+                userPromotionService.processUpdateUserPromotionType(userDto, new UserPromotionDto(null,
                         null, userPromotionType, promotionPriority), currencyDto)
         );
         assertEquals(DATE_CANNOT_BE_NULL, illegalArgumentException.getMessage());
@@ -87,7 +94,7 @@ public class UpdateUserPromotionTypeTest {
     @Test
     public void testProcessUpdateUserPromotionType_startDateAfterEndDate() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processUpdateUserPromotionType(userDto, new UserPromotionRequestDto(
+                userPromotionService.processUpdateUserPromotionType(userDto, new UserPromotionDto(
                         LocalDateTime.now().plusMinutes(1), LocalDateTime.now(),
                         userPromotionType, promotionPriority), currencyDto)
         );
@@ -98,7 +105,7 @@ public class UpdateUserPromotionTypeTest {
     public void testProcessUpdateUserPromotionType_nullUserId() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
                 userPromotionService.processUpdateUserPromotionType(new UserDto(1L, null,
-                        "name", "city"), new UserPromotionRequestDto(startDate, endDate,
+                        "name", "city"), new UserPromotionDto(startDate, endDate,
                         userPromotionType, promotionPriority), currencyDto)
         );
         assertEquals(USER_ID_CANNOT_BE_NULL, illegalArgumentException.getMessage());
@@ -107,7 +114,7 @@ public class UpdateUserPromotionTypeTest {
     @Test
     public void testProcessUpdateUserPromotionType_nullPromotionType() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processUpdateUserPromotionType(userDto, new UserPromotionRequestDto(startDate,
+                userPromotionService.processUpdateUserPromotionType(userDto, new UserPromotionDto(startDate,
                         endDate, null, promotionPriority), currencyDto)
         );
         assertEquals(USER_PROMOTION_TYPE_CANNOT_BE_NULL, illegalArgumentException.getMessage());
@@ -116,7 +123,7 @@ public class UpdateUserPromotionTypeTest {
     @Test
     public void testProcessUpdateUserPromotionType_nullPromotionPriority() {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processUpdateUserPromotionType(userDto, new UserPromotionRequestDto(startDate,
+                userPromotionService.processUpdateUserPromotionType(userDto, new UserPromotionDto(startDate,
                         endDate, userPromotionType, null), currencyDto)
         );
         assertEquals(PROMOTION_PRIORITY_CANNOT_BE_NULL, illegalArgumentException.getMessage());
@@ -128,7 +135,7 @@ public class UpdateUserPromotionTypeTest {
                 .thenReturn(null);
 
         PromotionNotFoundException promotionNotFoundException = assertThrows(PromotionNotFoundException.class, () ->
-                userPromotionService.processUpdateUserPromotionType(userDto, userPromotionRequestDto, currencyDto)
+                userPromotionService.processUpdateUserPromotionType(userDto, userPromotionDto, currencyDto)
         );
 
         assertEquals(String.format(CANT_UPDATE_USER_PROMOTION_TYPE + ". No such promotion exists",
@@ -143,7 +150,7 @@ public class UpdateUserPromotionTypeTest {
                 .thenReturn(40);
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () ->
-                userPromotionService.processUpdateUserPromotionType(userDto, userPromotionRequestDto, currencyDto)
+                userPromotionService.processUpdateUserPromotionType(userDto, userPromotionDto, currencyDto)
         );
 
         assertEquals(String.format(CANT_UPDATE_USER_PROMOTION_TYPE + ". Such promotion already exists",
@@ -160,7 +167,7 @@ public class UpdateUserPromotionTypeTest {
         when(userPromotionRepository.getUserPercentage(anyLong(), any(), any(), anyInt()))
                 .thenReturn(25);
         ResponseEntity<String> response = userPromotionService.processUpdateUserPromotionType(userDto,
-                userPromotionRequestDto, currencyDto
+                userPromotionDto, currencyDto
         );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -175,7 +182,7 @@ public class UpdateUserPromotionTypeTest {
         lenient().when(userPromotionRepository.getUserPercentage(anyLong(), any(), any(), anyInt()))
                 .thenReturn(25);
         ResponseEntity<String> response = userPromotionService.processUpdateUserPromotionType(userDto,
-                userPromotionRequestDto, currencyDto
+                userPromotionDto, currencyDto
         );
 
         assertEquals(HttpStatus.PAYMENT_REQUIRED, response.getStatusCode());
