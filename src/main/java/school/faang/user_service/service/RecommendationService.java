@@ -34,10 +34,10 @@ public class RecommendationService {
     private final RecommendationMapper recommendationMapper;
     private final SkillOfferMapper skillOfferMapper;
 
-    @Value("${recommendationMinDistanceMonths}")
+    @Value("${recommendation-min-distance-months}")
     private int recommendationMinDistanceMonths;
 
-    @Value("${pageSize}")
+    @Value("${page-size}")
     private int pageSize;
 
     @Transactional
