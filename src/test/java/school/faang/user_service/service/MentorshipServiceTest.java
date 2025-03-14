@@ -12,13 +12,18 @@ import school.faang.user_service.mapper.MentorshipMapper;
 import school.faang.user_service.mapper.MentorshipMapperImpl;
 import school.faang.user_service.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,6 +58,7 @@ class MentorshipServiceTest {
         assertEquals(2, result.size());
         assertEquals(2L, result.get(0).getUserId());
         assertEquals("mentee1", result.get(0).getUserName());
+        assertEquals("mentee2", result.get(1).getUserName());
     }
 
     @Test
@@ -77,4 +83,47 @@ class MentorshipServiceTest {
 
         assertTrue(result.isEmpty());
     }
+
+    @Test
+    public void testDeleteMenteeSuccess() {
+        long menteeId = 1L;
+        long mentorId = 2L;
+        User mentee = new User();
+        User mentor = new User();
+        mentee.setId(menteeId);
+        mentor.setId(mentorId);
+        mentor.setMentees(new ArrayList<>(List.of(mentee)));
+        mentee.setMentors(new ArrayList<>(List.of(mentor)));
+
+        when(userRepository.findById(mentorId)).thenReturn(Optional.of(mentor));
+        when(userRepository.findById(menteeId)).thenReturn(Optional.of(mentee));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        mentorshipService.deleteMentee(menteeId, mentorId);
+
+        assertFalse(mentor.getMentees().contains(mentee));
+        assertFalse(mentee.getMentors().contains(mentor));
+
+        verify(userRepository, times(1)).save(mentor);
+        verify(userRepository, times(1)).save(mentee);
+        verify(userRepository, times(2)).save(any(User.class));
+    }
+
+    /*
+        User mentor = userRepository.findById(mentorId)
+                .orElseThrow(() -> new EntityNotFoundException("Mentor not found."));
+        User mentee = userRepository.findById(menteeId)
+                .orElseThrow(() -> new EntityNotFoundException("Mentee not found."));
+        if (!mentor.getMentees().remove(mentee)) {
+            throw new EntityNotFoundException("The mentee was not found in the mentor's list.");
+        }
+        mentee.getMentors().remove(mentor);
+        userRepository.save(mentor);
+        userRepository.save(mentee);
+
+        public void deleteMentee(long menteeId, long mentorId) {
+        deleteMentorship(menteeId, mentorId);
+    }
+    */
+
 }
