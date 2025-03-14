@@ -13,8 +13,8 @@ import school.faang.user_service.repository.event.EventRepository;
 @RequiredArgsConstructor
 public class EventService {
     private final EventRepository eventRepository;
-    private final EventSkill eventSkill;
     private final EventMapper eventMapper;
+    private final EventSkill eventSkill;
     private final EventOwner eventOwner;
 
     public EventDto create(EventDto eventDto) {
