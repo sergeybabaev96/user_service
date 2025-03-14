@@ -3,10 +3,15 @@ package school.faang.user_service.service.event;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.event.EventDto;
+import school.faang.user_service.dto.event.EventFilterDto;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.filter.event.EventFilter;
 import school.faang.user_service.mapper.EventMapper;
 import school.faang.user_service.repository.event.EventRepository;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 
 @Service
@@ -16,6 +21,7 @@ public class EventService {
     private final EventMapper eventMapper;
     private final EventSkill eventSkill;
     private final EventOwner eventOwner;
+    private final List<EventFilter> eventFilters;
 
     public EventDto create(EventDto eventDto) {
         if (!eventSkill.checkSkillsToUser(eventDto)) {
@@ -27,5 +33,23 @@ public class EventService {
         Event savedEvent = eventRepository.save(event);
 
         return eventMapper.eventToEventDto(savedEvent);
+    }
+
+    public EventDto getEvent(Long eventId) {
+        Event event = eventRepository.findById(eventId).orElse(null);
+        if (event == null) {
+            throw new DataValidationException("The event does not exist");
+        }
+        return eventMapper.eventToEventDto(event);
+    }
+
+    public List<EventDto> getEventsByFilter(EventFilterDto eventFilterDto) {
+        Stream<Event> allEvents = eventRepository.findAll().stream();
+        for (EventFilter eventFilter : eventFilters) {
+            if (eventFilter.isApplicable(eventFilterDto)) {
+                allEvents = eventFilter.apply(eventFilterDto, allEvents);
+            }
+        }
+        return allEvents.map(eventMapper::eventToEventDto).toList();
     }
 }
