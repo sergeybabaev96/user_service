@@ -108,7 +108,7 @@ public class RecommendationService {
         return updatedRecommendationDto;
     }
 
-    public void delete(long id) {
+    public void deleteRecommendationById(long id) {
         recommendationRepository.deleteById(id);
     }
 
