@@ -11,7 +11,6 @@ public class FailedTest {
         fail("Этот тест должен упасть");
     }
 
-    @Test
     public void testThatAlwaysPasses() {
         assertTrue(true, "Этот тест всегда должен проходить");
     }
