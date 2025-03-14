@@ -2,8 +2,8 @@ package school.faang.user_service.service;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -67,50 +67,55 @@ public class RecommendationService {
         if (recommendationDto.getSkillOffers() != null) {
             var receiverSkills = skillService.findSkillsByUserId(createdRecommendationDto.getReceiverId());
             recommendationDto.getSkillOffers()
-                    .forEach(dto -> createSkillOffer(createdRecommendationDto, dto, receiverSkills));
+                    .forEach(dto -> saveSkillOffer(createdRecommendationDto, dto, receiverSkills));
         }
 
         return createdRecommendationDto;
     }
 
     @Transactional
-    public RecommendationDto update(@NotNull RecommendationDto recommendation) {
-        validateRecommendation(recommendation);
+    public RecommendationDto update(@NotNull RecommendationDto recommendationDto) {
+        validateRecommendation(recommendationDto);
 
-        recommendationRepository.update(
-                recommendation.getAuthorId(),
-                recommendation.getReceiverId(),
-                recommendation.getContent());
+        var updatedRecommendation = updatedRecommendation(recommendationDto);
 
-        var updatedRecommendation = recommendationRepository.findByAuthorIdAndReceiverId(
-                recommendation.getAuthorId(),
-                recommendation.getReceiverId());
-        if (updatedRecommendation.isEmpty()) {
-            throw new DataValidationException(
-                    "Source recommendation is not found (author id: %d, receiver id: %d)".formatted(
-                            recommendation.getAuthorId(),
-                            recommendation.getReceiverId()));
-        }
+        skillOfferService.deleteSkillOfferssByRecommendationId(updatedRecommendation.getId());
 
-        skillOfferService.deleteSkillOfferssByRecommendationId(updatedRecommendation.get().getId());
+        var updatedRecommendationDto = recommendationMapper.toDto(updatedRecommendation);
 
-        var updatedRecommendationDto = recommendationMapper.toDto(updatedRecommendation.get());
+        if (recommendationDto.getSkillOffers() != null) {
+            var savedSkillOfferDtos = saveSkillOffers(
+                    recommendationDto.getReceiverId(),
+                    recommendationDto.getSkillOffers(),
+                    updatedRecommendationDto);
 
-        if (recommendation.getSkillOffers() != null) {
-            var receiverSkills = skillService.findSkillsByUserId(recommendation.getReceiverId());
-            var createdSkillOffers = recommendation.getSkillOffers()
-                    .stream()
-                    .map(dto -> createSkillOffer(updatedRecommendationDto, dto, receiverSkills))
-                    .toList();
-
-            updatedRecommendationDto.setSkillOffers(createdSkillOffers);
+            updatedRecommendationDto.setSkillOffers(savedSkillOfferDtos);
         }
 
         return updatedRecommendationDto;
     }
 
-    public void deleteRecommendationById(long id) {
-        recommendationRepository.deleteById(id);
+    private Recommendation updatedRecommendation(RecommendationDto recommendationDto) {
+        recommendationRepository.update(
+                recommendationDto.getAuthorId(),
+                recommendationDto.getReceiverId(),
+                recommendationDto.getContent());
+
+        var updatedRecommendation = recommendationRepository.findByAuthorIdAndReceiverId(
+                recommendationDto.getAuthorId(),
+                recommendationDto.getReceiverId());
+        if (updatedRecommendation.isEmpty()) {
+            throw new DataValidationException(
+                    "Source recommendationDto is not found (author id: %d, receiver id: %d)".formatted(
+                            recommendationDto.getAuthorId(),
+                            recommendationDto.getReceiverId()));
+        }
+
+        return updatedRecommendation.get();
+    }
+
+    public void deleteRecommendationById(long recommendationId) {
+        recommendationRepository.deleteById(recommendationId);
     }
 
     public List<RecommendationDto> getAllUserRecommendations(long receiverId) {
@@ -121,6 +126,17 @@ public class RecommendationService {
     public List<RecommendationDto> getAllGivenRecommendations(long authorId) {
         return getRecommendationDtos(
                 pageRequest -> recommendationRepository.findAllByAuthorId(authorId, pageRequest));
+    }
+
+    private List<SkillOfferDto> saveSkillOffers(
+            long receiverId,
+            List<SkillOfferDto> skillOffers,
+            RecommendationDto updatedRecommendationDto) {
+        var receiverSkills = skillService.findSkillsByUserId(receiverId);
+
+        return skillOffers.stream()
+                .map(dto -> saveSkillOffer(updatedRecommendationDto, dto, receiverSkills))
+                .toList();
     }
 
     private List<RecommendationDto> getRecommendationDtos(Function<Pageable, Page<Recommendation>> pageFetcher) {
@@ -197,8 +213,8 @@ public class RecommendationService {
         }
     }
 
-    private SkillOfferDto createSkillOffer(
-            RecommendationDto recommendation,
+    private SkillOfferDto saveSkillOffer(
+            RecommendationDto recommendationDto,
             SkillOfferDto skillOfferDto,
             List<Skill> receiverSkills) {
         var existedSkill = receiverSkills.stream()
@@ -206,22 +222,22 @@ public class RecommendationService {
                 .findFirst();
         if (existedSkill.isPresent()
                 && userSkillGuaranteeService.findUserSkillGuaranteeByGuarantorId(
-                recommendation.getAuthorId()).isEmpty()) {
+                recommendationDto.getAuthorId()).isEmpty()) {
             userSkillGuaranteeService.createUserSkillGuarantee(
-                    recommendation.getReceiverId(),
+                    recommendationDto.getReceiverId(),
                     skillOfferDto.skillId(),
-                    recommendation.getAuthorId());
+                    recommendationDto.getAuthorId());
         }
 
-        skillOfferService.createSkillOffer(skillOfferDto.skillId(), recommendation.getId());
+        skillOfferService.createSkillOffer(skillOfferDto.skillId(), recommendationDto.getId());
         var skillOffer = skillOfferService.findSkillOfferBySkillAndRecommendationIds(
                 skillOfferDto.skillId(),
-                recommendation.getId());
+                recommendationDto.getId());
         if (skillOffer.isEmpty()) {
             throw new DataValidationException(
-                    "Skill offer is not created (skill id: %d, recommendation id: %d)".formatted(
+                    "Skill offer is not created (skill id: %d, recommendationDto id: %d)".formatted(
                             skillOfferDto.skillId(),
-                            recommendation.getId()));
+                            recommendationDto.getId()));
         }
 
         return skillOfferMapper.toDto(skillOffer.get());
@@ -230,7 +246,7 @@ public class RecommendationService {
     private Pageable getInitialPageRequest() {
         return PageRequest.of(0, pageSize);
     }
-    
+
     public Recommendation findRecommendationById(long recommendationId) {
         return recommendationRepository.findById(recommendationId)
                 .orElseThrow(() -> new DataRetrievalFailureException(
