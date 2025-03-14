@@ -26,7 +26,7 @@ public class RecommendationController {
     }
 
     public void deleteRecommendation(long id) {
-        recommendationService.delete(id);
+        recommendationService.deleteRecommendationById(id);
     }
 
     public List<RecommendationDto> getAllUserRecommendations(long receiverId) {
