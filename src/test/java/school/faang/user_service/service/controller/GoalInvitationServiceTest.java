@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -95,7 +96,12 @@ public class GoalInvitationServiceTest {
 
         ArgumentCaptor<GoalInvitation> captor = ArgumentCaptor.forClass(GoalInvitation.class);
         verify(goalInvitationRepository).save(captor.capture());
-        assertEquals(RequestStatus.PENDING, captor.getValue().getStatus());
+
+        GoalInvitation savedInvitation = captor.getValue();
+        assertEquals(RequestStatus.PENDING, savedInvitation.getStatus());
+        assertEquals(TestConstants.INVITER_ID, savedInvitation.getInviter().getId());
+        assertEquals(TestConstants.INVITED_USER_ID, savedInvitation.getInvited().getId());
+        assertEquals(TestConstants.GOAL_ID, savedInvitation.getGoal().getId());
     }
 
     @Test
@@ -109,6 +115,9 @@ public class GoalInvitationServiceTest {
                 goalInvitationService.createInvitation(invitationDto)
         );
         assertEquals("Inviter and invited user must be specified.", exception.getMessage());
+
+        verify(goalInvitationMapper).toEntity(invitationDto);
+        verify(goalInvitationRepository, never()).save(any(GoalInvitation.class));
     }
 
     @Test
@@ -121,6 +130,9 @@ public class GoalInvitationServiceTest {
                 goalInvitationService.createInvitation(invitationDto)
         );
         assertEquals("Inviter and invited user cannot be the same.", exception.getMessage());
+
+        verify(goalInvitationMapper).toEntity(invitationDto);
+        verify(goalInvitationRepository, never()).save(any(GoalInvitation.class));
     }
 
     @Test
@@ -132,6 +144,9 @@ public class GoalInvitationServiceTest {
                 goalInvitationService.createInvitation(invitationDto)
         );
         assertEquals("Goal does not exist.", exception.getMessage());
+
+        verify(goalInvitationMapper).toEntity(invitationDto);
+        verify(goalInvitationRepository, never()).save(any(GoalInvitation.class));
     }
 
     @Test
@@ -143,6 +158,7 @@ public class GoalInvitationServiceTest {
         goalInvitationService.acceptGoalInvitation(TestConstants.INVITATION_ID);
 
         assertEquals(RequestStatus.ACCEPTED, invitation.getStatus());
+        verify(goalInvitationRepository).findById(TestConstants.INVITATION_ID);
         verify(goalInvitationRepository).save(invitation);
     }
 
@@ -156,6 +172,9 @@ public class GoalInvitationServiceTest {
                 goalInvitationService.acceptGoalInvitation(TestConstants.INVITATION_ID)
         );
         assertEquals("Invitation is already processed.", exception.getMessage());
+
+        verify(goalInvitationRepository).findById(TestConstants.INVITATION_ID);
+        verify(goalInvitationRepository, never()).save(any(GoalInvitation.class));
     }
 
     @Test
@@ -169,6 +188,9 @@ public class GoalInvitationServiceTest {
                 goalInvitationService.acceptGoalInvitation(TestConstants.INVITATION_ID)
         );
         assertEquals("User has reached the maximum number of active goals.", exception.getMessage());
+
+        verify(goalInvitationRepository).findById(TestConstants.INVITATION_ID);
+        verify(goalInvitationRepository, never()).save(any(GoalInvitation.class));
     }
 
     @Test
@@ -178,6 +200,7 @@ public class GoalInvitationServiceTest {
         goalInvitationService.rejectGoalInvitation(TestConstants.INVITATION_ID);
 
         assertEquals(RequestStatus.REJECTED, invitation.getStatus());
+        verify(goalInvitationRepository).findById(TestConstants.INVITATION_ID);
         verify(goalInvitationRepository).save(invitation);
     }
 
@@ -191,6 +214,9 @@ public class GoalInvitationServiceTest {
                 goalInvitationService.rejectGoalInvitation(TestConstants.INVITATION_ID)
         );
         assertEquals("Invitation is already processed.", exception.getMessage());
+
+        verify(goalInvitationRepository).findById(TestConstants.INVITATION_ID);
+        verify(goalInvitationRepository, never()).save(any(GoalInvitation.class));
     }
 
     @Test
@@ -206,6 +232,10 @@ public class GoalInvitationServiceTest {
 
         assertEquals(1, result.size());
         assertEquals(invitationDto, result.get(0));
+
+        verify(goalInvitationRepository).findByInviterIdAndInvitedIdAndStatus(
+                TestConstants.INVITER_ID, TestConstants.INVITED_USER_ID, RequestStatus.PENDING);
+        verify(goalInvitationMapper).toDto(invitation);
     }
 
     @Test
@@ -219,6 +249,9 @@ public class GoalInvitationServiceTest {
 
         assertEquals(1, result.size());
         assertEquals(invitationDto, result.get(0));
+
+        verify(goalInvitationRepository).findByInvitedId(TestConstants.INVITED_USER_ID);
+        verify(goalInvitationMapper).toDto(invitation);
     }
 
     @Test
@@ -229,5 +262,7 @@ public class GoalInvitationServiceTest {
                 goalInvitationService.getInvitationById(TestConstants.INVITATION_ID)
         );
         assertEquals("Invitation not found.", exception.getMessage());
+
+        verify(goalInvitationRepository).findById(TestConstants.INVITATION_ID);
     }
 }
