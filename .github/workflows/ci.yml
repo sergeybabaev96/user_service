@@ -39,7 +39,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
-          path: build/reports/jacoco/test/html/
+          path: build/jacocoReports/test/html/
 
       - name: Comment on PR if tests fail
         if: ${{ failure() && github.event_name == 'pull_request' }}
