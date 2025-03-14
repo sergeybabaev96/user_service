@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FailedTest {
+    @Test
     public void testThatShouldFail() {
         fail("Этот тест должен упасть");
     }
