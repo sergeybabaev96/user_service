@@ -56,34 +56,27 @@ public class GoalInvitationServiceTest {
     private GoalInvitationDto invitationDto;
     private GoalInvitation invitation;
 
-    private static final long INVITATION_ID = 1L;
-    private static final long INVITER_ID = 1L;
-    private static final long INVITED_USER_ID = 2L;
-    private static final long GOAL_ID = 1L;
-    private static final int MAX_ACTIVE_GOALS = 5;
-    private static final long ACTIVE_GOALS_COUNT = 4L;
-
     @BeforeEach
     void setUp() {
         invitationDto = new GoalInvitationDto(
-                INVITATION_ID,
-                INVITER_ID,
-                INVITED_USER_ID,
-                GOAL_ID,
+                TestConstants.INVITATION_ID,
+                TestConstants.INVITER_ID,
+                TestConstants.INVITED_USER_ID,
+                TestConstants.GOAL_ID,
                 RequestStatus.PENDING
         );
 
         User inviter = new User();
-        inviter.setId(INVITER_ID);
+        inviter.setId(TestConstants.INVITER_ID);
 
         User invited = new User();
-        invited.setId(INVITED_USER_ID);
+        invited.setId(TestConstants.INVITED_USER_ID);
 
         Goal goal = new Goal();
-        goal.setId(GOAL_ID);
+        goal.setId(TestConstants.GOAL_ID);
 
         invitation = new GoalInvitation();
-        invitation.setId(INVITATION_ID);
+        invitation.setId(TestConstants.INVITATION_ID);
         invitation.setStatus(RequestStatus.PENDING);
         invitation.setInviter(inviter);
         invitation.setInvited(invited);
@@ -93,9 +86,9 @@ public class GoalInvitationServiceTest {
     @Test
     void testCreateInvitation() {
         when(goalInvitationMapper.toEntity(invitationDto)).thenReturn(invitation);
-        when(goalService.existsById(GOAL_ID)).thenReturn(true);
-        doNothing().when(userService).checkUserExists(INVITER_ID);
-        doNothing().when(userService).checkUserExists(INVITED_USER_ID);
+        when(goalService.existsById(TestConstants.GOAL_ID)).thenReturn(true);
+        doNothing().when(userService).checkUserExists(TestConstants.INVITER_ID);
+        doNothing().when(userService).checkUserExists(TestConstants.INVITED_USER_ID);
         when(goalInvitationRepository.save(any(GoalInvitation.class))).thenReturn(invitation);
 
         goalInvitationService.createInvitation(invitationDto);
@@ -120,7 +113,7 @@ public class GoalInvitationServiceTest {
 
     @Test
     void testCreateInvitation_SameInviterAndInvited() {
-        invitation.getInvited().setId(INVITER_ID);
+        invitation.getInvited().setId(TestConstants.INVITER_ID);
 
         when(goalInvitationMapper.toEntity(invitationDto)).thenReturn(invitation);
 
@@ -133,7 +126,7 @@ public class GoalInvitationServiceTest {
     @Test
     void testCreateInvitation_InvalidGoal() {
         when(goalInvitationMapper.toEntity(invitationDto)).thenReturn(invitation);
-        when(goalService.existsById(GOAL_ID)).thenReturn(false);
+        when(goalService.existsById(TestConstants.GOAL_ID)).thenReturn(false);
 
         InvalidInvitationException exception = assertThrows(InvalidInvitationException.class, () ->
                 goalInvitationService.createInvitation(invitationDto)
@@ -143,11 +136,11 @@ public class GoalInvitationServiceTest {
 
     @Test
     void testAcceptGoalInvitation() {
-        when(goalInvitationRepository.findById(INVITATION_ID)).thenReturn(Optional.of(invitation));
-        when(goalInvitationConfig.getMaxActiveGoals()).thenReturn(MAX_ACTIVE_GOALS);
-        when(goalService.countActiveGoalsPerUser(INVITED_USER_ID)).thenReturn(ACTIVE_GOALS_COUNT);
+        when(goalInvitationRepository.findById(TestConstants.INVITATION_ID)).thenReturn(Optional.of(invitation));
+        when(goalInvitationConfig.getMaxActiveGoals()).thenReturn(TestConstants.MAX_ACTIVE_GOALS);
+        when(goalService.countActiveGoalsPerUser(TestConstants.INVITED_USER_ID)).thenReturn(TestConstants.ACTIVE_GOALS_COUNT);
 
-        goalInvitationService.acceptGoalInvitation(INVITATION_ID);
+        goalInvitationService.acceptGoalInvitation(TestConstants.INVITATION_ID);
 
         assertEquals(RequestStatus.ACCEPTED, invitation.getStatus());
         verify(goalInvitationRepository).save(invitation);
@@ -157,31 +150,32 @@ public class GoalInvitationServiceTest {
     void testAcceptGoalInvitation_AlreadyProcessed() {
         invitation.setStatus(RequestStatus.ACCEPTED);
 
-        when(goalInvitationRepository.findById(INVITATION_ID)).thenReturn(Optional.of(invitation));
+        when(goalInvitationRepository.findById(TestConstants.INVITATION_ID)).thenReturn(Optional.of(invitation));
 
         InvalidInvitationException exception = assertThrows(InvalidInvitationException.class, () ->
-                goalInvitationService.acceptGoalInvitation(INVITATION_ID)
+                goalInvitationService.acceptGoalInvitation(TestConstants.INVITATION_ID)
         );
         assertEquals("Invitation is already processed.", exception.getMessage());
     }
 
     @Test
     void testAcceptGoalInvitation_MaxActiveGoals() {
-        when(goalInvitationRepository.findById(INVITATION_ID)).thenReturn(Optional.of(invitation));
-        when(goalInvitationConfig.getMaxActiveGoals()).thenReturn(MAX_ACTIVE_GOALS);
-        when(goalService.countActiveGoalsPerUser(INVITED_USER_ID)).thenReturn((long) MAX_ACTIVE_GOALS);
+        when(goalInvitationRepository.findById(TestConstants.INVITATION_ID)).thenReturn(Optional.of(invitation));
+        when(goalInvitationConfig.getMaxActiveGoals()).thenReturn(TestConstants.MAX_ACTIVE_GOALS);
+        when(goalService.countActiveGoalsPerUser(TestConstants.INVITED_USER_ID))
+                .thenReturn((long) TestConstants.MAX_ACTIVE_GOALS);
 
         InvalidInvitationException exception = assertThrows(InvalidInvitationException.class, () ->
-                goalInvitationService.acceptGoalInvitation(INVITATION_ID)
+                goalInvitationService.acceptGoalInvitation(TestConstants.INVITATION_ID)
         );
         assertEquals("User has reached the maximum number of active goals.", exception.getMessage());
     }
 
     @Test
     void testRejectGoalInvitation() {
-        when(goalInvitationRepository.findById(INVITATION_ID)).thenReturn(Optional.of(invitation));
+        when(goalInvitationRepository.findById(TestConstants.INVITATION_ID)).thenReturn(Optional.of(invitation));
 
-        goalInvitationService.rejectGoalInvitation(INVITATION_ID);
+        goalInvitationService.rejectGoalInvitation(TestConstants.INVITATION_ID);
 
         assertEquals(RequestStatus.REJECTED, invitation.getStatus());
         verify(goalInvitationRepository).save(invitation);
@@ -191,18 +185,20 @@ public class GoalInvitationServiceTest {
     void testRejectGoalInvitation_AlreadyProcessed() {
         invitation.setStatus(RequestStatus.ACCEPTED);
 
-        when(goalInvitationRepository.findById(INVITATION_ID)).thenReturn(Optional.of(invitation));
+        when(goalInvitationRepository.findById(TestConstants.INVITATION_ID)).thenReturn(Optional.of(invitation));
 
         InvalidInvitationException exception = assertThrows(InvalidInvitationException.class, () ->
-                goalInvitationService.rejectGoalInvitation(INVITATION_ID)
+                goalInvitationService.rejectGoalInvitation(TestConstants.INVITATION_ID)
         );
         assertEquals("Invitation is already processed.", exception.getMessage());
     }
 
     @Test
     void testGetInvitations() {
-        InvitationFilterDto filter = new InvitationFilterDto(INVITER_ID, INVITED_USER_ID, RequestStatus.PENDING);
-        when(goalInvitationRepository.findByInviterIdAndInvitedIdAndStatus(INVITER_ID, INVITED_USER_ID, RequestStatus.PENDING))
+        InvitationFilterDto filter = new InvitationFilterDto(TestConstants.INVITER_ID,
+                TestConstants.INVITED_USER_ID, RequestStatus.PENDING);
+        when(goalInvitationRepository.findByInviterIdAndInvitedIdAndStatus(TestConstants.INVITER_ID,
+                TestConstants.INVITED_USER_ID, RequestStatus.PENDING))
                 .thenReturn(Collections.singletonList(invitation));
         when(goalInvitationMapper.toDto(invitation)).thenReturn(invitationDto);
 
@@ -214,10 +210,12 @@ public class GoalInvitationServiceTest {
 
     @Test
     void testGetInvitationsByInvitedUserId() {
-        when(goalInvitationRepository.findByInvitedId(INVITED_USER_ID)).thenReturn(Collections.singletonList(invitation));
+        when(goalInvitationRepository.findByInvitedId(TestConstants.INVITED_USER_ID))
+                .thenReturn(Collections.singletonList(invitation));
         when(goalInvitationMapper.toDto(invitation)).thenReturn(invitationDto);
 
-        List<GoalInvitationDto> result = goalInvitationService.getInvitationsByInvitedUserId(INVITED_USER_ID);
+        List<GoalInvitationDto> result =
+                goalInvitationService.getInvitationsByInvitedUserId(TestConstants.INVITED_USER_ID);
 
         assertEquals(1, result.size());
         assertEquals(invitationDto, result.get(0));
@@ -225,10 +223,10 @@ public class GoalInvitationServiceTest {
 
     @Test
     void testGetInvitationById_NotFound() {
-        when(goalInvitationRepository.findById(INVITATION_ID)).thenReturn(Optional.empty());
+        when(goalInvitationRepository.findById(TestConstants.INVITATION_ID)).thenReturn(Optional.empty());
 
         InvalidInvitationException exception = assertThrows(InvalidInvitationException.class, () ->
-                goalInvitationService.getInvitationById(INVITATION_ID)
+                goalInvitationService.getInvitationById(TestConstants.INVITATION_ID)
         );
         assertEquals("Invitation not found.", exception.getMessage());
     }
