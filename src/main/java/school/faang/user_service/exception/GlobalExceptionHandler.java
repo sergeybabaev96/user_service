@@ -104,7 +104,7 @@ public class GlobalExceptionHandler {
                 }
             }
 
-            logging(Level.WARN, errors);
+            logging(loggingLevel, errors);
         }
         return errors;
     }
@@ -119,7 +119,7 @@ public class GlobalExceptionHandler {
             java.sql.SQLException sqlException = e.getSQLException();
             subHandleSQLException(sqlException, errors);
 
-            logging(Level.ERROR, errors);
+            logging(loggingLevel, errors);
         }
         return errors;
     }
@@ -147,7 +147,7 @@ public class GlobalExceptionHandler {
         if (isLoggable(loggingLevel)) {
             subHandleException(e, errors);
 
-            logging(Level.ERROR, errors);
+            logging(loggingLevel, errors);
         }
         return errors;
     }
