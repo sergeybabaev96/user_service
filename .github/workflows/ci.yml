@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'all'
+          distribution: 'temurin'
 
       # Шаг 3: Кэширование зависимостей Gradle
       - name: Cache Gradle dependencies
