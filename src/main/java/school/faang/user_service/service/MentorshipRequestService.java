@@ -50,7 +50,7 @@ public class MentorshipRequestService {
     private final List<RequestFilter> filters;
 
     public void requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
-        validateMentorshipRequestDto(mentorshipRequestDto);
+        validateDto(mentorshipRequestDto, ERROR_NULL_MENTORSHIP_REQUEST_DTO);
         if (mentorshipRequestDto.getDescription().length() < MIN_DESCRIPTION_LENGTH) {
             log.error(ERROR_SHORT_DESCRIPTION);
             throw new IllegalArgumentException(ERROR_SHORT_DESCRIPTION);
@@ -89,7 +89,7 @@ public class MentorshipRequestService {
     }
 
     public List<RequestFilterDto> getRequests(RequestFilterDto filterRequestDto) {
-        Objects.requireNonNull(filterRequestDto, ERROR_NULL_REQUEST_DTO);
+        validateDto(filterRequestDto, ERROR_NULL_REQUEST_DTO);
         Stream<MentorshipRequest> requestStream = StreamSupport.stream(mentorshipRequestRepository.findAll()
                 .spliterator(), false);
 
@@ -122,7 +122,7 @@ public class MentorshipRequestService {
     }
 
     public void rejectRequest(long id, RejectionDto rejection) {
-        Objects.requireNonNull(rejection, ERROR_NULL_REJECTION_DTO);
+        validateDto(rejection, ERROR_NULL_REJECTION_DTO);
 
         if (rejection.getRejectionReason() == null || rejection.getRejectionReason().isBlank()) {
             throw new IllegalArgumentException(ERROR_EMPTY_REJECTION);
@@ -135,7 +135,7 @@ public class MentorshipRequestService {
         mentorshipRequestRepository.save(mentorshipRequest);
     }
 
-    private void validateMentorshipRequestDto(MentorshipRequestDto mentorshipRequestDto) {
-        Objects.requireNonNull(mentorshipRequestDto, ERROR_NULL_MENTORSHIP_REQUEST_DTO);
+    private <T> void validateDto(T dto, String errorMessage) {
+        Objects.requireNonNull(dto, errorMessage);
     }
 }
