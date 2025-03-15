@@ -36,8 +36,6 @@ public class SkillService {
     }
 
     public void assignSkillToUser (long skillId, long userId) {
-        //пришлось добавить метод, что бы не передавать дальше скилл репозиторий
-        //оставлю временно до совещания с Сергеем по GoalService
         skillRepository.assignSkillToUser(skillId, userId);
     }
 
