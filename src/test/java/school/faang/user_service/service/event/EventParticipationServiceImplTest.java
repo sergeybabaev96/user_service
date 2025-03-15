@@ -27,6 +27,8 @@ import static org.mockito.Mockito.when;
 class EventParticipationServiceImplTest {
     private static final long EVENT_ID = 1L;
     private static final long USER_ID = 1L;
+    private static final String USER_NAME = "TestName";
+    private static final String USER_EMAIL = "example@email.com";
 
     @Mock
     private EventRepository eventRepository;
@@ -90,7 +92,6 @@ class EventParticipationServiceImplTest {
         verify(participationRepository, times(1)).unregister(EVENT_ID, USER_ID);
     }
 
-
     @Test
     void testGetParticipantsWhenEventDoesNotExists() {
         when(eventRepository.existsById(EVENT_ID)).thenReturn(false);
@@ -108,8 +109,14 @@ class EventParticipationServiceImplTest {
     void testGetParticipantsWhenEventExistsAndHasUsers() {
         when(eventRepository.existsById(EVENT_ID)).thenReturn(true);
         when(participationRepository.findAllParticipantsByEventId(EVENT_ID))
-                .thenReturn(List.of(User.builder().id(USER_ID).build()));
-        List<UserDto> userDtos = List.of(new UserDto(USER_ID));
+                .thenReturn(List.of(
+                        User.builder()
+                                .id(USER_ID)
+                                .username(USER_NAME)
+                                .email(USER_EMAIL)
+                                .build()
+                ));
+        List<UserDto> userDtos = List.of(new UserDto(USER_ID, USER_NAME, USER_EMAIL));
         assertEquals(userDtos, participationService.getParticipants(EVENT_ID));
     }
 

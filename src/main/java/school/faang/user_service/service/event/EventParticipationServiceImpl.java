@@ -43,7 +43,7 @@ public class EventParticipationServiceImpl implements EventParticipationService 
     public List<UserDto> getParticipants(long eventId) {
         isEventExist(eventId);
         List<User> participants = participationRepository.findAllParticipantsByEventId(eventId);
-        return userMapper.toUserDtoList(participants);
+        return userMapper.toDtoList(participants);
     }
 
     public long getParticipantsCount(long eventId) {
