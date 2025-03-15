@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @Testcontainers
-@SpringBootTest
+@SpringBootTest(classes = PostgreSQLContainerConfiguration.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PostgreSQLContainerTest {
 
