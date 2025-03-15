@@ -48,16 +48,16 @@ class UserServiceTest {
     @Test
     void getPremiumUsersWithOutFilters() {
         doReturn(sentUsers.stream()).when(userRepository).findPremiumUsers();
-        Stream<User> returnedUsers = userService.getPremiumUsers(null);
+        List<User> returnedUsers = userService.getPremiumUsers(null);
 
-        assertEquals(sentUsers.size(), returnedUsers.count());
+        assertEquals(sentUsers.size(), returnedUsers.size());
     }
 
     @Test
     void getPremiumUsersWithFilters() {
         doReturn(sentUsers.stream()).when(userRepository).findPremiumUsers();
-        Stream<User> returnedUsers = userService.getPremiumUsers(PRESET);
+        List<User> returnedUsers = userService.getPremiumUsers(PRESET);
 
-        assertEquals(AMOUNT_CONTENT_MATCHING_PRESET, returnedUsers.count());
+        assertEquals(AMOUNT_CONTENT_MATCHING_PRESET, returnedUsers.size());
     }
 }

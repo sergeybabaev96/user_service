@@ -1,15 +1,19 @@
 package school.faang.user_service.controller;
 
+import org.hibernate.annotations.Source;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.user.PremiumUserDto;
 import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.mapper.PremiumUserMapper;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.service.UserService;
 
@@ -30,7 +34,7 @@ class PremiumUserControllerTest {
     @Mock
     private UserService userService;
     @Mock
-    private UserMapper userMapper;
+    private PremiumUserMapper premiumUserMapper;
 
     @InjectMocks
     private PremiumUserController userController;
@@ -48,7 +52,7 @@ class PremiumUserControllerTest {
     @Test
     @DisplayName("PremiumUserController.  getPremiumUsers() WITH UserFilterDto")
     void getPremiumUsersWithFilterDto() {
-        when(userService.getPremiumUsers(userFilterDto)).thenReturn(sentUsers.stream());
+        when(userService.getPremiumUsers(userFilterDto)).thenReturn(sentUsers);
         List<PremiumUserDto> returnedUsers = userController.getPremiumUsers(userFilterDto);
 
         assertEquals(sentUsers.size(), returnedUsers.size());
@@ -57,7 +61,7 @@ class PremiumUserControllerTest {
     @Test
     @DisplayName("PremiumUserController.  getPremiumUsers() with OUT UserFilterDto")
     void getPremiumUsersWithOutFilterDto() {
-        when(userService.getPremiumUsers(null)).thenReturn(sentUsers.stream());
+        when(userService.getPremiumUsers(null)).thenReturn(sentUsers);
         List<PremiumUserDto> returnedUsers = userController.getPremiumUsers(null);
 
         assertEquals(sentUsers.size(), returnedUsers.size());
