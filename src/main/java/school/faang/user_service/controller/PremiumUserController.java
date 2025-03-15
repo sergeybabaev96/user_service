@@ -15,6 +15,7 @@ import school.faang.user_service.mapper.PremiumUserMapper;
 import school.faang.user_service.service.UserService;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,6 +40,7 @@ public class PremiumUserController {
 
     private List<PremiumUserDto> mapToPremiumUserDto(List<User> users) {
         return users.stream()
+                .filter(Objects::nonNull)
                 .map(premiumUserMapper::toDto)
                 .toList();
     }
