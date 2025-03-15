@@ -94,4 +94,6 @@ public class MentorshipService {
     private boolean removeUserFromList(List<User> users, long userId) {
         return users.removeIf(user -> user.getId() == userId);
     }
+    //ошибка для проверки пайплайна
+    fail();
 }
