@@ -41,7 +41,7 @@ public class EventParticipationService {
 
     public List<UserDto> getParticipants(long eventId) {
         List<User> participants = eventParticipationRepository.findAllParticipantsByEventId(eventId);
-        return UserMapper.usersToUserDto(participants);
+        return UserMapper.usersToUserDtos(participants);
     }
 
     public int getParticipantsCount(long eventId) {

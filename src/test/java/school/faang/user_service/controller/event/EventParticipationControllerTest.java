@@ -1,4 +1,4 @@
-package school.faang.user_service.service.controller.event;
+package school.faang.user_service.controller.event;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import school.faang.user_service.controller.event.EventParticipationController;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.event.EventParticipationService;
 
@@ -64,10 +63,10 @@ public class EventParticipationControllerTest {
 
     private static Stream<Arguments> provideInvalidIdsForExceptionTests() {
         return Stream.of(
-                Arguments.of(-1, 1, "register"),
-                Arguments.of(-1, 1, "unregister"),
-                Arguments.of(-1, 1, "getParticipants"),
-                Arguments.of(-1, 1, "getParticipantsCount")
+                Arguments.of(-1, -1, "register"),
+                Arguments.of(-1, -1, "unregister"),
+                Arguments.of(-1, -1, "getParticipants"),
+                Arguments.of(-1, -1, "getParticipantsCount")
         );
     }
 
