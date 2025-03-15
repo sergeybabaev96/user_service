@@ -61,7 +61,6 @@ public class RecommendationService {
 
         return new RecommendationDto();
     }
-
     public void delete(Long id) {
         recommendationRepository.deleteById(id);
         skillOfferRepository.deleteAllByRecommendationId(id);
@@ -70,4 +69,3 @@ public class RecommendationService {
     private void validateRecommendation(RecommendationDto recommendationDto) throws DataValidationException {
     }
 }
-
