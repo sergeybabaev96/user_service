@@ -60,7 +60,7 @@ public class GoalService {
             validateExistsGoalSkills(goalDto.getSkillIds());
             goal.getUsers().forEach(user ->
                     goal.getSkillsToAchieve().forEach(skill ->
-                            skillService.skillRepository.assignSkillToUser(user.getId(), skill.getId())));
+                            skillService.assignSkillToUser(user.getId(), skill.getId())));
         }
         updateGoalSkills(goal, goalDto.getSkillIds());
         Goal updatedGoal = goalRepository.save(goal);
@@ -101,7 +101,6 @@ public class GoalService {
     }
 
     private void validateExistsGoalSkills(List<Long> skillIds) {
-
         if (!skillService.isAllSkillsExist(skillIds)) {
             throw new RuntimeException("Skill ids do not exists");
         }

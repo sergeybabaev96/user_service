@@ -6,6 +6,8 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.UserRepository;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -17,5 +19,13 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new DataValidationException("user not found"));
         int countGoals = user.getGoals().size();
         return countGoals < GOALS_PER_USER;
+    }
+
+    public void save(User user) {
+        userRepository.save(user);
+    }
+
+    public Optional<User> findById(long id) {
+        return userRepository.findById(id);
     }
 }

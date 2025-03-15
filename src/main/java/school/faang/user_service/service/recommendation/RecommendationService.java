@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.recommendation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -11,8 +11,8 @@ import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.mapper.RecommendationMapper;
-import school.faang.user_service.mapper.SkillOfferMapper;
+import school.faang.user_service.mapper.recommendation.RecommendationMapper;
+import school.faang.user_service.mapper.recommendation.SkillOfferMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.UserSkillGuaranteeRepository;
@@ -37,7 +37,7 @@ public class RecommendationService {
     private static final int MIN_MONTH_VALUE = 6;
 
     public RecommendationDto create(RecommendationDto recommendation) {
-        List<SkillOffer> skillOffers = recommendation.getSkillOffers().stream()
+        List<SkillOffer> skillOffers = recommendation.getSkillOfferDtos().stream()
                 .map(skillOfferMapper::toEntity).toList();
         checkSixMonths(recommendation);
         checkSkillExist(recommendation);
@@ -63,7 +63,7 @@ public class RecommendationService {
     }
 
     private void checkSkillExist(RecommendationDto recommendation) {
-        for (SkillOfferDto skill : recommendation.getSkillOffers()) {
+        for (SkillOfferDto skill : recommendation.getSkillOfferDtos()) {
             if (!skillRepository.existsById(skill.getSkillId())) {
                 throw new DataValidationException("Skill is not in the database");
             }
@@ -77,7 +77,7 @@ public class RecommendationService {
                 .orElseThrow(() -> new DataValidationException("Receiver does not exist"));
         User guarantor = userRepository.findById(recommendation.getAuthorId())
                 .orElseThrow(() -> new DataValidationException("Author does not exist"));
-        recommendation.getSkillOffers().stream()
+        recommendation.getSkillOfferDtos().stream()
                 .flatMap(skillOffer -> receiverSkills.stream()
                         .filter(receiverSkill -> skillOffer.getSkillId() == receiverSkill.getId())
                         .map(receiverSkill -> {
@@ -91,7 +91,7 @@ public class RecommendationService {
     }
 
     private void saveSkillOffers(RecommendationDto recommendation) {
-        List<SkillOffer> skillOffers = recommendation.getSkillOffers().stream()
+        List<SkillOffer> skillOffers = recommendation.getSkillOfferDtos().stream()
                 .map(skillOfferMapper::toEntity).toList();
         skillOfferRepository.saveAll(skillOffers);
     }
@@ -102,7 +102,7 @@ public class RecommendationService {
         checkSixMonths(recommendation);
         recommendationRepository.update(entityRecommendation.getAuthor().getId(), entityRecommendation.getReceiver().getId(), entityRecommendation.getContent());
         skillOfferRepository.deleteAllByRecommendationId(entityRecommendation.getId());
-        for (SkillOfferDto skillOffer : recommendation.getSkillOffers()) {
+        for (SkillOfferDto skillOffer : recommendation.getSkillOfferDtos()) {
                 skillOfferRepository.create(skillOffer.getSkillId(), entityRecommendation.getId());
         }
         addGuarantor(recommendation);
