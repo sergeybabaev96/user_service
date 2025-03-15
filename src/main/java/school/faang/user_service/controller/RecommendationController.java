@@ -22,13 +22,15 @@ public class RecommendationController {
     private RecommendationService recommendationService;
 
     @PostMapping
-    public RecommendationDto giveRecommendation(@RequestBody RecommendationDto recommendation) throws DataValidationException {
+    public RecommendationDto giveRecommendation(@RequestBody RecommendationDto recommendation)
+            throws DataValidationException {
         validateRecommendation(recommendation);
         return recommendationService.create(recommendation);
     }
 
     @PutMapping
-    public RecommendationDto updateRecommendation(@RequestBody RecommendationDto updatedRecommendation) throws DataValidationException {
+    public RecommendationDto updateRecommendation(@RequestBody RecommendationDto updatedRecommendation)
+            throws DataValidationException {
         validateRecommendation(updatedRecommendation);
         return recommendationService.update(updatedRecommendation);
     }
