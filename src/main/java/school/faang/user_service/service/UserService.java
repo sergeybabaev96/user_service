@@ -2,12 +2,15 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.filter.user.UserFilter;
+import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
@@ -17,15 +20,28 @@ public class UserService {
     private final UserRepository userRepository;
     private final List<UserFilter> filters;
 
-    public Stream<User> getPremiumUsers(UserFilterDto presetFilterDto) {
+    @Transactional(readOnly = true)
+    public List<User> getPremiumUsers() {
+        return getPremiumUsers(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> getPremiumUsers(UserFilterDto presetFilterDto) {
         Stream<User> users = userRepository.findPremiumUsers();
-        if (presetFilterDto == null) {
-            return users;
-        } else {
-            return filters.stream()
-                    .filter(f -> f.isApplicable(presetFilterDto))
-                    .flatMap(f -> f.apply(users, presetFilterDto))
-                    .distinct();
+
+        if (null == presetFilterDto) {
+            return users.toList();
         }
+
+        return filtersApply(users, presetFilterDto);
+    }
+
+    private List<User> filtersApply(Stream<User> users, UserFilterDto presetFilterDto) {
+        for (UserFilter filter : filters) {
+            if (filter.isApplicable(presetFilterDto)) {
+                users = filter.apply(users, presetFilterDto);
+            }
+        }
+        return users.toList();
     }
 }
