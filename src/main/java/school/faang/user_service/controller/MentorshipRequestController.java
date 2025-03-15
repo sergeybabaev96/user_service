@@ -1,5 +1,7 @@
 package school.faang.user_service.controller;
 
+import static school.faang.user_service.constants.InfoMessages.*;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -14,15 +16,6 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 public class MentorshipRequestController {
-    private static final String START_MENTORSHIP_REQUEST = "Start requestMentorship id: {}";
-    private static final String END_MENTORSHIP_REQUEST = "End requestMentorship id: {}";
-    private static final String START_GETS_REQUEST = "Start mentorshipRequestService.getRequests";
-    private static final String END_GETS_REQUEST = "End mentorshipRequestService.getRequests";
-    private static final String START_ACCEPT_REQUEST = "Start acceptRequest id: {}";
-    private static final String END_ACCEPT_REQUEST = "End acceptRequest id: {}";
-    private static final String START_REJECT_REQUEST = "Start rejectRequest id: {}";
-    private static final String END_REJECT_REQUEST = "End rejectRequest id: {}";
-
     private final MentorshipRequestService mentorshipRequestService;
 
     public void requestMentorship(MentorshipRequestDto mentorshipRequestDto) {

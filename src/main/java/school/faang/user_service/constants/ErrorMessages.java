@@ -7,7 +7,6 @@ public class ErrorMessages {
     public static final String ERROR_NULL_REQUEST_DTO = "RequestFilterDto can't be null.";
     public static final String ERROR_ALREADY_MENTOR = "User is already a mentor for the requester.";
     public static final String ERROR_EMPTY_REJECTION = "Rejection reason cannot be empty.";
-    public static final String INFO_REJECTION_REASON = "Request {} rejected. Reason: {}";
 
     private static final String ERROR_SHORT_DESCRIPTION = "Description should be at least %d characters long.\n";
     private static final String ERROR_TOO_FREQUENT_REQUESTS = "You can only request mentorship once every %d months.\n";

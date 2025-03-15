@@ -1,6 +1,7 @@
 package school.faang.user_service.service;
 
 import static school.faang.user_service.constants.ErrorMessages.*;
+import static school.faang.user_service.constants.InfoMessages.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +54,7 @@ public class MentorshipRequestService {
                     .map(String::valueOf)
                     .collect(Collectors.joining(", "));
             String errorMessage = getUserNotFoundError(missingIds);
-            log.info(errorMessage);
+            log.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
         }
 
