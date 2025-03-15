@@ -1,5 +1,7 @@
 package school.faang.user_service.service;
 
+import static school.faang.user_service.constants.ErrorMessages.*;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,20 +31,6 @@ public class MentorshipRequestService {
     private static final int MIN_DESCRIPTION_LENGTH = 10;
     private static final int REQUEST_COOLDOWN_MONTHS = 3;
 
-    private static final String ERROR_NULL_MENTORSHIP_REQUEST_DTO = "MentorshipRequestDto can't be null.";
-    private static final String ERROR_NULL_REJECTION_DTO = "RejectionDto cant be null";
-    private static final String ERROR_SHORT_DESCRIPTION = String.format("Description should be at least %d characters long.\n",
-            MIN_DESCRIPTION_LENGTH);
-    private static final String ERROR_SELF_REQUEST = "You cannot request mentorship from yourself.";
-    private static final String ERROR_USER_NOT_FOUND = "User with the given ID(s): %s was not found.";
-    private static final String ERROR_TOO_FREQUENT_REQUESTS = String.format("You can only request mentorship once every %d months.\n",
-            REQUEST_COOLDOWN_MONTHS);
-    private static final String ERROR_NULL_REQUEST_DTO = "RequestFilterDto cant be null";
-    private static final String ERROR_ABSENT_REQUEST = "The request %d was not found.";
-    private static final String ERROR_ALREADY_MENTOR = "User is already a mentor for the requester.";
-    private static final String ERROR_EMPTY_REJECTION = "Rejection reason cannot be empty";
-    private static final String INFO_REJECTION_REASON = "Request {} rejected. Reason: {}";
-
     private final MentorshipRequestRepository mentorshipRequestRepository;
     private final MentorshipRequestMapper mentorshipRequestMapper;
     private final UserService userService;
@@ -52,8 +40,9 @@ public class MentorshipRequestService {
     public void requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
         validateDto(mentorshipRequestDto, ERROR_NULL_MENTORSHIP_REQUEST_DTO);
         if (mentorshipRequestDto.getDescription().length() < MIN_DESCRIPTION_LENGTH) {
-            log.error(ERROR_SHORT_DESCRIPTION);
-            throw new IllegalArgumentException(ERROR_SHORT_DESCRIPTION);
+            String errorMessage = getShortDescriptionError(MIN_DESCRIPTION_LENGTH);
+            log.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
         }
 
         List<Long> missingUser = Stream.of(mentorshipRequestDto.getRequesterId(), mentorshipRequestDto.getReceiverId())
@@ -63,8 +52,9 @@ public class MentorshipRequestService {
             String missingIds = missingUser.stream()
                     .map(String::valueOf)
                     .collect(Collectors.joining(", "));
-            log.info(String.format(ERROR_USER_NOT_FOUND, missingIds));
-            throw new IllegalArgumentException(String.format(ERROR_USER_NOT_FOUND, missingIds));
+            String errorMessage = getUserNotFoundError(missingIds);
+            log.info(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
         }
 
         if (mentorshipRequestDto.getRequesterId().equals(mentorshipRequestDto.getReceiverId())) {
@@ -77,8 +67,9 @@ public class MentorshipRequestService {
                 .findLatestRequest(mentorshipRequestDto.getRequesterId(), mentorshipRequestDto.getReceiverId());
         if (recentRequest.isPresent()) {
             if (recentRequest.get().getCreatedAt().isAfter(threeMouthAgo)) {
-                log.error(ERROR_TOO_FREQUENT_REQUESTS);
-                throw new IllegalArgumentException(ERROR_TOO_FREQUENT_REQUESTS);
+                String errorMessage = getFrequentRequestError(REQUEST_COOLDOWN_MONTHS);
+                log.error(errorMessage);
+                throw new IllegalArgumentException(errorMessage);
             }
         }
         MentorshipRequest mentorshipRequest = mentorshipRequestMapper.toEntity(mentorshipRequestDto);
@@ -103,7 +94,7 @@ public class MentorshipRequestService {
 
     public void acceptRequest(long id) {
         MentorshipRequest mentorshipRequest = mentorshipRequestRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(String.format(ERROR_ABSENT_REQUEST, id)));
+                .orElseThrow(() -> new IllegalArgumentException(getAbsentRequestError(id)));
 
         User receiver = mentorshipRequest.getReceiver();
         User requester = mentorshipRequest.getRequester();
@@ -128,7 +119,7 @@ public class MentorshipRequestService {
             throw new IllegalArgumentException(ERROR_EMPTY_REJECTION);
         }
         MentorshipRequest mentorshipRequest = mentorshipRequestRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(String.format(ERROR_ABSENT_REQUEST, id)));
+                .orElseThrow(() -> new IllegalArgumentException(getAbsentRequestError(id)));
         mentorshipRequest.setStatus(RequestStatus.REJECTED);
         mentorshipRequest.setRejectionReason(rejection.getRejectionReason());
         log.info(INFO_REJECTION_REASON, id, rejection.getRejectionReason());
