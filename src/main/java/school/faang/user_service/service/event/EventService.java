@@ -85,4 +85,17 @@ public class EventService {
     public void deleteEvent(Long eventId) {
         eventRepository.deleteById(eventId);
     }
+
+    public EventDto updateEvent(EventDto eventDto) {
+        if (!eventSkill.checkSkillsToUser(eventDto)) {
+            throw new DataValidationException("The creator does not have enough skills");
+        }
+        Event updatedEvent = eventRepository.save(eventMapper.eventDtoToEvent(eventDto));
+        return eventMapper.eventToEventDto(updatedEvent);
+    }
+
+    public List<EventDto> getPaticipatedEvents(Long userId) {
+        List<Event> paticipatedEvents = eventRepository.findParticipatedEventsByUserId(userId);
+        return paticipatedEvents.stream().map(eventMapper::eventToEventDto).toList();
+    }
 }

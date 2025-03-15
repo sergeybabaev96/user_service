@@ -19,9 +19,9 @@ import static school.faang.user_service.utils.ValidationUtils.validateEventId;
 public class EventController {
     private final EventService eventService;
 
-    public EventDto create(EventDto event) {
-        validateEvent(event);
-        return eventService.create(event);
+    public EventDto create(EventDto eventDto) {
+        validateEvent(eventDto);
+        return eventService.create(eventDto);
     }
 
     public EventDto getEvent(Long id) {
