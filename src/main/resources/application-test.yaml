@@ -3,6 +3,9 @@ spring:
     url: jdbc:postgresql://localhost:9999/fake
     username: fakeuser
     password: fakepass
+    hikari:
+      idle-timeout: 30000
+      connection-timeout: 20000
   jpa:
     hibernate:
       ddl-auto: update
