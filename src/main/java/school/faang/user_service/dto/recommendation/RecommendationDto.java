@@ -11,6 +11,6 @@ public class RecommendationDto {
     private Long authorId;
     private Long receiverId;
     private String content;
-    private List<SkillOfferDto> skillOffers;
+    private List<SkillOfferDto> skillOfferDtos;
     private LocalDateTime createdAt;
 }

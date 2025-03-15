@@ -2,7 +2,7 @@ package school.faang.user_service.controller.event;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
-import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.event.EventParticipationService;
 
@@ -35,9 +35,9 @@ public class EventParticipationController {
         return eventParticipationService.getParticipantsCount(eventId);
     }
 
-    private static void validateId(Long id) {
-        if (id == null || id <= 0) {
-            throw new DataValidationException("Id is less than or equal to zero");
+    private static void validateId(long id) {
+        if (id < 0) {
+            throw new DataValidationException("Id is less than zero");
         }
     }
 }
