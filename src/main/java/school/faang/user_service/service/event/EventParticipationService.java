@@ -21,7 +21,7 @@ public class EventParticipationService {
                 .anyMatch(user -> user.getId() == userId);
 
         if (isAlreadyRegistered) {
-            throw new DataValidationException("User is already registered for this event.");
+            throw new DataValidationException("User is already registered for this event");
         }
 
         eventParticipationRepository.register(eventId, userId);
