@@ -1,10 +1,12 @@
 package school.faang.user_service.filter.user;
 
+import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.entity.User;
 
 import java.util.stream.Stream;
 
+@Component
 public class UserFilterByPhonePattern implements UserFilter {
     @Override
     public boolean isApplicable(UserFilterDto presetDto) {
@@ -13,6 +15,8 @@ public class UserFilterByPhonePattern implements UserFilter {
 
     @Override
     public Stream<User> apply(Stream<User> users, UserFilterDto presetDto) {
-        return users.filter(user -> user.getPhone().contains(presetDto.getPhonePattern()));
+        return users
+                .filter(user -> user.getPhone().toLowerCase()
+                        .contains(presetDto.getPhonePattern().toLowerCase()));
     }
 }
