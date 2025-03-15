@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.skill;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,7 +11,7 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.skill.SkillCandidateMapper;
 import school.faang.user_service.mapper.skill.SkillMapper;
 import school.faang.user_service.repository.SkillRepository;
-import school.faang.user_service.service.recommendation.SkillOfferService;
+import school.faang.user_service.service.user.UserSkillGuaranteeService;
 
 import java.util.List;
 
@@ -25,6 +25,19 @@ public class SkillService {
     private final SkillRepository skillRepository;
     private final SkillCandidateMapper skillCandidateMapper;
     private final SkillMapper skillMapper;
+
+    public boolean isAllSkillsExist(List<Long> skillIds) {
+        for (Long skillId : skillIds) {
+            if (!skillRepository.existsById(skillId)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void assignSkillToUser (long skillId, long userId) {
+        skillRepository.assignSkillToUser(skillId, userId);
+    }
 
     public SkillDto create(SkillDto skillDto) {
         if (skillRepository.existsByTitle(skillDto.title())) {

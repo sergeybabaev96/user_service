@@ -2,7 +2,7 @@ package school.faang.user_service.mapper.user;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.entity.User;
 
 import java.util.Collections;
@@ -19,7 +19,7 @@ public interface UserMapper {
         return users == null ? List.of() : users.stream().map(User::getId).toList();
     }
 
-    static List<UserDto> usersToUserDto(List<User> users) {
+    static List<UserDto> usersToUserDtos(List<User> users) {
         if (users == null || users.isEmpty()) {
             return Collections.emptyList();
         }
