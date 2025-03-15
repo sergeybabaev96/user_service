@@ -30,6 +30,11 @@ public class EventController {
         return eventService.getEventsByFilter(eventFilter);
     }
 
+    public void deleteEvent(Long id) {
+        validateEventId(id);
+        eventService.deleteEvent(id);
+    }
+
     private void validateEvent(EventDto event) {
         if (event == null || event.getTitle().isBlank() || !Objects.nonNull(event.getStartDate())
                 || event.getStartDate().isBefore(LocalDateTime.now())
