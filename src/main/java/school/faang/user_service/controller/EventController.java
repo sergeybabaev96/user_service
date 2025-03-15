@@ -35,6 +35,15 @@ public class EventController {
         eventService.deleteEvent(id);
     }
 
+    public EventDto updateEvent(EventDto eventDto) {
+        validateEvent(eventDto);
+        return eventService.updateEvent(eventDto);
+    }
+
+    public List<EventDto> getPaticipatedEvents(Long userId) {
+        return eventService.getPaticipatedEvents(userId);
+    }
+
     private void validateEvent(EventDto event) {
         if (event == null || event.getTitle().isBlank() || !Objects.nonNull(event.getStartDate())
                 || event.getStartDate().isBefore(LocalDateTime.now())
