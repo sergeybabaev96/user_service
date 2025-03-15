@@ -39,5 +39,3 @@ class TestRecommendationController {
                 .andExpect(jsonPath("$.content").value("Test Recommendation"));
     }
 }
-
-
