@@ -41,18 +41,25 @@ public class MentorshipServiceTest {
 
     @BeforeEach
     void setUp() {
-        mentee1 = new User();
-        mentee1.setId(1L);
-        mentee1.setUsername("Filipp");
-        mentee2 = new User();
-        mentee2.setId(2L);
-        mentee2.setUsername("Ivan");
-        mentor1 = new MentorshipDto();
-        mentor1.setId(1L);
-        mentor1.setUsername("Filipp");
-        mentor2 = new MentorshipDto();
-        mentor2.setId(2L);
-        mentor2.setUsername("Ivan");
+        Object[] user1 = createUserAndDto(1L, "Filipp");
+        mentee1 = (User) user1[0];
+        mentor1 = (MentorshipDto) user1[1];
+
+        Object[] user2 = createUserAndDto(2L, "Ivan");
+        mentee2 = (User) user2[0];
+        mentor2 = (MentorshipDto) user2[1];
+    }
+
+    private Object[] createUserAndDto(Long id, String username) {
+        User user = new User();
+        user.setId(id);
+        user.setUsername(username);
+
+        MentorshipDto dto = new MentorshipDto();
+        dto.setId(id);
+        dto.setUsername(username);
+
+        return new Object[]{user, dto};
     }
 
     @Test
