@@ -3,6 +3,9 @@ on:
   pull_request:
     branches:
       - murloc-master-stream9
+  push:
+    branches:
+      - murloc-master-stream9
 
 jobs:
   build:
