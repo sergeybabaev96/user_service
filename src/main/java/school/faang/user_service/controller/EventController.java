@@ -30,7 +30,9 @@ public class EventController {
     }
 
     public List<EventDto> getEventsByFilter(EventFilterDto eventFilter) {
-        return eventService.getEventsByFilter(eventFilter);}
+        return eventService.getEventsByFilter(eventFilter);
+    }
+
     private void validateEvent(EventDto event) {
         if (event == null || event.getTitle().isBlank() || !Objects.nonNull(event.getStartDate())
                 || event.getStartDate().isBefore(LocalDateTime.now())
