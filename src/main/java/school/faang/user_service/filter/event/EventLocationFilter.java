@@ -7,7 +7,7 @@ import school.faang.user_service.entity.event.Event;
 import java.util.stream.Stream;
 
 @Component
-public class EventGetLocationFilter implements EventFilter {
+public class EventLocationFilter implements EventFilter {
     @Override
     public boolean isApplicable(EventFilterDto eventFilterDto) {
         return eventFilterDto.getLocation() != null && !eventFilterDto.getLocation().isBlank();
