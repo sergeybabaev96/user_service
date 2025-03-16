@@ -9,16 +9,17 @@ import school.faang.user_service.entity.event.Event;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy =  ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface EventMapper {
 
     @Mapping(target = "relatedSkills", ignore = true)
-    Event eventDtoToEvent(EventDto eventDto);
-    @Mapping(source="owner.id", target = "ownerId")
-    @Mapping(target = "relatedSkills", expression = "java(mapSkillsId(event.getRelatedSkills()))")
-    EventDto eventToEventDto(Event event);
+    Event toEventDto(EventDto eventDto);
 
-    default List<Long> mapSkillsId(List<Skill> skills) {
+    @Mapping(source = "owner.id", target = "ownerId")
+    @Mapping(target = "relatedSkills", expression = "java( extractSkillIds(event.getRelatedSkills()))")
+    EventDto toEntity(Event event);
+
+    default List<Long> extractSkillIds(List<Skill> skills) {
         return skills.stream().map(Skill::getId).toList();
     }
 }
