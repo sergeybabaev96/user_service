@@ -15,9 +15,7 @@ public class SkillController {
     private final SkillService skillService;
 
     public SkillDto create(SkillDto skill) {
-        if (!validateSkill(skill)) {
-            throw new DataValidationException("Title doesn't allow be empty");
-        }
+        validateSkill(skill);
         return skillService.create(skill);
     }
 
@@ -33,7 +31,8 @@ public class SkillController {
         return skillService.acquireSkillFromOffers(skillId, userId);
     }
 
-    private boolean validateSkill(SkillDto skill) {
-        return !skill.getTitle().isBlank();
+    private void validateSkill(SkillDto skill) {
+
+        throw new DataValidationException("Title doesn't allow be empty");
     }
 }

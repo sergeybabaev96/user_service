@@ -9,7 +9,7 @@ import school.faang.user_service.entity.Skill;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface SkillMapper {
 
-    SkillDto skillToSkillDto(Skill skill);
-    Skill skillDtoToSkill(SkillDto dto);
+    SkillDto toDto(Skill skill);
+    Skill toEntity(SkillDto dto);
 
 }

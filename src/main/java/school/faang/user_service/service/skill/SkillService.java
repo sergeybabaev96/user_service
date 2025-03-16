@@ -28,14 +28,14 @@ public class SkillService {
         if (skillRepository.existsByTitle(skillDto.getTitle())) {
             throw new DataValidationException("This skill already exists");
         }
-        Skill skill = skillMapper.skillDtoToSkill(skillDto);
+        Skill skill = skillMapper.toEntity(skillDto);
         skillRepository.save(skill);
-        return skillMapper.skillToSkillDto(skill);
+        return skillMapper.toDto(skill);
     }
 
     public List<SkillDto> getUserSkills(Long userId) {
        List<Skill> skills = skillRepository.findAllByUserId(userId);
-        return skills.stream().map(skillMapper::skillToSkillDto)
+        return skills.stream().map(skillMapper::toDto)
                .toList();
     }
 
@@ -44,7 +44,7 @@ public class SkillService {
         Map<Long,Long> skillCount = offeredSkills.stream()
                 .collect(Collectors.groupingBy(Skill::getId, Collectors.counting()));
         return skillCount.entrySet().stream().map(entry -> {
-            SkillDto skillDto = skillMapper.skillToSkillDto(findSkillById(entry.getKey(), offeredSkills).get());
+            SkillDto skillDto = skillMapper.toDto(findSkillById(entry.getKey(), offeredSkills).get());
             SkillCandidateDto  skillCandidateDto = new SkillCandidateDto();
             skillCandidateDto.setSkill(skillDto);
             skillCandidateDto.setOffersAmount(entry.getValue());
@@ -54,16 +54,18 @@ public class SkillService {
     }
 
     public SkillDto  acquireSkillFromOffers(long skillId, long userId) {
-        if (skillRepository.findUserSkill(skillId, userId).isPresent()) {
-            return null;
+
+        Optional<Skill> optionalSkill = skillRepository.findUserSkill(skillId,userId);
+        if (optionalSkill.isPresent()) {
+            throw new DataValidationException(String.format("This skill \"%s\" by user already exists"
+                    ,optionalSkill.get().getTitle()));
         }
-        if (skillOfferService.checkAmountOffersToSkill(skillId, userId)) {
-            return null;
-        }
+        skillOfferService.isEnoughAmountOffersToSkill(skillId, userId);
+
         skillRepository.assignSkillToUser(skillId, userId);
         skillUserGuarantee.addUserSkillGuarantee(skillId, userId);
 
-        return skillMapper.skillToSkillDto(skillRepository.findUserSkill(skillId, userId).get());
+        return skillMapper.toDto(skillRepository.findUserSkill(skillId, userId).get());
     }
 
     private Optional<Skill> findSkillById(Long id, List<Skill> skills) {
