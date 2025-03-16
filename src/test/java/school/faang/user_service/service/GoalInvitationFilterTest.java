@@ -23,28 +23,6 @@ public class GoalInvitationFilterTest {
     private final GoalInvitationInvitedIdFilter invitedIdFilter = new GoalInvitationInvitedIdFilter();
     private final GoalInvitationStatusFilter statusFilter = new GoalInvitationStatusFilter();
 
-    private GoalInvitation firstGoalInvitation;
-    private GoalInvitation secondGoalInvitation;
-
-    @BeforeEach
-    void setUp() {
-        User firstUser = new User();
-        firstUser.setId(1L);
-
-        User secondUser = new User();
-        secondUser.setId(2L);
-
-        firstGoalInvitation = new GoalInvitation();
-        firstGoalInvitation.setInviter(firstUser);
-        firstGoalInvitation.setInvited(secondUser);
-        firstGoalInvitation.setStatus(RequestStatus.ACCEPTED);
-
-        secondGoalInvitation = new GoalInvitation();
-        secondGoalInvitation.setInviter(secondUser);
-        secondGoalInvitation.setInvited(firstUser);
-        secondGoalInvitation.setStatus(RequestStatus.REJECTED);
-    }
-
     @Test
     void testIsApplicableWhenInviterIdIsNotNull() {
         InvitationFilterDto filterDto = new InvitationFilterDto(1L, null, null);
@@ -84,8 +62,10 @@ public class GoalInvitationFilterTest {
     @Test
     void testApplyFilterByInviterId() {
         InvitationFilterDto filterDto = new InvitationFilterDto(1L, null, null);
-
-        Stream<GoalInvitation> invitations = Stream.of(firstGoalInvitation, secondGoalInvitation);
+        Stream<GoalInvitation> invitations = Stream.of(
+                createGoalInvitation(1L, 2L, RequestStatus.ACCEPTED),
+                createGoalInvitation(2L, 1L, RequestStatus.REJECTED)
+        );
         List<GoalInvitation> result = inviterIdFilter.apply(invitations, filterDto).toList();
 
         assertEquals(1, result.size());
@@ -95,8 +75,10 @@ public class GoalInvitationFilterTest {
     @Test
     void testApplyFilterByInvitedId() {
         InvitationFilterDto filterDto = new InvitationFilterDto(null, 1L, null);
-
-        Stream<GoalInvitation> invitations = Stream.of(firstGoalInvitation, secondGoalInvitation);
+        Stream<GoalInvitation> invitations = Stream.of(
+                createGoalInvitation(1L, 2L, RequestStatus.ACCEPTED),
+                createGoalInvitation(2L, 1L, RequestStatus.REJECTED)
+        );
         List<GoalInvitation> result = invitedIdFilter.apply(invitations, filterDto).toList();
 
         assertEquals(1, result.size());
@@ -106,11 +88,28 @@ public class GoalInvitationFilterTest {
     @Test
     void testApplyFilterByStatus() {
         InvitationFilterDto filterDto = new InvitationFilterDto(null, null, RequestStatus.ACCEPTED);
-
-        Stream<GoalInvitation> invitations = Stream.of(firstGoalInvitation, secondGoalInvitation);
+        Stream<GoalInvitation> invitations = Stream.of(
+                createGoalInvitation(1L, 2L, RequestStatus.ACCEPTED),
+                createGoalInvitation(2L, 1L, RequestStatus.REJECTED)
+        );
         List<GoalInvitation> result = statusFilter.apply(invitations, filterDto).toList();
 
         assertEquals(1, result.size());
         assertEquals(RequestStatus.ACCEPTED, result.get(0).getStatus());
     }
+
+    private GoalInvitation createGoalInvitation(Long firstUserId, Long secondUserId, RequestStatus status) {
+        GoalInvitation goalInvitation = new GoalInvitation();
+        goalInvitation.setInviter(createUser(firstUserId));
+        goalInvitation.setInvited(createUser(secondUserId));
+        goalInvitation.setStatus(status);
+        return goalInvitation;
+    }
+
+    private User createUser(Long id) {
+        User user = new User();
+        user.setId(id);
+        return user;
+    }
+
 }
