@@ -36,7 +36,6 @@ public class RecommendationValidator {
         validateRecommendationTimeInterval(recommendation);
         validateSkillOffers(recommendation);
         validateAuthorAndReceiver(recommendation);
-
     }
 
     /**
@@ -76,7 +75,7 @@ public class RecommendationValidator {
      */
     private void validateRecommendationTimeInterval(RecommendationCreateDto recommendation) {
         LocalDateTime sixMonthsAgo = LocalDateTime.now().minusMonths(6);
-        LocalDateTime lastRecommendationDate = getUpdateAtCreateRecommendation(recommendation);
+        LocalDateTime lastRecommendationDate = getRecommendationLastUpdateDate(recommendation);
 
         if (lastRecommendationDate.isAfter(sixMonthsAgo)) {
             log.error("Ошибка валидации: рекомендация обновлена слишком рано");
@@ -103,7 +102,7 @@ public class RecommendationValidator {
      * @param recommendation - объект DTO с рекомендацией
      * @return Optional<LocalDateTime> - дата последнего обновления рекомендации
      */
-    private LocalDateTime getUpdateAtCreateRecommendation(RecommendationCreateDto recommendation) {
+    private LocalDateTime getRecommendationLastUpdateDate(RecommendationCreateDto recommendation) {
         User recommendationAuthor = getUser(recommendation.getAuthorId());
         return recommendationAuthor.getRecommendationsGiven().stream()
                 .filter(existingRecommendation -> {

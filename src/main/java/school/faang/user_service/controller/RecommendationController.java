@@ -1,11 +1,13 @@
 package school.faang.user_service.controller;
 
+import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import school.faang.user_service.dto.recommendation.RecommendationViewDto;
 import school.faang.user_service.dto.recommendation.RecommendationCreateDto;
 import school.faang.user_service.service.RecommendationService;
@@ -38,6 +40,7 @@ import school.faang.user_service.service.RecommendationService;
  */
 @Slf4j
 @Controller
+@Validated
 @RequiredArgsConstructor
 public class RecommendationController {
     private final RecommendationService recommendationService;
@@ -49,7 +52,7 @@ public class RecommendationController {
      * @param recommendationId айди рекомендации
      * @return созданная рекомендация
      */
-    public RecommendationViewDto createRecommendation(@NonNull RecommendationCreateDto recommendation,
+    public RecommendationViewDto createRecommendation(@Valid RecommendationCreateDto recommendation,
                                                       @NonNull Long recommendationId) {
         return recommendationService.create(recommendation, recommendationId);
     }
@@ -61,7 +64,7 @@ public class RecommendationController {
      * @param recommendationId айди рекомендации
      * @return обновленная рекомендация
      */
-    public RecommendationViewDto updateRecommendation(@NonNull RecommendationCreateDto updated,
+    public RecommendationViewDto updateRecommendation(@Valid  RecommendationCreateDto updated,
                                                       @NonNull Long recommendationId) {
         return recommendationService.update(updated, recommendationId);
     }
