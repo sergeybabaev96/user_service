@@ -3,7 +3,9 @@ package school.faang.user_service.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,7 +17,7 @@ import school.faang.user_service.service.EventPromotionService;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/promotion/event")
+@RequestMapping("/promotion/events")
 public class EventPromotionController {
     private final EventPromotionService eventPromotionService;
 
@@ -31,7 +33,7 @@ public class EventPromotionController {
         return response;
     }
 
-    @PostMapping("/end")
+    @DeleteMapping("/end")
     public ResponseEntity<String> endEventPromotion(
             @RequestBody EventPromotionRequestDto eventPromotionRequestDto) {
 
@@ -43,7 +45,7 @@ public class EventPromotionController {
         return response;
     }
 
-    @PostMapping("/update/priority")
+    @PutMapping("/update/priority")
     public ResponseEntity<String> updateEventPromotionPriority(
             @RequestBody EventPromotionRequestDto eventPromotionRequestDto,
             @RequestParam("CurrencyDto") CurrencyDto currencyDto) {
@@ -58,7 +60,7 @@ public class EventPromotionController {
         return response;
     }
 
-    @PostMapping("/update/type")
+    @PutMapping("/update/type")
     public ResponseEntity<String> updateEventPromotionType(
             @RequestBody EventPromotionRequestDto eventPromotionRequestDto,
             @RequestParam("CurrencyDto") CurrencyDto currencyDto) {
