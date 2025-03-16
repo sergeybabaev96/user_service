@@ -26,7 +26,7 @@ public class CareerController {
             @RequestBody CareerDto careerDto) {
         CareerValidator.validate(careerDto);
         CareerDto addCareer = careerService.addCareer(userId, careerDto);
-       return ResponseEntity.ok(addCareer);
+        return ResponseEntity.ok(addCareer);
     }
 
     @PutMapping("/{userId}")
