@@ -20,4 +20,8 @@ public class UserService {
                 .orElseThrow(() -> new DataRetrievalFailureException(
                         "User with id %d is not found".formatted(userId)));
     }
+
+    public boolean existsById(long userId) {
+        return userRepository.existsById(userId);
+    }
 }
