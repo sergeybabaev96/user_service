@@ -65,11 +65,9 @@ public class EventService {
     }
 
     public EventDto getEvent(Long eventId) {
-        Event event = eventRepository.findById(eventId).orElse(null);
-        if (event == null) {
-            throw new DataValidationException("The event does not exist");
-        }
-        return eventMapper.eventToEventDto(event);
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new DataValidationException("Event with id = %d does not exist".formatted(eventId)));
+        return eventMapper.toEntity(event);
     }
 
     public List<EventDto> getEventsByFilter(EventFilterDto eventFilterDto) {
@@ -87,11 +85,9 @@ public class EventService {
     }
 
     public EventDto updateEvent(EventDto eventDto) {
-        if (!eventSkill.checkSkillsToUser(eventDto)) {
-            throw new DataValidationException("The creator does not have enough skills");
-        }
-        Event updatedEvent = eventRepository.save(eventMapper.eventDtoToEvent(eventDto));
-        return eventMapper.eventToEventDto(updatedEvent);
+        eventSkill.checkSkillsToUser(eventDto);
+        Event updatedEvent = eventRepository.save(eventMapper.toEventDto(eventDto));
+        return eventMapper.toEntity(updatedEvent);
     }
 
     public List<EventDto> getPaticipatedEvents(Long userId) {
