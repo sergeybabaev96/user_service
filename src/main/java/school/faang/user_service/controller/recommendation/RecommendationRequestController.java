@@ -27,7 +27,8 @@ public class RecommendationRequestController {
     private final RecommendationRequestService recommendationRequestService;
 
     @PostMapping("/request")
-    public RecommendationRequestDto requestRecommendation(@Valid @RequestBody RecommendationRequestDto recommendationRequestDto) {
+    public RecommendationRequestDto requestRecommendation(
+            @Valid @RequestBody RecommendationRequestDto recommendationRequestDto) {
         return recommendationRequestService.create(recommendationRequestDto);
     }
 
@@ -42,7 +43,8 @@ public class RecommendationRequestController {
     }
 
     @PutMapping("/rejection/{id}")
-    public RecommendationRequestDto rejectRequest(@NotNull @PathVariable Long id, @Valid @RequestBody RejectionDto rejectionDto) {
+    public RecommendationRequestDto rejectRequest(@NotNull @PathVariable Long id,
+                                                  @Valid @RequestBody RejectionDto rejectionDto) {
         return recommendationRequestService.rejectRequest(id, rejectionDto);
     }
 }
