@@ -39,8 +39,8 @@ public class SkillService {
     public SkillDto create(SkillDto skillDto) {
         skillValidator.validatorTitleSkill(skillDto);
         Skill skill = skillMapper.toEntity(skillDto);
-        skillRepository.save(skill);
-        return skillMapper.toDto(skill);
+        Skill result = skillRepository.save(skill);
+        return skillMapper.toDto(result);
     }
 
     public List<SkillDto> getUserSkills(Long userId) {
