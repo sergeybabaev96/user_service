@@ -7,7 +7,7 @@ import school.faang.user_service.dto.CareerDto;
 import school.faang.user_service.entity.Career;
 
 @Mapper(componentModel = "spring",
-        unmappedSourcePolicy = ReportingPolicy.IGNORE)
+        unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CareerMapper {
     @Mapping(source = "from", target = "dateFrom")
     @Mapping(source = "to", target = "dateTo")
