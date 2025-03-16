@@ -1,18 +1,18 @@
-package school.faang.user_service.filter;
+package school.faang.user_service.filter.mentor;
 
 import school.faang.user_service.dto.mentor.RequestFilterDto;
 import school.faang.user_service.entity.MentorshipRequest;
 
 import java.util.stream.Stream;
 
-public class DescriptionFilter implements RequestFilter {
+public class StatusFilter implements RequestFilter {
     @Override
     public boolean isApplicable(RequestFilterDto requestFilterDto) {
-        return requestFilterDto.getDescription() != null && !requestFilterDto.getDescription().isBlank();
+        return requestFilterDto.getStatus() != null;
     }
 
     @Override
     public Stream<MentorshipRequest> apply(Stream<MentorshipRequest> request, RequestFilterDto filterRequestDto) {
-        return request.filter(reg -> reg.getDescription().contains(filterRequestDto.getDescription()));
+        return request.filter(req -> req.getStatus().equals(filterRequestDto.getStatus()));
     }
 }

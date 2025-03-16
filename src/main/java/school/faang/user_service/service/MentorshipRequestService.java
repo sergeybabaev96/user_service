@@ -11,7 +11,7 @@ import school.faang.user_service.dto.mentor.RequestFilterDto;
 import school.faang.user_service.dto.mentor.RejectionDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
-import school.faang.user_service.filter.RequestFilter;
+import school.faang.user_service.filter.mentor.RequestFilter;
 import school.faang.user_service.mapper.RequestFilterMapper;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.entity.User;
