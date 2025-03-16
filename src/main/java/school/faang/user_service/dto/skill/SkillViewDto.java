@@ -11,6 +11,4 @@ public class SkillViewDto {
     @NotNull(message = "title cannot be null ")
     private String title;
 
-
-
 }
