@@ -25,62 +25,75 @@ public class EventEndDateFilterTest {
     }
 
     @Test
-    @DisplayName("Тест isApplicable: фильтр применим, если endDate установлен")
+    @DisplayName("Фильтр применим, если endDate установлен")
     void isApplicableTestTrue() {
         boolean result = eventEndDateFilter.isApplicable(eventFilterDto);
+
         assertTrue(result);
     }
 
     @Test
-    @DisplayName("Тест isApplicable: фильтр не применим, если endDate не установлен")
+    @DisplayName("Фильтр не применим, если endDate не установлен")
     void isApplicableTestFalse() {
         eventFilterDto.setEndDate(null);
+
         boolean result = eventEndDateFilter.isApplicable(eventFilterDto);
+
         assertFalse(result);
     }
 
     @Test
-    @DisplayName("Тест apply: фильтрация событий с endDate, равным граничному значению")
+    @DisplayName("Фильтрация событий с endDate, равным граничному значению")
     void applyTestBoundary() {
         Event event = Event.builder().endDate(LocalDateTime.parse("2021-12-12T12:12:12")).build();
         Stream<Event> events = Stream.of(event);
+
         Stream<Event> result = eventEndDateFilter.apply(events, eventFilterDto);
+
         assertEquals(0, result.count());
     }
 
     @Test
-    @DisplayName("Тест apply: фильтрация событий с endDate до и после указанной даты")
+    @DisplayName("Фильтрация событий с endDate до и после указанной даты")
     void applyTest() {
         Event event1 = Event.builder().endDate(LocalDateTime.parse("2019-12-12T12:12:12")).build();
         Event event2 = Event.builder().endDate(LocalDateTime.parse("2024-12-12T12:12:12")).build();
         Stream<Event> events = Stream.of(event1, event2);
+
         Stream<Event> result = eventEndDateFilter.apply(events, eventFilterDto);
+
         assertEquals(1, result.count());
     }
 
     @Test
-    @DisplayName("Тест apply: фильтрация пустого списка событий")
+    @DisplayName("Фильтрация пустого списка событий")
     void applyTestEmpty() {
         Stream<Event> events = Stream.empty();
+
         Stream<Event> result = eventEndDateFilter.apply(events, eventFilterDto);
+
         assertEquals(0, result.count());
     }
 
     @Test
-    @DisplayName("Тест apply: фильтрация событий с endDate, который раньше указанной даты")
+    @DisplayName("Фильтрация событий с endDate, который раньше указанной даты")
     void applyTestBeforeEndDate() {
         Event event = Event.builder().endDate(LocalDateTime.parse("2020-12-12T12:12:12")).build();
         Stream<Event> events = Stream.of(event);
+
         Stream<Event> result = eventEndDateFilter.apply(events, eventFilterDto);
+
         assertEquals(1, result.count());
     }
 
     @Test
-    @DisplayName("Тест apply: фильтрация событий с endDate, который позже указанной даты")
+    @DisplayName("Фильтрация событий с endDate, который позже указанной даты")
     void applyTestAfterEndDate() {
         Event event = Event.builder().endDate(LocalDateTime.parse("2022-12-12T12:12:12")).build();
         Stream<Event> events = Stream.of(event);
+
         Stream<Event> result = eventEndDateFilter.apply(events, eventFilterDto);
+
         assertEquals(0, result.count());
     }
 }

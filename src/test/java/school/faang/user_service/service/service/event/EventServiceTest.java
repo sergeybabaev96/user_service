@@ -45,7 +45,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class EventServiceTest {
-
     @Mock
     private EventRepository eventRepository;
     @Mock
@@ -174,8 +173,9 @@ public class EventServiceTest {
 
         when(userRepository.findById(eventCreateDto.getOwnerId())).thenReturn(Optional.of(eventOwner));
         when(skillRepository.findAllById(requiredSkillsIds)).thenReturn(requiredSkills);
+        when(eventMapper.toEntity(eventCreateDto)).thenReturn(event);
 
-        assertThrows(NullPointerException.class, () -> eventService.create(eventCreateDto));
+        assertThrows(DataValidationException.class, () -> eventService.create(eventCreateDto));
 
         verify(userRepository, times(2)).findById(eventCreateDto.getOwnerId());
         verify(skillRepository, times(1)).findAllById(requiredSkillsIds);
@@ -433,7 +433,7 @@ public class EventServiceTest {
 
     @Test
     @DisplayName("Обновление события: успешное обновление")
-    void updateEvent_Success() {
+    void updateEventSuccess() {
         skill.setEvents(new ArrayList<>(List.of(event)));
 
         when(eventMapper.toEntity(eventCreateDto)).thenReturn(event);
@@ -455,7 +455,7 @@ public class EventServiceTest {
 
     @Test
     @DisplayName("Обновление события: пользователь не имеет доступа")
-    void updateEvent_UserHasNoAccess_ThrowsException() {
+    void updateEventUserHasNoAccessThrowsException() {
         skill.setEvents(new ArrayList<>(List.of(new Event())));
 
         when(eventMapper.toEntity(eventCreateDto)).thenReturn(event);

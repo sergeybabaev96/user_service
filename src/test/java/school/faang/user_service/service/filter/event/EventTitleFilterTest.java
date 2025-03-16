@@ -23,85 +23,104 @@ public class EventTitleFilterTest {
     }
 
     @Test
-    @DisplayName("Тест isApplicable: фильтр применим, если title установлен и не пустой")
+    @DisplayName("Фильтр применим, если title установлен и не пустой")
     public void isApplicableTestTrue() {
         eventFilterDto.setTitle("Moscow");
+
         boolean result = eventTitleFilter.isApplicable(eventFilterDto);
+
         assertTrue(result);
     }
 
     @Test
-    @DisplayName("Тест isApplicable: фильтр не применим, если title равен null")
+    @DisplayName("Фильтр не применим, если title равен null")
     void isApplicableTestFalse() {
         eventFilterDto.setTitle(null);
+
         boolean result = eventTitleFilter.isApplicable(eventFilterDto);
+
         assertFalse(result);
     }
 
     @Test
-    @DisplayName("Тест isApplicable: фильтр не применим, если title состоит только из пробелов")
+    @DisplayName("Фильтр не применим, если title состоит только из пробелов")
     void isApplicableTestBlank() {
         eventFilterDto.setTitle(" ");
+
         boolean result = eventTitleFilter.isApplicable(eventFilterDto);
+
         assertFalse(result);
     }
 
     @Test
-    @DisplayName("Тест isApplicable: фильтр не применим, если title пустой")
+    @DisplayName("Фильтр не применим, если title пустой")
     void isApplicableTestEmpty() {
         eventFilterDto.setTitle("");
+
         boolean result = eventTitleFilter.isApplicable(eventFilterDto);
+
         assertFalse(result);
     }
 
     @Test
-    @DisplayName("Тест apply: фильтрация событий по точному совпадению title")
+    @DisplayName("Фильтрация событий по точному совпадению title")
     void applyTest() {
         eventFilterDto.setTitle("Moscow");
         Event event1 = Event.builder().title("Moscow").build();
         Event event2 = Event.builder().title("Gomel").build();
         Stream<Event> events = Stream.of(event1, event2);
+
         Stream<Event> result = eventTitleFilter.apply(events, eventFilterDto);
+
         assertEquals(1, result.count());
     }
 
     @Test
-    @DisplayName("Тест apply: фильтрация событий по title с учетом регистра")
+    @DisplayName("Фильтрация событий по title с учетом регистра")
     void applyIgnoreCaseTest() {
         eventFilterDto.setTitle("Moscow");
         Event event1 = Event.builder().title("moScow").build();
         Event event2 = Event.builder().title("Gomel").build();
         Stream<Event> events = Stream.of(event1, event2);
+
         Stream<Event> result = eventTitleFilter.apply(events, eventFilterDto);
+
         assertEquals(1, result.count());
     }
 
     @Test
-    @DisplayName("Тест apply: фильтрация пустого списка событий")
+    @DisplayName("Фильтрация пустого списка событий")
     void applyEmptyTest() {
         eventFilterDto.setTitle("Moscow");
         Stream<Event> events = Stream.empty();
+
         Stream<Event> result = eventTitleFilter.apply(events, eventFilterDto);
+
         assertEquals(0, result.count());
     }
 
     @Test
-    @DisplayName("Тест apply: фильтрация событий с title, равным null")
+    @DisplayName("Фильтрация событий с title, равным null")
     void applyTestNullTitle() {
         eventFilterDto.setTitle("Moscow");
         Event event = Event.builder().title(null).build();
         Stream<Event> events = Stream.of(event);
+
         Stream<Event> result = eventTitleFilter.apply(events, eventFilterDto);
+
         assertEquals(0, result.count());
     }
 
     @Test
-    @DisplayName("Тест apply: фильтрация событий с пустым title")
+    @DisplayName("Фильтрация событий с пустым title")
     void applyTestEmptyTitle() {
         eventFilterDto.setTitle("Moscow");
         Event event = Event.builder().title("").build();
         Stream<Event> events = Stream.of(event);
+
         Stream<Event> result = eventTitleFilter.apply(events, eventFilterDto);
+
         assertEquals(0, result.count());
+
     }
 }
