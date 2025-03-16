@@ -24,10 +24,8 @@ import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 public class RecommendationValidatorTest {
-
     @Mock
     private SkillRepository skillRepository;
-
     @Mock
     private UserRepository userRepository;
 
@@ -62,13 +60,14 @@ public class RecommendationValidatorTest {
         recommendation.setAuthor(author);
         recommendation.setReceiver(receiver);
         author.setRecommendationsGiven(List.of(recommendation));
-    }
 
-    @DisplayName("Позитивный тест метода validate")
-    @Test
-    void validateRecommendationWithValidInputsTest() {
         Mockito.when(userRepository.findById(author.getId()))
                 .thenReturn(Optional.of(author));
+    }
+
+    @DisplayName("Проверка успешной валидации рекомендации")
+    @Test
+    void validateRecommendationWithValidInputsTest() {
         Mockito.when(skillRepository.existsById(skillOfferCreateDto.getSkillId()))
                 .thenReturn(true);
 
@@ -81,13 +80,9 @@ public class RecommendationValidatorTest {
                 .existsById(skillOfferCreateDto.getSkillId());
     }
 
-    @DisplayName("Негативный тест метода validate с неправильными данными" +
-            " в методе validateRecommendationTimeInterval")
+    @DisplayName("Проверка получения ошибки при слишком раннем обновлении рекомендации")
     @Test
     void validateRecommendationTimeIntervalWithInvalidInputsTest() {
-        Mockito.when(userRepository.findById(author.getId()))
-                .thenReturn(Optional.of(author));
-
         LocalDateTime lessThanSixMonthsAgo = LocalDateTime.now().minusMonths(5);
         recommendation.setUpdatedAt(lessThanSixMonthsAgo);
 
@@ -98,12 +93,10 @@ public class RecommendationValidatorTest {
         Mockito.verify(userRepository, Mockito.times(1))
                 .findById(author.getId());
     }
-    @DisplayName("Негативный тест метода validate с отсутствием updateAt " +
-            "в методе validateRecommendationTimeInterval")
+
+    @DisplayName("Проверка получения ошибки при отсутствии даты обновления")
     @Test
     void validateRecommendationTimeIntervalWithoutInputsTest() {
-        Mockito.when(userRepository.findById(author.getId()))
-                .thenReturn(Optional.of(author));
         recommendation.setUpdatedAt(null);
 
         Exception exception =  Assertions.assertThrows(DataValidationException.class, () ->
@@ -114,12 +107,9 @@ public class RecommendationValidatorTest {
                 .findById(author.getId());
     }
 
-    @DisplayName("Негативный тест на отсутствие SkillOffers")
+    @DisplayName("Проверка получения ошибки при отсутствии SkillOffers")
     @Test
     void validateRecommendationWithoutSkillOffersInputsTest() {
-        Mockito.when(userRepository.findById(author.getId()))
-                .thenReturn(Optional.of(author));
-
         recommendationCreateDto.setSkillOffers(null);
 
         Exception exception = Assertions.assertThrows(DataValidationException.class, () ->
@@ -130,12 +120,9 @@ public class RecommendationValidatorTest {
                 .findById(author.getId());
     }
 
-    @DisplayName("Негативный тест на пустой SkillOffers")
+    @DisplayName("Проверка получения ошибки при пустом списке SkillOffers")
     @Test
     void validateRecommendationWithEmptySkillOffersInputsTest() {
-        Mockito.when(userRepository.findById(author.getId()))
-                .thenReturn(Optional.of(author));
-
         recommendationCreateDto.setSkillOffers(List.of());
 
         Exception exception = Assertions.assertThrows(DataValidationException.class, () ->
@@ -146,11 +133,9 @@ public class RecommendationValidatorTest {
                 .findById(author.getId());
     }
 
-    @DisplayName("Негативный тест на отсутсвие нужного SkillOffers в skillRepository")
+    @DisplayName("Проверка получения ошибки при отсутствии SkillOffer в репозитории")
     @Test
     void validateRecommendationWithoutSkillOffersEntityTest() {
-        Mockito.when(userRepository.findById(author.getId()))
-                .thenReturn(Optional.of(author));
         Mockito.when(skillRepository.existsById(skillOfferCreateDto.getSkillId()))
                 .thenReturn(false);
 

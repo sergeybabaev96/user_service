@@ -47,9 +47,9 @@ public class RecommendationServiceTest {
     @InjectMocks
     private RecommendationService recommendationService;
 
-    User author;
-    User receiver;
-    Long recommendationCreateDtoId;
+    private User author;
+    private User receiver;
+    private Long recommendationCreateDtoId;
     private RecommendationCreateDto recommendationCreateDto;
     private RecommendationViewDto recommendationViewDto;
     private Recommendation recommendationEntity;
@@ -58,8 +58,10 @@ public class RecommendationServiceTest {
     void setUp() {
         author = new User();
         author.setId(1L);
+
         receiver = new User();
         receiver.setId(2L);
+
         recommendationCreateDto = new RecommendationCreateDto();
         recommendationCreateDto.setAuthorId(author.getId());
         recommendationCreateDto.setReceiverId(receiver.getId());
@@ -75,7 +77,8 @@ public class RecommendationServiceTest {
         recommendationEntity.setReceiver(receiver);
         recommendationEntity.setContent("Create content");
     }
-    @DisplayName("Позитивный тест с валидными входными данными для метода create")
+
+    @DisplayName("Проверка успешного создания рекомендации")
     @Test
     void createRecommendationWithValidInputsTest() {
         Mockito.when(userRepository.findById(author.getId()))
@@ -96,7 +99,7 @@ public class RecommendationServiceTest {
                 .save(recommendationEntity);
     }
 
-    @DisplayName("Негативный тест на отсутствие receiver")
+    @DisplayName("Проверка получения ошибки при отсутствии получателя")
     @Test
     void createRecommendationWithInvalidReceiver() {
         Mockito.when(userRepository.findById(receiver.getId())).thenReturn(Optional.empty());
@@ -107,7 +110,7 @@ public class RecommendationServiceTest {
         Assertions.assertTrue(exception.getMessage().contains("User is not found"));
     }
 
-    @DisplayName("Негативный тест на отсутствие author")
+    @DisplayName("Проверка получения ошибки при отсутствии автора")
     @Test
     void createRecommendationWithInvalidAuthor() {
         Mockito.when(userRepository.findById(receiver.getId()))
@@ -120,7 +123,7 @@ public class RecommendationServiceTest {
         Assertions.assertTrue(exception.getMessage().contains("User is not found"));
     }
 
-    @DisplayName("Позитивный тест с валидными входными данными для метода update")
+    @DisplayName("Проверка успешного обновления рекомендации")
     @Test
     void updateRecommendationWithValidInputsTest() {
         Mockito.when(recommendationRepository.findById(recommendationCreateDtoId))
@@ -145,7 +148,7 @@ public class RecommendationServiceTest {
         Assertions.assertNotNull(result);
     }
 
-    @DisplayName("Негативный тест на отсутствие рекомендации в репозитории ")
+    @DisplayName("Проверка получения ошибки при обновлении несуществующей рекомендации")
     @Test
     void updateRecommendationWithInvalidIdTest() {
         Mockito.when(recommendationRepository.findById(recommendationCreateDtoId))
@@ -156,7 +159,8 @@ public class RecommendationServiceTest {
 
         Assertions.assertTrue(exception.getMessage().contains("Recommendation not found"));
     }
-    @DisplayName("Позитивный тест с валидными входными данными метода delete")
+
+    @DisplayName("Проверка успешного удаления рекомендации")
     @Test
     void deleteRecommendationWithValidInputsTest() {
         Mockito.when(recommendationRepository.existsById(recommendationCreateDtoId))
@@ -167,7 +171,8 @@ public class RecommendationServiceTest {
         Mockito.verify(recommendationRepository, Mockito.times(1))
                 .deleteById(recommendationCreateDtoId);
     }
-    @DisplayName("Негативный тест с невалидными входными данными метода delete")
+
+    @DisplayName("Проверка получения ошибки при удалении несуществующей рекомендации")
     @Test
     void deleteRecommendationWithInvalidInputsTest() {
         Mockito.when(recommendationRepository.existsById(recommendationCreateDtoId))
@@ -180,7 +185,7 @@ public class RecommendationServiceTest {
                 .contains(String.format("Recommendation id %d not found", recommendationCreateDtoId)));
     }
 
-    @DisplayName("Позитивный тест с валидными входными данными метода getAllUserRecommendations")
+    @DisplayName("Проверка успешного получения всех рекомендаций для пользователя")
     @Test
     void getAllUserRecommendationsTest() {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
@@ -203,7 +208,7 @@ public class RecommendationServiceTest {
                 .toViewDto(recommendationEntity);
     }
 
-    @DisplayName("Позитивный тест с валидными входными данными метода getAllGivenRecommendations")
+    @DisplayName("Проверка успешного получения всех созданных рекомендаций")
     @Test
     void getAllCreatedRecommendationTest() {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);

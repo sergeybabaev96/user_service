@@ -27,7 +27,6 @@ import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 public class SkillOfferServiceTest {
-
     @Mock
     private SkillOfferRepository skillOfferRepository;
     @Mock
@@ -40,13 +39,13 @@ public class SkillOfferServiceTest {
 
     private RecommendationCreateDto recommendationCreateDto;
     private SkillOfferCreateDto skillOfferCreateDto;
-    Skill skill;
-    User author;
-    User receiver;
-    long skillId;
-    Long recommendationCreateDtoId;
-    UserSkillGuarantee guarantee;
-    List<UserSkillGuarantee> skillGuarantees;
+    private Skill skill;
+    private User author;
+    private User receiver;
+    private long skillId;
+    private Long recommendationCreateDtoId;
+    private UserSkillGuarantee guarantee;
+    private List<UserSkillGuarantee> skillGuarantees;
 
     @BeforeEach
     public void setUp() {
@@ -76,7 +75,7 @@ public class SkillOfferServiceTest {
         recommendationCreateDtoId = 1L;
     }
 
-    @DisplayName("Позитивный тест метода saveSkillsOffer")
+    @DisplayName("Проверка успешного сохранения SkillOffer")
     @Test
     void saveSkillsOfferTest() {
         Mockito.when(userRepository.findById(author.getId()))
@@ -94,7 +93,7 @@ public class SkillOfferServiceTest {
                 .save(skill);
     }
 
-    @DisplayName("Негативный тест на null skillOffer")
+    @DisplayName("Проверка получения ошибки при отсутствии SkillOffers")
     @Test
     void saveSkillsOfferWhenSkillOffersIsNullTest() {
         recommendationCreateDto.setSkillOffers(null);
@@ -105,7 +104,7 @@ public class SkillOfferServiceTest {
         Assertions.assertEquals("skillOffers is not found", exception.getMessage());
     }
 
-    @DisplayName("Негативный тест на Empty skillOffer")
+    @DisplayName("Проверка получения ошибки при пустом списке SkillOffers")
     @Test
     void saveSkillsOfferWhenSkillOffersIsEmptyTest() {
         recommendationCreateDto.setSkillOffers(Collections.emptyList());
@@ -116,7 +115,7 @@ public class SkillOfferServiceTest {
         Assertions.assertEquals("skillOffers is Empty", exception.getMessage());
     }
 
-    @DisplayName("Негативный тест на отсутствие пользователя")
+    @DisplayName("Проверка получения ошибки при отсутствии пользователя")
     @Test
     void saveSkillsOfferWhenUserNotFoundTest() {
         Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
@@ -125,7 +124,7 @@ public class SkillOfferServiceTest {
             skillOfferService.saveSkillsOffer(recommendationCreateDto, recommendationCreateDtoId));
     }
 
-    @DisplayName("Негативный тест на отсутствие skill")
+    @DisplayName("Проверка получения ошибки при отсутствии Skill")
     @Test
     void saveSkillsOfferWhenSkillNotFoundTest() {
         Mockito.when(userRepository.findById(author.getId()))
@@ -141,7 +140,7 @@ public class SkillOfferServiceTest {
         Assertions.assertEquals("Skill not found", exception.getMessage());
     }
 
-    @DisplayName("Тест с наличием автора в гарантах")
+    @DisplayName("Проверка, что автор не добавляется как гарант, если уже является им")
     @Test
     void saveSkillsOfferWhenGuarantorIsNotAddedTest() {
         Mockito.when(userRepository.findById(author.getId()))
