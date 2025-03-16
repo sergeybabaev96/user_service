@@ -9,7 +9,7 @@ import school.faang.user_service.entity.User;
 
 @Mapper(componentModel = "spring")
 public interface EducationMapper {
-    @Mapping(target = "user", ignore = true)
+
     Education toEducation(EducationDto educationDto);
 
     EducationDto toEducationDto(Education education);
@@ -17,7 +17,6 @@ public interface EducationMapper {
     @Mapping(target = "user", ignore = true)
     void updateEducationFromDto(EducationDto dto, @MappingTarget Education entity);
 
-    @Mapping(target = "id", source = "educationDto.id")
-    @Mapping(target = "user", source = "user")
+    @Mapping(source = "educationDto.id", target = "id") // Добавляем аннотацию
     Education toEducationWithUser(EducationDto educationDto, User user);
 }
