@@ -22,18 +22,9 @@ import static org.mockito.Mockito.when;
 public class GoalControllerTest {
 
     private final Long userId = 1L;
-    private final Long goalId = 1L;
-    private final GoalDto firstGoalDto = GoalDto.builder()
-            .id(goalId)
-            .title("title")
-            .status(GoalStatus.ACTIVE)
-            .build();
-    private final GoalDto secondGoalDto = GoalDto.builder()
-            .id(2L)
-            .title("   ")
-            .status(GoalStatus.COMPLETED)
-            .build();
-    private final List<GoalDto> expectedGoals = List.of(firstGoalDto);
+    private final Long firstGoalId = 1L;
+    private final Long secondGoalId = 2L;
+    private final List<GoalDto> expectedGoals = List.of(createGoal(firstGoalId, "title", GoalStatus.ACTIVE));
     private final SearchGoalDto searchGoalDto = new SearchGoalDto("title", GoalStatus.ACTIVE);
 
     @InjectMocks
@@ -44,42 +35,46 @@ public class GoalControllerTest {
 
     @Test
     public void testNegativeCreateGoalWhenBlankTitle() {
-        assertThrows(IllegalArgumentException.class, () -> goalController.createGoal(userId, secondGoalDto));
+        GoalDto goalDto = createGoal(secondGoalId, "   ", GoalStatus.COMPLETED);
+        assertThrows(IllegalArgumentException.class, () -> goalController.createGoal(userId, goalDto));
     }
 
     @Test()
     public void testPositiveCreateGoal() {
-        goalController.createGoal(userId, firstGoalDto);
+        GoalDto goalDto = createGoal(firstGoalId, "title", GoalStatus.ACTIVE);
+        goalController.createGoal(userId, goalDto);
 
-        verify(goalService, times(1)).createGoal(userId, firstGoalDto);
+        verify(goalService, times(1)).createGoal(userId, goalDto);
     }
 
     @Test()
     public void testPositiveDeleteGoal() {
-        goalController.deleteGoal(goalId);
+        goalController.deleteGoal(firstGoalId);
 
-        verify(goalService, times(1)).deleteGoal(goalId);
+        verify(goalService, times(1)).deleteGoal(firstGoalId);
     }
 
     @Test
     public void testNegativeUpdateGoalWhenBlankTitle() {
-        assertThrows(IllegalArgumentException.class, () -> goalController.updateGoal(goalId, secondGoalDto));
+        GoalDto goalDto = createGoal(secondGoalId, "   ", GoalStatus.COMPLETED);
+        assertThrows(IllegalArgumentException.class, () -> goalController.updateGoal(firstGoalId, goalDto));
     }
 
     @Test()
     public void testPositiveUpdateGoal() {
-        goalController.updateGoal(goalId, firstGoalDto);
+        GoalDto goalDto = createGoal(firstGoalId, "title", GoalStatus.ACTIVE);
+        goalController.updateGoal(firstGoalId, goalDto);
 
-        verify(goalService, times(1)).updateGoal(goalId, firstGoalDto);
+        verify(goalService, times(1)).updateGoal(firstGoalId, goalDto);
     }
 
     @Test()
     public void testPositiveFindSubtasksByGoalId() {
-        when(goalService.findSubtasksByGoalId(goalId, searchGoalDto)).thenReturn(expectedGoals);
+        when(goalService.findSubtasksByGoalId(firstGoalId, searchGoalDto)).thenReturn(expectedGoals);
 
-        List<GoalDto> actualGoals = goalController.findSubtasksByGoalId(goalId, searchGoalDto);
+        List<GoalDto> actualGoals = goalController.findSubtasksByGoalId(firstGoalId, searchGoalDto);
 
-        verify(goalService, times(1)).findSubtasksByGoalId(goalId, searchGoalDto);
+        verify(goalService, times(1)).findSubtasksByGoalId(firstGoalId, searchGoalDto);
         assertEqualsLists(expectedGoals, actualGoals);
     }
 
@@ -96,5 +91,13 @@ public class GoalControllerTest {
     private void assertEqualsLists(List<GoalDto> expectedGoals, List<GoalDto> actualGoals) {
         assertEquals(1, actualGoals.size());
         assertEquals(expectedGoals, actualGoals);
+    }
+
+    private GoalDto createGoal(Long id, String title, GoalStatus status) {
+        return GoalDto.builder()
+                .id(id)
+                .title(title)
+                .status(status)
+                .build();
     }
 }

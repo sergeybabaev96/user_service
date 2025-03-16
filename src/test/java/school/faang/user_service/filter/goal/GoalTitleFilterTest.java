@@ -19,20 +19,6 @@ public class GoalTitleFilterTest {
     private final GoalTitleFilter filter = new GoalTitleFilter();
     private final String firstTitle = "title";
     private final String secondTitle = "another title";
-    private final String thirdTitle = "tiTlE";
-    private final String fourthTitle = "Title";
-    private final Goal firstGoal = Goal.builder()
-            .title(firstTitle)
-            .build();
-    private final Goal secondGoal = Goal.builder()
-            .title(secondTitle)
-            .build();
-    private final Goal thirdGoal = Goal.builder()
-            .title(thirdTitle)
-            .build();
-    private final Goal fourthGoal = Goal.builder()
-            .title(fourthTitle)
-            .build();
 
     @Test
     public void testPositiveApplicable() {
@@ -64,7 +50,7 @@ public class GoalTitleFilterTest {
 
     @Test
     public void testPositiveApplyTitleExists() {
-        Stream<Goal> goals = Stream.of(firstGoal, secondGoal);
+        Stream<Goal> goals = Stream.of(createGoal(firstTitle), createGoal(secondTitle));
 
         List<Goal> filteredGoals = filter.apply(goals, new SearchGoalDto(firstTitle, null)).toList();
 
@@ -74,7 +60,7 @@ public class GoalTitleFilterTest {
 
     @Test
     public void testPositiveApplyTitleDoesntExist() {
-        Stream<Goal> goals = Stream.of(firstGoal, secondGoal);
+        Stream<Goal> goals = Stream.of(createGoal(firstTitle), createGoal(secondTitle));
 
         List<Goal> filteredGoals = filter.apply(goals, new SearchGoalDto("name", null)).toList();
 
@@ -83,7 +69,9 @@ public class GoalTitleFilterTest {
 
     @Test
     public void testPositiveApplyIgnoreCase() {
-        Stream<Goal> goals = Stream.of(firstGoal, thirdGoal, fourthGoal);
+        String thirdTitle = "tiTlE";
+        String fourthTitle = "Title";
+        Stream<Goal> goals = Stream.of(createGoal(firstTitle), createGoal(thirdTitle), createGoal(fourthTitle));
 
         List<Goal> filteredGoals = filter.apply(goals, new SearchGoalDto(firstTitle, null)).toList();
 
@@ -91,5 +79,11 @@ public class GoalTitleFilterTest {
         assertEquals(firstTitle.toLowerCase(), filteredGoals.get(0).getTitle().toLowerCase());
         assertEquals(thirdTitle.toLowerCase(), filteredGoals.get(1).getTitle().toLowerCase());
         assertEquals(fourthTitle.toLowerCase(), filteredGoals.get(2).getTitle().toLowerCase());
+    }
+
+    private Goal createGoal(String title) {
+        return Goal.builder()
+                .title(title)
+                .build();
     }
 }

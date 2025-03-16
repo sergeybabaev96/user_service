@@ -18,15 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class GoalStatusFilterTest {
 
     private final GoalStatusFilter filter = new GoalStatusFilter();
-    private final Goal firstGoal = Goal.builder()
-            .status(GoalStatus.ACTIVE)
-            .build();
-    private final Goal secondGoal = Goal.builder()
-            .status(GoalStatus.COMPLETED)
-            .build();
-    private final Goal thirdGoal = Goal.builder()
-            .status(GoalStatus.ACTIVE)
-            .build();
 
     @Test
     public void testPositiveApplicable() {
@@ -44,7 +35,8 @@ public class GoalStatusFilterTest {
 
     @Test
     public void testPositiveApplyActiveStatus() {
-        Stream<Goal> goals = Stream.of(firstGoal, secondGoal, thirdGoal);
+        Stream<Goal> goals = Stream.of(
+                createGoal(GoalStatus.ACTIVE), createGoal(GoalStatus.COMPLETED), createGoal(GoalStatus.ACTIVE));
 
         List<Goal> filteredGoals = filter.apply(goals, new SearchGoalDto(null, GoalStatus.ACTIVE)).toList();
 
@@ -53,7 +45,8 @@ public class GoalStatusFilterTest {
 
     @Test
     public void testPositiveApplyCompletedStatus() {
-        Stream<Goal> goals = Stream.of(firstGoal, secondGoal, thirdGoal);
+        Stream<Goal> goals = Stream.of(
+                createGoal(GoalStatus.ACTIVE), createGoal(GoalStatus.COMPLETED), createGoal(GoalStatus.ACTIVE));
 
         List<Goal> filteredGoals = filter.apply(goals, new SearchGoalDto(null, GoalStatus.COMPLETED)).toList();
 
@@ -62,10 +55,16 @@ public class GoalStatusFilterTest {
 
     @Test
     public void testPositiveApplyNotFoundStatus() {
-        Stream<Goal> goals = Stream.of(firstGoal, thirdGoal);
+        Stream<Goal> goals = Stream.of(createGoal(GoalStatus.ACTIVE), createGoal(GoalStatus.ACTIVE));
 
         List<Goal> filteredGoals = filter.apply(goals, new SearchGoalDto(null, GoalStatus.COMPLETED)).toList();
 
         assertEquals(0, filteredGoals.size());
+    }
+
+    private Goal createGoal(GoalStatus status) {
+        return Goal.builder()
+                .status(status)
+                .build();
     }
 }
