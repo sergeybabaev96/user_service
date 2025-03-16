@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import school.faang.user_service.entity.recommendation.SkillRequest;
 
+import java.util.List;
+
 public interface SkillRequestRepository extends CrudRepository<SkillRequest, Long> {
 
     @Query(nativeQuery = true, value = """
@@ -13,4 +15,8 @@ public interface SkillRequestRepository extends CrudRepository<SkillRequest, Lon
             """)
     @Modifying
     SkillRequest create(long requestId, long skillId);
+
+
+    List<SkillRequest> findBySkillIdIn(List<Long> skillIds);
+
 }
