@@ -2,7 +2,7 @@ package school.faang.user_service.validator;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import school.faang.user_service.exceptions.DataValidationException;
+import school.faang.user_service.exception.DataValidationException;
 
 import java.time.LocalDate;
 
