@@ -40,8 +40,8 @@ public class EventController {
         return eventService.updateEvent(eventDto);
     }
 
-    public List<EventDto> getPaticipatedEvents(Long userId) {
-        return eventService.getPaticipatedEvents(userId);
+    public List<EventDto> getParticipatedEvents(Long userId) {
+        return eventService.getParticipatedEvents(userId);
     }
 
     private void validateEvent(EventDto event) {
