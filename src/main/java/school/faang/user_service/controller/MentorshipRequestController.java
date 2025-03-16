@@ -5,9 +5,9 @@ import static school.faang.user_service.constants.InfoMessages.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import school.faang.user_service.dto.MentorshipRequestDto;
-import school.faang.user_service.dto.RequestFilterDto;
-import school.faang.user_service.dto.RejectionDto;
+import school.faang.user_service.dto.mentor.MentorshipRequestDto;
+import school.faang.user_service.dto.mentor.RequestFilterDto;
+import school.faang.user_service.dto.mentor.RejectionDto;
 import school.faang.user_service.service.MentorshipRequestService;
 
 import java.util.List;
