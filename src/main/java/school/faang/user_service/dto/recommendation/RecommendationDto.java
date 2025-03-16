@@ -1,0 +1,28 @@
+package school.faang.user_service.dto.recommendation;
+
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.jetbrains.annotations.Nullable;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Getter
+@Setter
+@RequiredArgsConstructor
+public class RecommendationDto {
+    @Nullable
+    private Long id;
+    @NonNull
+    private Long authorId;
+    @NonNull
+    private Long receiverId;
+    @NonNull
+    private String content;
+    @Nullable
+    private List<SkillOfferDto> skillOffers;
+    @Nullable
+    private LocalDateTime createdAt;
+}
