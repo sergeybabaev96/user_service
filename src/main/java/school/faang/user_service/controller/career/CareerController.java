@@ -1,24 +1,34 @@
 package school.faang.user_service.controller.career;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.CareerDto;
 import school.faang.user_service.service.career.CareerService;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/career")
 public class CareerController {
     public final CareerService careerService;
 
-    public CareerDto addCareer(long userId, CareerDto careerDto) {
+    @PostMapping("/{userId}")
+    public CareerDto addCareer(@PathVariable long userId, @RequestBody CareerDto careerDto) {
         return careerService.addCareer(userId, careerDto);
     }
 
-    public CareerDto updateCareer(long userId, CareerDto careerDto) {
+    @PutMapping("/userId")
+    public CareerDto updateCareer(@PathVariable long userId, @RequestBody CareerDto careerDto) {
         return careerService.updateCareer(userId, careerDto);
     }
 
-    public CareerDto getById(long carrerId) {
+    @GetMapping("/carrerId")
+    public CareerDto getById(@PathVariable long carrerId) {
         return careerService.getById(carrerId);
     }
 }
