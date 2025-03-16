@@ -16,7 +16,7 @@ public class EventOwner {
     public User getOwner(Long id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
-            throw new DataValidationException("User not found");
+            throw new DataValidationException("User with id = %d not found".formatted(id));
         }
         return user.get();
     }

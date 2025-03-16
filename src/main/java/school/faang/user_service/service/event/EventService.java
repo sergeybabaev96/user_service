@@ -24,23 +24,19 @@ public class EventService {
     private final List<EventFilter> eventFilters;
 
     public EventDto create(EventDto eventDto) {
-        if (!eventSkill.checkSkillsToUser(eventDto)) {
-            throw new DataValidationException("The creator does not have enough skills");
-        }
-        Event event = eventMapper.eventDtoToEvent(eventDto);
+        eventSkill.checkSkillsToUser(eventDto);
+        Event event = eventMapper.toEventDto(eventDto);
         event.setOwner(eventOwner.getOwner(eventDto.getOwnerId()));
         event.setRelatedSkills(eventSkill.getSkills(eventDto.getRelatedSkills()));
         Event savedEvent = eventRepository.save(event);
 
-        return eventMapper.eventToEventDto(savedEvent);
+        return eventMapper.toEntity(savedEvent);
     }
 
     public EventDto getEvent(Long eventId) {
-        Event event = eventRepository.findById(eventId).orElse(null);
-        if (event == null) {
-            throw new DataValidationException("The event does not exist");
-        }
-        return eventMapper.eventToEventDto(event);
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new DataValidationException("Event with id = %d does not exist".formatted(eventId)));
+        return eventMapper.toEntity(event);
     }
 
     public List<EventDto> getEventsByFilter(EventFilterDto eventFilterDto) {
@@ -50,7 +46,7 @@ public class EventService {
                 allEvents = eventFilter.apply(eventFilterDto, allEvents);
             }
         }
-        return allEvents.map(eventMapper::eventToEventDto).toList();
+        return allEvents.map(eventMapper::toEntity).toList();
     }
 
     public void deleteEvent(Long eventId) {
@@ -58,15 +54,13 @@ public class EventService {
     }
 
     public EventDto updateEvent(EventDto eventDto) {
-        if (!eventSkill.checkSkillsToUser(eventDto)) {
-            throw new DataValidationException("The creator does not have enough skills");
-        }
-        Event updatedEvent = eventRepository.save(eventMapper.eventDtoToEvent(eventDto));
-        return eventMapper.eventToEventDto(updatedEvent);
+        eventSkill.checkSkillsToUser(eventDto);
+        Event updatedEvent = eventRepository.save(eventMapper.toEventDto(eventDto));
+        return eventMapper.toEntity(updatedEvent);
     }
 
-    public List<EventDto> getPaticipatedEvents(Long userId) {
-        List<Event> paticipatedEvents = eventRepository.findParticipatedEventsByUserId(userId);
-        return paticipatedEvents.stream().map(eventMapper::eventToEventDto).toList();
+    public List<EventDto> getParticipatedEvents(Long userId) {
+        List<Event> participatedEvents = eventRepository.findParticipatedEventsByUserId(userId);
+        return participatedEvents.stream().map(eventMapper::toEntity).toList();
     }
 }
