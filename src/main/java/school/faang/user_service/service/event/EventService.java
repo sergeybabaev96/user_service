@@ -17,7 +17,6 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Сервис для управления событиями.
@@ -83,7 +82,8 @@ public class EventService {
 
         var events = eventRepository.findAll().stream();
 
-        for (EventFilter eventFilter : eventFilters) {
+        for (int i = 0; i < eventFilters.size(); i++) {
+            var eventFilter = eventFilters.get(i);
             if (eventFilter.isApplicable(eventFilterDto)) {
                 events = eventFilter.apply(events, eventFilterDto);
             }
@@ -101,7 +101,7 @@ public class EventService {
      * @throws DataValidationException если событие не найдено.
      */
     public void deleteEvent(long eventId) {
-        if (eventRepository.existsById(eventId)) {
+        if (!eventRepository.existsById(eventId)) {
             log.error("Event not found with ID: {}", eventId);
             throw new DataValidationException("Event not found with ID: " + eventId);
         }
@@ -203,14 +203,15 @@ public class EventService {
     /**
      * Проверяет, обладает ли пользователь необходимыми навыками для создания события.
      *
-     * @param eventDto DTO события.
+     * @param eventDto Объект {@link EventCreateDto}, содержащий информацию о создаваемом событии.
      * @throws DataValidationException если пользователь не обладает необходимыми навыками.
      */
     private void validateUserSkills(EventCreateDto eventDto) {
         List<Long> relatedSkillsIds = eventDto.getRelatedSkillsId();
 
         if (relatedSkillsIds == null || relatedSkillsIds.isEmpty()) {
-            return;
+            log.error("User does not possess required skills for event: {}", eventDto);
+            throw new DataValidationException("User does not possess required skills.");
         }
 
         User user = userRepository.findById(eventDto.getOwnerId())
