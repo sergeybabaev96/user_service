@@ -50,15 +50,15 @@ class CareerServiceTest {
         careerDto.setId(1L);
         careerDto.setFrom(LocalDate.of(2020, 1, 1));
         careerDto.setTo(LocalDate.of(2023, 1, 1));
-        careerDto.setCompany("Tech Corp");
-        careerDto.setPosition("Software Engineer");
+        careerDto.setCompany("Супер корпорация");
+        careerDto.setPosition("Инженер программист");
 
         career = new Career();
         career.setId(1L);
         career.setDateFrom(LocalDate.of(2020, 1, 1));
         career.setDateTo(LocalDate.of(2023, 1, 1));
-        career.setCompany("Tech Corp");
-        career.setPosition("Software Engineer");
+        career.setCompany("Супер корпорация");
+        career.setPosition("Инженер программист");
         career.setUser(user);
     }
 
@@ -72,7 +72,7 @@ class CareerServiceTest {
         CareerDto result = careerService.addCareer(1L, careerDto);
 
         assertNotNull(result);
-        assertEquals("Tech Corp", result.getCompany());
+        assertEquals("Супер корпорация", result.getCompany());
         verify(careerRepository).save(any(Career.class));
     }
 
@@ -92,7 +92,7 @@ class CareerServiceTest {
         CareerDto result = careerService.updateCareer(1L, careerDto);
 
         assertNotNull(result);
-        assertEquals("Tech Corp", result.getCompany());
+        assertEquals("Супер корпорация", result.getCompany());
         verify(careerRepository).save(any(Career.class));
     }
 
