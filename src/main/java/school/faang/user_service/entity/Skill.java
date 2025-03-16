@@ -77,6 +77,6 @@ public class Skill {
         guarantee.setUser(receiver);
         guarantee.setGuarantor(author);
         guarantees.add(guarantee);
-        guarantee.setSkill(this); // Устанавливаем обратную связь, если она есть
+        guarantee.setSkill(this);
     }
 }
