@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.mapper.UserMapper;
-import school.faang.user_service.service.user.UserService;
+import school.faang.user_service.service.UserService;
+
 
 import java.util.List;
 
@@ -24,5 +25,10 @@ public class UserController {
     @GetMapping(USER_ID_PATH)
     public UserDto getUser(@PathVariable long userId) {
         return userMapper.toDto(userService.getUserById(userId));
+    }
+
+    @PutMapping(USER_ID_PATH)
+    public void deactivateUser(@PathVariable Long userId) {
+        userService.deactivateUser(userId);
     }
 }

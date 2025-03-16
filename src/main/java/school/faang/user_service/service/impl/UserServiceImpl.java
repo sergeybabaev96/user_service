@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.adapter.user.UserRepositoryAdapter;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.goal.Goal;
@@ -21,6 +22,7 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     private EventRepository eventRepository;
     private GoalRepository goalRepository;
+    private final UserRepositoryAdapter userRepositoryAdapter;
 
     @Override
     @Transactional
@@ -57,5 +59,14 @@ public class UserServiceImpl implements UserService {
 
         List<Goal> mentoredGoals = goalRepository.findAllByMentorId(user.getId());
         mentoredGoals.forEach(goal -> goal.setMentor(null));
+    }
+    @Override
+    public User getUserById(long userId) {
+        return userRepositoryAdapter.getUserById(userId);
+    }
+
+    @Override
+    public List<User> getUsersByIds(List<Long> ids) {
+        return userRepository.findAllById(ids);
     }
 }
