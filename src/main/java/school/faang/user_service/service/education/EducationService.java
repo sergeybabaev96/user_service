@@ -10,7 +10,7 @@ import school.faang.user_service.mapper.EducationMapper;
 import school.faang.user_service.repository.EducationRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.exceptions.DataValidationException;
-import school.faang.user_service.validation.UserServiceValidation;
+import school.faang.user_service.validator.UserServiceValidation;
 
 @Service
 @RequiredArgsConstructor
