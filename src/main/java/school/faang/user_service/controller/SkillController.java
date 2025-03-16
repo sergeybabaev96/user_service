@@ -32,7 +32,8 @@ public class SkillController {
     }
 
     private void validateSkill(SkillDto skill) {
+        if (skill == null || skill.getTitle().isBlank()) {
+            throw new DataValidationException("Title doesn't allow be empty");}
 
-        throw new DataValidationException("Title doesn't allow be empty");
     }
 }
