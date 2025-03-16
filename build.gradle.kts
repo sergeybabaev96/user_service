@@ -122,14 +122,6 @@ tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
             element = "CLASS"
-            // Classes to test
-            // Example:
-            // includes = listOf(
-            //    "school.faang.user_service.RecommendationRequestService",
-            //    "school.faang.user_service.SkillRequestService",
-            //    "school.faang.user_service.SkillService",
-            //    "school.faang.user_service.exception.*",
-            //    )
             includes = listOf(
                 "school.faang.user_service.RecommendationRequestService",
                 "school.faang.user_service.SkillRequestService",
