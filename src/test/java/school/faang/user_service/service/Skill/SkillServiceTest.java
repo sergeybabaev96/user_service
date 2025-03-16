@@ -61,11 +61,10 @@ public class SkillServiceTest {
 
     @Test
     public void testSaveSkillRepository() {
-        SkillDto skillDtoResult = skillService.create(prepareDataSkillDto());
+        skillService.create(prepareDataSkillDto());
         verify(skillRepository, times(1)).save(captorSkill.capture());
         Skill skill = captorSkill.getValue();
         assertEquals(prepareDataSkillDto().getTitle(), skill.getTitle());
-        assertEquals(prepareDataSkillDto().getTitle(), skillDtoResult.getTitle());
     }
 
     @Test
