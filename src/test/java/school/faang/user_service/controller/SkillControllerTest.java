@@ -2,19 +2,13 @@ package school.faang.user_service.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import jakarta.persistence.EntityNotFoundException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
@@ -35,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(SkillController.class)
-@Import({SkillControllerTest.TestExceptionHandler.class})
 class SkillControllerTest {
     @Autowired
     MockMvc mockMvc;
@@ -151,13 +144,5 @@ class SkillControllerTest {
         secondSkillCandidateDto.setSkill(firstSkillDto);
         secondSkillCandidateDto.setOffersAmount(1L);
         return List.of(firstSkillCandidateDto, secondSkillCandidateDto);
-    }
-
-    @ControllerAdvice
-    static class TestExceptionHandler {
-        @ExceptionHandler(EntityNotFoundException.class)
-        @ResponseStatus(HttpStatus.NOT_FOUND)
-        public void handleEntityNotFoundException(EntityNotFoundException ex) {
-        }
     }
 }
