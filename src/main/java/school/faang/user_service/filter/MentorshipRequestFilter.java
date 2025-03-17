@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 public interface MentorshipRequestFilter {
     boolean isApplyable(RequestFilterDto requestFilterDto);
+
     Stream<MentorshipRequest> filter(Stream<MentorshipRequest> requests,
                                      RequestFilterDto filter);
 }
