@@ -2,7 +2,12 @@ package school.faang.user_service.controller.goal;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.GoalCreateDto;
 import school.faang.user_service.dto.GoalFilterDto;
 import school.faang.user_service.dto.GoalViewDto;
@@ -10,33 +15,38 @@ import school.faang.user_service.service.goal.GoalService;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @Slf4j
 public class GoalController {
     private final GoalService goalService;
 
-    public GoalViewDto createGoal(Long userId, GoalCreateDto goal) {
+    @PostMapping("/{userId}/goal")
+    public GoalViewDto createGoal(@PathVariable Long userId, @RequestBody GoalCreateDto goal) {
         log.info("Cоздание цели для пользователя {}", userId);
         return goalService.createGoal(userId, goal);
     }
 
-    public GoalViewDto updateGoal(Long goalId, GoalCreateDto goal) {
+    @PutMapping("/goal/{goalId}")
+    public GoalViewDto updateGoal(@PathVariable Long goalId, @RequestBody GoalCreateDto goal) {
         log.info("Обновление цели{}", goalId);
         return goalService.updateGoal(goalId, goal);
     }
 
-    public void deleteGoal(Long goalId) {
+    @DeleteMapping("/goal/{goalId}")
+    public void deleteGoal(@PathVariable Long goalId) {
         log.info("Удаление цели{}", goalId);
         goalService.deleteGoal(goalId);
     }
 
-    public List<GoalViewDto> findSubtasksByGoalId(Long goalId, GoalFilterDto filter) {
+    @PostMapping("/{goalId}/subGoals")
+    public List<GoalViewDto> findSubtasksByGoalId(@PathVariable Long goalId, @RequestBody GoalFilterDto filter) {
         log.info("Поиск отфильтрованных подзадач по задаче {}", goalId);
         return goalService.findSubtasksByGoalId(goalId, filter);
     }
 
-    public List<GoalViewDto> getGoalsByUser(Long userId, GoalFilterDto filter) {
+    @PostMapping("/{userId}/goals")
+    public List<GoalViewDto> getGoalsByUser(@PathVariable Long userId, @RequestBody GoalFilterDto filter) {
         log.info("Поиск задач пользователя по фильтру {}", userId);
         return goalService.getGoalsByUser(userId, filter);
     }

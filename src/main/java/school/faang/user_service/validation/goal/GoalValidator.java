@@ -40,7 +40,7 @@ public class GoalValidator {
     }
 
     private void validateMaxActiveGoals(Long userId) {
-        if (goalRepository.countActiveGoalsPerUser(userId) >= MAX_GOALS) {
+        if (goalRepository.countActiveGoalsPerUser(userId) > MAX_GOALS) {
             log.error("Ошибка валидации: количество активных целей не может быть больше 3");
             throw new DataValidationException("Превышено максимальное количество целей: " + MAX_GOALS);
         }
@@ -48,7 +48,7 @@ public class GoalValidator {
 
     private void validateSkillsExist(GoalCreateDto goal) {
         List<Long> skillsId = goal.getSkillsToAchieveId();
-        if (skillRepository.countExisting(skillsId) != skillsId.size()) {
+        if (null != skillsId && skillRepository.countExisting(skillsId) != skillsId.size()) {
             log.error("Ошибка валидации: цель содержит несуществующие навыки");
             throw new DataValidationException("Цель содержит несуществующие навыки");
         }
