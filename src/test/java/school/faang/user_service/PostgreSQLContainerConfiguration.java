@@ -3,34 +3,56 @@ package school.faang.user_service;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.sql.DataSource;
 
-@TestConfiguration
+@Testcontainers
 public class PostgreSQLContainerConfiguration {
 
-    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
+    protected static final PostgreSQLContainer<?> POSTGRES_CONTAINER =
+            new PostgreSQLContainer<>("postgres:15-alpine")
             .withDatabaseName("test")
             .withUsername("user")
             .withPassword("password");
 
     static {
-        postgres.start();
+        POSTGRES_CONTAINER.start();
+        System.out.println("✅ Запуска POSTGRES");
+        printInto(POSTGRES_CONTAINER);
     }
 
-    @Bean
-    public DataSource dataSource() {
-        HikariDataSource dataSource = new HikariDataSource();
-        dataSource.setJdbcUrl(postgres.getJdbcUrl());
-        dataSource.setUsername(postgres.getUsername());
-        dataSource.setPassword(postgres.getPassword());
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        System.out.println("✅ spring.datasource.url: " + POSTGRES_CONTAINER.getJdbcUrl());
+        System.out.println("✅ spring.datasource.username: " + POSTGRES_CONTAINER.getUsername());
+        System.out.println("✅ spring.datasource.password: " + POSTGRES_CONTAINER.getPassword());
 
-        printInto(postgres);
-        return dataSource;
+        registry.add("spring.datasource.url", POSTGRES_CONTAINER::getJdbcUrl);
+        registry.add("spring.datasource.username", POSTGRES_CONTAINER::getUsername);
+        registry.add("spring.datasource.password", POSTGRES_CONTAINER::getPassword);
+
+//        System.setProperty("spring.datasource.url", POSTGRES_CONTAINER.getJdbcUrl());
+//        System.setProperty("spring.datasource.username", POSTGRES_CONTAINER.getUsername());
+//        System.setProperty("spring.datasource.password", POSTGRES_CONTAINER.getPassword());
+
     }
 
-    private void printInto(PostgreSQLContainer<?> postgres) {
+//    @Bean
+//    public DataSource dataSource() {
+//        HikariDataSource dataSource = new HikariDataSource();
+//        dataSource.setJdbcUrl(POSTGRES_CONTAINER.getJdbcUrl());
+//        dataSource.setUsername(POSTGRES_CONTAINER.getUsername());
+//        dataSource.setPassword(POSTGRES_CONTAINER.getPassword());
+//
+//        printInto(POSTGRES_CONTAINER);
+//        return dataSource;
+//    }
+
+    private static void printInto(PostgreSQLContainer<?> postgres) {
         int mappedPort = postgres.getMappedPort(5432);
         String host = postgres.getHost();
         String jdbcUrl = String.format("jdbc:postgresql://%s:%d/%s", host, mappedPort, postgres.getDatabaseName());
@@ -47,5 +69,4 @@ public class PostgreSQLContainerConfiguration {
         System.out.format("getJdbcUrl(): %s%n", postgres.getJdbcUrl());
         System.out.println("-------------------------------------");
     }
-
 }
