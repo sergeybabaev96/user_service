@@ -86,6 +86,10 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+tasks.build {
+    dependsOn(tasks.test)
+}
+
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
 
 tasks.bootJar {
