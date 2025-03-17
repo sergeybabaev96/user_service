@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 @Data
 public class SkillService {
 
-    public static final int MIN_SKILL_OFFERS = 3;
     private final SkillRepository skillRepository;
     private final SkillMapper skillMapper;
     private final SkillOfferService skillOfferService;
