@@ -1,15 +1,21 @@
 package school.faang.user_service.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import jakarta.persistence.EntityNotFoundException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.dto.skill.SkillCandidateDto;
@@ -19,95 +25,118 @@ import school.faang.user_service.service.implementation.SkillServiceImpl;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(SkillController.class)
+@Import({SkillControllerTest.TestExceptionHandler.class})
 class SkillControllerTest {
-    @InjectMocks
-    private SkillController skillController;
-    @Mock
+    @Autowired
+    MockMvc mockMvc;
+    @MockBean
     private SkillServiceImpl skillService;
+    @MockBean
+    private UserContext userContext;
 
     @Test
-    void testCreate() {
+    void testCreate() throws Exception {
         SkillDto skillDto = new SkillDto();
         skillDto.setId(1L);
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-        ArgumentCaptor<SkillDto> skillDtoCaptor = ArgumentCaptor.forClass(SkillDto.class);
+        skillDto.setTitle("Title1");
+        ObjectMapper om = new ObjectMapper();
+        ObjectWriter ow = om.writer();
+        String request = ow.writeValueAsString(skillDto);
         when(skillService.create(skillDto)).thenReturn(skillDto);
 
-        SkillDto actualSkillDto = skillController.create(skillDto);
+        mockMvc.perform(post("/skill/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isCreated())
+                .andExpect(dto -> assertNotNull(skillDto))
+                .andExpect(id -> assertEquals(skillDto.getId(), 1L))
+                .andExpect(title -> assertEquals(skillDto.getTitle(), "Title1"))
+                .andReturn();
 
-        verify(skillService, times(1)).create(skillDtoCaptor.capture());
-        SkillDto skillDtoValue = skillDtoCaptor.getValue();
-        assertEquals(skillDto, skillDtoValue);
-        assertEquals(skillDto.getId(), actualSkillDto.getId());
+        verify(skillService, times(1)).create(skillDto);
     }
 
     @Test
-    void testGetUserSkills() {
+    void testGetUserSkills() throws Exception {
         User user = new User();
-        user.setId(1L);
+        Long userId = 1L;
+        user.setId(userId);
         SkillDto firstSkillDto = new SkillDto();
         firstSkillDto.setId(1L);
+        firstSkillDto.setTitle("Title1");
         SkillDto secondSkillDto = new SkillDto();
         secondSkillDto.setId(2L);
+        secondSkillDto.setTitle("Title2");
         List<SkillDto> userSkills = List.of(firstSkillDto, secondSkillDto);
-        ArgumentCaptor<Long> userIdCaptor = ArgumentCaptor.forClass(Long.class);
         when(skillService.getUserSkills(user.getId())).thenReturn(userSkills);
 
-        List<SkillDto> actualUserSkills = skillController.getUserSkills(user.getId());
+        mockMvc.perform(get("/skill/user-skills/{userId}", userId).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(id -> assertNotNull(userId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].title").value("Title1"))
+                .andExpect(jsonPath("$[1].id").value(2L))
+                .andExpect(jsonPath("$[1].title").value("Title2"));
 
-        verify(skillService, times(1)).getUserSkills(userIdCaptor.capture());
-        Long userIdValue = userIdCaptor.getValue();
-        assertEquals(user.getId(), userIdValue);
-        assertEquals(userSkills.size(), actualUserSkills.size());
-        assertEquals(userSkills.get(0).getId(), actualUserSkills.get(0).getId());
-        assertEquals(userSkills.get(1).getId(), actualUserSkills.get(1).getId());
+        verify(skillService, times(1)).getUserSkills(user.getId());
     }
 
     @Test
-    void testGetOfferedSkills() {
+    void testGetOfferedSkills() throws Exception {
         User user = new User();
-        user.setId(1L);
+        Long userId = 1L;
+        user.setId(userId);
         List<SkillCandidateDto> skillCandidates = getSkillCandidatesDto();
-        ArgumentCaptor<Long> userIdCaptor = ArgumentCaptor.forClass(Long.class);
         when(skillService.getOfferedSkills(user.getId())).thenReturn(skillCandidates);
 
-        List<SkillCandidateDto> actualOfferedSkills = skillController.getOfferedSkills(user.getId());
+        mockMvc.perform(get("/skill/skills-offered/{userId}", userId))
+                .andExpect(id -> assertNotNull(userId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].skill").value(skillCandidates.get(0).getSkill()))
+                .andExpect(jsonPath("$[0].offersAmount").value(skillCandidates.get(0).getOffersAmount()))
+                .andExpect(jsonPath("$[1].skill").value(skillCandidates.get(1).getSkill()))
+                .andExpect(jsonPath("$[1].offersAmount").value(skillCandidates.get(1).getOffersAmount()));
 
-        verify(skillService, times(1)).getOfferedSkills(userIdCaptor.capture());
-        Long userIdValue = userIdCaptor.getValue();
-        assertEquals(user.getId(), userIdValue);
-        assertEquals(skillCandidates.size(), actualOfferedSkills.size());
-        assertEquals(skillCandidates.get(0).getSkill(), actualOfferedSkills.get(0).getSkill());
-        assertEquals(skillCandidates.get(1).getSkill(), actualOfferedSkills.get(1).getSkill());
+        verify(skillService, times(1)).getOfferedSkills(user.getId());
     }
 
     @Test
-    void testAcquireSkillFromOffers() {
+    void testAcquireSkillFromOffers() throws Exception {
         User user = new User();
-        user.setId(1L);
+        Long userId = 1L;
+        user.setId(userId);
         Skill skill = new Skill();
-        skill.setId(1L);
+        Long skillId = 1L;
+        skill.setId(skillId);
         SkillDto skillDto = new SkillDto();
         skillDto.setId(1L);
-        ArgumentCaptor<Long> skillIdCaptor = ArgumentCaptor.forClass(Long.class);
-        ArgumentCaptor<Long> userIdCaptor = ArgumentCaptor.forClass(Long.class);
+        skillDto.setTitle("Title");
         when(skillService.acquireSkillFromOffers(skill.getId(), user.getId())).thenReturn(skillDto);
 
-        SkillDto actualSkillDto = skillController.acquireSkillFromOffers(skill.getId(), user.getId());
+        mockMvc.perform(get("/skill/acquire/{skillId}/user/{userId}", skillId, userId))
+                .andExpect(id -> assertNotNull(skillId))
+                .andExpect(id -> assertNotNull(userId))
+                .andExpect(status().isOk())
+                .andExpect(dto -> assertNotNull(skillDto))
+                .andExpect(id -> assertEquals(skillDto.getId(), 1L))
+                .andExpect(title -> assertEquals(skillDto.getTitle(), "Title"))
+                .andReturn();
 
-        verify(skillService, times(1))
-                .acquireSkillFromOffers(skillIdCaptor.capture(), userIdCaptor.capture());
-        Long skillIdValue = skillIdCaptor.getValue();
-        Long userIdValue = userIdCaptor.getValue();
-        assertEquals(skill.getId(), skillIdValue);
-        assertEquals(user.getId(), userIdValue);
-        assertEquals(skillDto.getId(), actualSkillDto.getId());
+        verify(skillService, times(1)).acquireSkillFromOffers(skill.getId(), user.getId());
     }
 
     private static @NotNull List<SkillCandidateDto> getSkillCandidatesDto() {
@@ -117,8 +146,18 @@ class SkillControllerTest {
         secondSkillDto.setId(2L);
         SkillCandidateDto firstSkillCandidateDto = new SkillCandidateDto();
         firstSkillCandidateDto.setSkill(firstSkillDto);
+        firstSkillCandidateDto.setOffersAmount(1L);
         SkillCandidateDto secondSkillCandidateDto = new SkillCandidateDto();
         secondSkillCandidateDto.setSkill(firstSkillDto);
+        secondSkillCandidateDto.setOffersAmount(1L);
         return List.of(firstSkillCandidateDto, secondSkillCandidateDto);
+    }
+
+    @ControllerAdvice
+    static class TestExceptionHandler {
+        @ExceptionHandler(EntityNotFoundException.class)
+        @ResponseStatus(HttpStatus.NOT_FOUND)
+        public void handleEntityNotFoundException(EntityNotFoundException ex) {
+        }
     }
 }
