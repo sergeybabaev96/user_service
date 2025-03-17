@@ -13,7 +13,7 @@ import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.UserMapper;
-import school.faang.user_service.service.user.UserService;
+import school.faang.user_service.service.user.DeactivateUserService;
 
 @RestController
 @AllArgsConstructor
@@ -21,7 +21,7 @@ import school.faang.user_service.service.user.UserService;
 @Slf4j
 public class UserController {
 
-    private UserService userService;
+    private DeactivateUserService deactivateUserService;
     private UserMapper userMapper;
     private static final String NEGATIVE_ID = "userId is negative";
 
@@ -29,7 +29,7 @@ public class UserController {
     @ResponseBody
     public void deactivateUser(@RequestParam Long userId) {
         if (idIsValid(userId)) {
-            userService.deactivateUser(userId);
+            deactivateUserService.deactivateUser(userId);
         } else {
             log.error(NEGATIVE_ID);
             throw new DataValidationException(NEGATIVE_ID);
@@ -40,7 +40,7 @@ public class UserController {
     @ResponseBody
     public UserDto getUser(@PathVariable Long userId) {
         if(idIsValid(userId)) {
-            User user = userService.getUser(userId);
+            User user = deactivateUserService.getUser(userId);
             return userMapper.toDto(user);
         } else {
             log.error(NEGATIVE_ID);
