@@ -1,5 +1,6 @@
 package school.faang.user_service.service;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,12 +9,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
+import school.faang.user_service.dto.EducationViewDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.EducationMapper;
 import school.faang.user_service.repository.EducationRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.education.EducationService;
 
+import java.time.Year;
 import java.util.Optional;
 
 public class EducationServiceTest {
@@ -27,17 +31,26 @@ public class EducationServiceTest {
     @InjectMocks
     private EducationService educationService;
     private User user;
+    private User anotherUser;
 
     @BeforeEach
     void setUp() {
         user = new User();
         user.setId(1L);
+
+        anotherUser = new User();
+        anotherUser.setId(2L);
+        educationService = new EducationService(userRepository, educationRepository, educationMapper);
     }
 
     @DisplayName("Проверка получения ошибки при указании года начала обучения больше текущего")
     @Test
     void testAddEducationWithIncorrectYearFrom() {
+        EducationViewDto educationDto = new EducationViewDto();
+        educationDto.setYearFrom(Year.now().getValue() + 1);
+        long userId = 3L;
 
+        Assertions.assertThrows(DataValidationException.class, () -> educationService.addEducation(userId, educationDto));
     }
 
     @DisplayName("Проверка успешного прохождения валидации года начала обучения")
