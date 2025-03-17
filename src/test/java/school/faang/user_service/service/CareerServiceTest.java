@@ -4,6 +4,7 @@ package school.faang.user_service.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -48,15 +49,15 @@ class CareerServiceTest {
 
         careerDto = new CareerDto();
         careerDto.setId(1L);
-        careerDto.setFrom(LocalDate.of(2020, 1, 1));
-        careerDto.setTo(LocalDate.of(2023, 1, 1));
+        careerDto.setFrom(LocalDate.of(2025, 3, 13));
+        careerDto.setTo(LocalDate.of(2024, 12, 1));
         careerDto.setCompany("Супер корпорация");
         careerDto.setPosition("Инженер программист");
 
         career = new Career();
         career.setId(1L);
-        career.setDateFrom(LocalDate.of(2020, 1, 1));
-        career.setDateTo(LocalDate.of(2023, 1, 1));
+        career.setDateFrom(LocalDate.of(2025, 3, 13));
+        career.setDateTo(LocalDate.of(2024, 12, 1));
         career.setCompany("Супер корпорация");
         career.setPosition("Инженер программист");
         career.setUser(user);
@@ -70,10 +71,16 @@ class CareerServiceTest {
         when(careerMapper.toCareerDto(career)).thenReturn(careerDto);
 
         CareerDto result = careerService.addCareer(1L, careerDto);
+        ArgumentCaptor<Career> careerCaptor = ArgumentCaptor.forClass(Career.class);
+        verify(careerRepository).save(careerCaptor.capture());
 
-        assertNotNull(result);
-        assertEquals("Супер корпорация", result.getCompany());
-        verify(careerRepository).save(any(Career.class));
+        Career savedCareer = careerCaptor.getValue();
+
+        assertNotNull(savedCareer);
+        assertEquals("Супер корпорация", savedCareer.getCompany());
+        assertEquals("Инженер программист", savedCareer.getPosition());
+        assertEquals(user, savedCareer.getUser());
+
     }
 
     @Test
@@ -90,10 +97,15 @@ class CareerServiceTest {
         when(careerMapper.toCareerDto(career)).thenReturn(careerDto);
 
         CareerDto result = careerService.updateCareer(1L, careerDto);
+        ArgumentCaptor<Career> careerCaptor = ArgumentCaptor.forClass(Career.class);
+        verify(careerRepository).save(careerCaptor.capture());
 
-        assertNotNull(result);
-        assertEquals("Супер корпорация", result.getCompany());
-        verify(careerRepository).save(any(Career.class));
+        Career updatedCareer = careerCaptor.getValue();
+
+        assertNotNull(updatedCareer);
+        assertEquals("Супер корпорация", updatedCareer.getCompany());
+        assertEquals("Инженер программист", updatedCareer.getPosition());
+        assertEquals(user, updatedCareer.getUser());
     }
 
     @Test
