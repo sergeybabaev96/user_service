@@ -1,5 +1,6 @@
 package school.faang.user_service.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -55,6 +56,28 @@ class SkillServiceTest {
     private ArgumentCaptor<List<Long>> idsCaptor;
     @Captor
     private ArgumentCaptor<List<Skill>> skillsCaptor;
+    private User firstUser;
+    private User secondUser;
+    private Goal goal;
+    private Skill firstSkill;
+    private Skill secondSkill;
+
+    @BeforeEach
+    void setUp() {
+        firstUser = new User();
+        firstUser.setId(1L);
+        secondUser = new User();
+        secondUser.setId(2L);
+        goal = new Goal();
+        goal.setId(1L);
+        List<Goal> goals = List.of(goal);
+        firstSkill = new Skill();
+        firstSkill.setUsers(List.of(firstUser));
+        firstSkill.setGoals(goals);
+        secondSkill = new Skill();
+        secondSkill.setUsers(List.of(firstUser));
+        secondSkill.setGoals(goals);
+    }
 
     @Test
     void testCreate_withParameterMethod_isNull() {
@@ -101,16 +124,6 @@ class SkillServiceTest {
 
     @Test
     void testGetUserSkills() {
-        User firstUser = new User();
-        firstUser.setId(1L);
-        User secondUser = new User();
-        secondUser.setId(2L);
-        Skill firstSkill = new Skill();
-        firstSkill.setTitle("Title1");
-        firstSkill.setUsers(List.of(firstUser, secondUser));
-        Skill secondSkill = new Skill();
-        secondSkill.setTitle("Title2");
-        secondSkill.setUsers(List.of(firstUser, secondUser));
         List<Skill> expectedSkills = List.of(firstSkill, secondSkill);
         List<SkillDto> expectedSkillsDto = expectedSkills
                 .stream()
@@ -131,12 +144,6 @@ class SkillServiceTest {
 
     @Test
     void testGetOfferedSkills() {
-        User user = new User();
-        user.setId(1L);
-        Skill firstSkill = new Skill();
-        firstSkill.setUsers(List.of(user));
-        Skill secondSkill = new Skill();
-        secondSkill.setUsers(List.of(user));
         List<Skill> skills = List.of(firstSkill, secondSkill);
         Map<Skill, Long> skillCountMap = skills.stream()
                 .collect(Collectors.groupingBy(skill -> skill, Collectors.counting()));
@@ -146,91 +153,75 @@ class SkillServiceTest {
                 .map(entry -> skillMapper.toSkillCandidateDto(entry.getKey(), entry.getValue()))
                 .toList();
         ArgumentCaptor<Long> userIdCaptor = ArgumentCaptor.forClass(Long.class);
-        when(skillRepository.findSkillsOfferedToUser(user.getId())).thenReturn(List.of(firstSkill, secondSkill));
+        when(skillRepository.findSkillsOfferedToUser(firstUser.getId())).thenReturn(List.of(firstSkill, secondSkill));
 
-        List<SkillCandidateDto> actualSkillCandidatesDto = skillService.getOfferedSkills(user.getId());
+        List<SkillCandidateDto> actualSkillCandidatesDto = skillService.getOfferedSkills(firstUser.getId());
 
         verify(skillRepository, times(1)).findSkillsOfferedToUser(userIdCaptor.capture());
         Long firstUserId = userIdCaptor.getValue();
-        assertEquals(user.getId(), firstUserId);
+        assertEquals(firstUser.getId(), firstUserId);
         assertIterableEquals(expectedSkillCandidatesDto, actualSkillCandidatesDto);
     }
 
     @Test
     void acquireSkillFromOffers_notFindsBySkillId() {
-        Skill skill = new Skill();
-        skill.setId(1L);
-        User user = new User();
-        user.setId(1L);
-        when(skillRepository.findById(skill.getId())).thenReturn(Optional.empty());
+        when(skillRepository.findById(firstSkill.getId())).thenReturn(Optional.empty());
         assertThrows(DataValidationException.class,
-                () -> skillService.acquireSkillFromOffers(skill.getId(), user.getId()));
+                () -> skillService.acquireSkillFromOffers(firstSkill.getId(), firstUser.getId()));
     }
 
     @Test
     void acquireSkillFromOffers_findsByUserSkill() {
-        Skill skill = new Skill();
-        skill.setId(1L);
-        User user = new User();
-        user.setId(1L);
-        Optional<Skill> acquiredSkill = Optional.of(skill);
+        Optional<Skill> acquiredSkill = Optional.of(firstSkill);
         SkillDto expectedSkillDto = skillMapper.toDto(acquiredSkill.get());
         ArgumentCaptor<Long> skillIdCaptor = ArgumentCaptor.forClass(Long.class);
         ArgumentCaptor<Long> userIdCaptor = ArgumentCaptor.forClass(Long.class);
-        when(skillRepository.findById(skill.getId()))
-                .thenReturn(Optional.of(skill));
-        when(skillRepository.findUserSkill(skill.getId(), user.getId()))
+        when(skillRepository.findById(firstSkill.getId()))
+                .thenReturn(Optional.of(firstSkill));
+        when(skillRepository.findUserSkill(firstSkill.getId(), firstUser.getId()))
                 .thenReturn(acquiredSkill);
 
-        SkillDto actualSkillDto = skillService.acquireSkillFromOffers(skill.getId(), user.getId());
+        SkillDto actualSkillDto = skillService.acquireSkillFromOffers(firstSkill.getId(), firstUser.getId());
 
         verify(skillRepository, times(1))
-                .findById(skill.getId());
+                .findById(firstSkill.getId());
         verify(skillRepository, times(1))
                 .findUserSkill(skillIdCaptor.capture(), userIdCaptor.capture());
         Long skillId = skillIdCaptor.getValue();
         Long userId = userIdCaptor.getValue();
-        assertEquals(skill.getId(), skillId);
-        assertEquals(user.getId(), userId);
+        assertEquals(firstSkill.getId(), skillId);
+        assertEquals(firstUser.getId(), userId);
         assertEquals(expectedSkillDto, actualSkillDto);
     }
 
     @Test
     void acquireSkillFromOffers_notFinds_whenOffersSize_lessThan_minSkillOffers() {
-        Skill skill = new Skill();
-        skill.setId(1L);
-        User user = new User();
-        user.setId(1L);
         SkillOffer skillOffer = new SkillOffer();
         List<SkillOffer> offers = List.of(skillOffer);
-        when(skillRepository.findById(skill.getId()))
-                .thenReturn(Optional.of(skill));
-        when(skillRepository.findUserSkill(skill.getId(), user.getId()))
+        when(skillRepository.findById(firstSkill.getId()))
+                .thenReturn(Optional.of(firstSkill));
+        when(skillRepository.findUserSkill(firstSkill.getId(), firstUser.getId()))
                 .thenReturn(Optional.empty());
-        when(skillOfferRepository.findAllOffersOfSkill(skill.getId(), user.getId()))
+        when(skillOfferRepository.findAllOffersOfSkill(firstSkill.getId(), firstUser.getId()))
                 .thenReturn(offers);
 
         assertThrows(DataValidationException.class,
-                () -> skillService.acquireSkillFromOffers(skill.getId(), user.getId()));
+                () -> skillService.acquireSkillFromOffers(firstSkill.getId(), firstUser.getId()));
     }
 
     @Test
     void acquireSkillFromOffers_savesAllGuarantees() {
-        Skill skill = new Skill();
-        skill.setId(1L);
-        User user = new User();
-        user.setId(1L);
         SkillOffer firstSkillOffer = new SkillOffer();
-        firstSkillOffer.setSkill(skill);
+        firstSkillOffer.setSkill(firstSkill);
         Recommendation recommendation = new Recommendation();
-        recommendation.setAuthor(user);
-        recommendation.setReceiver(user);
+        recommendation.setAuthor(firstUser);
+        recommendation.setReceiver(firstUser);
         firstSkillOffer.setRecommendation(recommendation);
         SkillOffer secondSkillOffer = new SkillOffer();
-        secondSkillOffer.setSkill(skill);
+        secondSkillOffer.setSkill(firstSkill);
         secondSkillOffer.setRecommendation(recommendation);
         SkillOffer thirdSkillOffer = new SkillOffer();
-        thirdSkillOffer.setSkill(skill);
+        thirdSkillOffer.setSkill(firstSkill);
         thirdSkillOffer.setRecommendation(recommendation);
         List<SkillOffer> offers = List.of(firstSkillOffer, secondSkillOffer, thirdSkillOffer);
         List<UserSkillGuarantee> guarantees = offers.stream()
@@ -244,29 +235,29 @@ class SkillServiceTest {
                 .collect(Collectors.toList());
         ArgumentCaptor<Long> skillIdCaptor = ArgumentCaptor.forClass(Long.class);
         ArgumentCaptor<Long> userIdCaptor = ArgumentCaptor.forClass(Long.class);
-        SkillDto expectedSkillDto = skillMapper.toDto(skill);
+        SkillDto expectedSkillDto = skillMapper.toDto(firstSkill);
 
-        when(skillRepository.findById(skill.getId()))
-                .thenReturn(Optional.of(skill));
-        when(skillRepository.findUserSkill(skill.getId(), user.getId()))
+        when(skillRepository.findById(firstSkill.getId()))
+                .thenReturn(Optional.of(firstSkill));
+        when(skillRepository.findUserSkill(firstSkill.getId(), firstUser.getId()))
                 .thenReturn(Optional.empty());
-        when(skillOfferRepository.findAllOffersOfSkill(skill.getId(), user.getId()))
+        when(skillOfferRepository.findAllOffersOfSkill(firstSkill.getId(), firstUser.getId()))
                 .thenReturn(offers);
 
-        SkillDto actualSkillDto = skillService.acquireSkillFromOffers(skill.getId(), user.getId());
+        SkillDto actualSkillDto = skillService.acquireSkillFromOffers(firstSkill.getId(), firstUser.getId());
 
         verify(skillRepository, times(1))
-                .findById(skill.getId());
+                .findById(firstSkill.getId());
         verify(skillRepository, times(1))
-                .findUserSkill(skill.getId(), user.getId());
+                .findUserSkill(firstSkill.getId(), firstUser.getId());
         verify(skillOfferRepository, times(1))
-                .findAllOffersOfSkill(skill.getId(), user.getId());
+                .findAllOffersOfSkill(firstSkill.getId(), firstUser.getId());
         verify(skillRepository, times(1))
                 .assignSkillToUser(skillIdCaptor.capture(), userIdCaptor.capture());
         Long captorSkillId = skillIdCaptor.getValue();
         Long captorUserId = userIdCaptor.getValue();
-        assertEquals(skill.getId(), captorSkillId);
-        assertEquals(user.getId(), captorUserId);
+        assertEquals(firstSkill.getId(), captorSkillId);
+        assertEquals(firstUser.getId(), captorUserId);
         verify(userSkillGuaranteeRepository, times(1))
                 .saveAll(guaranteeCaptor.capture());
         List<UserSkillGuarantee> captorGuarantees = guaranteeCaptor.getValue();
@@ -276,10 +267,6 @@ class SkillServiceTest {
 
     @Test
     void findAllSkillsById() {
-        Skill firstSkill = new Skill();
-        firstSkill.setId(1L);
-        Skill secondSkill = new Skill();
-        secondSkill.setId(2L);
         List<Long> skillIds = List.of(firstSkill.getId(), secondSkill.getId());
         List<Skill> skills = List.of(firstSkill, secondSkill);
         when(skillRepository.findAllById(skillIds)).thenReturn(skills);
@@ -295,34 +282,20 @@ class SkillServiceTest {
 
     @Test
     void findSkillsByUserId() {
-        User user = new User();
-        user.setId(1L);
-        List<User> users = List.of(user);
-        Skill firstSkill = new Skill();
-        firstSkill.setUsers(users);
-        Skill secondSkill = new Skill();
-        secondSkill.setUsers(users);
         List<Skill> skills = List.of(firstSkill, secondSkill);
         ArgumentCaptor<Long> userIdCaptor = ArgumentCaptor.forClass(Long.class);
-        when(skillRepository.findAllByUserId(user.getId())).thenReturn(skills);
+        when(skillRepository.findAllByUserId(firstUser.getId())).thenReturn(skills);
 
-        List<Skill> actualSkillsByUserId = skillService.findSkillsByUserId(user.getId());
+        List<Skill> actualSkillsByUserId = skillService.findSkillsByUserId(firstUser.getId());
 
         verify(skillRepository, times(1)).findAllByUserId(userIdCaptor.capture());
         Long userIdCaptorValue = userIdCaptor.getValue();
-        assertEquals(user.getId(), userIdCaptorValue);
+        assertEquals(firstUser.getId(), userIdCaptorValue);
         assertIterableEquals(skills, actualSkillsByUserId);
     }
 
     @Test
     void findSkillsByGoalId() {
-        Goal goal = new Goal();
-        goal.setId(1L);
-        List<Goal> goals = List.of(goal);
-        Skill firstSkill = new Skill();
-        firstSkill.setGoals(goals);
-        Skill secondSkill = new Skill();
-        secondSkill.setGoals(goals);
         List<Skill> skills = List.of(firstSkill, secondSkill);
         ArgumentCaptor<Long> goalIdCaptor = ArgumentCaptor.forClass(Long.class);
         when(skillRepository.findSkillsByGoalId(goal.getId())).thenReturn(skills);
@@ -337,13 +310,6 @@ class SkillServiceTest {
 
     @Test
     void saveAllSkills() {
-        Goal goal = new Goal();
-        goal.setId(1L);
-        List<Goal> goals = List.of(goal);
-        Skill firstSkill = new Skill();
-        firstSkill.setGoals(goals);
-        Skill secondSkill = new Skill();
-        secondSkill.setGoals(goals);
         List<Skill> skills = List.of(firstSkill, secondSkill);
 
         skillService.saveAllSkills(skills);
