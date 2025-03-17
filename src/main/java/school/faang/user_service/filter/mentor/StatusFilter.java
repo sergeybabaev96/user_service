@@ -1,7 +1,9 @@
 package school.faang.user_service.filter.mentor;
 
 import school.faang.user_service.dto.mentor.RequestFilterDto;
+import school.faang.user_service.dto.mentor.RequestStatusDto;
 import school.faang.user_service.entity.MentorshipRequest;
+import school.faang.user_service.entity.RequestStatus;
 
 import java.util.stream.Stream;
 
@@ -13,6 +15,14 @@ public class StatusFilter implements RequestFilter {
 
     @Override
     public Stream<MentorshipRequest> apply(Stream<MentorshipRequest> request, RequestFilterDto filterRequestDto) {
-        return request.filter(req -> req.getStatus().equals(filterRequestDto.getStatus()));
+        RequestStatus status = mapToRequestStatus(filterRequestDto.getStatus());
+        return request.filter(req -> req.getStatus().equals(status));
+    }
+
+    private RequestStatus mapToRequestStatus(RequestStatusDto statusDto) {
+        if (statusDto == null) {
+            return null;
+        }
+        return RequestStatus.valueOf(statusDto.name());
     }
 }
