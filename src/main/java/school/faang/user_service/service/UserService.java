@@ -1,5 +1,7 @@
 package school.faang.user_service.service;
 
+import static school.faang.user_service.constants.ErrorMessages.getUserNotFoundError;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,12 +12,10 @@ import school.faang.user_service.repository.UserRepository;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private static final String ERROR_USER_NOT_FOUND = "User with the given ID: %d was not found.";
-
     private final UserRepository userRepository;
 
     public User findById(long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(String.format(ERROR_USER_NOT_FOUND, id)));
+                .orElseThrow(() -> new IllegalArgumentException(getUserNotFoundError(Long.toString(id))));
     }
 }
