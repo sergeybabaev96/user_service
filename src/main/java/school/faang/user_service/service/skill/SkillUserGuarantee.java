@@ -22,6 +22,7 @@ public class SkillUserGuarantee {
             guarantee.setSkill(skillOffer.getSkill());
             guarantee.setGuarantor(skillOffer.getRecommendation().getAuthor());
             guarantee.setUser(skillOffer.getRecommendation().getReceiver());
+            guaranteeRepository.save(guarantee);
         });
     }
 }

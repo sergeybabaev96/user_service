@@ -3,6 +3,7 @@ package school.faang.user_service.service.skill;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.recommendation.SkillOffer;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 
 import java.util.List;
@@ -16,7 +17,7 @@ public class SkillOfferService {
     public void isEnoughAmountOffersToSkill(Long skillOfferId, Long userId) {
         int amountOffers = skillOfferRepository.findAllOffersOfSkill (skillOfferId,userId).size();
         if (amountOffers < 3) {
-            throw new IllegalArgumentException("User has less than 3 offers");
+            throw new DataValidationException("User has less than 3 offers");
         };
     }
 
