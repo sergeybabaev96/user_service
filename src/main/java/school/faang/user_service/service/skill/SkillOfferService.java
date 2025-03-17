@@ -14,7 +14,7 @@ public class SkillOfferService {
 
     private static final int MIN_SKILL_OFFERS = 3;
 
-    private SkillOfferRepository skillOfferRepository;
+    private final SkillOfferRepository skillOfferRepository;
 
     public void isEnoughAmountOffersToSkill(Long skillOfferId, Long userId) {
         int amountOffers = skillOfferRepository.findAllOffersOfSkill (skillOfferId,userId).size();
