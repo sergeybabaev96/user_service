@@ -31,7 +31,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build with Gradle
-        run: ./gradlew build --info | grep "Executing tests"
+        run: ./gradlew build --info
 
       - name: Run tests
         id: tests
