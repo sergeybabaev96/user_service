@@ -23,6 +23,7 @@ public class PostgreSQLContainerSpringBootTest extends PostgreSQLContainerConfig
 
     @Test
     void testDatabaseConnection() throws Exception {
+        System.out.println("⭐ testDatabaseConnection() in @SpringBootTest.");
         assertThat(dataSource).isNotNull();
         System.out.println("✅ DB is reachable!");
     }
