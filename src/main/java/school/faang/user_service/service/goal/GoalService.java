@@ -1,6 +1,7 @@
 package school.faang.user_service.service.goal;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,7 @@ public class GoalService {
     private final GoalMapper goalMapper;
     private final List<GoalFilter> goalFilters;
 
+    @Transactional
     public void createGoal(Long userId, GoalDto goal) {
         validateByExistsUserOnId(userId);
         validateByCountGoals(userId);
@@ -86,6 +88,7 @@ public class GoalService {
         });
     }
 
+    @Transactional
     public List<GoalDto> findSubtasksByGoalId(Long goalId, SearchGoalDto searchGoalDto) {
         validateByExistsGoalOnId(goalId);
         return goalMapper.goalListToGoalDtoList(applyFiltersOnGoals(
@@ -93,6 +96,7 @@ public class GoalService {
                 .toList());
     }
 
+    @Transactional
     public List<GoalDto> getGoalsByUserId(Long userId, SearchGoalDto searchGoalDto) {
         validateByExistsUserOnId(userId);
         return goalMapper.goalListToGoalDtoList(applyFiltersOnGoals(
