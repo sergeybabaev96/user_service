@@ -64,15 +64,7 @@ public class MentorshipRequestService {
         }
 
         LocalDateTime threeMouthAgo = LocalDateTime.now().minusMonths(REQUEST_COOLDOWN_MONTHS);
-        Optional<MentorshipRequest> recentRequest = mentorshipRequestRepository
-                .findLatestRequest(mentorshipRequestDto.getRequesterId(), mentorshipRequestDto.getReceiverId());
-        if (recentRequest.isPresent()) {
-            if (recentRequest.get().getCreatedAt().isAfter(threeMouthAgo)) {
-                String errorMessage = getFrequentRequestError(REQUEST_COOLDOWN_MONTHS);
-                log.error(errorMessage);
-                throw new IllegalArgumentException(errorMessage);
-            }
-        }
+        validateRecentRequest(mentorshipRequestDto, threeMouthAgo);
         MentorshipRequest mentorshipRequest = mentorshipRequestMapper.toEntity(mentorshipRequestDto);
         mentorshipRequest.setRequester(userService.findById(mentorshipRequestDto.getRequesterId()));
         mentorshipRequest.setReceiver(userService.findById(mentorshipRequestDto.getReceiverId()));
@@ -85,11 +77,9 @@ public class MentorshipRequestService {
         Stream<MentorshipRequest> requestStream = StreamSupport.stream(mentorshipRequestRepository.findAll()
                 .spliterator(), false);
 
-        for (RequestFilter filter : filters) {
-            if (filter.isApplicable(filterRequestDto)) {
-                requestStream = filter.apply(requestStream, filterRequestDto);
-            }
-        }
+        filters.stream()
+                .filter(filter -> filter.isApplicable(filterRequestDto))
+                .forEach(filter -> filter.apply(requestStream, filterRequestDto));
         return requestFilterMapper.toListDto(requestStream.toList());
     }
 
@@ -100,13 +90,7 @@ public class MentorshipRequestService {
         User receiver = mentorshipRequest.getReceiver();
         User requester = mentorshipRequest.getRequester();
 
-        if (receiver.equals(requester)) {
-            throw new IllegalArgumentException(ERROR_SELF_REQUEST);
-        }
-
-        if (receiver.getMentors().contains(requester)) {
-            throw new IllegalArgumentException(ERROR_ALREADY_MENTOR);
-        }
+        validateSelfRequestAndAlreadyMentor(receiver, requester);
         receiver.getMentors().add(requester);
         mentorshipRequest.setStatus(RequestStatus.ACCEPTED);
         mentorshipRequest.setReceiver(receiver);
@@ -116,9 +100,7 @@ public class MentorshipRequestService {
     public void rejectRequest(long id, RejectionDto rejection) {
         validateDto(rejection, ERROR_NULL_REJECTION_DTO);
 
-        if (rejection.getRejectionReason() == null || rejection.getRejectionReason().isBlank()) {
-            throw new IllegalArgumentException(ERROR_EMPTY_REJECTION);
-        }
+        validateRejectionReason(rejection);
         MentorshipRequest mentorshipRequest = mentorshipRequestRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(getAbsentRequestError(id)));
         mentorshipRequest.setStatus(RequestStatus.REJECTED);
@@ -129,5 +111,33 @@ public class MentorshipRequestService {
 
     private <T> void validateDto(T dto, String errorMessage) {
         Objects.requireNonNull(dto, errorMessage);
+    }
+
+    private static void validateRejectionReason(RejectionDto rejection) {
+        if (rejection.getRejectionReason() == null || rejection.getRejectionReason().isBlank()) {
+            throw new IllegalArgumentException(ERROR_EMPTY_REJECTION);
+        }
+    }
+
+    private static void validateSelfRequestAndAlreadyMentor(User receiver, User requester) {
+        if (receiver.equals(requester)) {
+            throw new IllegalArgumentException(ERROR_SELF_REQUEST);
+        }
+
+        if (receiver.getMentors().contains(requester)) {
+            throw new IllegalArgumentException(ERROR_ALREADY_MENTOR);
+        }
+    }
+
+    private void validateRecentRequest(MentorshipRequestDto mentorshipRequestDto, LocalDateTime threeMouthAgo) {
+        Optional<MentorshipRequest> recentRequest = mentorshipRequestRepository
+                .findLatestRequest(mentorshipRequestDto.getRequesterId(), mentorshipRequestDto.getReceiverId());
+        if (recentRequest.isPresent()) {
+            if (recentRequest.get().getCreatedAt().isAfter(threeMouthAgo)) {
+                String errorMessage = getFrequentRequestError(REQUEST_COOLDOWN_MONTHS);
+                log.error(errorMessage);
+                throw new IllegalArgumentException(errorMessage);
+            }
+        }
     }
 }
