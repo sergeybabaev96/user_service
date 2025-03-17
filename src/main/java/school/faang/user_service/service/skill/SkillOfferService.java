@@ -12,11 +12,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SkillOfferService {
 
+    private static final int MIN_SKILL_OFFERS = 3;
+
     private SkillOfferRepository skillOfferRepository;
 
     public void isEnoughAmountOffersToSkill(Long skillOfferId, Long userId) {
         int amountOffers = skillOfferRepository.findAllOffersOfSkill (skillOfferId,userId).size();
-        if (amountOffers < 3) {
+        if (amountOffers < MIN_SKILL_OFFERS) {
             throw new DataValidationException("User has less than 3 offers");
         };
     }
