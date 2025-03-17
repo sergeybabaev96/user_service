@@ -1,6 +1,7 @@
 package school.faang.user_service.controller.career;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -46,20 +47,19 @@ public class CareerControllerTest {
 
     long userId = 1L;
     long careerId = 1L;
+    CareerDto careerDto = new CareerDto();
 
-    CareerDto prepareCareerDto() {
-        CareerDto careerDto = new CareerDto();
+    @BeforeEach
+    void setUp() {
         careerDto.setId(careerId);
         careerDto.setFrom(LocalDate.of(2006, 1, 1));
-        careerDto.setTo(java.time.LocalDate.of(2012, 1, 1));
+        careerDto.setTo(LocalDate.of(2012, 1, 1));
         careerDto.setCompany("TestCompany");
         careerDto.setPosition("testPosition");
-        return careerDto;
     }
 
     @Test
     void testAddCareerReturnCareerDTO() throws Exception {
-        CareerDto careerDto = prepareCareerDto();
         String careerJson = objectMapper.writeValueAsString(careerDto);
 
         when(careerService.addCareer(anyLong(), any(CareerDto.class))).thenReturn(careerDto);
@@ -75,21 +75,19 @@ public class CareerControllerTest {
 
     @Test
     void testUpdateCareerById() throws Exception {
-        CareerDto careerDto = prepareCareerDto();
         String careerJson = objectMapper.writeValueAsString(careerDto);
-        when(careerService.updateCareer(anyLong(), any(CareerDto.class))).thenReturn(careerDto);
+        when(careerService.updateCareer(userId, careerDto)).thenReturn(careerDto);
 
         mockMvc.perform(put("/careers/{userId}", userId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(careerJson)
         ).andExpect(status().isOk());
 
-        verify(careerService, times(1)).updateCareer(anyLong(), any(CareerDto.class));
+        verify(careerService, times(1)).updateCareer(userId, careerDto);
     }
 
     @Test
     void testGettingCareerById() throws Exception {
-        CareerDto careerDto = prepareCareerDto();
         when(careerService.getById(careerId)).thenReturn(careerDto);
         mockMvc.perform(get("/careers/{careerId}", careerId))
                 .andExpect(status().isOk())
