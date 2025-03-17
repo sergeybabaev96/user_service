@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.sql.DataSource;
@@ -13,17 +14,18 @@ import javax.sql.DataSource;
 @Testcontainers
 public class PostgreSQLContainerConfiguration {
 
+    @Container
     protected static final PostgreSQLContainer<?> POSTGRES_CONTAINER =
             new PostgreSQLContainer<>("postgres:15-alpine")
             .withDatabaseName("test")
             .withUsername("user")
             .withPassword("password");
 
-    static {
-        POSTGRES_CONTAINER.start();
-        System.out.println("✅ Запуска POSTGRES");
-        printInto(POSTGRES_CONTAINER);
-    }
+//    static {
+//        POSTGRES_CONTAINER.start();
+//        System.out.println("✅ Запуска POSTGRES");
+//        printInto(POSTGRES_CONTAINER);
+//    }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
