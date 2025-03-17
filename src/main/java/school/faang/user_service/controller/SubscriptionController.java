@@ -1,5 +1,6 @@
 package school.faang.user_service.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,7 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
     @PostMapping("/follow")
-    public ResponseEntity<String> followUser(@RequestBody FollowRequestDto followRequestDto) {
+    public ResponseEntity<String> followUser(@RequestBody FollowRequestDto followRequestDto) throws JsonProcessingException {
         subscriptionService.followUser(followRequestDto);
         return ResponseEntity.ok("User followed successfully");
     }

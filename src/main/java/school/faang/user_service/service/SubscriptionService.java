@@ -1,19 +1,23 @@
 package school.faang.user_service.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.dto.subscription.FollowRequestDto;
+import school.faang.user_service.dto.subscription.FollowerEvent;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.user.UserFilter;
 import school.faang.user_service.filter.user.UserPageFilter;
 import school.faang.user_service.mapper.UserMapper;
+import school.faang.user_service.publisher.FollowerEventPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -23,9 +27,10 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final List<UserFilter> userFilters;
     private final UserMapper userMapper;
+    private final FollowerEventPublisher followerEventPublisher;
 
     @Transactional
-    public void followUser(FollowRequestDto followRequestDto) {
+    public void followUser(FollowRequestDto followRequestDto) throws JsonProcessingException {
         long followerId = followRequestDto.getFollowerId();
         long followeeId = followRequestDto.getFolloweeId();
         if (followerId == followeeId) {
@@ -37,6 +42,7 @@ public class SubscriptionService {
         }
 
         subscriptionRepository.followUser(followerId, followeeId);
+        followerEventPublisher.publish(new FollowerEvent(followerId, followeeId, LocalDateTime.now()));
     }
 
     @Transactional
