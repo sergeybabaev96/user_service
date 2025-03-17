@@ -39,7 +39,7 @@ public class SkillControllerTest {
     @Test
     public void testCreateWithBlankTitle() {
         SkillDto skillDto = new SkillDto();
-        skillDto.setTitle("   ");
+        skillDto.setTitle("   \n");
         assertThrows(DataValidationException.class, () -> skillController.create(skillDto));
     }
 
