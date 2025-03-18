@@ -69,12 +69,12 @@ class UserServiceTest {
 
         @Test
         void whenFilterIsNullAndPremiumUsersListIsEmpty_ReturnEmptyUserDtos() {
-            List<UserDto> emptyList = List.of();
+            List<UserDto> emptyDtoList = List.of();
             when(userRepository.findPremiumUsers()).thenReturn(Stream.empty());
 
             List<UserDto> result = userService.getPremiumUsers(null);
 
-            assertEquals(emptyList, result);
+            assertEquals(emptyDtoList, result);
         }
 
         @Test
@@ -89,6 +89,17 @@ class UserServiceTest {
             List<UserDto> result = userService.getPremiumUsers(userFilterDto);
 
             assertEquals(filtereduserDtoList, result);
+        }
+
+        @Test
+        void whenApplyFilterWithExperienceFrom3To8ButPremiumUsersListIsEmpty_ReturnEmptyUserDtos() {
+            UserFilterDto userFilterDto = new UserFilterDto(null, null, 3, 8);
+            List<UserDto> emptyDtoList = List.of();
+            when(userRepository.findPremiumUsers()).thenReturn(Stream.empty());
+
+            List<UserDto> result = userService.getPremiumUsers(userFilterDto);
+
+            assertEquals(emptyDtoList, result);
         }
     }
 
