@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.UserFilterMapper;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
@@ -28,6 +29,15 @@ public class UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new DataRetrievalFailureException(
                         "User with id %d is not found".formatted(userId)));
+    }
+
+    public User findById(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new DataValidationException("User not found"));
+    }
+
+    public boolean existsById(long userId) {
+        return userRepository.existsById(userId);
     }
 
     public List<UserDto> getPremiumUsers(UserFilterDto userFilterDto) {
