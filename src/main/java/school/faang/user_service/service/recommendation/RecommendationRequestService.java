@@ -1,5 +1,6 @@
 package school.faang.user_service.service.recommendation;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
@@ -41,8 +42,10 @@ public class RecommendationRequestService {
         if (dto.getRequesterId() == null || dto.getReceiverId() == null) {
             throw new IllegalArgumentException("Requester ID and Receiver ID must not be null");
         }
-        User requester = userService.getUserById(dto.getRequesterId());
-        User receiver = userService.getUserById(dto.getReceiverId());
+        User requester = userService.findById(dto.getRequesterId())
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + dto.getRequesterId() + " not found"));
+        User receiver = userService.findById(dto.getReceiverId())
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + dto.getReceiverId() + " not found"));
         // Проверка на существование пользователей
         if (requester == null) {
             throw new NotFoundException("Requester not found with ID " + dto.getRequesterId());

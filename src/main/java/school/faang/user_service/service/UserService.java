@@ -5,13 +5,18 @@ import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.UserRepository;
 
-@RequiredArgsConstructor
+import java.util.Optional;
+
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
 
-    public User getUserById(long id) {
-        return userRepository.findById(id).orElseThrow(()
-                -> new RuntimeException("User with id " + id + " not found"));
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    public User save(User user) {
+        return userRepository.save(user);
     }
 }
