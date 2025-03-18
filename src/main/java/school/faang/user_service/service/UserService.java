@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.UserRepository;
@@ -13,6 +14,7 @@ import school.faang.user_service.repository.UserRepository;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final EventService eventService;
 
     public boolean doesUserExist(long userId) {
         return userRepository.existsById(userId);
@@ -39,4 +41,11 @@ public class UserService {
     public boolean existsById(long userId) {
         return userRepository.existsById(userId);
     }
+
+    public UserDto deactivateUser(long userId) {
+        eventService.deleteEventByUserId(userId);
+        User user = getUserById(userId);
+
+    }
+
 }
