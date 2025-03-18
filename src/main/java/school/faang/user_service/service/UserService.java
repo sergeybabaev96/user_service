@@ -44,6 +44,7 @@ public class UserService {
 
     public UserDto deactivateUser(long userId) {
         eventService.deleteEventByUserId(userId);
+        eventService.deleteParticipationFromEvent(userId);
         User user = getUserById(userId);
 
     }

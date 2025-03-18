@@ -6,7 +6,6 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.repository.event.EventRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
