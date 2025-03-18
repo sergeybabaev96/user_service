@@ -31,10 +31,12 @@ public class UserService {
     }
 
     public List<UserDto> getPremiumUsers(UserFilterDto userFilterDto) {
-        if (userFilterDto == null) {
-            return userRepository.findPremiumUsers().map(userMapper::toDto).toList();
-        }
         Stream<User> userStream = userRepository.findPremiumUsers();
-        return userStream.filter(userFilterMapper.toEntity(userFilterDto)).map(userMapper::toDto).toList();
+        if (userFilterDto == null) { //userFilterDto фильтр пользователей может быть null, если фильтрация не требуется.
+            return userStream.map(userMapper::toDto).toList();
+        }
+        return userStream.filter(userFilterMapper.toEntity(userFilterDto))
+                .map(userMapper::toDto)
+                .toList();
     }
 }
