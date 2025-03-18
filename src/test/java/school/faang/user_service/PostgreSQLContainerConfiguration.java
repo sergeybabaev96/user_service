@@ -23,7 +23,7 @@ public class PostgreSQLContainerConfiguration {
 
     static {
         POSTGRES_CONTAINER.start();
-        System.out.println("✅ Запуска POSTGRES");
+        System.out.println("✅ Запуск POSTGRES");
         printInto(POSTGRES_CONTAINER);
     }
 
@@ -36,23 +36,7 @@ public class PostgreSQLContainerConfiguration {
         registry.add("spring.datasource.url", POSTGRES_CONTAINER::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES_CONTAINER::getUsername);
         registry.add("spring.datasource.password", POSTGRES_CONTAINER::getPassword);
-
-//        System.setProperty("spring.datasource.url", POSTGRES_CONTAINER.getJdbcUrl());
-//        System.setProperty("spring.datasource.username", POSTGRES_CONTAINER.getUsername());
-//        System.setProperty("spring.datasource.password", POSTGRES_CONTAINER.getPassword());
-
     }
-
-//    @Bean
-//    public DataSource dataSource() {
-//        HikariDataSource dataSource = new HikariDataSource();
-//        dataSource.setJdbcUrl(POSTGRES_CONTAINER.getJdbcUrl());
-//        dataSource.setUsername(POSTGRES_CONTAINER.getUsername());
-//        dataSource.setPassword(POSTGRES_CONTAINER.getPassword());
-//
-//        printInto(POSTGRES_CONTAINER);
-//        return dataSource;
-//    }
 
     private static void printInto(PostgreSQLContainer<?> postgres) {
         int mappedPort = postgres.getMappedPort(5432);
