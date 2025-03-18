@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
         LiquibaseAutoConfiguration.class
 })
 @EnableJpaRepositories("school.faang.user_service.repository") // ✅ Сканирует все репозитории внутри этого пакета
-@EntityScan("school.faang.user_service.model")
+@EntityScan("school.faang.user_service.entity")
 class UserServiceApplicationTest {
 
     @MockBean
