@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
+import school.faang.user_service.dto.mentorship.RequestFilterDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.filter.MentorshipRequestFilter;
@@ -44,9 +45,10 @@ class MentorshipRequestServiceTest {
     @DisplayName("Test request mentorship with null-requester or null-receiver")
     public void testNullIdsInvalidRequest() {
         MentorshipRequestDto requestDto = MentorshipRequestDto.builder()
-                .requesterId(1L)
-                .receiverId(2L)
-                .build();
+                .requesterId(1L).receiverId(2L).description("Some description").build();
+        User requester = User.builder().id(1L).build();
+        User receiver = User.builder().id(2L).build();
+
         when(userRepository.existsById(requestDto.getRequesterId())).thenReturn(false);
         when(userRepository.existsById(requestDto.getReceiverId())).thenReturn(true);
         assertThrows(IllegalArgumentException.class,
@@ -68,7 +70,7 @@ class MentorshipRequestServiceTest {
     @DisplayName("Test request mentorship with last request 2 month ago")
     public void testInvalidLastRequest() {
         MentorshipRequestDto requestDto = MentorshipRequestDto.builder()
-                .requesterId(1L).receiverId(2L).build();
+                .requesterId(1L).receiverId(2L).description("Some description").build();
         User requester = User.builder().id(1L).build();
         User receiver = User.builder().id(2L).build();
         LocalDateTime twoMonthsAgo = LocalDateTime.now().minusMonths(2);
@@ -82,6 +84,7 @@ class MentorshipRequestServiceTest {
                 requestDto.getRequesterId(),
                 requestDto.getReceiverId())
         ).thenReturn(Optional.of(lastRequest));
+
         assertThrows(IllegalArgumentException.class,
                 () -> mentorshipRequestService.requestMentorship(requestDto),
                 "The request was made in the last 3 months");
@@ -91,7 +94,7 @@ class MentorshipRequestServiceTest {
     @DisplayName("Test request mentorship with identical requester and receiver")
     public void testIdenticalRequesterReceiver() {
         MentorshipRequestDto requestDto = MentorshipRequestDto.builder()
-                .requesterId(1L).receiverId(1L).build();
+                .requesterId(1L).receiverId(1L).description("Some description").build();
 
         when(userRepository.existsById(requestDto.getRequesterId())).thenReturn(true);
         when(userRepository.existsById(requestDto.getReceiverId())).thenReturn(true);
@@ -99,6 +102,7 @@ class MentorshipRequestServiceTest {
                 requestDto.getRequesterId(),
                 requestDto.getReceiverId())
         ).thenReturn(Optional.empty());
+
         assertThrows(IllegalArgumentException.class,
                 () -> mentorshipRequestService.requestMentorship(requestDto),
                 "Requester user and receiver user is equal");
@@ -108,7 +112,9 @@ class MentorshipRequestServiceTest {
     @DisplayName("Test request mentorship is successful")
     public void testSuccessfulRequestMentorship() {
         MentorshipRequestDto requestDto = MentorshipRequestDto.builder()
-                .requesterId(1L).receiverId(2L).build();
+                .requesterId(1L).receiverId(2L).description("Some description").build();
+        User requester = User.builder().id(1L).build();
+        User receiver = User.builder().id(2L).build();
 
         when(userRepository.existsById(requestDto.getRequesterId())).thenReturn(true);
         when(userRepository.existsById(requestDto.getReceiverId())).thenReturn(true);
@@ -116,14 +122,41 @@ class MentorshipRequestServiceTest {
                 requestDto.getRequesterId(),
                 requestDto.getReceiverId())
         ).thenReturn(Optional.empty());
-        MentorshipRequestDto responseDto = mentorshipRequestService.requestMentorship(requestDto);
+
+        mentorshipRequestService.requestMentorship(requestDto);
+
         MentorshipRequest response = mentorshipRequestMapper.toEntity(requestDto);
         verify(mentorshipRequestRepository, Mockito.times(1)).save(response);
-        assertEquals(responseDto, requestDto);
     }
 
     @Test
-    void requestMentorship() {
+    void testReturnFilteredRequest() {
+        User firstUser = User.builder().id(1L).build();
+        User secondUser = User.builder().id(2L).build();
+        User thirdUser = User.builder().id(3L).build();
+        MentorshipRequest firstRequest = MentorshipRequest.builder()
+                .id(1L)
+                .requester(firstUser)
+                .receiver(secondUser)
+                .description("Some description").build();
+        MentorshipRequest secondRequest = MentorshipRequest.builder()
+                .id(2L)
+                .requester(firstUser)
+                .receiver(thirdUser)
+                .description("Some description too").build();
+        MentorshipRequest thirdRequest = MentorshipRequest.builder()
+                .id(3L)
+                .requester(secondUser)
+                .receiver(thirdUser)
+                .description("afdja;flkdsj;fal").build();
+        List<MentorshipRequest> requests = List.of(firstRequest, secondRequest, thirdRequest);
+        RequestFilterDto filterDto = RequestFilterDto.builder()
+                .requesterId(1L).build();
+        when(mentorshipRequestRepository.findAll()).thenReturn(requests);
+
+        List<MentorshipRequestDto> filteredRequests = mentorshipRequestService.getRequests(filterDto);
+
+        assertEquals(2, filteredRequests.size());
     }
 
     @Test
