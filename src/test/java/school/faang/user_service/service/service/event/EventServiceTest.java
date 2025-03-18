@@ -17,6 +17,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.event.EventType;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.exception.EntityNotFoundException;
 import school.faang.user_service.filter.event.EventFilter;
 import school.faang.user_service.filter.event.EventLocationFilter;
 import school.faang.user_service.filter.event.EventTitleFilter;
@@ -43,6 +44,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+/**
+ * Тесты для проверки функциональности сервиса {@link EventService}.
+ */
+@DisplayName("Проверка функциональности сервиса событий")
 @ExtendWith(MockitoExtension.class)
 public class EventServiceTest {
     @Mock
@@ -139,7 +144,7 @@ public class EventServiceTest {
     void validateUserSkillsUserNotFound() {
         when(userRepository.findById(eventCreateDto.getOwnerId())).thenReturn(Optional.empty());
 
-        assertThrows(DataValidationException.class, () -> eventService.create(eventCreateDto));
+        assertThrows(EntityNotFoundException.class, () -> eventService.create(eventCreateDto));
 
         verify(userRepository, times(1)).findById(eventCreateDto.getOwnerId());
         verifyNoInteractions(skillRepository, eventMapper, eventRepository);
@@ -202,7 +207,7 @@ public class EventServiceTest {
     void getEventByIdEventNotFound() {
         when(eventRepository.findById(eventViewDto.getId())).thenReturn(Optional.empty());
 
-        assertThrows(DataValidationException.class, () -> eventService.getEvent(eventViewDto.getId()));
+        assertThrows(EntityNotFoundException.class, () -> eventService.getEvent(eventViewDto.getId()));
 
         verify(eventRepository, times(1)).findById(eventViewDto.getId());
         verifyNoInteractions(eventMapper);
@@ -434,32 +439,33 @@ public class EventServiceTest {
     @Test
     @DisplayName("Обновление события: успешное обновление")
     void updateEventSuccess() {
+        long eventId = 2L;
         skill.setEvents(new ArrayList<>(List.of(event)));
 
-        when(eventMapper.toEntity(eventCreateDto)).thenReturn(event);
-        when(eventRepository.save(event)).thenReturn(event);
-        when(eventMapper.toDto(event)).thenReturn(eventViewDto);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(eventMapper.toDto(eventRepository.save(event))).thenReturn(eventViewDto);
 
-        EventViewDto result = eventService.updateEvent(eventCreateDto);
+        EventViewDto result = eventService.updateEvent(eventId, eventCreateDto);
 
         assertNotNull(result);
         assertEquals(eventViewDto.getId(), result.getId());
         assertEquals(eventViewDto.getOwnerId(), result.getOwnerId());
         assertEquals(eventViewDto.getEventType(), result.getEventType());
         assertEquals(eventViewDto.getTitle(), result.getTitle());
-
-        verify(eventMapper, times(1)).toEntity(eventCreateDto);
-        verify(eventRepository, times(1)).save(event);
-        verify(eventMapper, times(1)).toDto(event);
     }
 
     @Test
     @DisplayName("Обновление события: пользователь не имеет доступа")
     void updateEventUserHasNoAccessThrowsException() {
-        skill.setEvents(new ArrayList<>(List.of(new Event())));
+        long eventId = 2L;
+        User anotherUser = new User();
+        anotherUser.setId(456L);
+        anotherUser.setSkills(new ArrayList<>());
+        event.setOwner(anotherUser);
 
-        when(eventMapper.toEntity(eventCreateDto)).thenReturn(event);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
 
-        assertThrows(DataValidationException.class, () -> eventService.updateEvent(eventCreateDto));
+        assertThrows(DataValidationException.class, () -> eventService.updateEvent(eventId, eventCreateDto));
+        verify(eventRepository, times(1)).findById(eventId);
     }
 }
