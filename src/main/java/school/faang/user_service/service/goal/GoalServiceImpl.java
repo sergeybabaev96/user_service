@@ -18,6 +18,7 @@ import school.faang.user_service.service.SkillService;
 import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.validator.goalvalidator.GoalValidator;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -150,6 +151,12 @@ public class GoalServiceImpl implements GoalService {
 
     private void saveUserWithNewGoalAndSkills(Long userId, GoalDto goal, List<Skill> newSkills) {
         User userFromBase = userService.findUserById(userId);
+        if (userFromBase.getGoals() == null) {
+            userFromBase.setGoals(new ArrayList<>());
+        }
+        if (userFromBase.getSkills() == null) {
+            userFromBase.setSkills(new ArrayList<>());
+        }
         Goal newGoal = goalMapper.toEntity(goal);
         userFromBase.getGoals().add(newGoal);
         userFromBase.getSkills().addAll(new HashSet<>(newSkills));
