@@ -122,7 +122,7 @@ public class MentorshipRequestController {
 
     private void validateMentorshipRequest(MentorshipRequestDto mentorshipRequestDto) {
         String desc = mentorshipRequestDto.getDescription();
-        if (desc.isBlank()) {
+        if (desc == null || desc.isBlank()) {
             throw new IllegalArgumentException("Description is empty");
         }
         if (desc.length() > DESCRIPTION_MAX_LENGTH) {

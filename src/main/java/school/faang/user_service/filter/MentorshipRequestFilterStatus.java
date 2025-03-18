@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 @Component
 public class MentorshipRequestFilterStatus implements MentorshipRequestFilter {
     @Override
-    public boolean isApplyable(RequestFilterDto requestFilterDto) {
+    public boolean isApplicable(RequestFilterDto requestFilterDto) {
         return requestFilterDto.getStatus() != null;
     }
 
