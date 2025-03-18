@@ -21,7 +21,7 @@ import java.util.Optional;
 @AllArgsConstructor
 @Transactional
 @Slf4j
-public class UserService {
+public class DeactivateUserService {
 
     private GoalService goalService;
     private EventService eventService;

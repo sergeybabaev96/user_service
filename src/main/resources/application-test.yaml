@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:9999/fake
+    username: fakeuser
+    password: fakepass
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      idle-timeout: 30000
+      connection-timeout: 20000
+  jpa:
+    hibernate:
+      ddl-auto: update
+  test:
+    database:
+      replace: none
+
+server:
+  port: 8080

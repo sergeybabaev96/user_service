@@ -23,7 +23,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+public class DeactivateUserServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -34,7 +34,7 @@ public class UserServiceTest {
     private MentorshipService mentorshipService;
 
     @InjectMocks
-    private UserService userService;
+    private DeactivateUserService deactivateUserService;
 
     private User userWithNoGoals;
     private List<User> userListSizeOne;
@@ -79,7 +79,7 @@ public class UserServiceTest {
     @Test
     public void testDeactivateUserGoalIsDeleted() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(userListSizeOne.get(0)));
-        userService.deactivateUser(1L);
+        deactivateUserService.deactivateUser(1L);
 
         Mockito.verify(goalService, Mockito.times(1)).deleteGoal(goal);
     }
@@ -87,7 +87,7 @@ public class UserServiceTest {
     @Test
     public void testDeactivateUserDeleteGoalIsNotInvoked() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(userWithNoGoals));
-        userService.deactivateUser(1L);
+        deactivateUserService.deactivateUser(1L);
 
         Mockito.verify(goalService, never()).deleteGoal(Mockito.any());
     }
@@ -95,7 +95,7 @@ public class UserServiceTest {
     @Test
     public void testDeactivateUserGoalIsUpdated() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(userListSizeOne.get(0)));
-        userService.deactivateUser(1L);
+        deactivateUserService.deactivateUser(1L);
 
         Mockito.verify(goalService, Mockito.times(1)).updateGoal(Mockito.anyLong(), Mockito.any(Goal.class));
     }
@@ -105,7 +105,7 @@ public class UserServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(userListSizeOne.get(0)));
         userListSizeOne.get(0).setOwnedEvents(new ArrayList<>(List.of(new Event())));
         userListSizeOne.get(0).getOwnedEvents().get(0).setAttendees(new ArrayList<>(List.of(new User())));
-        userService.deactivateUser(1L);
+        deactivateUserService.deactivateUser(1L);
 
         Mockito.verify(eventService, Mockito.times(1)).deleteEvent(Mockito.any());
     }
@@ -113,7 +113,7 @@ public class UserServiceTest {
     @Test
     public void testDeactivateUserStopMentorship() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(userListSizeOne.get(0)));
-        userService.deactivateUser(1L);
+        deactivateUserService.deactivateUser(1L);
 
         Mockito.verify(mentorshipService, Mockito.times(1)).stopMentorship(userListSizeOne.get(0));
     }

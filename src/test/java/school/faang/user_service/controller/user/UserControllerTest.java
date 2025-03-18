@@ -9,14 +9,14 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.UserMapper;
-import school.faang.user_service.service.user.UserService;
+import school.faang.user_service.service.user.DeactivateUserService;
 
 @ExtendWith(MockitoExtension.class)
 public class UserControllerTest {
     @Mock
     private UserMapper userMapper;
     @Mock
-    private UserService userService;
+    private DeactivateUserService userService;
     @InjectMocks
     private UserController userController;
 
