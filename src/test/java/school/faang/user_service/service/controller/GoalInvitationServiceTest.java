@@ -17,9 +17,9 @@ import school.faang.user_service.entity.goal.GoalInvitation;
 import school.faang.user_service.exception.InvalidInvitationException;
 import school.faang.user_service.mapper.GoalInvitationMapper;
 import school.faang.user_service.repository.goal.GoalInvitationRepository;
-import school.faang.user_service.service.goal.GoalInvitationService;
-import school.faang.user_service.service.goal.GoalService;
-import school.faang.user_service.service.user.UserService;
+import school.faang.user_service.service.GoalInvitationService;
+import school.faang.user_service.service.GoalService;
+import school.faang.user_service.service.UserService;
 
 import java.util.Collections;
 import java.util.List;
