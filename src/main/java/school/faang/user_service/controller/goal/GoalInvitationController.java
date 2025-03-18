@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import school.faang.user_service.dto.goal.GoalInvitationDto;
 import school.faang.user_service.dto.goal.InvitationFilterDto;
 import school.faang.user_service.entity.RequestStatus;
-import school.faang.user_service.service.goal.GoalInvitationService;
+import school.faang.user_service.service.GoalInvitationService;
 import java.util.List;
 
 

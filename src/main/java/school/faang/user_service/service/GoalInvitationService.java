@@ -1,4 +1,4 @@
-package school.faang.user_service.service.goal;
+package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,13 +12,13 @@ import school.faang.user_service.entity.goal.GoalInvitation;
 import school.faang.user_service.exception.InvalidInvitationException;
 import school.faang.user_service.mapper.GoalInvitationMapper;
 import school.faang.user_service.repository.goal.GoalInvitationRepository;
-import school.faang.user_service.service.user.UserService;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
+
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class GoalInvitationService {
 
