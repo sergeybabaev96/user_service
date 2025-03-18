@@ -1,4 +1,4 @@
-package school.faang.user_service.exception;
+package school.faang.user_service.exception.data_validation_exception;
 
 import lombok.Getter;
 
