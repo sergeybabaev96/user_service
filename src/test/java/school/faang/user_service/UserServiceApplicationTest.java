@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import school.faang.user_service.repository.UserRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,6 +20,9 @@ import static org.junit.jupiter.api.Assertions.*;
         LiquibaseAutoConfiguration.class
 })
 class UserServiceApplicationTest {
+
+    @MockBean
+    private UserRepository userRepository;
 
     @Test
     void contextLoads() {
