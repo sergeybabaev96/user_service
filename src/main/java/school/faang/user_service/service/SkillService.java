@@ -27,13 +27,13 @@ public class SkillService {
         }
 
         Skill entity = skillMapper.toEntity(skill);
-        entity = skillRepository.save(entity);
-        return skillMapper.toDto(entity);
+        return skillMapper.toDto(skillRepository.save(entity));
     }
 
     public List<SkillDto> getUserSkills(long userId) {
         return skillRepository.findAllByUserId(userId).stream().
-                map(skillMapper::toDto).collect(Collectors.toList());
+                map(skillMapper::toDto).
+                collect(Collectors.toList());
     }
 
     public List<SkillCandidateDto> getOfferedSkills(long userId) {
