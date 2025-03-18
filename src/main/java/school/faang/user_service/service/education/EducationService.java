@@ -9,7 +9,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.EducationMapper;
 import school.faang.user_service.repository.EducationRepository;
 import school.faang.user_service.repository.UserRepository;
-import school.faang.user_service.exceptions.DataValidationException;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.validator.UserServiceValidation;
 
 @Service
