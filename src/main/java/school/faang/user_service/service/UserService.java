@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.UserRepository;
 
 @Service
@@ -19,5 +20,14 @@ public class UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new DataRetrievalFailureException(
                         "User with id %d is not found".formatted(userId)));
+    }
+
+    public User findById(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new DataValidationException("User not found"));
+    }
+
+    public boolean existsById(long userId) {
+        return userRepository.existsById(userId);
     }
 }
