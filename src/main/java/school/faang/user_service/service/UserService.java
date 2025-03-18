@@ -9,6 +9,7 @@ import school.faang.user_service.filter.user.UserFilter;
 import school.faang.user_service.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
@@ -17,6 +18,16 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final List<UserFilter> filters;
+
+    @Transactional(readOnly = true)
+    public Optional<User> getUser(Long id) {
+        return userRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> getUsers(List<Long> ids) {
+        return userRepository.findAllById(ids);
+    }
 
     @Transactional(readOnly = true)
     public List<User> getPremiumUsers() {

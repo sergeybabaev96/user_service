@@ -42,6 +42,15 @@ public class GlobalExceptionHandler {
         return errors;
     }
 
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleNotFoundException(NotFoundException e) {
+        Map<String, String> errors = getErrorsMapWithExceptionTitle(e, "Not Found exception occurred");
+
+        logging(Level.WARN, errors);
+        return errors;
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleIllegalArgumentException(IllegalArgumentException e) {
