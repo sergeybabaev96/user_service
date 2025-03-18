@@ -1,5 +1,6 @@
 package school.faang.user_service.service;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataRetrievalFailureException;
@@ -29,5 +30,9 @@ public class UserService {
             log.error("User with ID {} does not exist", userId);
             throw new DataValidationException("User does not exist.");
         }
+    }
+
+    public boolean existsById(long userId) {
+        return userRepository.existsById(userId);
     }
 }
