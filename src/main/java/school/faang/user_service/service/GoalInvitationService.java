@@ -2,9 +2,9 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import school.faang.user_service.config.goal.GoalInvitationConfig;
 import school.faang.user_service.dto.goal.GoalInvitationDto;
 import school.faang.user_service.dto.goal.InvitationFilterDto;
 import school.faang.user_service.entity.RequestStatus;
@@ -22,11 +22,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GoalInvitationService {
 
+    @Value("${goal.invitation.max-active-goals}")
+    private int maxActiveGoals;
+
     private final GoalInvitationRepository goalInvitationRepository;
     private final GoalService goalService;
     private final UserService userService;
     private final GoalInvitationMapper goalInvitationMapper;
-    private final GoalInvitationConfig goalInvitationConfig;
+
 
     @Transactional
     public void createInvitation(GoalInvitationDto invitationDto) {
@@ -117,8 +120,7 @@ public class GoalInvitationService {
             throw new InvalidInvitationException("Invitation is already processed.");
         }
 
-        if (goalService.countActiveGoalsPerUser(invitation.getInvited().getId()) >=
-                goalInvitationConfig.getMaxActiveGoals()) {
+        if (goalService.countActiveGoalsPerUser(invitation.getInvited().getId()) >= maxActiveGoals) {
             throw new InvalidInvitationException("User has reached the maximum number of active goals.");
         }
 
