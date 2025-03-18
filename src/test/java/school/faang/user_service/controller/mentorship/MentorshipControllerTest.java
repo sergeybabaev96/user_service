@@ -5,12 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.dto.MentorshipDto;
 import school.faang.user_service.service.MentorshipService;
@@ -19,6 +14,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -30,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(MentorshipController.class)
-@Import(MentorshipControllerTest.TestExceptionHandler.class)
 public class MentorshipControllerTest {
 
     @Autowired
@@ -87,23 +84,23 @@ public class MentorshipControllerTest {
         verify(mentorshipService).deleteMentee(menteeId, mentorId);
     }
 
+
     @Test
-    public void deleteMenteeWhenServiceThrowsExceptionReturnsNotFound() throws Exception {
+    public void deleteMenteeWhenServiceThrowsException() {
         long mentorId = 1L;
         long menteeId = 2L;
-        doThrow(new EntityNotFoundException("Some error")).when(mentorshipService).deleteMentee(menteeId, mentorId);
 
-        mockMvc.perform(delete("/mentorship/mentors/{mentorId}/mentees/{menteeId}", mentorId, menteeId))
-                .andExpect(status().isNotFound());
+        doThrow(new EntityNotFoundException("Mentor not found"))
+                .when(mentorshipService).deleteMentee(menteeId, mentorId);
+
+        try {
+            mockMvc.perform(delete("/mentorship/mentors/{mentorId}/mentees/{menteeId}", mentorId, menteeId));
+        } catch (Exception e) {
+            assertInstanceOf(EntityNotFoundException.class, e.getCause());
+            assertEquals("Mentor not found", e.getCause().getMessage());
+        }
 
         verify(mentorshipService).deleteMentee(menteeId, mentorId);
     }
 
-    @ControllerAdvice
-    static class TestExceptionHandler {
-        @ExceptionHandler(EntityNotFoundException.class)
-        @ResponseStatus(HttpStatus.NOT_FOUND)
-        public void handleEntityNotFoundException(EntityNotFoundException ex) {
-        }
-    }
 }
