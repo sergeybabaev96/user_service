@@ -21,11 +21,11 @@ public class PostgreSQLContainerConfiguration {
             .withUsername("user")
             .withPassword("password");
 
-//    static {
-//        POSTGRES_CONTAINER.start();
-//        System.out.println("✅ Запуска POSTGRES");
-//        printInto(POSTGRES_CONTAINER);
-//    }
+    static {
+        POSTGRES_CONTAINER.start();
+        System.out.println("✅ Запуска POSTGRES");
+        printInto(POSTGRES_CONTAINER);
+    }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
