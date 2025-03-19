@@ -65,20 +65,21 @@ public class EducationServiceTest {
     @DisplayName("Проверка получения ошибки при указании года начала обучения больше текущего")
     @Test
     void testAddEducationWithIncorrectYearFrom() {
-        EducationViewDto educationDto = new EducationViewDto();
-        educationDto.setYearFrom(Year.now().getValue() + 1);
-        long userId = 3L;
+        educationViewDto.setYearFrom(Year.now().getValue() + 1);
 
-        Assertions.assertThrows(DataValidationException.class, () -> educationService.addEducation(userId, educationDto));
+        Exception exception = Assertions.assertThrows(DataValidationException.class,
+                () -> educationService.addEducation(user.getId(), educationViewDto));
+        Assertions.assertTrue(exception.getMessage().contains("The start date of studies is too late"));
     }
 
     @DisplayName("Проверка получения ошибки при попытке найти пользователя по несуществующему id")
     @Test
     void testAddEducationWithNonExistingUserId() {
-        EducationViewDto educationDto = new EducationViewDto();
-        educationDto.setYearFrom(Year.now().getValue());
         long userId = 5L;
-        Assertions.assertThrows(DataValidationException.class, () -> educationService.addEducation(userId, educationDto));
+
+        Exception exception = Assertions.assertThrows(DataValidationException.class,
+                () -> educationService.addEducation(userId, educationViewDto));
+        Assertions.assertTrue(exception.getMessage().contains("User is not found"));
     }
 
     @DisplayName("Проверка успешного добавления данных об образовании")
@@ -89,13 +90,16 @@ public class EducationServiceTest {
         Mockito.when(educationRepository.save(education)).thenReturn(education);
         Mockito.when(educationMapper.toEducationDto(education)).thenReturn(educationViewDto);
         EducationViewDto result = educationService.addEducation(user.getId(), educationViewDto);
+
         Assertions.assertEquals(educationViewDto, result);
     }
 
     @DisplayName("Проверка получения ошибки при попытке найти данные об образовании по несуществующему id")
     @Test
     void testUpdateEducationWithNonExistingEducationId() {
-        Assertions.assertThrows(DataValidationException.class, () -> educationService.updateEducation(user.getId(), educationViewDto));
+        Exception exception = Assertions.assertThrows(DataValidationException.class,
+                () -> educationService.updateEducation(user.getId(), educationViewDto));
+        Assertions.assertTrue(exception.getMessage().contains("Education is not found"));
     }
 
     @DisplayName("Проверка получения ошибки при попытке обновить данные об образовании третьим лицом")
@@ -106,7 +110,9 @@ public class EducationServiceTest {
         Mockito.when(educationMapper.toEducation(educationViewDto)).thenReturn(education);
         education.setUser(anotherUser);
 
-        Assertions.assertThrows(DataValidationException.class, () -> educationService.updateEducation(user.getId(), educationViewDto));
+        Exception exception = Assertions.assertThrows(DataValidationException.class,
+                () -> educationService.updateEducation(user.getId(), educationViewDto));
+        Assertions.assertTrue(exception.getMessage().contains("User tried update other user's data"));
     }
 
     @DisplayName("Проверка успешного обновления данных об образовании")
