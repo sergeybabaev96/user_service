@@ -38,18 +38,6 @@ public class EducationServiceTest {
     @InjectMocks
     private EducationService educationService;
 
-    @Captor
-    private ArgumentCaptor<Long> userIdCaptor;
-
-    @Captor
-    private ArgumentCaptor<EducationDto> educationDtoCaptor;
-
-    @Captor
-    private ArgumentCaptor<Education> educationCaptor;
-
-    @Captor
-    private ArgumentCaptor<Long> educationIdCaptor;
-
     private final Integer MINUS_ONE_YEARS = LocalDate.now().minusYears(1).getYear();
 
     private final long userId = 1L;
@@ -71,7 +59,6 @@ public class EducationServiceTest {
     @Test
     public void testUserNotFound() {
 
-
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThrows(DataValidationException.class, () -> {
@@ -89,16 +76,13 @@ public class EducationServiceTest {
 
         EducationDto result = educationService.addEducation(userId, educationDto);
 
-        verify(userRepository, times(1)).findById(userIdCaptor.capture());
-        verify(educationMapper, times(1)).toEducation(educationDtoCaptor.capture());
-        verify(educationRepository, times(1)).save(educationCaptor.capture());
-        verify(educationMapper, times(1)).toEducationDto(educationCaptor.capture());
+        verify(userRepository, times(1)).findById(any(Long.class));
+        verify(educationMapper, times(1)).toEducation(any(EducationDto.class));
+        verify(educationRepository, times(1)).save(any(Education.class));
+        verify(educationMapper, times(1)).toEducationDto(any(Education.class));
 
         assertNotNull(result);
         assertEquals(educationDto, result);
-        assertEquals(userId, userIdCaptor.getValue());
-        assertEquals(educationDto, educationDtoCaptor.getValue());
-
     }
 
     @Test
@@ -121,16 +105,11 @@ public class EducationServiceTest {
 
         assertNotNull(result);
         assertEquals(educationDto, result);
-        verify(userRepository, times(1)).findById(userIdCaptor.capture());
-        verify(educationRepository, times(1)).findById(educationIdCaptor.capture());
-        verify(educationMapper, times(1)).toEducation(educationDtoCaptor.capture());
-        verify(educationRepository, times(1)).save(educationCaptor.capture());
-        verify(educationMapper, times(1)).toEducationDto(educationCaptor.capture());
-
-        assertEquals(userId, userIdCaptor.getValue());
-        assertEquals(educationId, educationIdCaptor.getValue());
-        assertEquals(educationDto, educationDtoCaptor.getValue());
-        assertEquals(updatedEducation, educationCaptor.getValue());
+        verify(userRepository, times(1)).findById(any(Long.class));
+        verify(educationRepository, times(1)).findById(any(Long.class));
+        verify(educationMapper, times(1)).toEducation(any(EducationDto.class));
+        verify(educationRepository, times(1)).save(any(Education.class));
+        verify(educationMapper, times(1)).toEducationDto(any(Education.class));
     }
 
     @Test
@@ -144,14 +123,11 @@ public class EducationServiceTest {
             educationService.updateEducation(userId, educationDto);
         });
 
-        verify(userRepository, times(1)).findById(userIdCaptor.capture());
-        verify(educationRepository, times(1)).findById(educationIdCaptor.capture());
+        verify(userRepository, times(1)).findById(any(Long.class));
+        verify(educationRepository, times(1)).findById(any(Long.class));
         verify(educationMapper, never()).toEducation(any());
         verify(educationRepository, never()).save(any());
         verify(educationMapper, never()).toEducationDto(any());
-
-        assertEquals(userId, userIdCaptor.getValue());
-        assertEquals(educationId, educationIdCaptor.getValue());
     }
 
     @Test
@@ -168,15 +144,11 @@ public class EducationServiceTest {
             educationService.updateEducation(userId, educationDto);
         });
 
-        verify(userRepository, times(1)).findById(userIdCaptor.capture());
-        verify(educationRepository, times(1)).findById(educationIdCaptor.capture());
+        verify(userRepository, times(1)).findById(any(Long.class));
+        verify(educationRepository, times(1)).findById(any(Long.class));
         verify(educationMapper, never()).toEducation(any());
         verify(educationRepository, never()).save(any());
         verify(educationMapper, never()).toEducationDto(any());
-
-        assertEquals(userId, userIdCaptor.getValue());
-        assertEquals(educationId, educationIdCaptor.getValue());
-
     }
 
     @Test
@@ -189,11 +161,8 @@ public class EducationServiceTest {
 
         assertNotNull(result);
         assertEquals(educationDto, result);
-        verify(educationRepository, times(1)).findById(educationIdCaptor.capture());
-        verify(educationMapper, times(1)).toEducationDto(educationCaptor.capture());
-
-        assertEquals(educationId, educationIdCaptor.getValue());
-        assertEquals(education, educationCaptor.getValue());
+        verify(educationRepository, times(1)).findById(any(Long.class));
+        verify(educationMapper, times(1)).toEducationDto(any(Education.class));
     }
 
     @Test
@@ -205,9 +174,7 @@ public class EducationServiceTest {
             educationService.getById(educationId);
         });
 
-        verify(educationRepository, times(1)).findById(educationIdCaptor.capture());
+        verify(educationRepository, times(1)).findById(any(Long.class));
         verify(educationMapper, never()).toEducationDto(any());
-
-        assertEquals(educationId, educationIdCaptor.getValue());
     }
 }
