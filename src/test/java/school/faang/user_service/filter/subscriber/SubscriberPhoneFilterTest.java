@@ -44,6 +44,17 @@ class SubscriberPhoneFilterTest {
     }
 
     @Test
+    void applyNoMatch() {
+        UserFilterDto filterDto = new UserFilterDto();
+        filterDto.setPhonePattern(mockUsers.user1.getPhone());
+        User noMatchUser = new User();
+        noMatchUser.setPhone("34244234");
+
+        List<User> filteredUsers = subscriberPhoneFilter.apply(Stream.of(noMatchUser), filterDto).toList();
+        assertEquals(0, filteredUsers.size());
+    }
+
+    @Test
     void applySuccess() {
         UserFilterDto filterDto = new UserFilterDto();
         filterDto.setPhonePattern(mockUsers.user1.getPhone());

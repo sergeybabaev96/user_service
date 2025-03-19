@@ -6,6 +6,7 @@ import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.entity.User;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,11 +35,23 @@ class SubscriberNameFilterTest {
         assertFalse(subscriberNameFilter.isApplicable(filterDto));
     }
 
+
     @Test
     void isApplicableNameCorrect(){
         filterDto.setNamePattern(mockUsers.user1.getUsername());
 
         assertTrue(subscriberNameFilter.isApplicable(filterDto));
+    }
+
+    @Test
+    void applyNoMatch() {
+        UserFilterDto filterDto = new UserFilterDto();
+        filterDto.setNamePattern(mockUsers.user1.getUsername());
+        User noMatchUser = new User();
+        noMatchUser.setUsername("Test");
+
+        List<User> filteredUsers = subscriberNameFilter.apply(Stream.of(noMatchUser), filterDto).toList();
+        assertEquals(0, filteredUsers.size());
     }
 
     @Test

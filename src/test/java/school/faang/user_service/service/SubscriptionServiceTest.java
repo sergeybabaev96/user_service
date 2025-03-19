@@ -143,7 +143,7 @@ public class SubscriptionServiceTest {
         }
 
         @Test
-        public void unfollowUserAlreadySubscribed() {
+        public void unfollowUserNotSubscribedUser() {
             mockFollowerExists(true);
             mockFolloweeExists(true);
             when(subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).thenReturn(false);
@@ -171,6 +171,7 @@ public class SubscriptionServiceTest {
             mockFolloweeExists(false);
 
             assertThrows(DataValidationException.class, () -> subscriptionService.getFollowers(followeeId, filters));
+            verify(subscriptionRepository, never()).findByFolloweeId(followeeId);
             verify(userMapper, never()).toListUser(anyList());
         }
 
@@ -182,6 +183,7 @@ public class SubscriptionServiceTest {
 
             List<UserDto> usersDto = subscriptionService.getFollowers(followeeId, filters);
             assertTrue(usersDto.isEmpty());
+            verify(subscriptionRepository, times(1)).findByFolloweeId(followeeId);
             verify(userMapper, never()).toListUser(anyList());
         }
 
@@ -195,6 +197,7 @@ public class SubscriptionServiceTest {
             filters.setNamePattern(mockUsers.user1.getUsername());
 
             subscriptionService.getFollowers(followeeId, filters);
+            verify(subscriptionRepository, times(1)).findByFolloweeId(followeeId);
             verify(userMapper, times(1)).toListUserDto(anyList());
         }
     }
@@ -204,18 +207,18 @@ public class SubscriptionServiceTest {
 
         @Test
         public void getFollowersCountFolloweeIdNotFound() {
-            mockFollowerExists(false);
+            mockFolloweeExists(false);
 
-            assertThrows(DataValidationException.class, () -> subscriptionService.getFollowersCount(followerId));
-            verify(subscriptionRepository, never()).findFollowersAmountByFolloweeId(followerId);
+            assertThrows(DataValidationException.class, () -> subscriptionService.getFollowersCount(followeeId));
+            verify(subscriptionRepository, never()).findFollowersAmountByFolloweeId(followeeId);
         }
 
         @Test
         public void getFollowersCountSuccess() {
-            mockFollowerExists(true);
+            mockFolloweeExists(true);
             
-            subscriptionService.getFollowersCount(followerId);
-            verify(subscriptionRepository, times(1)).findFollowersAmountByFolloweeId(followerId);
+            subscriptionService.getFollowersCount(followeeId);
+            verify(subscriptionRepository, times(1)).findFollowersAmountByFolloweeId(followeeId);
         }
     }
 
@@ -224,33 +227,33 @@ public class SubscriptionServiceTest {
 
         @Test
         public void getFollowingUserIdNotFound() {
-            mockFolloweeExists(false);
+            mockFollowerExists(false);
 
-            assertThrows(DataValidationException.class, () -> subscriptionService.getFollowing(followeeId, filters));
+            assertThrows(DataValidationException.class, () -> subscriptionService.getFollowing(followerId, filters));
             verify(userMapper, never()).toListUser(anyList());
         }
 
         @Test
         public void getFollowingFilterIsEmpty() {
-            mockFolloweeExists(true);
-            when(subscriptionRepository.findByFollowerId(followeeId)).thenReturn(Stream.empty());
+            mockFollowerExists(true);
+            when(subscriptionRepository.findByFollowerId(followerId)).thenReturn(Stream.empty());
             when(subscriberFilters.stream()).thenReturn(Stream.empty());
 
-            List<UserDto> usersDto = subscriptionService.getFollowing(followeeId, filters);
+            List<UserDto> usersDto = subscriptionService.getFollowing(followerId, filters);
             assertTrue(usersDto.isEmpty());
             verify(userMapper, never()).toListUser(anyList());
         }
 
         @Test
         public void getFollowingSuccess() {
-            mockFolloweeExists(true);
-            when(subscriptionRepository.findByFollowerId(followeeId)).thenReturn(mockUsers.getUsers());
+            mockFollowerExists(true);
+            when(subscriptionRepository.findByFollowerId(followerId)).thenReturn(mockUsers.getUsers());
             when(subscriberFilters.stream()).thenReturn(Stream.of(new SubscriberNameFilter()));
             when(userMapper.toListUserDto(anyList())).thenReturn(List.of(new UserDto()));
 
             filters.setNamePattern(mockUsers.user1.getUsername());
 
-            subscriptionService.getFollowing(followeeId, filters);
+            subscriptionService.getFollowing(followerId, filters);
             verify(userMapper, times(1)).toListUserDto(anyList());
         }
     }
@@ -259,15 +262,15 @@ public class SubscriptionServiceTest {
     class GetFollowingCount {
 
         @Test
-        public void getFollowersCountFolloweeIdNotFound() {
+        public void getFollowingCountFollowerIdNotFound() {
             mockFollowerExists(false);
 
             assertThrows(DataValidationException.class, () -> subscriptionService.getFollowingCount(followerId));
-            verify(subscriptionRepository, never()).findFollowersAmountByFolloweeId(followerId);
+            verify(subscriptionRepository, never()).findFolloweesAmountByFollowerId(followerId);
         }
 
         @Test
-        public void getFollowersCountSuccess() {
+        public void getFollowingCountSuccess() {
             mockFollowerExists(true);
 
             subscriptionService.getFollowingCount(followerId);
