@@ -67,7 +67,7 @@ class EventServiceTest {
     private static final long USER_ID = 1L;
     private static final long SKILL_JAVA_ID = 10L;
     private static final long SKILL_SQL_ID = 20L;
-    private static final LocalDateTime BASELINE_TIME = LocalDateTime.of(2026, 3, 10, 18, 0);
+    private static final LocalDateTime BASELINE_TIME = LocalDateTime.now().plusYears(1);
 
     @BeforeEach
     @DisplayName("Setup event DTO, valid user and event")

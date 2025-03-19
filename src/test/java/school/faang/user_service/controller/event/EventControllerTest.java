@@ -22,14 +22,19 @@ import school.faang.user_service.service.event.EventService;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
@@ -50,7 +55,7 @@ class EventControllerTest {
     private static final long EVENT_ID = 1L;
     private static final long NON_EXISTING_EVENT_ID = 999L;
     private static final long USER_ID = 1L;
-    private static final LocalDateTime BASELINE_TIME = LocalDateTime.of(2026, 3, 10, 18, 0);
+    private static final LocalDateTime BASELINE_TIME = LocalDateTime.now().plusYears(1);
 
     @Nested
     @DisplayName("POST /events")
@@ -70,6 +75,31 @@ class EventControllerTest {
                     .andExpect(header().string("Location", "/events/" + EVENT_ID))
                     .andExpect(jsonPath("$.id").value(EVENT_ID))
                     .andExpect(jsonPath("$.title").value("Java presentation"));
+        }
+
+        @Test
+        @DisplayName("Should validate event via EventDtoValidator on create")
+        void testCreateEventCallsValidator() throws Exception {
+            EventDto request = EventDtoBuilder.createValidEventDto(null);
+            when(eventService.create(any())).thenReturn(EventDtoBuilder.createValidEventDto(EVENT_ID));
+
+            mockMvc.perform(post("/events")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated());
+
+            verify(eventService).create(any());
+        }
+
+        @Test
+        @DisplayName("Should return 500 when validation fails (startDate in past)")
+        void testCreateEventInvalidStartDate() throws Exception {
+            EventDto invalidRequest = EventDtoBuilder.createInvalidEventDto();
+
+            mockMvc.perform(post("/events")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidRequest)))
+                    .andExpect(jsonPath("$.message").value("Validation failed: StartDate can't be null or in the past"));
         }
     }
 
@@ -117,6 +147,31 @@ class EventControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(EVENT_ID))
                     .andExpect(jsonPath("$.title").value("Java presentation"));
+        }
+
+        @Test
+        @DisplayName("Should validate event via EventDtoValidator on update")
+        void testUpdateEventCallsValidator() throws Exception {
+            EventDto request = EventDtoBuilder.createValidEventDto(EVENT_ID);
+            when(eventService.updateEvent(any(), eq(EVENT_ID))).thenReturn(request);
+
+            mockMvc.perform(put("/events/{eventId}", EVENT_ID)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk());
+
+            verify(eventService).updateEvent(any(), eq(EVENT_ID));
+        }
+
+        @Test
+        @DisplayName("Should return 400 when ID mismatch")
+        void testUpdateEventIdMismatch() throws Exception {
+            EventDto request = EventDtoBuilder.createInvalidEventDto();
+
+            mockMvc.perform(put("/events/{eventId}", EVENT_ID)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(jsonPath("$.message").value("Validation failed: StartDate can't be null or in the past"));
         }
     }
 

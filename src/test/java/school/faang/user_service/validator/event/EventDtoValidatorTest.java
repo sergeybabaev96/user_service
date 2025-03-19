@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("EventDtoValidator Tests")
 class EventDtoValidatorTest {
 
-    private static final LocalDateTime BASELINE_TIME = LocalDateTime.of(2026, 3, 10, 18, 0);
+    private static final LocalDateTime BASELINE_TIME = LocalDateTime.now().plusYears(1);
 
     @Nested
     @DisplayName("Valid Event Validation Tests")
@@ -103,7 +103,7 @@ class EventDtoValidatorTest {
         void testValidateStartDateInPast() {
             EventDto dto = EventDto
                     .builder()
-                    .startDate(BASELINE_TIME.minusDays(15))
+                    .startDate(BASELINE_TIME.minusYears(3))
                     .build();
 
             assertThrows(DataValidationException.class,

@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DateRangeFilterTest {
-    private final LocalDateTime START = LocalDateTime.of(2026, 10, 1, 10, 0);
-    private final LocalDateTime END = LocalDateTime.of(2026, 10, 5, 18, 0);
+    private final LocalDateTime START = LocalDateTime.now().plusYears(1);
+    private final LocalDateTime END = LocalDateTime.now().plusYears(1).plusMonths(4);
 
     @Test
     void testMatchesEventWithinDateRange() {

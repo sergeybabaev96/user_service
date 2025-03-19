@@ -14,7 +14,7 @@ import school.faang.user_service.entity.event.EventType;
 @UtilityClass
 public class EventBuilder {
 
-    private static final LocalDateTime BASELINE_TIME = LocalDateTime.of(2026, 3, 10, 18, 0);
+    private static final LocalDateTime BASELINE_TIME = LocalDateTime.now().plusYears(1);
 
     public static Event createValidEvent(Long id, User owner) {
         return Event.builder()
