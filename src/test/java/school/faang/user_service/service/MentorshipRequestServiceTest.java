@@ -1,5 +1,6 @@
 package school.faang.user_service.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,16 +12,19 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
+import school.faang.user_service.dto.mentorship.RejectionDto;
 import school.faang.user_service.dto.mentorship.RequestFilterDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.exception.MentorshipAlreadyExistsException;
 import school.faang.user_service.filter.MentorshipRequestFilter;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,7 +60,7 @@ class MentorshipRequestServiceTest {
 
     private Map<MentorshipRequestFilter, Predicate<MentorshipRequest>> filterMap;
 
-    void setUpBeforeTestFilters() {
+    void setUpBeforeTestFilters(boolean appliedFilter) {
         mentorshipRequestService = new MentorshipRequestService(
                 mentorshipRequestRepository,
                 mentorshipRequestMapper,
@@ -93,11 +97,13 @@ class MentorshipRequestServiceTest {
 
         List<MentorshipRequestFilter> filters = List.of(requestFilter, receiverFilter, descriptionFilter, statusFilter);
         for (MentorshipRequestFilter filter : filters) {
-            when(filter.isApplicable(any())).thenReturn(true);
-            when(filter.filter(any(), any())).thenAnswer((Answer<Stream<MentorshipRequest>>) invocation -> {
-                Stream<MentorshipRequest> stream = invocation.getArgument(0);
-                return stream.filter(filterMap.get(filter));
-            });
+            if (appliedFilter) {
+                when(filter.isApplicable(any())).thenReturn(appliedFilter);
+                when(filter.filter(any(), any())).thenAnswer((Answer<Stream<MentorshipRequest>>) invocation -> {
+                    Stream<MentorshipRequest> stream = invocation.getArgument(0);
+                    return stream.filter(filterMap.get(filter));
+                });
+            }
         }
 
     }
@@ -199,16 +205,18 @@ class MentorshipRequestServiceTest {
     }
 
     @Test
+    @DisplayName("Test getRequest with applied all filters")
     void testReturnFilteredRequest() {
-        setUpBeforeTestFilters();
+        setUpBeforeTestFilters(true);
         List<MentorshipRequestDto> filteredRequests = mentorshipRequestService.getRequests(new RequestFilterDto());
 
         assertEquals(1, filteredRequests.size());
     }
 
     @Test
+    @DisplayName("Test getRequest with applied all filters and return empty")
     void testReturnEmpty() {
-        setUpBeforeTestFilters();
+        setUpBeforeTestFilters(true);
         filterMap = Map.of(
                 requestFilter, request -> request.getRequester().getId() == 1L,
                 receiverFilter, request -> request.getReceiver().getId() == 8L,
@@ -221,24 +229,89 @@ class MentorshipRequestServiceTest {
     }
 
     @Test
+    @DisplayName("Test getRequest with null filters")
     void testGetRequestsWithNullFilter() {
-        setUpBeforeTestFilters();
-        filterMap = Map.of(
-                requestFilter, request -> true,
-                receiverFilter, request -> true,
-                descriptionFilter, request -> true,
-                statusFilter, request -> true
-        );
+        setUpBeforeTestFilters(false);
+
         List<MentorshipRequestDto> filteredRequests = mentorshipRequestService.getRequests(new RequestFilterDto());
 
         assertEquals(4, filteredRequests.size());
     }
 
     @Test
-    void acceptRequest() {
+    @DisplayName("Test accept request with requestId not found")
+    void testAcceptRequestWithIdNotFound() {
+        long requestId = 1L;
+        when(mentorshipRequestRepository.findById(requestId)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class,
+                () -> mentorshipRequestService.acceptRequest(requestId),
+                "Mentorship request with id " + requestId + " not found");
     }
 
     @Test
-    void rejectRequest() {
+    @DisplayName("Test accept request with already mentors for requester")
+    void testAcceptRequestWithAlreadyMentors() {
+        long requestId = 1L;
+        MentorshipRequest request = MentorshipRequest.builder()
+                .id(requestId)
+                .requester(User.builder().id(1L).mentors(List.of(User.builder().id(2L).build())).build())
+                .receiver(User.builder().id(2L).build())
+                .status(RequestStatus.PENDING)
+                .build();
+        when(mentorshipRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+
+        assertThrows(MentorshipAlreadyExistsException.class,
+                () -> mentorshipRequestService.acceptRequest(requestId),
+                "User 2 is already a mentor for user 1");
+    }
+
+    @Test
+    @DisplayName("Test accept request successful")
+    void testAcceptRequestSuccessful() {
+        long requestId = 1L;
+        MentorshipRequest request = MentorshipRequest.builder()
+                .id(requestId)
+                .requester(User.builder().id(1L).mentors(new ArrayList<>()).build())
+                .receiver(User.builder().id(2L).mentees(new ArrayList<>()).build())
+                .status(RequestStatus.PENDING)
+                .build();
+        when(mentorshipRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+
+        mentorshipRequestService.acceptRequest(requestId);
+
+        verify(userRepository, Mockito.times(1)).save(request.getRequester());
+        verify(userRepository, Mockito.times(1)).save(request.getReceiver());
+        verify(mentorshipRequestRepository, Mockito.times(1)).save(request);
+    }
+
+    @Test
+    @DisplayName("Test reject request when requestId not found")
+    void testRejectRequestWithNotFoundById() {
+        long requestId = 1L;
+        RejectionDto rejectionDto = RejectionDto.builder().rejectionReason("Some reason").build();
+        when(mentorshipRequestRepository.findById(requestId)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class,
+                () -> mentorshipRequestService.rejectRequest(requestId, rejectionDto),
+                "Mentorship request with id " + requestId + " not found");
+    }
+
+    @Test
+    @DisplayName("Test reject request successful")
+    void testRejectRequestSuccessful() {
+        long requestId = 1L;
+        MentorshipRequest request = MentorshipRequest.builder()
+                .id(requestId)
+                .requester(User.builder().id(1L).build())
+                .receiver(User.builder().id(2L).build())
+                .status(RequestStatus.PENDING)
+                .build();
+        RejectionDto rejectionDto = RejectionDto.builder().rejectionReason("Some reason").build();
+        when(mentorshipRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+
+        mentorshipRequestService.rejectRequest(requestId, rejectionDto);
+
+        verify(mentorshipRequestRepository, Mockito.times(1)).save(request);
     }
 }
