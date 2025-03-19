@@ -15,14 +15,14 @@ import school.faang.user_service.service.education.EducationService;
 public class EducationController {
     private final EducationService educationService;
 
-    @PostMapping("/{userId}")
-    public ResponseEntity<EducationDto> addEducation(@RequestParam("userId") long userId, @Valid @RequestBody EducationDto educationDto) {
+    @PostMapping("{userId}")
+    public ResponseEntity<EducationDto> addEducation(@PathVariable("userId") long userId, @Valid @RequestBody EducationDto educationDto) {
         EducationDto result = educationService.addEducation(userId, educationDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<EducationDto> updateEducation(@RequestParam("userId") long userId, @Valid @RequestBody EducationDto educationDto) {
+    public ResponseEntity<EducationDto> updateEducation(@PathVariable("userId") long userId, @Valid @RequestBody EducationDto educationDto) {
         EducationDto result = educationService.updateEducation(userId, educationDto);
         return ResponseEntity.ok(result);
     }
