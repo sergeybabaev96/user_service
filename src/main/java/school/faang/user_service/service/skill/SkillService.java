@@ -1,5 +1,6 @@
 package school.faang.user_service.service.skill;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.skill.SkillCandidateDto;
@@ -11,8 +12,10 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.skill.SkillCandidateMapper;
 import school.faang.user_service.mapper.skill.SkillMapper;
 import school.faang.user_service.repository.SkillRepository;
+import school.faang.user_service.service.user.UserSkillGuaranteeService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -70,11 +73,16 @@ public class SkillService {
                             .guarantor(skillOffer.getRecommendation().getAuthor())
                             .build()));
             }
-
             return skillRepository.findUserSkill(skillId, userId)
                     .orElseThrow(() -> new DataValidationException("Skill isn`t find"));
         });
-
         return skillMapper.toDto(skill);
+    }
+
+    public List<Skill> getSkillsByIds(List<Long> skillIds) {
+        return skillIds.stream()
+                .map(skillId -> skillRepository.findById(skillId)
+                        .orElseThrow(() -> new EntityNotFoundException("skill with id " + skillId + " not exists")))
+                .collect(Collectors.toList());
     }
 }

@@ -86,6 +86,7 @@ class GoalServiceTest {
             .description(description)
             .parent(parent)
             .users(users)
+            .skillsToAchieve(skills)
             .build();
 
     private final GoalDto goalDto = GoalDto.builder()
@@ -105,7 +106,6 @@ class GoalServiceTest {
 
     @Test
     public void testCreateGoal() {
-        goal.setSkillsToAchieve(skills);
         Optional<Goal> createdOptionalGoal = Optional.of(goal);
         mockCreateGoalMethods(createdOptionalGoal);
 
@@ -158,25 +158,25 @@ class GoalServiceTest {
 
     @Test
     public void testUpdateGoal() {
-        Goal updatedGoal = goal;
-        updatedGoal.setSkillsToAchieve(skills);
-
         when(goalRepository.findById(goalId)).thenReturn(Optional.of(goal));
         when(skillService.isAllSkillsExist(goalDto.getSkillIds())).thenReturn(true);
-        when(goalRepository.save(goal)).thenReturn(updatedGoal);
+        when(goalRepository.findById(goalDto.getParentId())).thenReturn(Optional.of(parent));
+        when(skillService.getSkillsByIds(goalDto.getSkillIds())).thenReturn(skills);
+        when(goalRepository.save(goal)).thenReturn(goal);
 
         GoalDto updatedGoalDto = goalService.updateGoal(goalId, goalDto);
 
         verify(goalRepository, times(1)).findById(goalId);
         verify(skillService, times(1)).isAllSkillsExist(goalDto.getSkillIds());
         verify(skillService, times(getCountAssignSkillToUser())).assignSkillToUser(anyLong(), anyLong());
-        verify(goalRepository, times(1)).removeSkillsFromGoal(goalId);
-        verify(goalRepository, times(goalDto.getSkillIds().size())).addSkillToGoal(anyLong(), anyLong());
+        verify(goalMapper, times(1)).updateGoalFromDto(goalDto, goal);
+        verify(goalRepository, times(1)).findById(parent.getId());
+        verify(skillService, times(1)).getSkillsByIds(goalDto.getSkillIds());
         verify(goalRepository, times(1)).save(goal);
 
-        assertEquals(updatedGoal.getSkillsToAchieve().size(), updatedGoalDto.getSkillIds().size());
+        assertEquals(goal.getSkillsToAchieve().size(), updatedGoalDto.getSkillIds().size());
         IntStream.range(0, skills.size()).forEach(num ->
-                assertEquals(updatedGoal.getSkillsToAchieve().get(num).getId(), updatedGoalDto.getSkillIds().get(num)));
+                assertEquals(goal.getSkillsToAchieve().get(num).getId(), updatedGoalDto.getSkillIds().get(num)));
     }
 
     @Test
@@ -213,7 +213,21 @@ class GoalServiceTest {
         assertThrows(EntityNotFoundException.class, () -> goalService.updateGoal(goalId, goalDto));
         verify(goalRepository, times(1)).findById(goalId);
         verify(skillService, times(1)).isAllSkillsExist(goalDto.getSkillIds());
+    }
 
+    @Test
+    public void testNotUpdateWhenGoalParentNotExists() {
+        when(goalRepository.findById(goalId)).thenReturn(Optional.of(goal));
+        when(skillService.isAllSkillsExist(goalDto.getSkillIds())).thenReturn(true);
+        when(goalRepository.findById(goalDto.getParentId())).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> goalService.updateGoal(goalId, goalDto));
+
+        verify(goalRepository, times(1)).findById(goalId);
+        verify(skillService, times(1)).isAllSkillsExist(goalDto.getSkillIds());
+        verify(skillService, times(getCountAssignSkillToUser())).assignSkillToUser(anyLong(), anyLong());
+        verify(goalMapper, times(1)).updateGoalFromDto(goalDto, goal);
+        verify(goalRepository, times(1)).findById(parent.getId());
     }
 
     @Test

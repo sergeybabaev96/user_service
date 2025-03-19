@@ -3,6 +3,7 @@ package school.faang.user_service.service.goal;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.GoalFilterDto;
 import school.faang.user_service.entity.goal.Goal;
@@ -32,12 +33,12 @@ public class GoalService {
         validateExistsGoalParent(goalDto);
         validateExistsGoalSkills(goalDto.getSkillIds());
 
-        Long goalId = goalRepository.create(goalDto.getTitle(), goalDto.getDescription(),
-                goalDto.getParentId()).getId();
+        Goal goal = goalRepository.create(goalDto.getTitle(), goalDto.getDescription(),
+                goalDto.getParentId());
 
-        goalDto.getSkillIds().forEach(skillId -> goalRepository.addSkillToGoal(skillId, goalId));
-        Goal createdGoal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new EntityNotFoundException("Goal with id " + goalId + " does not exist"));
+        goalDto.getSkillIds().forEach(skillId -> goalRepository.addSkillToGoal(skillId, goal.getId()));
+        Goal createdGoal = goalRepository.findById(goal.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Goal with id " + goal.getId() + " does not exist"));
 
         return goalMapper.toDto(createdGoal);
     }
@@ -45,12 +46,17 @@ public class GoalService {
     public GoalDto updateGoal(long goalId, GoalDto goalDto) {
         Goal goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new EntityNotFoundException("Goal with id " + goalId + " does not exist"));
+
         validateStatuses(goalDto, goal);
         validateExistsGoalSkills(goalDto.getSkillIds());
 
         assignSkillsToUsers(goal);
-        goalRepository.removeSkillsFromGoal(goal.getId());
-        goalDto.getSkillIds().forEach(skillId -> goalRepository.addSkillToGoal(skillId, goal.getId()));
+
+        goalMapper.updateGoalFromDto(goalDto, goal);
+        goal.setParent(goalRepository.findById(goalDto.getParentId()).orElseThrow(
+                () -> new EntityNotFoundException("Goal parent with id " + goalDto.getParentId() + " not exists")));
+        goal.setSkillsToAchieve(skillService.getSkillsByIds(goalDto.getSkillIds()));
+
         return goalMapper.toDto(goalRepository.save(goal));
     }
 
@@ -60,11 +66,13 @@ public class GoalService {
         goalRepository.deleteById(goalId);
     }
 
+    @Transactional(readOnly = true)
     public List<GoalDto> getSubtasksByGoalId(long goalId, GoalFilterDto filters) {
         Stream<Goal> goals = goalRepository.findByParent(goalId);
         return applyFiltersAndConvertToDtos(goals, filters);
     }
 
+    @Transactional(readOnly = true)
     public List<GoalDto> getGoalsByUserId(long userId, GoalFilterDto filters) {
         Stream<Goal> userGoals = goalRepository.findGoalsByUserId(userId);
         return applyFiltersAndConvertToDtos(userGoals, filters);

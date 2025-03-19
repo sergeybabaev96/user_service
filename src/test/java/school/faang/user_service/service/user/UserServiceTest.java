@@ -1,5 +1,6 @@
 package school.faang.user_service.service.user;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -8,7 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
-import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.UserRepository;
 
 import java.util.List;
@@ -60,7 +60,7 @@ class UserServiceTest {
 
     @Test
     public void testIsWithinGoalLimitWithNotFoundUser() {
-        assertThrows(DataValidationException.class, () -> getResult(Optional.empty()));
+        assertThrows(EntityNotFoundException.class, () -> getResult(Optional.empty()));
     }
 
 
