@@ -23,6 +23,6 @@ public interface SkillCandidateMapper {
         return skills.stream()
                 .distinct()
                 .map(skill -> toSkillCandidateDto(skill, skillCountMap.get(skill.getId()).intValue()))
-                .toList();
+                .collect(Collectors.toList());
     }
 }

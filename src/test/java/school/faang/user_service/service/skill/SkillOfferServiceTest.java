@@ -31,8 +31,8 @@ public class SkillOfferServiceTest {
                 new SkillOffer()
         );
 
-        long skillId = 1;
-        long userId = 1;
+        long skillId = 1L;
+        long userId = 1L;
 
         when(skillOfferRepository.findAllOffersOfSkill(skillId, userId)).thenReturn(expectedOffers);
         List<SkillOffer> result = skillOfferService.findAllOffersOfSkill(skillId, userId);
