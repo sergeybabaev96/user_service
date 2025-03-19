@@ -17,7 +17,7 @@ import java.util.List;
 public class RecommendationController {
     private final RecommendationService recommendationService;
 
-    @RequestMapping("/create")
+    @RequestMapping("/give")
     public RecommendationDto giveRecommendation(RecommendationDto recommendation) {
         validateRecommendation(recommendation);
         return recommendationService.create(recommendation);
@@ -29,17 +29,17 @@ public class RecommendationController {
         return recommendationService.update(recommendation);
     }
 
-    @RequestMapping("/delete")
+    @RequestMapping("/deleteById")
     public void deleteRecommendation(long id) {
         recommendationService.delete(id);
     }
 
-    @RequestMapping("/getAllByReceiver")
+    @RequestMapping("/getAllByUserId")
     public List<RecommendationDto> getAllUserRecommendations(long recieverId) {
         return recommendationService.getAllUserRecommendations(recieverId);
     }
 
-    @RequestMapping("/getAllByAuthor")
+    @RequestMapping("/getAllByAuthorId")
     public List<RecommendationDto> getAllGivenRecommendations(long authorId) {
         return recommendationService.getAllGivenRecommendations(authorId);
     }
