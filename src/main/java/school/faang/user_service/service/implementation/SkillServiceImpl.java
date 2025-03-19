@@ -1,5 +1,7 @@
 package school.faang.user_service.service.implementation;
 
+import jakarta.validation.constraints.NotBlank;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -87,6 +89,8 @@ public class SkillServiceImpl implements SkillService {
         skillRepository.assignSkillToUser(skillId, userId);
 
         List<UserSkillGuarantee> guarantees = offers.stream()
+                .filter(offer -> Objects.nonNull(offer.getRecommendation().getReceiver())
+                        && Objects.nonNull(offer.getRecommendation().getAuthor()))
                 .map(offer -> UserSkillGuarantee.builder()
                         .user(offer.getRecommendation().getReceiver())
                         .skill(offer.getSkill())
@@ -115,7 +119,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
-    public void saveAllSkills(List<Skill> skills) {
+    public void saveAllSkills(@NonNull @NotBlank List<Skill> skills) {
         skillRepository.saveAll(skills);
     }
 

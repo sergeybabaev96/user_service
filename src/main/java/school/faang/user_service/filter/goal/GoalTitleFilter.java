@@ -8,14 +8,16 @@ import java.util.stream.Stream;
 
 @Component
 public class GoalTitleFilter implements GoalFilter {
-
     @Override
     public boolean isApplicable(SearchGoalDto searchGoal) {
-        return !searchGoal.title().isBlank();
+        return searchGoal.title() != null && !searchGoal.title().isBlank();
     }
 
     @Override
     public Stream<Goal> apply(Stream<Goal> goals, SearchGoalDto searchGoal) {
+        if (!isApplicable(searchGoal)) {
+            return goals;
+        }
         return goals.filter(goal -> searchGoal.title().equals(goal.getTitle()));
     }
 }
