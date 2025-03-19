@@ -17,9 +17,7 @@ public interface EducationMapper {
     @Mapping(target = "user", ignore = true)
     void updateEducationFromDto(EducationDto dto, @MappingTarget Education entity);
 
-    default Education toEducationWithUser(EducationDto educationDto, User user) {
-        Education education = toEducation(educationDto);
-        education.setUser(user);
-        return education;
-    }
+    @Mapping(source = "educationDto.id", target = "id")
+    Education toEducationWithUser(EducationDto educationDto, User user);
 }
+
