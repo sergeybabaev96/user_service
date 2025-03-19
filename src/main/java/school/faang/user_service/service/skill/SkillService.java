@@ -29,7 +29,7 @@ public class SkillService {
     private final SkillMapper skillMapper;
 
     public boolean isAllSkillsExist(List<Long> skillIds) {
-        return skillIds.stream().allMatch(skillRepository::existsById);
+       return skillIds.stream().allMatch(skillRepository::existsById);
     }
 
     public void assignSkillToUser (long skillId, long userId) {
@@ -37,9 +37,7 @@ public class SkillService {
     }
 
     public SkillDto create(SkillDto skillDto) {
-        if (skillRepository.existsByTitle(skillDto.title())) {
-            throw new DataValidationException("The skill already exists : " + skillDto.title());
-        }
+        checkSkillNotExists(skillDto);
 
         Skill skill = skillMapper.toEntity(skillDto);
         skill = skillRepository.save(skill);
@@ -48,9 +46,7 @@ public class SkillService {
 
     public List<SkillDto> getUserSkills(long userId) {
         List<Skill> skills = skillRepository.findAllByUserId(userId);
-        return skills.stream()
-                .map(skillMapper::toDto)
-                .toList();
+        return skills.stream().map(skillMapper::toDto).toList();
     }
 
     public List<SkillCandidateDto> getOfferedSkills(long userId) {
@@ -64,8 +60,10 @@ public class SkillService {
 
             if (skillOffers.size() >= MIN_SKILL_OFFERS) {
                 skillRepository.assignSkillToUser(skillId, userId);
+
                 Skill skillUser = skillRepository.findUserSkill(skillId, userId)
                         .orElseThrow(() -> new RuntimeException("Error adding a skill to a user"));
+
                 skillOffers.forEach(skillOffer ->
                     userSkillGuaranteeService.save(UserSkillGuarantee.builder()
                             .user(skillOffer.getRecommendation().getReceiver())
@@ -73,9 +71,11 @@ public class SkillService {
                             .guarantor(skillOffer.getRecommendation().getAuthor())
                             .build()));
             }
+
             return skillRepository.findUserSkill(skillId, userId)
                     .orElseThrow(() -> new DataValidationException("Skill isn`t find"));
         });
+
         return skillMapper.toDto(skill);
     }
 
@@ -84,5 +84,12 @@ public class SkillService {
                 .map(skillId -> skillRepository.findById(skillId)
                         .orElseThrow(() -> new EntityNotFoundException("skill with id " + skillId + " not exists")))
                 .collect(Collectors.toList());
+    }
+}
+
+    private void checkSkillNotExists(SkillDto skillDto) {
+        if (skillRepository.existsByTitle(skillDto.getTitle())) {
+            throw new DataValidationException("The skill already exists : " + skillDto.getTitle());
+        }
     }
 }
