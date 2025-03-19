@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import school.faang.user_service.dto.GoalCreateDto;
-import school.faang.user_service.dto.GoalFilterDto;
-import school.faang.user_service.dto.GoalViewDto;
+import school.faang.user_service.dto.goal.GoalCreateDto;
+import school.faang.user_service.dto.goal.GoalFilterDto;
+import school.faang.user_service.dto.goal.GoalViewDto;
 import school.faang.user_service.service.goal.GoalService;
 
 import java.util.List;

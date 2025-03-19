@@ -3,7 +3,7 @@ package school.faang.user_service.validation.goal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import school.faang.user_service.dto.GoalCreateDto;
+import school.faang.user_service.dto.goal.GoalCreateDto;
 import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.EntityNotFoundException;
@@ -40,8 +40,8 @@ public class GoalValidator {
     }
 
     private void validateMaxActiveGoals(Long userId) {
-        if (goalRepository.countActiveGoalsPerUser(userId) > MAX_GOALS) {
-            log.error("Ошибка валидации: количество активных целей не может быть больше 3");
+        if (goalRepository.countActiveGoalsPerUser(userId) >= MAX_GOALS) {
+            log.error("Ошибка валидации: максимальное количество активных целей 3");
             throw new DataValidationException("Превышено максимальное количество целей: " + MAX_GOALS);
         }
     }
