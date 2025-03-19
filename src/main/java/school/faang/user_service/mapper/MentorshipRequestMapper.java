@@ -11,6 +11,7 @@ public interface MentorshipRequestMapper {
 
     @Mapping(target = "requester.id", source = "requesterId")
     @Mapping(target = "receiver.id", source = "receiverId")
+    @Mapping(target = "status", constant = "PENDING")
     MentorshipRequest toEntity(MentorshipRequestDto dto);
 
     @Mapping(target = "requesterId", source = "requester.id")
