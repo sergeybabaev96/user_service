@@ -118,16 +118,16 @@ tasks.jacocoTestReport {
 
 // This task verifies tests
 tasks.jacocoTestCoverageVerification {
-    dependsOn(tasks.test)      // To start task after tests
+    dependsOn(tasks.jacocoTestReport)      // To start task after tests
 
     violationRules {
         rule {
             element = "CLASS"
             includes = listOf(
-                "school.faang.user_service.RecommendationRequestService",
-                "school.faang.user_service.SkillRequestService",
-                "school.faang.user_service.SkillService",
-                "school.faang.user_service.SkillService",
+                "school.faang.user_service.service.UserService",
+                "school.faang.user_service.service.MentorshipService",
+                "school.faang.user_service.service.event..EventParticipationService",
+                "school.faang.user_service.service.education.EducationService",
                 )
 
             limit {
