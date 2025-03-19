@@ -22,11 +22,11 @@ public class EventParticipationService {
     public void registerParticipant(long eventId, long userId) {
         List<User> users = eventParticipationRepository.findAllParticipantsByEventId(eventId);
 
-        if (isUserNotRegistered(users, userId)) {
+        if (users == null || !isUserRegistered(users, userId)) {
             eventParticipationRepository.register(eventId, userId);
             log.info("Пользователь {} успешно зарегистрирован на событие {}", userId, eventId);
         } else {
-            throw new RuntimeException("Пользователь уже зарегистрирован на событие");
+            throw new RuntimeException("Пользователь " + userId + " уже зарегистрирован на событие");
         }
     }
 
@@ -37,7 +37,7 @@ public class EventParticipationService {
             eventParticipationRepository.unregister(eventId, userId);
             log.info("Пользователь {} отменил регистрацию на событие {}", userId, eventId);
         } else {
-            throw new RuntimeException("Пользователь не участвует в событии");
+            throw new RuntimeException("Пользователь " + userId + " не участвует в событии");
         }
     }
 
@@ -48,11 +48,6 @@ public class EventParticipationService {
 
     public long getParticipantsCount(long eventId) {
         return eventParticipationRepository.countParticipants(eventId);
-    }
-
-    private boolean isUserNotRegistered(List<User> users, long userId) {
-        return users == null || users.stream()
-                .noneMatch(user -> user.getId().equals(userId));
     }
 
     private boolean isUserRegistered(List<User> users, long userId) {

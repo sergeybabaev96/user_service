@@ -1,5 +1,6 @@
 package school.faang.user_service.service.event;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,6 +35,13 @@ class EventParticipationServiceTest {
     @Spy
     private UserMapper userMapper;
 
+    private User user;
+
+    @BeforeEach
+    void setUp() {
+        user = new User();
+    }
+
     @Test
     void positiveRegisterParticipant() {
         eventParticipationService.registerParticipant(eventId, userId);
@@ -42,9 +50,7 @@ class EventParticipationServiceTest {
 
     @Test
     void negativeUserAlreadyRegistered() {
-        User user = User.builder()
-                .id(userId)
-                .build();
+        user.setId(userId);
         List<User> participants = List.of(user);
 
         when(eventParticipationRepository.findAllParticipantsByEventId(eventId)).thenReturn(participants);
@@ -56,9 +62,7 @@ class EventParticipationServiceTest {
 
     @Test
     void positiveUnregisterParticipant() {
-        User user = User.builder()
-                .id(userId)
-                .build();
+        user.setId(userId);
         List<User> participants = List.of(user);
 
         when(eventParticipationRepository.findAllParticipantsByEventId(eventId)).thenReturn(participants);
@@ -69,9 +73,7 @@ class EventParticipationServiceTest {
 
     @Test
     void negativeUserNotRegistered() {
-        User user = User.builder()
-                .id(0L)
-                .build();
+        user.setId(0L);
         List<User> participants = List.of(user);
 
         when(eventParticipationRepository.findAllParticipantsByEventId(eventId)).thenReturn(participants);
@@ -83,9 +85,7 @@ class EventParticipationServiceTest {
 
     @Test
     void positiveGetParticipant() {
-        User user = User.builder()
-                .id(userId)
-                .build();
+        user.setId(userId);
         UserDto userDto = UserDto.builder()
                 .id(userId)
                 .build();
