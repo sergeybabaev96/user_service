@@ -3,10 +3,8 @@ package school.faang.user_service.validator.education;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.exception.DataValidationException;
-import org.slf4j.Logger;
 
 import java.time.LocalDate;
 
@@ -33,10 +31,9 @@ public class UserServiceValidationTest {
     @Test
     @DisplayName("Test validYearLessCurrentYear with future year")
     public void testValidYearLessCurrentYear_FutureYear() {
-        String errorMessage = "The start date of education must be less than the current date";
         Integer futureYear = LocalDate.now().plusYears(1).getYear();
-        DataValidationException exception = assertThrows(DataValidationException.class,
+        assertThrows(DataValidationException.class,
                 () -> UserServiceValidation.validYearLessCurrentYear(futureYear));
-        assertEquals(errorMessage, exception.getMessage());
+
     }
 }

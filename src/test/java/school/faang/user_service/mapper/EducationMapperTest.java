@@ -1,5 +1,6 @@
 package school.faang.user_service.mapper;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +20,21 @@ class EducationMapperTest {
     @Autowired
     private EducationMapper educationMapper;
 
-    private final EducationDto educationDto = new EducationDto();
-    private final Education education = new Education();
+    private EducationDto educationDto;
+     private Education education;
+    Integer dataYearFrom;
+    Integer dataYearTo;
+
+    @BeforeEach
+    void setUp() {
+        educationDto = new EducationDto();
+        education = new Education();
+        dataYearFrom = LocalDate.now().minusYears(2).getYear();
+        dataYearTo = LocalDate.now().minusYears(1).getYear();
+    }
 
     @Test
     public void testToEducation() {
-
-        Integer dataYearFrom = LocalDate.now().minusYears(2).getYear();
-        Integer dataYearTo = LocalDate.now().minusYears(1).getYear();
 
         educationDto.setId(1L);
         educationDto.setYearFrom(dataYearFrom);
@@ -49,9 +57,6 @@ class EducationMapperTest {
 
     @Test
     public void testToEducationDto() {
-
-        Integer dataYearFrom = LocalDate.now().minusYears(2).getYear();
-        Integer dataYearTo = LocalDate.now().minusYears(1).getYear();
 
         education.setId(1L);
         education.setYearFrom(dataYearFrom);

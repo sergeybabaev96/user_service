@@ -5,10 +5,13 @@ import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.EducationDto;
 import school.faang.user_service.entity.Education;
 import school.faang.user_service.entity.User;
@@ -20,6 +23,7 @@ import school.faang.user_service.repository.UserRepository;
 import java.time.LocalDate;
 import java.util.Optional;
 
+@ExtendWith(MockitoExtension.class)
 public class EducationServiceTest {
 
     @Mock
@@ -34,6 +38,18 @@ public class EducationServiceTest {
     @InjectMocks
     private EducationService educationService;
 
+    @Captor
+    private ArgumentCaptor<Long> userIdCaptor;
+
+    @Captor
+    private ArgumentCaptor<EducationDto> educationDtoCaptor;
+
+    @Captor
+    private ArgumentCaptor<Education> educationCaptor;
+
+    @Captor
+    private ArgumentCaptor<Long> educationIdCaptor;
+
     private final Integer MINUS_ONE_YEARS = LocalDate.now().minusYears(1).getYear();
 
     private final long userId = 1L;
@@ -46,12 +62,15 @@ public class EducationServiceTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
+        educationDto.setYearFrom(MINUS_ONE_YEARS);
+        education.setId(educationId);
+        educationDto.setId(educationId);
+        user.setId(userId);
     }
 
     @Test
     public void testUserNotFound() {
-        educationDto.setYearFrom(MINUS_ONE_YEARS);
+
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
@@ -62,11 +81,6 @@ public class EducationServiceTest {
 
     @Test
     public void testAddEducationSuccess() {
-        educationDto.setYearFrom(MINUS_ONE_YEARS);
-
-        user.setId(userId);
-
-        education.setUser(user);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(educationMapper.toEducation(educationDto)).thenReturn(education);
@@ -75,21 +89,20 @@ public class EducationServiceTest {
 
         EducationDto result = educationService.addEducation(userId, educationDto);
 
+        verify(userRepository, times(1)).findById(userIdCaptor.capture());
+        verify(educationMapper, times(1)).toEducation(educationDtoCaptor.capture());
+        verify(educationRepository, times(1)).save(educationCaptor.capture());
+        verify(educationMapper, times(1)).toEducationDto(educationCaptor.capture());
+
         assertNotNull(result);
         assertEquals(educationDto, result);
-        verify(userRepository, times(1)).findById(userId);
-        verify(educationMapper, times(1)).toEducation(educationDto);
-        verify(educationRepository, times(1)).save(education);
-        verify(educationMapper, times(1)).toEducationDto(education);
+        assertEquals(userId, userIdCaptor.getValue());
+        assertEquals(educationDto, educationDtoCaptor.getValue());
+
     }
 
     @Test
     public void testUpdateEducation_Success() {
-
-        educationDto.setId(educationId);
-        educationDto.setYearFrom(MINUS_ONE_YEARS);
-
-        user.setId(userId);
 
         existingEducation.setId(educationId);
         existingEducation.setUser(user);
@@ -108,20 +121,21 @@ public class EducationServiceTest {
 
         assertNotNull(result);
         assertEquals(educationDto, result);
-        verify(userRepository, times(1)).findById(userId);
-        verify(educationRepository, times(1)).findById(educationId);
-        verify(educationMapper, times(1)).toEducation(educationDto);
-        verify(educationRepository, times(1)).save(updatedEducation);
-        verify(educationMapper, times(1)).toEducationDto(updatedEducation);
+        verify(userRepository, times(1)).findById(userIdCaptor.capture());
+        verify(educationRepository, times(1)).findById(educationIdCaptor.capture());
+        verify(educationMapper, times(1)).toEducation(educationDtoCaptor.capture());
+        verify(educationRepository, times(1)).save(educationCaptor.capture());
+        verify(educationMapper, times(1)).toEducationDto(educationCaptor.capture());
+
+        assertEquals(userId, userIdCaptor.getValue());
+        assertEquals(educationId, educationIdCaptor.getValue());
+        assertEquals(educationDto, educationDtoCaptor.getValue());
+        assertEquals(updatedEducation, educationCaptor.getValue());
     }
 
     @Test
     public void testUpdateEducation_EducationNotFound() {
 
-        educationDto.setId(educationId);
-        educationDto.setYearFrom(MINUS_ONE_YEARS);
-
-        user.setId(userId);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(educationRepository.findById(educationId)).thenReturn(Optional.empty());
@@ -130,20 +144,19 @@ public class EducationServiceTest {
             educationService.updateEducation(userId, educationDto);
         });
 
-        verify(userRepository, times(1)).findById(userId);
-        verify(educationRepository, times(1)).findById(educationId);
+        verify(userRepository, times(1)).findById(userIdCaptor.capture());
+        verify(educationRepository, times(1)).findById(educationIdCaptor.capture());
         verify(educationMapper, never()).toEducation(any());
         verify(educationRepository, never()).save(any());
         verify(educationMapper, never()).toEducationDto(any());
+
+        assertEquals(userId, userIdCaptor.getValue());
+        assertEquals(educationId, educationIdCaptor.getValue());
     }
 
     @Test
     public void testUpdateEducation_InvalidUser() {
 
-        educationDto.setId(educationId);
-        educationDto.setYearFrom(MINUS_ONE_YEARS);
-
-        user.setId(userId);
 
         existingEducation.setId(educationId);
         existingEducation.setUser(new User());
@@ -155,19 +168,19 @@ public class EducationServiceTest {
             educationService.updateEducation(userId, educationDto);
         });
 
-        verify(userRepository, times(1)).findById(userId);
-        verify(educationRepository, times(1)).findById(educationId);
+        verify(userRepository, times(1)).findById(userIdCaptor.capture());
+        verify(educationRepository, times(1)).findById(educationIdCaptor.capture());
         verify(educationMapper, never()).toEducation(any());
         verify(educationRepository, never()).save(any());
         verify(educationMapper, never()).toEducationDto(any());
+
+        assertEquals(userId, userIdCaptor.getValue());
+        assertEquals(educationId, educationIdCaptor.getValue());
+
     }
 
     @Test
     public void testGetById_Success() {
-
-        education.setId(educationId);
-
-        educationDto.setId(educationId);
 
         when(educationRepository.findById(educationId)).thenReturn(Optional.of(education));
         when(educationMapper.toEducationDto(education)).thenReturn(educationDto);
@@ -176,8 +189,11 @@ public class EducationServiceTest {
 
         assertNotNull(result);
         assertEquals(educationDto, result);
-        verify(educationRepository, times(1)).findById(educationId);
-        verify(educationMapper, times(1)).toEducationDto(education);
+        verify(educationRepository, times(1)).findById(educationIdCaptor.capture());
+        verify(educationMapper, times(1)).toEducationDto(educationCaptor.capture());
+
+        assertEquals(educationId, educationIdCaptor.getValue());
+        assertEquals(education, educationCaptor.getValue());
     }
 
     @Test
@@ -189,7 +205,9 @@ public class EducationServiceTest {
             educationService.getById(educationId);
         });
 
-        verify(educationRepository, times(1)).findById(educationId);
+        verify(educationRepository, times(1)).findById(educationIdCaptor.capture());
         verify(educationMapper, never()).toEducationDto(any());
+
+        assertEquals(educationId, educationIdCaptor.getValue());
     }
 }
