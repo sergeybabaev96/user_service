@@ -9,7 +9,7 @@ import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.service.AvatarService;
 
 @RestController
-@RequestMapping("avatar")
+@RequestMapping("/avatar")
 @RequiredArgsConstructor
 public class AvatarController {
     private final AvatarService avatarService;
