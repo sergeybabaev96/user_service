@@ -5,35 +5,50 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import io.netty.channel.ChannelOption;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.netty.http.client.HttpClient;
+
+import java.time.Duration;
 
 @Configuration
+@EnableConfigurationProperties(S3Properties.class)
+@RequiredArgsConstructor
 public class S3Config {
 
-    @Value("${s3.endpoint}")
-    private String endpoint;
+    private static final int REQUEST_TIMEOUT = 1000;
+    private static final int RESPONSE_TIMEOUT = 1000;
 
-    @Value("${s3.accessKey}")
-    private String accessKey;
+    private final S3Properties s3Properties;
 
-    @Value("${s3.secretKey}")
-    private String secretKey;
-
-    @Value("${s3.isMocked}")
-    private boolean isMocked;
-
-    @Value("${s3.bucketName}")
-    private String bucketName;
+    @Value("${dicebear.initials-url}")
+    private String dicebearUrl;
 
     @Bean
     public AmazonS3 amazonS3() {
         return AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, "us-east-1"))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(s3Properties.endpoint(), "us-east-1"))
                 .withCredentials(new AWSStaticCredentialsProvider(
-                        new BasicAWSCredentials(accessKey, secretKey)))
+                        new BasicAWSCredentials(s3Properties.accessKey(), s3Properties.secretKey())))
                 .withPathStyleAccessEnabled(true)
+                .build();
+    }
+
+    @Bean
+    public WebClient webClient() {
+        HttpClient httpClient = HttpClient.create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, REQUEST_TIMEOUT)
+                .responseTimeout(Duration.ofMillis(RESPONSE_TIMEOUT));
+
+        return WebClient.builder()
+                .baseUrl(dicebearUrl)
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
     }
 }

@@ -44,4 +44,4 @@ s3:
   isMocked: false
 
 dicebear:
-  initials-url: https://api.dicebear.com/9.x/initials/png?seed=
+  initials-url: https://api.dicebear.com/9.x/initials/png
