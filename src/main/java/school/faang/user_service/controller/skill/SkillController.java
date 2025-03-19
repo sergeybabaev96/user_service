@@ -32,7 +32,7 @@ public class SkillController {
     }
 
     private void validateSkillDtoTitle(SkillDto skill) {
-        if (skill.title() == null || skill.title().isBlank()) {
+        if (skill.getTitle() == null || skill.getTitle().isBlank()) {
             throw new DataValidationException("Invalid skill : " + skill);
         }
     }
