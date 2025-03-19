@@ -12,7 +12,6 @@ import school.faang.user_service.repository.WorkScheduleRepository;
 import school.faang.user_service.service.work_schedule.WorkScheduleService;
 
 import java.time.LocalTime;
-import java.util.Optional;
 
 import static school.faang.user_service.exception.data_validation_exception.DataValidationException.TIME_EXCEPTION;
 import static school.faang.user_service.exception.data_validation_exception.DataValidationException.TIME_EXCEPTION_CODE;
@@ -33,41 +32,31 @@ public class WorkScheduleServiceImpl implements WorkScheduleService {
 
 
     @Override
-    public WorkScheduleDto addWorkSchedule(long userId, WorkScheduleDto workScheduleDto) throws DataValidationException {
-        Optional<User> user = userRepository.findById(userId);
+    public WorkScheduleDto addWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new DataValidationException(USER_DOESNT_EXIST,USER_DOESNT_EXIST_CODE));
         checkData(workScheduleDto);
-        if(user.isEmpty()) {
-            throw new DataValidationException(USER_DOESNT_EXIST,USER_DOESNT_EXIST_CODE);
-        }
-        WorkSchedule workSchedule = workScheduleMapper.toWorkSchedule(workScheduleDto);
-        workSchedule.setUser(user.get());
-        WorkSchedule savedSchedule = workScheduleRepository.save(workSchedule);
-        return workScheduleMapper.toWorkScheduleDto(savedSchedule);
+        WorkSchedule savedSchedule = saveWorkSchedule(workScheduleDto, user);
+        return workScheduleMapper.toDto(savedSchedule);
     }
 
     @Override
     public WorkScheduleDto updateWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
         checkData(workScheduleDto);
-        long workScheduleId = workScheduleDto.getId();
-        Optional<WorkSchedule> workScheduleById = workScheduleRepository.findById(workScheduleId);
-        checkIfScheduleExist(workScheduleById);
-        if(workScheduleId != userId) {
+        WorkSchedule workScheduleById = getWorkSchedule(workScheduleDto.getId());
+        if(workScheduleById.getUser().getId() != userId) {
             throw new DataValidationException(USER_DOESNT_HAVE_ACCESS,USER_DOESNT_HAVE_ACCESS_CODE);
         }
-        WorkSchedule workSchedule = workScheduleMapper.toWorkSchedule(workScheduleDto);
-        workSchedule.setUser(workScheduleById.get().getUser());
-        WorkSchedule savedWorkSchedule = workScheduleRepository.save(workSchedule);
-        return workScheduleMapper.toWorkScheduleDto(savedWorkSchedule);
+        WorkSchedule savedWorkSchedule = saveWorkSchedule(workScheduleDto, workScheduleById.getUser());
+        return workScheduleMapper.toDto(savedWorkSchedule);
     }
 
     @Override
-    public WorkScheduleDto getById(long workScheduleId) throws DataValidationException {
-        Optional<WorkSchedule> workScheduleById = workScheduleRepository.findById(workScheduleId);
-        checkIfScheduleExist(workScheduleById);
-        return workScheduleMapper.toWorkScheduleDto(workScheduleById.get());
+    public WorkScheduleDto getById(long workScheduleId) {
+        WorkSchedule workScheduleById = getWorkSchedule(workScheduleId) ;
+        return workScheduleMapper.toDto(workScheduleById);
     }
 
-    private void checkData (WorkScheduleDto workScheduleDto) throws DataValidationException {
+    private void checkData (WorkScheduleDto workScheduleDto) {
         LocalTime startTime = workScheduleDto.getStartTime();
         LocalTime startLunch = workScheduleDto.getStartLunch();
         LocalTime endLunch = workScheduleDto.getEndLunch();
@@ -77,11 +66,14 @@ public class WorkScheduleServiceImpl implements WorkScheduleService {
         }
     }
 
-    private void checkIfScheduleExist(Optional<WorkSchedule> workSchedule) throws DataValidationException {
-        if(workSchedule.isEmpty()) {
-            throw new DataValidationException(WORK_SCHEDULE_DOESNT_EXIST,WORK_SCHEDULE_DOESNT_EXIST_CODE);
-        }
+    private WorkSchedule getWorkSchedule(long workScheduleId) {
+        return workScheduleRepository.findById(workScheduleId).orElseThrow(() -> new DataValidationException(WORK_SCHEDULE_DOESNT_EXIST,WORK_SCHEDULE_DOESNT_EXIST_CODE));
     }
 
+    private WorkSchedule saveWorkSchedule(WorkScheduleDto workScheduleDto, User user) {
+        WorkSchedule workSchedule = workScheduleMapper.toEntity(workScheduleDto);
+        workSchedule.setUser(user);
+        return workScheduleRepository.save(workSchedule);
+    }
 
 }

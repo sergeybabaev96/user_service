@@ -9,7 +9,7 @@ import static org.mapstruct.ap.internal.gem.MappingConstantsGem.ComponentModelGe
 @Mapper(componentModel = SPRING)
 public interface WorkScheduleMapper {
 
-    public WorkSchedule toWorkSchedule(WorkScheduleDto workScheduleDto);
+    public WorkSchedule toEntity(WorkScheduleDto workScheduleDto);
 
-    public WorkScheduleDto toWorkScheduleDto(WorkSchedule workSchedule);
+    public WorkScheduleDto toDto(WorkSchedule workSchedule);
 }
