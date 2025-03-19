@@ -38,10 +38,12 @@ public class EducationServiceTest {
     @Spy
     private EducationMapper educationMapper = Mappers.getMapper(EducationMapper.class);
 
-    private User user = new User();
+    private final User user = new User();
     private User anotherUser;
-    private Education education = new Education();
-    private EducationViewDto educationViewDto = new EducationViewDto();
+    private final Education education = new Education();
+    private final EducationViewDto educationViewDto = new EducationViewDto();
+    private final Education anotherEducation = new Education();
+    private final EducationViewDto anotherEducationViewDto = new EducationViewDto();
 
     @BeforeEach
     void setUp() {
@@ -51,12 +53,13 @@ public class EducationServiceTest {
         educationViewDto.setId(10L);
         educationViewDto.setYearFrom(Year.now().getValue());
         educationViewDto.setYearTo(Year.now().getValue() + 4);
-        educationViewDto.setInstitution("");
-        educationViewDto.setEducationLevel("");
-        educationViewDto.setSpecialization("");
 
         anotherUser = new User();
         anotherUser.setId(2L);
+        anotherEducation.setUser(anotherUser);
+        anotherEducationViewDto.setId(12L);
+        anotherEducationViewDto.setYearFrom(Year.now().getValue());
+        anotherEducationViewDto.setYearTo(Year.now().getValue() + 4);
     }
 
     @DisplayName("Проверка получения ошибки при указании года начала обучения больше текущего")
@@ -89,25 +92,27 @@ public class EducationServiceTest {
         Assertions.assertEquals(educationViewDto, result);
     }
 
-
-
     @DisplayName("Проверка получения ошибки при попытке найти данные об образовании по несуществующему id")
     @Test
     void testUpdateEducationWithNonExistingEducationId() {
-
+        Assertions.assertThrows(DataValidationException.class, () -> educationService.updateEducation(user.getId(), educationViewDto));
     }
 
     @DisplayName("Проверка получения ошибки при попытке обновить данные об образовании третьим лицом")
     @Test
     void testUpdateEducationWithNotSuccessfulValidateUser() {
+        Mockito.when(educationRepository.findById(educationViewDto.getId())).thenReturn(Optional.of(education));
+        Mockito.when(educationMapper.toEducationDto(education)).thenReturn(educationViewDto);
+        Mockito.when(educationMapper.toEducation(educationViewDto)).thenReturn(education);
+        education.setUser(anotherUser);
 
+        Assertions.assertThrows(DataValidationException.class, () -> educationService.updateEducation(user.getId(), educationViewDto));
     }
-
 
     @DisplayName("Проверка успешного обновления данных об образовании")
     @Test
     void testUpdateEducation() {
-        Mockito.when(educationRepository.findById(10L)).thenReturn(Optional.of(education));
+        Mockito.when(educationRepository.findById(educationViewDto.getId())).thenReturn(Optional.of(education));
         Mockito.when(educationMapper.toEducationDto(education)).thenReturn(educationViewDto);
         Mockito.when(educationMapper.toEducation(educationViewDto)).thenReturn(education);
         Mockito.when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
@@ -117,5 +122,4 @@ public class EducationServiceTest {
 
         Assertions.assertEquals(educationViewDto, result);
     }
-
 }
