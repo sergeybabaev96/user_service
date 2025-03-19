@@ -1,4 +1,4 @@
-package school.faang.user_service.config.s3;
+package school.faang.user_service.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

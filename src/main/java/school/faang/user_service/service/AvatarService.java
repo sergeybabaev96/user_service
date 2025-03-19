@@ -7,7 +7,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import school.faang.user_service.config.s3.S3Properties;
+import school.faang.user_service.config.properties.S3Properties;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
@@ -23,13 +23,13 @@ public class AvatarService {
 
     private final AmazonS3 amazonS3;
     private final UserService userService;
-    private final WebClient webClient;
+    private final WebClient dicebearWebClient;
     private final S3Properties s3Properties;
 
     public String generateAndUploadAvatar(UserDto userDto) {
         User user = userService.getUserById(userDto.id());
 
-        byte[] imageBytes = webClient
+        byte[] imageBytes = dicebearWebClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .queryParam("seed", user.getUsername())
