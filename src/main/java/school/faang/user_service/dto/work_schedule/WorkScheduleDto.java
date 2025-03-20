@@ -2,10 +2,12 @@ package school.faang.user_service.dto.work_schedule;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalTime;
 
 @Getter
+@Setter
 public class WorkScheduleDto {
 
     private Long id;
