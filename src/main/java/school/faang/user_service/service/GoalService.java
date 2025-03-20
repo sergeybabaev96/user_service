@@ -24,25 +24,16 @@ public class GoalService {
                     .filter(user -> !Objects.equals(user.getId(), userId)).toList();
             if (usersWithoutDeactivatedUser.isEmpty()) {
                 goalRepository.delete(goal);
-            } else {
-                goal.setUsers(usersWithoutDeactivatedUser);
             }
-
+            goal.setUsers(usersWithoutDeactivatedUser);
         });
-        List<Goal> goalsWithFollower  = goalsToUser.stream()
+        List<Goal> goalsWithFollower = goalsToUser.stream()
                 .filter(goal -> !goal.getUsers().isEmpty()).toList();
         goalRepository.saveAll(goalsWithFollower);
     }
 
-    public void setNullInGoalsToMentor(Long userId){
-        List<Goal> goalsWhereUserMentor = goalRepository.findAllByMentorId(userId);
-        goalsWhereUserMentor.stream()
-                .peek(goal-> goal.setMentor(null)).toList();
-        goalRepository.saveAll(goalsWhereUserMentor);
-    }
-
     private List<Goal> getActiveGoalsToUser(Long userId) {
         return goalRepository.findGoalsByUserId(userId)
-                .filter(goal-> goal.getStatus() == GoalStatus.ACTIVE).toList();
+                .filter(goal -> goal.getStatus() == GoalStatus.ACTIVE).toList();
     }
 }

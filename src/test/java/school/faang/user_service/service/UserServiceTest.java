@@ -8,7 +8,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.repository.UserRepository;
 
@@ -52,7 +51,6 @@ class UserServiceTest {
         verify(eventService).deleteEventByUserId(userId);
         verify(eventService).deleteParticipationFromEvent(userId);
         verify(goalService).deleteUserFromGoals(userId);
-        verify(goalService).setNullInGoalsToMentor(userId);
         verify(mentorshipService).deleteMentorShipByDeactivatedUser(userId);
         verify(mentorshipService).deleteMenteeByDeactivatedUser(userId);
         verify(userRepository).save(any(User.class));

@@ -20,7 +20,8 @@ public class EventService {
     }
 
     public void deleteParticipationFromEvent(Long userId) {
-        List<Event> eventsWhereUserParticipation = eventRepository.findParticipatedEventsByUserId(userId);
+        List<Event> eventsWhereUserParticipation = eventRepository
+                .findParticipatedEventsByUserId(userId);
         for (Event event : eventsWhereUserParticipation) {
             List<User> participationWithoutDeactivatedUser = event.getAttendees().stream()
                     .filter(user-> !Objects.equals(user.getId(), userId)).toList();
