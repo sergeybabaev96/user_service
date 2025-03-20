@@ -18,6 +18,7 @@ public interface EducationMapper {
     @Mapping(target = "user", ignore = true)
     void updateEducationFromDto(EducationDto dto, @MappingTarget Education entity);
 
-    @Mapping(source = "educationDto.id", target = "id")
+    @Mapping(target = "id", source = "educationDto.id")
+    @Mapping(target = "user", source = "user")
     Education toEducationWithUser(EducationDto educationDto, User user);
 }
