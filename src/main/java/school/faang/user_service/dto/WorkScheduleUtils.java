@@ -11,7 +11,7 @@ public class WorkScheduleUtils {
             userField.setAccessible(true);
             userField.set(workSchedule, user);
         } catch (Exception e) {
-            throw new RuntimeException("Не удалось установить поле пользователя", e);
+            throw new RuntimeException("Failed to set user field", e);
         }
     }
 
@@ -21,7 +21,7 @@ public class WorkScheduleUtils {
             idField.setAccessible(true);
             idField.set(workSchedule, id);
         } catch (Exception e) {
-            throw new RuntimeException("Не удалось установить поле идентификатора", e);
+            throw new RuntimeException("Failed to set the identifier field", e);
         }
     }
 }

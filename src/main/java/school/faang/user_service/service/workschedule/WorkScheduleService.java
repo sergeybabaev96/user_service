@@ -10,6 +10,8 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.WorkScheduleMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.WorkScheduleRepository;
+import school.faang.user_service.validator.WorkScheduleValidator;
+
 import java.time.LocalTime;
 
 @Service
@@ -19,12 +21,11 @@ public class WorkScheduleService {
     private final WorkScheduleRepository workScheduleRepository;
     private final WorkScheduleMapper workScheduleMapper;
 
-
     public WorkScheduleDto addWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
-        validateWorkScheduleTimes(workScheduleDto);
+        WorkScheduleValidator.validateWorkScheduleTimes(workScheduleDto);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new DataValidationException("Пользователь не найден"));
+                .orElseThrow(() -> new DataValidationException("User not found"));
 
         WorkSchedule workSchedule = workScheduleMapper.toWorkSchedule(workScheduleDto);
         WorkScheduleUtils.setUser(workSchedule, user);
@@ -33,13 +34,13 @@ public class WorkScheduleService {
     }
 
     public WorkScheduleDto updateWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
-        validateWorkScheduleTimes(workScheduleDto);
+        WorkScheduleValidator.validateWorkScheduleTimes(workScheduleDto);
 
         WorkSchedule existingWorkSchedule = workScheduleRepository.findById(workScheduleDto.getId())
-                .orElseThrow(() -> new DataValidationException("График работы не найден"));
+                .orElseThrow(() -> new DataValidationException("Opening hours not found"));
 
         if (existingWorkSchedule.getUser().getId() != userId) {
-            throw new DataValidationException("Несоответствие пользователя");
+            throw new DataValidationException("User mismatch");
         }
 
         WorkSchedule updatedWorkSchedule = workScheduleMapper.toWorkSchedule(workScheduleDto);
@@ -52,18 +53,7 @@ public class WorkScheduleService {
 
     public WorkScheduleDto getById(long workScheduleId) {
         WorkSchedule workSchedule = workScheduleRepository.findById(workScheduleId)
-                .orElseThrow(() -> new DataValidationException("График работы не найден"));
+                .orElseThrow(() -> new DataValidationException("Opening hours not found"));
         return workScheduleMapper.toWorkScheduleDto(workSchedule);
-    }
-
-    private void validateWorkScheduleTimes(WorkScheduleDto workScheduleDto) {
-        LocalTime startTime = workScheduleDto.getStartTime();
-        LocalTime startLunch = workScheduleDto.getStartLunch();
-        LocalTime endLunch = workScheduleDto.getEndLunch();
-        LocalTime endTime = workScheduleDto.getEndTime();
-
-        if (!(startTime.isBefore(startLunch) && startLunch.isBefore(endLunch) && endLunch.isBefore(endTime))) {
-            throw new DataValidationException("Неверное время рабочего графика");
-        }
     }
 }
