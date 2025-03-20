@@ -77,9 +77,11 @@ public class MentorshipRequestService {
         Stream<MentorshipRequest> requestStream = StreamSupport.stream(mentorshipRequestRepository.findAll()
                 .spliterator(), false);
 
-        filters.stream()
-                .filter(filter -> filter.isApplicable(filterRequestDto))
-                .forEach(filter -> filter.apply(requestStream, filterRequestDto));
+        for (RequestFilter filter : filters) {
+            if (filter.isApplicable(filterRequestDto)) {
+                requestStream = filter.apply(requestStream, filterRequestDto);
+            }
+        }
         return requestFilterMapper.toListDto(requestStream.toList());
     }
 
