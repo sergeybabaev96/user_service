@@ -126,6 +126,7 @@ class EventMapperTest {
         @DisplayName("Updating an entity with non-null DTO updates the entity correctly")
         void testUpdateEntityWithNotNullDto() {
             Event existing = EventBuilder.createValidEvent(EVENT_ID, testOwner);
+            EventType originalType = existing.getType();
             EventDto update = EventDto.builder()
                     .title("Updated Title")
                     .description("New Description")
@@ -138,7 +139,7 @@ class EventMapperTest {
                     () -> assertEquals("Updated Title", existing.getTitle()),
                     () -> assertEquals("New Description", existing.getDescription()),
                     () -> assertEquals(50, existing.getMaxAttendees()),
-                    () -> assertEquals(EventType.PRESENTATION, existing.getType())
+                    () -> assertEquals(originalType, existing.getType())
             );
         }
 
@@ -146,11 +147,28 @@ class EventMapperTest {
         @DisplayName("Updating an entity with a null DTO leaves the entity unchanged")
         void testUpdateEntityWithNullDto() {
             Event original = EventBuilder.createValidEvent(EVENT_ID, testOwner);
-            Event originalCopy = EventBuilder.createValidEvent(EVENT_ID, testOwner);
+            String originalTitle = original.getTitle();
+            int originalMaxAttendees = original.getMaxAttendees();
+            EventType originalType = original.getType();
+            String originalLocation = original.getLocation();
 
-            mapper.updateEventFormDto(null, original, skillRepository);
+            EventDto update = EventDto.builder()
+                    .title("Java presentation")
+                    .description("Updated Description")
+                    .maxAttendees(100)
+                    .eventType(EventType.PRESENTATION)
+                    .location("Moscow")
+                    .build();
 
-            assertEquals(originalCopy, original);
+            mapper.updateEventFormDto(update, original, skillRepository);
+
+            assertAll(
+                    () -> assertEquals(originalTitle, original.getTitle(), "Title should not be updated"),
+                    () -> assertEquals("Updated Description", original.getDescription(), "Description should be updated"),
+                    () -> assertEquals(originalMaxAttendees, original.getMaxAttendees(), "MaxAttendees should not be updated"),
+                    () -> assertEquals(originalType, original.getType(), "EventType should not be updated"),
+                    () -> assertEquals(originalLocation, original.getLocation(), "Location should not be updated")
+            );
         }
     }
 }

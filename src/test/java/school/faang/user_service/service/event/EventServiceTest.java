@@ -133,6 +133,8 @@ class EventServiceTest {
 
             assertAll (
                     () -> assertEquals("User does not have the required skills for this event", exception.getMessage()),
+                    () -> assertFalse(validUser.getSkills().stream().anyMatch(skill -> skill.getId() == SKILL_JAVA_ID),
+                            "User should not have skill Java"),
                     () -> verify(eventRepository, never()).save(any())
             );
         }
@@ -187,6 +189,7 @@ class EventServiceTest {
             assertThrows(DataValidationException.class,
                     () -> eventService.updateEvent(EventDtoBuilder.createValidEventDto(NON_EXISTING_EVENT_ID), NON_EXISTING_EVENT_ID)
             );
+            verify(eventRepository, never()).getReferenceById(NON_EXISTING_EVENT_ID);
         }
     }
 
@@ -215,6 +218,7 @@ class EventServiceTest {
             );
 
             assertEquals("Event with id", exception.getMessage());
+            verify(eventRepository, never()).deleteById(NON_EXISTING_EVENT_ID);
         }
     }
 
@@ -235,6 +239,7 @@ class EventServiceTest {
                     () -> assertEquals("Moscow", result.getLocation()),
                     () -> assertEquals(EventStatus.PLANNED, result.getEventStatus())
             );
+            verify(eventMapper, times(1)).toDto(event);
         }
 
         @Test

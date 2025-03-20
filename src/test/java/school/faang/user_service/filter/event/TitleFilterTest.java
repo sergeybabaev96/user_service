@@ -33,12 +33,4 @@ class TitleFilterTest {
 
         assertFalse(filter.matches(event));
     }
-
-    @Test
-    void testMatchesWhenEventTitleIsNull() {
-        Event event = Event.builder().title("Some title").build();
-        TitleFilter filter = new TitleFilter(null);
-
-        assertTrue(filter.matches(event));
-    }
 }

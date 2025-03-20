@@ -1,7 +1,6 @@
 package school.faang.user_service.controller.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,33 +12,36 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import school.faang.user_service.databuilder.event.EventBuilder;
 import school.faang.user_service.databuilder.event.EventDtoBuilder;
+import school.faang.user_service.databuilder.event.UserBuilder;
 import school.faang.user_service.dto.event.EventDto;
+import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.exception.HandlerDataValidationException;
 import school.faang.user_service.filter.Event.EventFilterDto;
+import school.faang.user_service.mapper.EventMapper;
 import school.faang.user_service.service.event.EventService;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(EventController.class)
-@ContextConfiguration(classes = EventController.class)
+@ContextConfiguration(classes = {EventController.class, HandlerDataValidationException.class})
 @DisplayName("EventController MVC Tests")
 class EventControllerTest {
 
@@ -51,6 +53,9 @@ class EventControllerTest {
 
     @MockBean
     private EventService eventService;
+
+    @MockBean
+    private EventMapper eventMapper;
 
     private static final long EVENT_ID = 1L;
     private static final long NON_EXISTING_EVENT_ID = 999L;
@@ -92,14 +97,15 @@ class EventControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 500 when validation fails (startDate in past)")
+        @DisplayName("Should return 400 when validation fails (startDate in past)")
         void testCreateEventInvalidStartDate() throws Exception {
             EventDto invalidRequest = EventDtoBuilder.createInvalidEventDto();
 
             mockMvc.perform(post("/events")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(invalidRequest)))
-                    .andExpect(jsonPath("$.message").value("Validation failed: StartDate can't be null or in the past"));
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string("Validation failed: StartDate can't be null or in the past"));
         }
     }
 
@@ -121,13 +127,13 @@ class EventControllerTest {
 
         @Test
         @DisplayName("Should throw DataValidationException for non-existing event")
-        void testGetEventNonExistingId() {
+        void testGetEventNonExistingId() throws Exception {
             when(eventService.getEvent(NON_EXISTING_EVENT_ID))
                     .thenThrow(new DataValidationException("Event with id not found"));
 
-            assertThrows(ServletException.class, () ->
-                    mockMvc.perform(get("/events/{eventId}", NON_EXISTING_EVENT_ID))
-            );
+            mockMvc.perform(get("/events/{eventId}", NON_EXISTING_EVENT_ID))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string("Event with id not found"));
         }
     }
 
@@ -171,7 +177,8 @@ class EventControllerTest {
             mockMvc.perform(put("/events/{eventId}", EVENT_ID)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(jsonPath("$.message").value("Validation failed: StartDate can't be null or in the past"));
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string("Validation failed: StartDate can't be null or in the past"));
         }
     }
 
@@ -194,29 +201,50 @@ class EventControllerTest {
     class GetEventsByFilterTests {
 
         @Test
-        @DisplayName("Should return filtered list of events")
+        @DisplayName("Should return filtered events correctly")
         void testGetEventsByFilter() throws Exception {
-            List<EventDto> expected = List.of(
-                    EventDtoBuilder.createValidEventDto(1L),
-                    EventDtoBuilder.createValidEventDto(2L)
-            );
+            String title = "Java";
+            LocalDateTime startDate = BASELINE_TIME.plusDays(5);
+            LocalDateTime endDate = BASELINE_TIME.plusDays(15);
+            Long ownerId = 1L;
 
-            EventFilterDto filter = new EventFilterDto();
-            filter.setTitle("Java");
-            filter.setStartDate(BASELINE_TIME.plusDays(1));
-            filter.setEndDate(BASELINE_TIME.plusDays(5));
-            filter.setOwnerId(USER_ID);
+            Event event1 = EventBuilder.createValidEvent(1L, UserBuilder.createValidUser(ownerId));
+            Event event2 = EventBuilder.createValidEvent(2L, UserBuilder.createValidUser(ownerId));
 
-            when(eventService.getEventsByFilter(any())).thenReturn(expected);
+            when(eventMapper.toDto(event1)).thenReturn(EventDtoBuilder.createValidEventDto(1L));
+            when(eventMapper.toDto(event2)).thenReturn(EventDtoBuilder.createValidEventDto(2L));
+
+            when(eventService.getEventsByFilter(any(EventFilterDto.class)))
+                    .thenAnswer(invocation -> {
+                        EventFilterDto filter = invocation.getArgument(0);
+                        return List.of(eventMapper.toDto(event1), eventMapper.toDto(event2));
+                    });
 
             mockMvc.perform(get("/events/filter")
-                            .param("title", filter.getTitle())
-                            .param("startDate", filter.getStartDate().toString())
-                            .param("endDate", filter.getEndDate().toString())
-                            .param("ownerId", filter.getOwnerId().toString()))
+                            .param("title", title)
+                            .param("startDate", startDate.toString())
+                            .param("endDate", endDate.toString())
+                            .param("ownerId", ownerId.toString()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$[0].id").value(1L))
-                    .andExpect(jsonPath("$[1].id").value(2L));
+                    .andExpect(jsonPath("$[0].id").value(1))
+                    .andExpect(jsonPath("$[1].id").value(2));
+
+            verify(eventService, times(1)).getEventsByFilter(argThat(filter ->
+                    title.equals(filter.getTitle()) &&
+                            startDate.equals(filter.getStartDate()) &&
+                            endDate.equals(filter.getEndDate()) &&
+                            ownerId.equals(filter.getOwnerId())
+            ));
+
+            verify(eventMapper, times(1)).toDto(event1);
+            verify(eventMapper, times(1)).toDto(event2);
+        }
+
+        @Test
+        @DisplayName("Should return 400 if filterDto is null")
+        void testGetEventsByFilterWithNullFilter() throws Exception {
+            mockMvc.perform(get("/events/filter"))
+                    .andExpect(status().isBadRequest());
         }
     }
 

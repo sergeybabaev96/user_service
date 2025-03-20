@@ -113,6 +113,20 @@ class EventDtoValidatorTest {
         }
 
         @Test
+        @DisplayName("Should throw DataValidationException when start date is null")
+        void testValidateStartDateIsNull() {
+            EventDto dto = EventDto.builder()
+                    .title("Valid Title")
+                    .startDate(null)
+                    .build();
+
+            DataValidationException exception = assertThrows(DataValidationException.class,
+                    () -> EventDtoValidator.validate(dto));
+
+            assertEquals("Validation failed: StartDate can't be null or in the past", exception.getMessage());
+        }
+
+        @Test
         @DisplayName("Should throw DataValidationException when end date is before start date")
         void testValidateEndDateBeforeStart() {
             EventDto dto = EventDto
