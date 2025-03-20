@@ -188,7 +188,7 @@ class RecommendationRequestServiceTest {
 
         when(userService.getUserById(1L)).thenReturn(requester);
         when(userService.getUserById(2L)).thenReturn(receiver);
-        when(recommendationRequestRepository.findByRequesterAndReceiverAndCreatedDateAfter(any(User.class),
+        when(recommendationRequestRepository.findByRequesterAndReceiverAndCreatedAtAfter(any(User.class),
                 any(User.class), any(LocalDateTime.class))).thenReturn(Optional.of(new RecommendationRequest()));
 
         assertThrows(IllegalStateException.class, () -> recommendationRequestService.create(dto));
