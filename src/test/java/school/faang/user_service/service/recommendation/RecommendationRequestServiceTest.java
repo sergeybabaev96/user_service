@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -188,7 +187,7 @@ class RecommendationRequestServiceTest {
 
         when(userService.findById(1L)).thenReturn(Optional.of(requester));
         when(userService.findById(2L)).thenReturn(Optional.of(receiver));
-        when(recommendationRequestRepository.findByRequesterAndReceiverAndCreatedDateAfter(any(User.class),
+        when(recommendationRequestRepository.findByRequesterAndReceiverAndCreatedAtAfter(any(User.class),
                 any(User.class), any(LocalDateTime.class))).thenReturn(Optional.of(new RecommendationRequest()));
 
         assertThrows(IllegalStateException.class, () -> recommendationRequestService.create(dto));
