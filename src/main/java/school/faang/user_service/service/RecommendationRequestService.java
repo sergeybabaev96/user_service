@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RecommendationRequestService {
-    @Value("${recommendationRequestMinDistanceMonths}")
+    @Value("${recommendation-min-distance-months}")
     private int recommendationRequestMinDistanceMonths;
 
     private final UserService userService;

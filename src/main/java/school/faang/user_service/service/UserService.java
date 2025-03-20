@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapper;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.UserRepository;
 
 @Service
@@ -41,5 +42,14 @@ public class UserService {
         User deactivatedUser = userRepository.save(user);
 
         return userMapper.toDto(deactivatedUser);
+
+    public User findById(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new DataValidationException("User not found"));
+    }
+
+    public boolean existsById(long userId) {
+        return userRepository.existsById(userId);
+
     }
 }
