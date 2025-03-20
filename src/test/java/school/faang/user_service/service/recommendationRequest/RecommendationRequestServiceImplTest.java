@@ -12,8 +12,10 @@ import school.faang.user_service.dto.request.RecommendationRequestDto;
 import school.faang.user_service.dto.request.RejectionDto;
 import school.faang.user_service.dto.request.SearchRequest;
 import school.faang.user_service.dto.response.RecommendationRequestResponseDto;
+import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.exception.RecommendationFrequencyException;
+import school.faang.user_service.publisher.MessagePublisher;
 import school.faang.user_service.repository.genericSpecification.GenericSpecification;
 import school.faang.user_service.mapper.RecommendationRequestMapper;
 import school.faang.user_service.repository.SkillRepository;
@@ -67,12 +69,16 @@ public class RecommendationRequestServiceImplTest {
     SkillRepository skillRepository;
     @Mock
     UserRepository userRepository;
+    @Mock
+    MessagePublisher recommendationPublisher;
 
     private RecommendationRequestResponseDto recommendationRequestResponseDto;
     private RecommendationRequestDto recommendationRequestDto;
     private RecommendationRequest recommendationRequest;
     private SearchRequest searchRequest;
     private RejectionDto rejectionDto;
+    private User userRequester;
+    private User userReceiver;
 
     @BeforeEach
     public void init() {
@@ -98,6 +104,12 @@ public class RecommendationRequestServiceImplTest {
 
         // searchRequest
         searchRequest = new SearchRequest();
+
+        userRequester = new User();
+        userRequester.setId(VALID_REQUESTER_ID);
+
+        userReceiver = new User();
+        userReceiver.setId(VALID_RECEIVER_ID);
     }
 
     @Test
@@ -215,6 +227,8 @@ public class RecommendationRequestServiceImplTest {
         when(userRepository.existsById(VALID_RECEIVER_ID)).thenReturn(true);
         when(skillRepository.getExistingSkillCountByIds(recommendationRequestDto.getSkillIds()))
                 .thenReturn((long) recommendationRequestDto.getSkillIds().size());
+        recommendationRequest.setReceiver(userReceiver);
+        recommendationRequest.setRequester(userRequester);
         when(recommendationRequestMapper.toEntity(recommendationRequestDto)).thenReturn(recommendationRequest);
         when(recommendationRequestRepository.save(recommendationRequest)).thenReturn(recommendationRequest);
 
