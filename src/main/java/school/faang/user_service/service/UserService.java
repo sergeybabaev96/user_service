@@ -1,5 +1,6 @@
 package school.faang.user_service.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final EventService eventService;
     private final GoalService goalService;
+    private final MentorshipService mentorshipService;
     private final UserMapper userMapper;
 
     public boolean doesUserExist(long userId) {
@@ -26,13 +28,17 @@ public class UserService {
                         "User with id %d is not found".formatted(userId)));
     }
 
+    @Transactional
     public UserDto deactivateUser(long userId) {
         eventService.deleteEventByUserId(userId);
         eventService.deleteParticipationFromEvent(userId);
         goalService.deleteUserFromGoals(userId);
         goalService.setNullInGoalsToMentor(userId);
+        mentorshipService.deleteMentorShipByDeactivatedUser(userId);
+        mentorshipService.deleteMenteeByDeactivatedUser(userId);
         User user = getUserById(userId);
         user.setActive(false);
-        return userMapper.toDto(user);
+        User deactivatedUser = userRepository.save(user);
+        return userMapper.toDto(deactivatedUser);
     }
 }
