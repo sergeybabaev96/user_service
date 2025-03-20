@@ -30,6 +30,7 @@ public class SkillService {
 
     public boolean isAllSkillsExist(List<Long> skillIds) {
         return skillIds.stream().allMatch(skillRepository::existsById);
+
     }
 
     public void assignSkillToUser (long skillId, long userId) {
@@ -57,7 +58,6 @@ public class SkillService {
     public SkillDto acquireSkillFromOffers(long skillId, long userId) {
         Skill skill = skillRepository.findUserSkill(skillId, userId).orElseGet(() -> {
             List<SkillOffer> skillOffers = skillOfferService.findAllOffersOfSkill(skillId, userId);
-
             if (skillOffers.size() >= MIN_SKILL_OFFERS) {
                 skillRepository.assignSkillToUser(skillId, userId);
 
@@ -86,7 +86,6 @@ public class SkillService {
                 .collect(Collectors.toList());
     }
 }
-
     private void checkSkillNotExists(SkillDto skillDto) {
         if (skillRepository.existsByTitle(skillDto.getTitle())) {
             throw new DataValidationException("The skill already exists : " + skillDto.getTitle());
