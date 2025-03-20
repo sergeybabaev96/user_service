@@ -32,6 +32,7 @@ public class SkillUserGuaranteeTest {
 
     @Test
     public void testAddUserSkillGuarantee() {
+
         long skillId = 1;
         long userId = 1;
         SkillOffer offer1 = new SkillOffer();

@@ -117,6 +117,7 @@ public class SkillServiceTest {
 
     @Test
     public void testAcquireSkillFromOffersWithNonExistingSkill() {
+
         long userId = 1L;
         long skillId = 2L;
         Skill newSkill = new Skill();

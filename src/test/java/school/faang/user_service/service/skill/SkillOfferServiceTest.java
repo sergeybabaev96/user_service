@@ -40,6 +40,7 @@ public class SkillOfferServiceTest {
 
     @Test
     public void testIsEnoughAmountOffersToSkill() {
+
         long skillOfferId = 1L;
         long userId = 1L;
         SkillOffer skillOffered1 = new SkillOffer();
