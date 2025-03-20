@@ -30,6 +30,7 @@ public class UserService {
 
     @Transactional
     public UserDto deactivateUser(long userId) {
+
         eventService.deleteEventByUserId(userId);
         eventService.deleteParticipationFromEvent(userId);
         goalService.deleteUserFromGoals(userId);
@@ -38,6 +39,7 @@ public class UserService {
         User user = getUserById(userId);
         user.setActive(false);
         User deactivatedUser = userRepository.save(user);
+
         return userMapper.toDto(deactivatedUser);
     }
 }

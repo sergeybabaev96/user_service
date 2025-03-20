@@ -14,7 +14,6 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class GoalService {
-
     private final GoalRepository goalRepository;
 
     public void deleteUserFromGoals(Long userId) {

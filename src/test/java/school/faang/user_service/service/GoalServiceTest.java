@@ -20,8 +20,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GoalServiceTest {
 
-    @Mock private GoalRepository goalRepository;
-    @InjectMocks private GoalService goalService;
+    @Mock
+    private GoalRepository goalRepository;
+    @InjectMocks
+    private GoalService goalService;
 
     @Test
     void testDeleteUserFromGoals() {

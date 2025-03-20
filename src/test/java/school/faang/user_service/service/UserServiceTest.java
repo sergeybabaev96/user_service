@@ -55,7 +55,6 @@ class UserServiceTest {
         verify(mentorshipService).deleteMenteeByDeactivatedUser(userId);
         verify(userRepository).save(any(User.class));
         verify(userMapper).toDto(deactivatedUser);
-
         assertFalse(deactivatedUser.isActive());
     }
 }
