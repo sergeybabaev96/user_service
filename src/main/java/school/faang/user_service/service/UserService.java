@@ -12,6 +12,11 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
 
+    public User getUserById(long id) {
+        return userRepository.findById(id).orElseThrow(()
+                -> new RuntimeException("User with id " + id + " not found"));
+    }
+
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }

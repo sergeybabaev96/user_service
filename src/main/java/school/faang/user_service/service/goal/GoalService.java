@@ -104,6 +104,10 @@ public class GoalService {
                 .toList());
     }
 
+    public Optional<Goal> findById(Long id) {
+        return goalRepository.findById(id);
+    }
+
     private Stream<Goal> applyFiltersOnGoals(Stream<Goal> goals, SearchGoalDto searchGoalDto) {
         for (GoalFilter goalFilter : goalFilters) {
             if (goalFilter.isApplicable(searchGoalDto)) {
