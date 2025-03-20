@@ -9,13 +9,10 @@ import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
 import school.faang.user_service.dto.mentorship.RejectionDto;
 import school.faang.user_service.entity.MentorshipRequest;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        uses = MentorshipRequestMapperDecorator.class)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 @DecoratedWith(MentorshipRequestMapperDecorator.class)
 public interface MentorshipRequestMapper {
 
-    @Mapping(target = "requester", source = "requesterId", qualifiedByName = "mapUserIdToUser")
-    @Mapping(target = "receiver", source = "receiverId", qualifiedByName = "mapUserIdToUser")
     @Mapping(target = "status", constant = "PENDING")
     MentorshipRequest toEntity(MentorshipRequestDto dto);
 
