@@ -1,6 +1,5 @@
 package school.faang.user_service.service.controller;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,53 +33,54 @@ public class MentorshipRequestControllerTest {
     @Mock
     private MentorshipRequestService mentorshipRequestService;
 
-    private MentorshipRequestDto requestDto;
-
-    @BeforeEach
-    void setUp() {
-        requestDto = new MentorshipRequestDto(1L, "description", 1L, 2L, RequestStatus.PENDING, null, null);
+    private MentorshipRequestDto getRequestDto() {
+        return new MentorshipRequestDto(1L, "description", 1L, 2L, RequestStatus.PENDING, null, null);
     }
 
     @Test
     void testRequestMentorship() {
+        MentorshipRequestDto requestDto = getRequestDto();
         when(mentorshipRequestService.requestMentorship(any())).thenReturn(requestDto);
 
         MentorshipRequestDto response = mentorshipRequestController.requestMentorship(requestDto);
 
-        assertNotNull(response);
         verify(mentorshipRequestService, times(1)).requestMentorship(any());
+        assertNotNull(response);
     }
 
     @Test
-    void testGetRequests() {
+    void positiveGetRequests() {
+        MentorshipRequestDto requestDto = getRequestDto();
         RequestFilterDto filter = new RequestFilterDto("status", 1L, 2L, RequestStatus.PENDING);
         when(mentorshipRequestService.getRequests(any())).thenReturn(Collections.singletonList(requestDto));
 
         List<MentorshipRequestDto> response = mentorshipRequestController.getRequests(filter);
 
+        verify(mentorshipRequestService, times(1)).getRequests(any());
         assertNotNull(response);
         assertEquals(1, response.size());
-        verify(mentorshipRequestService, times(1)).getRequests(any());
     }
 
     @Test
-    void testAcceptRequest() {
+    void positiveAcceptRequest() {
+        MentorshipRequestDto requestDto = getRequestDto();
         when(mentorshipRequestService.acceptRequest(anyLong())).thenReturn(requestDto);
 
         MentorshipRequestDto response = mentorshipRequestController.acceptRequest(REQUEST_ID);
 
-        assertNotNull(response);
         verify(mentorshipRequestService, times(1)).acceptRequest(anyLong());
+        assertNotNull(response);
     }
 
     @Test
-    void testRejectRequest() {
+    void positiveRejectRequest() {
+        MentorshipRequestDto requestDto = getRequestDto();
         RejectionDto rejectionDto = new RejectionDto("reason");
         when(mentorshipRequestService.rejectRequest(anyLong(), any())).thenReturn(requestDto);
 
         MentorshipRequestDto response = mentorshipRequestController.rejectRequest(1L, rejectionDto);
 
-        assertNotNull(response);
         verify(mentorshipRequestService, times(1)).rejectRequest(anyLong(), any());
+        assertNotNull(response);
     }
 }
