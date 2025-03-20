@@ -10,7 +10,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.UserDto;
 import org.springframework.dao.DataRetrievalFailureException;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.repository.UserRepository;
 
@@ -26,19 +25,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
-
-    @Mock
-    private UserRepository userRepository;
+class UserServiceTest {
 
     @Mock private EventService eventService;
     @Mock private GoalService goalService;
     @Mock private MentorshipService mentorshipService;
     @Mock private UserRepository userRepository;
     @Spy private UserMapperImpl userMapper;
-    @InjectMocks
-    private UserService userService;
-
+    @InjectMocks private UserService userService;
     long userId;
 
     @BeforeEach

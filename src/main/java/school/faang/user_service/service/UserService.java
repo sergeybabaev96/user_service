@@ -53,7 +53,6 @@ public class UserService {
         eventService.deleteEventByUserId(userId);
         eventService.deleteParticipationFromEvent(userId);
         goalService.deleteUserFromGoals(userId);
-        goalService.setNullInGoalsToMentor(userId);
         mentorshipService.deleteMentorShipByDeactivatedUser(userId);
         mentorshipService.deleteMenteeByDeactivatedUser(userId);
         User user = getUserById(userId);
