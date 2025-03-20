@@ -17,6 +17,6 @@ public class MentorshipRequestFilterRequester implements MentorshipRequestFilter
     @Override
     public Stream<MentorshipRequest> filter(Stream<MentorshipRequest> requests, RequestFilterDto filter) {
         return requests.filter(request ->
-                request.getRequester().equals(filter.getRequesterId()));
+                request.getRequester().getId().equals(filter.getRequesterId()));
     }
 }
