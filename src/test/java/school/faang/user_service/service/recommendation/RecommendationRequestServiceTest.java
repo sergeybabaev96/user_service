@@ -86,8 +86,8 @@ class RecommendationRequestServiceTest {
         receiver.setId(2L);
 
         when(skillRequestService.findByIds(dto.getSkillsId())).thenReturn(new ArrayList<>());
-        when(userService.getUserById(dto.getRequesterId())).thenReturn(requester);
-        when(userService.getUserById(dto.getReceiverId())).thenReturn(receiver);
+        when(userService.findById(dto.getRequesterId())).thenReturn(Optional.of(requester));
+        when(userService.findById(dto.getReceiverId())).thenReturn(Optional.of(receiver));
 
         recommendationRequestService.create(dto);
 
@@ -186,8 +186,8 @@ class RecommendationRequestServiceTest {
         User requester = new User();
         User receiver = new User();
 
-        when(userService.getUserById(1L)).thenReturn(requester);
-        when(userService.getUserById(2L)).thenReturn(receiver);
+        when(userService.findById(1L)).thenReturn(Optional.of(requester));
+        when(userService.findById(2L)).thenReturn(Optional.of(receiver));
         when(recommendationRequestRepository.findByRequesterAndReceiverAndCreatedAtAfter(any(User.class),
                 any(User.class), any(LocalDateTime.class))).thenReturn(Optional.of(new RecommendationRequest()));
 
