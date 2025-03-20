@@ -34,17 +34,14 @@ class UserFilterTest {
     //Positive
     @Test
     void isApplicable() {
-        //Arrange
         requestFilterDto.setRequesterId(requester.getId());
         requestFilterDto.setReceiverId(receiver.getId());
 
-        //Assert
         assertTrue(userFilter.isApplicable(requestFilterDto));
     }
 
     @Test
     void apply() {
-        //Arrange
         requestFilterDto.setRequesterId(requester.getId());
         requestFilterDto.setReceiverId(receiver.getId());
         MentorshipRequest request1 = new MentorshipRequest();
@@ -55,10 +52,8 @@ class UserFilterTest {
         request2.setReceiver(receiver2);
         List<MentorshipRequest> requests = List.of(request1, request2);
 
-        //Act
         List<MentorshipRequest> result = userFilter.apply(requests.stream(), requestFilterDto).toList();
 
-        //Assert
         assertEquals(1, result.size());
         assertEquals(requester, result.get(0).getRequester());
         assertEquals(receiver, result.get(0).getReceiver());
@@ -67,46 +62,37 @@ class UserFilterTest {
     //Negative
     @Test
     void isApplicableNullDescription() {
-        //Arrange
         requestFilterDto.setStatus(null);
 
-        //Assert
         assertFalse(userFilter.isApplicable(requestFilterDto));
     }
 
     @Test
     void isApplicableNullReceiver() {
-        //Arrange
         requestFilterDto.setRequesterId(requester.getId());
         requestFilterDto.setReceiverId(null);
 
-        //Assert
         assertFalse(userFilter.isApplicable(requestFilterDto));
     }
 
     @Test
     void isApplicableNullRequester() {
-        //Arrange
         requestFilterDto.setRequesterId(null);
         requestFilterDto.setReceiverId(receiver.getId());
 
-        //Assert
         assertFalse(userFilter.isApplicable(requestFilterDto));
     }
 
     @Test
     void isApplicableNullRequesterAndReceiver() {
-        //Arrange
         requestFilterDto.setRequesterId(null);
         requestFilterDto.setReceiverId(null);
 
-        //Assert
         assertFalse(userFilter.isApplicable(requestFilterDto));
     }
 
     @Test
     void applyEmptyListWhenNoMatches() {
-        //Arrange
         requestFilterDto.setRequesterId(requester.getId());
         requestFilterDto.setReceiverId(receiver.getId());
         MentorshipRequest request1 = new MentorshipRequest();
@@ -117,10 +103,8 @@ class UserFilterTest {
         request2.setReceiver(receiver);
         List<MentorshipRequest> requests = List.of(request1, request2);
 
-        //Act
         List<MentorshipRequest> result = userFilter.apply(requests.stream(), requestFilterDto).toList();
 
-        //Assert
         assertTrue(result.isEmpty());
     }
 }

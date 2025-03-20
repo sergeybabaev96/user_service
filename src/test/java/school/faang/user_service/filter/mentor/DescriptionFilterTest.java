@@ -21,16 +21,13 @@ class DescriptionFilterTest {
     //Positive
     @Test
     void isApplicable() {
-        //Arrange
         requestFilterDto.setDescription("Text");
 
-        //Assert
         assertTrue(descriptionFilter.isApplicable(requestFilterDto));
     }
 
     @Test
     void apply() {
-        //Arrange
         requestFilterDto.setDescription("Java");
         MentorshipRequest request1 = new MentorshipRequest();
         MentorshipRequest request2 = new MentorshipRequest();
@@ -38,17 +35,14 @@ class DescriptionFilterTest {
         request2.setDescription("C#");
         List<MentorshipRequest> requests = List.of(request1, request2);
 
-        //Act
         List<MentorshipRequest> result = descriptionFilter.apply(requests.stream(), requestFilterDto).toList();
 
-        //Assert
         assertEquals(1, result.size());
         assertEquals("Java", result.get(0).getDescription());
     }
 
     @Test
     void applyCheckRegister() {
-        //Arrange
         requestFilterDto.setDescription("jAvA");
         MentorshipRequest request1 = new MentorshipRequest();
         MentorshipRequest request2 = new MentorshipRequest();
@@ -56,10 +50,8 @@ class DescriptionFilterTest {
         request2.setDescription("java");
         List<MentorshipRequest> requests = List.of(request1, request2);
 
-        //Act
         List<MentorshipRequest> result = descriptionFilter.apply(requests.stream(), requestFilterDto).toList();
 
-        //Assert
         assertEquals(2, result.size());
         assertEquals("java", result.get(0).getDescription().toLowerCase());
         assertEquals("java", result.get(1).getDescription().toLowerCase());
@@ -68,34 +60,27 @@ class DescriptionFilterTest {
     //Negative
     @Test
     void isApplicableNullDescription() {
-        //Arrange
         requestFilterDto.setDescription(null);
 
-        //Assert
         assertFalse(descriptionFilter.isApplicable(requestFilterDto));
     }
 
     @Test
     void isApplicableBlankDescription() {
-        //Arrange
         requestFilterDto.setDescription("");
 
-        //Assert
         assertFalse(descriptionFilter.isApplicable(requestFilterDto));
     }
 
     @Test
     void applyEmptyListWhenNoMatches() {
-        //Arrange
         requestFilterDto.setDescription("Java");
         MentorshipRequest request1 = new MentorshipRequest();
         request1.setDescription("C# Developer");
         List<MentorshipRequest> requests = List.of(request1);
 
-        //Act
         List<MentorshipRequest> result = descriptionFilter.apply(requests.stream(), requestFilterDto).toList();
 
-        //Assert
         assertTrue(result.isEmpty());
     }
 }

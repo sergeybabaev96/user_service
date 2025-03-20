@@ -29,6 +29,7 @@ import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.mapper.RequestFilterMapper;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -102,18 +103,25 @@ class MentorshipRequestServiceTest {
 
         requestDescriptionFilter = new StatusFilter();
         requestStatusFilter = new DescriptionFilter();
+
+        try {
+            Field filtersField = MentorshipRequestService.class.getDeclaredField("filters");
+            filtersField.setAccessible(true);
+            filtersField.set(mentorshipRequestService, List.of(requestDescriptionFilter, requestStatusFilter));
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     //Positive
     @Test
     void testRequestMentorship() {
-        //Arrange
         isExistById(true);
         when(userService.findById(requester.getId())).thenReturn(requester);
         when(userService.findById(receiver.getId())).thenReturn(receiver);
-        //Act
+
         mentorshipRequestService.requestMentorship(mentorshipRequestDto);
-        //Assert
+
         verify(mentorshipRequestRepository, times(1)).save(mentorshipRequestCaptor.capture());
         MentorshipRequest mentorshipRequest = mentorshipRequestCaptor.getValue();
         assertEquals(RequestStatus.PENDING, mentorshipRequest.getStatus());
@@ -123,13 +131,6 @@ class MentorshipRequestServiceTest {
 
     @Test
     void testGetRequests() {
-        //Arrange
-        mentorshipRequestService = new MentorshipRequestService(
-                mentorshipRequestRepository,
-                mentorshipRequestMapper,
-                userService,
-                requestFilterMapper,
-                List.of(requestDescriptionFilter, requestStatusFilter));
         MentorshipRequest request1 = new MentorshipRequest();
         MentorshipRequest request2 = new MentorshipRequest();
         request1.setId(1);
@@ -140,23 +141,14 @@ class MentorshipRequestServiceTest {
         request2.setStatus(RequestStatus.ACCEPTED);
         when(mentorshipRequestRepository.findAll()).thenReturn(List.of(request1, request2));
 
-        //Act
         List<RequestFilterDto> result = mentorshipRequestService.getRequests(requestFilterDto);
 
-        //Assert
         verify(requestFilterMapper, times(1)).toListDto(mentorshipRequestStreamCaptor.capture());
         assertTrue(result.isEmpty());
     }
 
     @Test
     void testGetRequests2() {
-        //Arrange
-        mentorshipRequestService = new MentorshipRequestService(
-                mentorshipRequestRepository,
-                mentorshipRequestMapper,
-                userService,
-                requestFilterMapper,
-                List.of(requestDescriptionFilter, requestStatusFilter));
         MentorshipRequest request1 = new MentorshipRequest();
         MentorshipRequest request2 = new MentorshipRequest();
         request1.setId(1);
@@ -167,22 +159,19 @@ class MentorshipRequestServiceTest {
         request2.setStatus(RequestStatus.REJECTED);
         when(mentorshipRequestRepository.findAll()).thenReturn(List.of(request1, request2));
 
-        //Act
         List<RequestFilterDto> result = mentorshipRequestService.getRequests(requestFilterDto);
 
-        //Assert
         verify(requestFilterMapper, times(1)).toListDto(mentorshipRequestStreamCaptor.capture());
         assertEquals(1, result.size());
     }
 
     @Test
     void testAcceptRequest() {
-        //Arrange
         when(mentorshipRequestRepository.findById(requestId)).thenReturn(Optional.of(mentorshipRequest));
         when(mentorshipRequestRepository.save(mentorshipRequest)).thenReturn(mentorshipRequest);
-        //Act
+
         mentorshipRequestService.acceptRequest(requestId);
-        //Assert
+
         assertEquals(RequestStatus.ACCEPTED, mentorshipRequest.getStatus());
         assertEquals(receiver, mentorshipRequest.getReceiver());
         verify(mentorshipRequestRepository, times(1)).save(mentorshipRequestCaptor.capture());
@@ -191,12 +180,11 @@ class MentorshipRequestServiceTest {
 
     @Test
     void testRejectRequest() {
-        //Arrange
         when(mentorshipRequestRepository.findById(requestId)).thenReturn(Optional.of(mentorshipRequest));
         when(mentorshipRequestRepository.save(mentorshipRequest)).thenReturn(mentorshipRequest);
-        //Act
+
         mentorshipRequestService.rejectRequest(requestId, rejectionDto);
-        //Assert
+
         assertEquals(RequestStatus.REJECTED, mentorshipRequest.getStatus());
         assertEquals(rejectionDto.getRejectionReason(), mentorshipRequest.getRejectionReason());
         verify(mentorshipRequestRepository, times(1)).save(mentorshipRequestCaptor.capture());
@@ -205,59 +193,50 @@ class MentorshipRequestServiceTest {
     //Negative
     @Test
     void testRequestMentorshipNullDto() {
-        //Act
         NullPointerException exception = assertThrows(NullPointerException.class, () ->
                 mentorshipRequestService.requestMentorship(null));
-        //Assert
+
         assertEquals(ERROR_NULL_MENTORSHIP_REQUEST_DTO, exception.getMessage());
     }
 
     @Test
     void testRequestMentorshipErrorShotDescription() {
-        //Arrange
         mentorshipRequestDto.setDescription(" ");
-        //Assert
+
         assertThrows(IllegalArgumentException.class, () ->
                 mentorshipRequestService.requestMentorship(mentorshipRequestDto));
     }
 
     @Test
     void testRequestMentorshipErrorSelfRequest() {
-        //Arrange
         mentorshipRequestDto.setRequesterId(requester.getId());
         mentorshipRequestDto.setReceiverId(requester.getId());
         when(mentorshipRequestRepository.existsById(requester.getId())).thenReturn(true);
 
-        //Act
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 mentorshipRequestService.requestMentorship(mentorshipRequestDto));
 
-        //Assert
         assertEquals(ERROR_SELF_REQUEST, exception.getMessage());
     }
 
     @Test
     void testRequestMentorshipNotFoundUser() {
-        //Arrange
         List<Long> missingUser = Stream.of(mentorshipRequestDto.getRequesterId(), mentorshipRequestDto.getReceiverId())
                 .filter(id -> !mentorshipRequestRepository.existsById(id))
                 .toList();
         isExistById(false);
 
-        //Act
         String missingIds = missingUser.stream()
                 .map(String::valueOf)
                 .collect(Collectors.joining(", "));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 mentorshipRequestService.requestMentorship(mentorshipRequestDto));
 
-        //Assert
         assertEquals(getUserNotFoundError(missingIds), exception.getMessage());
     }
 
     @Test
     void testRequestMentorshipAfterCooldown() {
-        //Arrange
         LocalDateTime oldRequestTime = LocalDateTime.now().minusMonths(1);
         MentorshipRequest oldRequest = new MentorshipRequest();
         oldRequest.setCreatedAt(oldRequestTime);
@@ -265,97 +244,89 @@ class MentorshipRequestServiceTest {
         isExistById(true);
         when(mentorshipRequestRepository.findLatestRequest(requester.getId(), receiver.getId()))
                 .thenReturn(Optional.of(oldRequest));
-        //Act
+
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 mentorshipRequestService.requestMentorship(mentorshipRequestDto));
 
-        //Assert
         assertEquals(getFrequentRequestError(REQUEST_COOLDOWN_MONTHS), exception.getMessage());
     }
 
     @Test
     void testGetRequestsNullDto() {
-        //Act
         NullPointerException exception = assertThrows(NullPointerException.class, () ->
                 mentorshipRequestService.getRequests(null));
-        //Assert
+
         assertEquals(ERROR_NULL_REQUEST_DTO, exception.getMessage());
     }
 
     @Test
     void testAcceptRequestNoFindRequest() {
-        //Arrange
         when(mentorshipRequestRepository.findById(requestId)).thenReturn(Optional.empty());
-        //Act
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mentorshipRequestService.acceptRequest(requestId));
-        //Assert
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                mentorshipRequestService.acceptRequest(requestId));
+
         assertEquals(getAbsentRequestError(requestId), exception.getMessage());
     }
 
     @Test
     void testAcceptRequestSelfRequest() {
-        //Arrange
         mentorshipRequest.setRequester(requester);
         mentorshipRequest.setReceiver(requester);
         when(mentorshipRequestRepository.findById(requestId)).thenReturn(Optional.of(mentorshipRequest));
-        //Act
+
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mentorshipRequestService.acceptRequest(requestId));
-        //Assert
+
         assertEquals(ERROR_SELF_REQUEST, exception.getMessage());
     }
 
     @Test
     void testAcceptRequestIsAlreadyMentor() {
-        //Arrange
         List<User> mentors = new ArrayList<>();
         mentors.add(requester);
         receiver.setMentors(mentors);
         when(mentorshipRequestRepository.findById(requestId)).thenReturn(Optional.of(mentorshipRequest));
-        //Act
+
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mentorshipRequestService.acceptRequest(requestId));
-        //Assert
+
         assertEquals(ERROR_ALREADY_MENTOR, exception.getMessage());
     }
 
     @Test
     void testRejectRequestNullDto() {
-        //Act
         NullPointerException exception = assertThrows(NullPointerException.class, () ->
                 mentorshipRequestService.rejectRequest(0, null));
-        //Assert
+
         assertEquals(ERROR_NULL_REJECTION_DTO, exception.getMessage());
     }
 
     @Test
     void testRejectRequestNullReason() {
-        //Arrange
         rejectionDto.setRejectionReason(null);
-        //Act
+
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 mentorshipRequestService.rejectRequest(requestId, rejectionDto));
-        //Assert
+
         assertEquals(ERROR_EMPTY_REJECTION, exception.getMessage());
     }
 
     @Test
     void testRejectRequestIsBlankReason() {
-        //Arrange
         rejectionDto.setRejectionReason("");
-        //Act
+
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 mentorshipRequestService.rejectRequest(requestId, rejectionDto));
-        //Assert
+
         assertEquals(ERROR_EMPTY_REJECTION, exception.getMessage());
     }
 
     @Test
     void testRejectRequestNoFoundRequest() {
-        //Arrange
         when(mentorshipRequestRepository.findById(requestId)).thenReturn(Optional.empty());
-        //Act
+
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 mentorshipRequestService.rejectRequest(requestId, rejectionDto));
-        //Assert
+
         assertEquals(getAbsentRequestError(requestId), exception.getMessage());
     }
 

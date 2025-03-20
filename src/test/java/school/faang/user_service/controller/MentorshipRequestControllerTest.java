@@ -36,49 +36,39 @@ class MentorshipRequestControllerTest {
 
     @Test
     void requestMentorship() {
-        //Arrange
         MentorshipRequestDto requestDto = new MentorshipRequestDto();
         requestDto.setId(requestId);
 
-        //Act
         mentorshipRequestController.requestMentorship(requestDto);
 
-        //Assert
         verify(mentorshipRequestService, times(1)).requestMentorship(requestDto);
     }
 
     @Test
     void getRequests() {
-        //Arrange
         RequestFilterDto filter = new RequestFilterDto();
         List<RequestFilterDto> expectedRequest = List.of(new RequestFilterDto());
         when(mentorshipRequestService.getRequests(filter)).thenReturn(expectedRequest);
 
-        //Act
         List<RequestFilterDto> result = mentorshipRequestController.getRequests(filter);
 
-        //Assert
         assertEquals(expectedRequest, result);
         verify(mentorshipRequestService, times(1)).getRequests(filter);
     }
 
     @Test
     void acceptRequest() {
-        //Act
         mentorshipRequestController.acceptRequest(requestId);
-        //Assert
+
         verify(mentorshipRequestService, times(1)).acceptRequest(requestId);
     }
 
     @Test
     void rejectRequest() {
-        //Arrange
         RejectionDto rejectionDto = new RejectionDto();
 
-        //Act
         mentorshipRequestController.rejectRequest(requestId, rejectionDto);
 
-        //Assert
         verify(mentorshipRequestService, times(1)).rejectRequest(requestId, rejectionDto);
     }
 }
