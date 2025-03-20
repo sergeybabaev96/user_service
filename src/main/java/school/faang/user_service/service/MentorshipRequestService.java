@@ -72,16 +72,13 @@ public class MentorshipRequestService {
         Stream<MentorshipRequest> requestStream = StreamSupport
                 .stream(mentorshipRequestIterable.spliterator(), false);
 
-        Stream<MentorshipRequest> filteredStream = filters.stream()
-                .filter(f -> f.isApplyable(filterDto))
-                .reduce(
-                        requestStream,
-                        (stream, filter) ->
-                                filter.filter(stream, filterDto),
-                        (s1, s2) -> s1
-                );
+        for (MentorshipRequestFilter filter : filters) {
+            if (filter.isApplicable(filterDto)) {
+                requestStream = filter.filter(requestStream, filterDto);
+            }
+        }
 
-        return filteredStream
+        return requestStream
                 .map(mentorshipRequestMapper::toDto)
                 .toList();
     }
@@ -116,7 +113,9 @@ public class MentorshipRequestService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         String.format("Mentorship request with id %d not found", mentorshipRequestId)));
 
-        request = mentorshipRequestMapper.updateRequestFromDto(rejection, request);
+        request.setRejectionReason(rejection.getRejectionReason());
+        request.setStatus(RequestStatus.REJECTED);
+
         mentorshipRequestRepository.save(request);
     }
 }
