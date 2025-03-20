@@ -69,7 +69,7 @@ public class EducationServiceTest {
 
         Exception exception = Assertions.assertThrows(DataValidationException.class,
                 () -> educationService.addEducation(user.getId(), educationViewDto));
-        Assertions.assertTrue(exception.getMessage().contains("The start date of studies is too late"));
+        Assertions.assertEquals("The start date of studies is too late", exception.getMessage());
     }
 
     @DisplayName("Проверка получения ошибки при попытке найти пользователя по несуществующему id")
@@ -79,7 +79,7 @@ public class EducationServiceTest {
 
         Exception exception = Assertions.assertThrows(DataValidationException.class,
                 () -> educationService.addEducation(userId, educationViewDto));
-        Assertions.assertTrue(exception.getMessage().contains("User is not found"));
+        Assertions.assertEquals("User is not found", exception.getMessage());
     }
 
     @DisplayName("Проверка успешного добавления данных об образовании")
@@ -99,7 +99,7 @@ public class EducationServiceTest {
     void testUpdateEducationWithNonExistingEducationId() {
         Exception exception = Assertions.assertThrows(DataValidationException.class,
                 () -> educationService.updateEducation(user.getId(), educationViewDto));
-        Assertions.assertTrue(exception.getMessage().contains("Education is not found"));
+        Assertions.assertEquals("Education is not found", exception.getMessage());
     }
 
     @DisplayName("Проверка получения ошибки при попытке обновить данные об образовании третьим лицом")
@@ -112,7 +112,7 @@ public class EducationServiceTest {
 
         Exception exception = Assertions.assertThrows(DataValidationException.class,
                 () -> educationService.updateEducation(user.getId(), educationViewDto));
-        Assertions.assertTrue(exception.getMessage().contains("User tried update other user's data"));
+        Assertions.assertEquals("User tried update other user's data", exception.getMessage());
     }
 
     @DisplayName("Проверка успешного обновления данных об образовании")
