@@ -33,7 +33,6 @@ public class UserService {
         List<User> users = userRepository.findAllById(ids);
 
         if (users.isEmpty()) {
-            System.out.println("Users notfoun");
             return Collections.emptyList();
         } else {
             return users.stream()
