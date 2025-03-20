@@ -57,10 +57,12 @@ public class MentorshipService {
     }
 
     public void deleteMentorShipByDeactivatedUser(Long mentorID) {
+
         mentorshipRepository.deactivateMentor(mentorID);
     }
 
     public void deleteMenteeByDeactivatedUser(Long menteeId) {
+
         mentorshipRepository.deleteDeactivatedMentee(menteeId);
     }
 }

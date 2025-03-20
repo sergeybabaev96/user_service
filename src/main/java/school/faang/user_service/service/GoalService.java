@@ -32,7 +32,7 @@ public class GoalService {
     long countActiveGoalsPerUser(Long userId);
 }
         });
-        List<Goal> goalsWithFollower  = goalsToUser.stream()
+        List<Goal> goalsWithFollower = goalsToUser.stream()
                 .filter(goal -> !goal.getUsers().isEmpty()).toList();
         goalRepository.saveAll(goalsWithFollower);
     }
@@ -46,6 +46,6 @@ public class GoalService {
 
     private List<Goal> getActiveGoalsToUser(Long userId) {
         return goalRepository.findGoalsByUserId(userId)
-                .filter(goal-> goal.getStatus() == GoalStatus.ACTIVE).toList();
+                .filter(goal -> goal.getStatus() == GoalStatus.ACTIVE).toList();
     }
 }

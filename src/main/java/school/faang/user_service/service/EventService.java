@@ -12,6 +12,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class EventService {
+
     private final EventRepository eventRepository;
 
     public void deleteEventByUserId(Long userId) {
