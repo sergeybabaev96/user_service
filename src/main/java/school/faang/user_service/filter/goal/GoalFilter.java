@@ -10,19 +10,19 @@ public abstract class GoalFilter {
 
     public abstract Stream<Goal> apply(Stream<Goal> goals, GoalFilterDto filter);
 
-    protected boolean isApplicable(Stream<Goal> goals, String pattern) {
-        return goals != null && isValidField(pattern);
+    private boolean isApplicable(Stream<Goal> goals, String pattern) {
+        return goals != null && isValidString(pattern);
     }
 
     protected Stream<Goal> apply(Stream<Goal> goals, Function<Goal, String> fieldMapper, String pattern) {
         return !isApplicable(goals, pattern) ? goals :
                 goals.filter(
                         goal -> goal != null &&
-                        isValidField(fieldMapper.apply(goal)) &&
+                        isValidString(fieldMapper.apply(goal)) &&
                         fieldMapper.apply(goal).contains(pattern));
     }
 
-    private boolean isValidField(String description) {
-        return description != null && !description.isBlank();
+    private boolean isValidString(String string) {
+        return string != null && !string.isBlank();
     }
 }

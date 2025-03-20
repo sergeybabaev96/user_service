@@ -43,8 +43,8 @@ class SkillServiceTest {
 
     @Test
     public void testAssignSkillToUser() {
-        long skillId = anyLong();
-        long userId = anyLong();
+        long skillId = 1;
+        long userId = 1 ;
 
         skillService.assignSkillToUser(skillId, userId);
 
