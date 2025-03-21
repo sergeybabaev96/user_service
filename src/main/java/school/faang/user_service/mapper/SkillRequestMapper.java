@@ -13,8 +13,10 @@ public interface SkillRequestMapper {
     @Mapping(target = "skillId", source = "skill.id")
     SkillRequestDto toDto(SkillRequest entity);
 
+    @Mapping(target = "skill.id", source = "skillId")
     SkillRequest toEntity(SkillRequestDto dto);
 
+    @Mapping(target = "skill.id", source = "skillId")
     List<SkillRequest> toEntities(List<SkillRequestDto> dtos);
 
     @Mapping(target = "skillId", source = "skill.id")
