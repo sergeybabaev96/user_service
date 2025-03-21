@@ -57,7 +57,7 @@ class EventParticipationServiceTest {
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
                 eventParticipationService.registerParticipant(eventId, userId));
-        assertEquals("Пользователь уже зарегистрирован на событие", exception.getMessage());
+        assertEquals("Пользователь 1 уже зарегистрирован на событие", exception.getMessage());
     }
 
     @Test
@@ -80,7 +80,7 @@ class EventParticipationServiceTest {
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
                 eventParticipationService.unregisterParticipant(eventId, userId));
-        assertEquals("Пользователь не участвует в событии", exception.getMessage());
+        assertEquals("Пользователь 1 не участвует в событии", exception.getMessage());
     }
 
     @Test
