@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.event.EventFilterDto;
-import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.event.EventService;
 
 import java.time.LocalDateTime;
@@ -55,12 +54,5 @@ public class EventController {
         return eventService.getParticipatedEvents(userId);
     }
 
-
-
-    private void validateEventId(Long id) {
-        if(id == null || id <= 0) {
-            throw new DataValidationException("Event id not valid");
-        }
-    }
 
 }

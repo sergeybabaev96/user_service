@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.skill.SkillDto;
 import school.faang.user_service.exception.DataValidationException;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
