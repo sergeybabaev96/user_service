@@ -56,7 +56,6 @@ public class RecommendationControllerTest {
     @Nested
     class GiveRecommendationTests {
         @Test
-        @DisplayName("Тест успешного создания рекомендации")
         public void testGiveRecommendationSuccess() {
             RecommendationDto inputRecommendation = createRecommendationDto(null, "Valid Content");
             RecommendationDto expectedRecommendation = createRecommendationDto(null, "Valid Content");
@@ -77,7 +76,6 @@ public class RecommendationControllerTest {
         @NullSource
         @EmptySource
         @ValueSource(strings = {"   "})
-        @DisplayName("Тест создания рекомендации с невалидным контентом")
         public void testGiveRecommendationInvalidContent(String content) {
             RecommendationDto invalidRecommendation = createRecommendationDto(null, content);
 
@@ -92,7 +90,6 @@ public class RecommendationControllerTest {
     @Nested
     class UpdateRecommendationTests {
         @Test
-        @DisplayName("Тест успешного обновления рекомендации")
         public void testUpdateRecommendationSuccess() {
             RecommendationDto inputRecommendation = createRecommendationDto(1L, "Updated Content");
             RecommendationDto expectedRecommendation = createRecommendationDto(1L, "Updated Content");
@@ -114,7 +111,6 @@ public class RecommendationControllerTest {
     @Nested
     class DeleteRecommendationTests {
         @Test
-        @DisplayName("Тест успешного удаления рекомендации")
         public void testDeleteRecommendationSuccess() {
             recommendationController.deleteRecommendation(RECEIVER_ID);
 
@@ -122,7 +118,6 @@ public class RecommendationControllerTest {
         }
 
         @Test
-        @DisplayName("Тест удаления рекомендации с исключением")
         public void testDeleteRecommendationServiceThrowsException() {
             doThrow(new RuntimeException("Recommendation not found")).when(recommendationService).delete(INVALID_ID);
 
@@ -139,7 +134,6 @@ public class RecommendationControllerTest {
     @Nested
     class GetAllUserRecommendationsTests {
         @Test
-        @DisplayName("Тест успешного получения рекомендаций для пользователя")
         public void testGetAllUserRecommendationsSuccess() {
             List<RecommendationDto> expectedRecommendations = Arrays.asList(recommendation1, recommendation2);
 
@@ -157,7 +151,6 @@ public class RecommendationControllerTest {
         }
 
         @Test
-        @DisplayName("Тест получения пустого списка рекомендаций для пользователя")
         public void testGetAllUserRecommendationsEmptyList() {
             when(recommendationService.getAllUserRecommendations(RECEIVER_ID)).thenReturn(Collections.emptyList());
 
@@ -172,7 +165,6 @@ public class RecommendationControllerTest {
         }
 
         @Test
-        @DisplayName("Тест получения рекомендаций для пользователя с исключением")
         public void testGetAllUserRecommendationsServiceThrowsException() {
             when(recommendationService.getAllUserRecommendations(INVALID_ID))
                     .thenThrow(new RuntimeException("Invalid receiver ID"));
@@ -190,7 +182,6 @@ public class RecommendationControllerTest {
     @Nested
     class GetAllGivenRecommendationsTests {
         @Test
-        @DisplayName("Тест успешного получения рекомендаций, созданных автором")
         public void testGetAllGivenRecommendationsSuccess() {
             List<RecommendationDto> expectedRecommendations = Arrays.asList(recommendation1, recommendation2);
 
@@ -208,7 +199,6 @@ public class RecommendationControllerTest {
         }
 
         @Test
-        @DisplayName("Тест получения пустого списка рекомендаций, созданных автором")
         public void testGetAllGivenRecommendationsEmptyList() {
             when(recommendationService.getAllGivenRecommendations(AUTHOR_ID)).thenReturn(Collections.emptyList());
 
@@ -223,7 +213,6 @@ public class RecommendationControllerTest {
         }
 
         @Test
-        @DisplayName("Тест получения рекомендаций, созданных автором, с исключением")
         public void testGetAllGivenRecommendationsServiceThrowsException() {
             when(recommendationService.getAllGivenRecommendations(INVALID_ID))
                     .thenThrow(new RuntimeException("Invalid author ID"));
