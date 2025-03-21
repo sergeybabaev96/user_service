@@ -13,8 +13,8 @@ import school.faang.user_service.service.UserService;
 
 import java.util.List;
 
-@RestController
 @RequiredArgsConstructor
+@RestController
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;

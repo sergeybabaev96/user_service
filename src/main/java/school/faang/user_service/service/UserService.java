@@ -2,11 +2,11 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.entity.User;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.event.EventDTO;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.exception.UserNotFoundException;
+import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.mapper.goal.GoalMapper;
 import school.faang.user_service.repository.UserRepository;
@@ -20,15 +20,15 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class UserService {
+    private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final GoalMapper goalMapper;
     private final GoalService goalService;
     private final EventService eventService;
     private final MentorshipService mentorshipService;
-    private final UserRepository userRepository;
 
     private static final int MONTHS = 3;
 
