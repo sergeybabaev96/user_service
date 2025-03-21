@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import school.faang.user_service.dto.mentor.MentorshipRequestDto;
 import school.faang.user_service.dto.mentor.RejectionDto;
 import school.faang.user_service.dto.mentor.RequestFilterDto;
@@ -29,7 +30,6 @@ import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.mapper.RequestFilterMapper;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 
-import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,14 +103,7 @@ class MentorshipRequestServiceTest {
 
         requestDescriptionFilter = new StatusFilter();
         requestStatusFilter = new DescriptionFilter();
-
-        try {
-            Field filtersField = MentorshipRequestService.class.getDeclaredField("filters");
-            filtersField.setAccessible(true);
-            filtersField.set(mentorshipRequestService, List.of(requestDescriptionFilter, requestStatusFilter));
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            System.out.println(e.getMessage());
-        }
+        ReflectionTestUtils.setField(mentorshipRequestService, "filters", List.of(requestDescriptionFilter, requestStatusFilter));
     }
 
     //Positive
