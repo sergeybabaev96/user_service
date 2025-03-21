@@ -1,3 +1,7 @@
+app:
+  leaderboard:
+    max-cached-size: 1000
+
 payment:
   api:
     url: http://localhost:9081/api/payment
@@ -12,7 +16,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
