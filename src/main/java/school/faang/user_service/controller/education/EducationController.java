@@ -15,7 +15,7 @@ import school.faang.user_service.service.education.EducationService;
 public class EducationController {
     private final EducationService educationService;
 
-    @PostMapping("{userId}")
+    @PostMapping("/{userId}")
     public ResponseEntity<EducationDto> addEducation(@PathVariable("userId") long userId, @Valid @RequestBody EducationDto educationDto) {
         EducationDto result = educationService.addEducation(userId, educationDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
