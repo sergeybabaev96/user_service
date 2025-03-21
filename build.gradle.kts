@@ -6,7 +6,7 @@ plugins {
     kotlin("jvm")
     checkstyle
     id("checkstyle")
-
+    jacoco
 }
 
 group = "faang.school"
@@ -119,3 +119,43 @@ tasks.checkstyleTest {
     classpath = files()
 }
 
+jacoco {
+    toolVersion = "0.8.10"
+    reportsDirectory.set(layout.buildDirectory.dir("reports/jacoco"))
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.required.set(true)
+    }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it).apply {
+                include("school/faang/user_service/service/**")
+            }
+        })
+    )
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                counter = "CLASS"
+                value = "COVEREDRATIO"
+                minimum = "0.5".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.test {
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
+}
