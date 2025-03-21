@@ -7,16 +7,22 @@ import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.repository.event.EventRepository;
+import school.faang.user_service.repository.goal.GoalRepository;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final GoalRepository goalRepository;
+    private final EventRepository eventRepository;
+    private final MentorshipService mentorshipService;
 
     public User getUserById(long id) {
         return userRepository.findById(id).orElseThrow(()
@@ -48,5 +54,52 @@ public class UserService {
                     .map(userMapper::toDto)
                     .toList();
         }
+    }
+
+    public UserDto activateUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("User with id " + id + " not found")
+        );
+
+        if (user.getUpdatedAt().isAfter(LocalDateTime.now().minusMonths(3))) {
+            user.setActive(true);
+        }
+
+        return userMapper.toDto(userRepository.save(user));
+    }
+
+    public UserDto deactivateUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("User with id " + id + " not found")
+        );
+
+        deleteGoalsAndEvents(user);
+
+        user.setActive(false);
+
+        user.getMentees().forEach(mentee -> mentorshipService.deleteMentorship(user.getId(), mentee.getId()));
+
+        return userMapper.toDto(userRepository.save(user));
+    }
+
+    private void deleteGoalsAndEvents(User user) {
+        user.getGoals().forEach(goal -> {
+            user.getGoals().remove(goal);
+
+            goal.getUsers().remove(user);
+            goalRepository.save(goal);
+            if (goal.getUsers().isEmpty()) {
+                goalRepository.deleteById(goal.getId());
+            }
+
+            userRepository.save(user);
+        });
+
+        user.getOwnedEvents().forEach(event -> {
+            user.getOwnedEvents().remove(event);
+            userRepository.save(user);
+
+            eventRepository.deleteById(event.getId());
+        });
     }
 }
