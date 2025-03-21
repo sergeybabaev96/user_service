@@ -35,7 +35,7 @@ public class SkillService {
         return true;
     }
 
-    public void assignSkillToUser (long skillId, long userId) {
+    public void assignSkillToUser(long skillId, long userId) {
         skillRepository.assignSkillToUser(skillId, userId);
     }
 
@@ -75,7 +75,6 @@ public class SkillService {
                         userSkillGuaranteeService.save(UserSkillGuarantee.builder()
                                 .user(skillOffer.getRecommendation().getReceiver())
                                 .skill(skillUser)
-
                                 .guarantor(skillOffer.getRecommendation().getAuthor())
                                 .build()));
             }
