@@ -62,9 +62,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<String> handleMaxUploadSizeExceededExceptionException(MaxUploadSizeExceededException e) {
-        log.error("Max upload file size exceeded \n", e);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleMaxUploadSizeExceededExceptionException(MaxUploadSizeExceededException e) {
+        Map<String, String> errors = getErrorsMapWithExceptionTitle(e, "Max upload file size exceeded");
+
+        logging(Level.WARN, errors);
+        return errors;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
