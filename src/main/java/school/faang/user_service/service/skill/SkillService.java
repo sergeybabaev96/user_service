@@ -24,7 +24,7 @@ public class SkillService {
     private final SkillUserGuarantee skillUserGuarantee;
 
     public SkillDto create(SkillDto skillDto) {
-        if (skillRepository.existsByTitle(skillDto.getTitle())) {
+        if (skillRepository.existsByTitle(skillDto.title())) {
             throw new DataValidationException("This skill already exists");
         }
         Skill skill = skillMapper.toEntity(skillDto);
@@ -33,31 +33,29 @@ public class SkillService {
     }
 
     public List<SkillDto> getUserSkills(Long userId) {
-       List<Skill> skills = skillRepository.findAllByUserId(userId);
+        List<Skill> skills = skillRepository.findAllByUserId(userId);
         return skills.stream().map(skillMapper::toDto)
-               .toList();
+                .toList();
     }
 
     public List<SkillCandidateDto> getOfferedSkills(Long userId) {
         List<Skill> offeredSkills = skillRepository.findSkillsOfferedToUser(userId);
-        Map<Long,Long> skillCount = offeredSkills.stream()
+        Map<Long, Long> skillCount = offeredSkills.stream()
                 .collect(Collectors.groupingBy(Skill::getId, Collectors.counting()));
-        return skillCount.entrySet().stream().map(entry -> {
+        List<SkillCandidateDto> offeredSkillsDto = skillCount.entrySet().stream().map(entry -> {
             SkillDto skillDto = skillMapper.toDto(findSkillById(entry.getKey(), offeredSkills).get());
-            SkillCandidateDto  skillCandidateDto = new SkillCandidateDto();
-            skillCandidateDto.setSkill(skillDto);
-            skillCandidateDto.setOffersAmount(entry.getValue());
-            return skillCandidateDto;
+            return new SkillCandidateDto(skillDto, entry.getValue());
         }).toList();
+        return offeredSkillsDto;
 
     }
 
-    public SkillDto  acquireSkillFromOffers(long skillId, long userId) {
+    public SkillDto acquireSkillFromOffers(long skillId, long userId) {
 
-        Optional<Skill> optionalSkill = skillRepository.findUserSkill(skillId,userId);
+        Optional<Skill> optionalSkill = skillRepository.findUserSkill(skillId, userId);
         if (optionalSkill.isPresent()) {
             throw new DataValidationException(String.format("This skill \"%s\" by user already exists"
-                    ,optionalSkill.get().getTitle()));
+                    , optionalSkill.get().getTitle()));
         }
         skillOfferService.isEnoughAmountOffersToSkill(skillId, userId);
 

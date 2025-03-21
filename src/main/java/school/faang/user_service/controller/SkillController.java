@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.skill.SkillCandidateDto;
 import school.faang.user_service.dto.skill.SkillDto;
-import school.faang.user_service.exception.DataValidationException;
+
 import school.faang.user_service.service.skill.SkillService;
 
 import java.util.List;
+
+import static school.faang.user_service.utils.ValidationUtils.validateSkill;
 
 @Controller
 @RequiredArgsConstructor
@@ -31,9 +33,4 @@ public class SkillController {
         return skillService.acquireSkillFromOffers(skillId, userId);
     }
 
-    private void validateSkill(SkillDto skill) {
-        if (skill == null || skill.getTitle().isBlank()) {
-            throw new DataValidationException("Title doesn't allow be empty");}
-
-    }
 }
