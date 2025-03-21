@@ -45,7 +45,7 @@ public class RecommendationController {
     }
 
     private void validateRecommendation(RecommendationDto recommendation) {
-        if (recommendation == null || recommendation.getContent().isBlank()) {
+        if (recommendation == null || recommendation.getContent() == null || recommendation.getContent().isBlank()) {
             log.info("Recommendation Is Not Valid");
             throw new DataValidationException("recommendation is not valid");
         }
