@@ -12,10 +12,10 @@ import school.faang.user_service.mapper.UserFilterMapper;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
 
-@Slf4j
 import java.util.List;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -23,22 +23,13 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserFilterMapper userFilterMapper;
 
-    public boolean doesUserExist(long userId) {
-        return userRepository.existsById(userId);
-    }
-
     public User getUserById(long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new DataRetrievalFailureException(
                         "User with id %d is not found".formatted(userId)));
     }
 
-    public User findById(long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new DataValidationException("User not found"));
-    }
-
-    public void checkUserExists(Long userId) {
+    public void validateUserExists(Long userId) {
         if (!userRepository.existsById(userId)) {
             log.error("User with ID {} does not exist", userId);
             throw new DataValidationException("User does not exist.");
