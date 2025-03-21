@@ -50,6 +50,7 @@ public class MentorshipRequestService {
             if (requests == null) {
                 requests = new ArrayList<>();
             }
+            requestEntity.setStatus(RequestStatus.PENDING);
             requests.add(requestEntity);
             requester.setSentMentorshipRequests(requests);
 
