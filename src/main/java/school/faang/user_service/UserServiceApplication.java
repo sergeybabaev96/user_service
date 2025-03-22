@@ -3,22 +3,15 @@ package school.faang.user_service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
-import school.faang.user_service.controller.recommendation.RecommendationRequestController;
-import school.faang.user_service.dto.RecommendationRequestDto;
-import school.faang.user_service.dto.RequestStatusDto;
-import school.faang.user_service.entity.recommendation.RecommendationRequest;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableFeignClients("school.faang.user_service.client")
+@EnableScheduling
 public class UserServiceApplication  {
     public static void main(String[] args) {
         SpringApplication.run(UserServiceApplication.class, args);
