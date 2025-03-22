@@ -35,3 +35,38 @@ project-service:
 payment-service:
   host: localhost
   port: 9080
+
+dicebear:
+  baseUrl: https://api.dicebear.com/9.x/
+  styleNames:
+    - adventurer
+    - avataaars
+    - big-ears
+    - big-smile
+    - bottts
+    - dylan
+    - micah
+    - miniavs
+    - open-peeps
+    - personas
+  seeds:
+    - emery
+    - jameson
+    - kimberly
+    - aidan
+    - brooklynn
+    - destiny
+    - jessica
+    - maria
+    - ryker
+    - amaya
+    - eliza
+    - aiden
+    - luis
+    - liam
+    - valentina
+    - vivian
+    - caleb
+    - chase
+    - sadie
+    - katherine
