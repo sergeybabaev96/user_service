@@ -1,38 +1,10 @@
 package school.faang.user_service.service;
 
+public interface GoalService {
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import school.faang.user_service.entity.User;
-import school.faang.user_service.entity.goal.Goal;
-import school.faang.user_service.entity.goal.GoalStatus;
-import school.faang.user_service.repository.goal.GoalRepository;
+    boolean existsById(Long goalId);
 
-import java.util.List;
-import java.util.Objects;
+    long countActiveGoalsPerUser(Long userId);
 
-@Service
-@RequiredArgsConstructor
-public class GoalService {
-    private final GoalRepository goalRepository;
-
-    public void deleteUserFromGoals(Long userId) {
-        List<Goal> goalsToUser = getActiveGoalsToUser(userId);
-        goalsToUser.forEach(goal -> {
-            List<User> usersWithoutDeactivatedUser = goal.getUsers().stream()
-                    .filter(user -> !Objects.equals(user.getId(), userId)).toList();
-            if (usersWithoutDeactivatedUser.isEmpty()) {
-                goalRepository.delete(goal);
-            }
-            goal.setUsers(usersWithoutDeactivatedUser);
-        });
-        List<Goal> goalsWithFollower = goalsToUser.stream()
-                .filter(goal -> !goal.getUsers().isEmpty()).toList();
-        goalRepository.saveAll(goalsWithFollower);
-    }
-
-    private List<Goal> getActiveGoalsToUser(Long userId) {
-        return goalRepository.findGoalsByUserId(userId)
-                .filter(goal -> goal.getStatus() == GoalStatus.ACTIVE).toList();
-    }
+    public void deleteUserFromGoals(Long userId);
 }

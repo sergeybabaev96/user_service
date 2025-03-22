@@ -2,6 +2,7 @@ package school.faang.user_service.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserDto;
@@ -10,6 +11,7 @@ import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.UserRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -42,10 +44,18 @@ public class UserService {
         User deactivatedUser = userRepository.save(user);
 
         return userMapper.toDto(deactivatedUser);
+    }
 
     public User findById(long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new DataValidationException("User not found"));
+    }
+
+    public void checkUserExists(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            log.error("User with ID {} does not exist", userId);
+            throw new DataValidationException("User does not exist.");
+        }
     }
 
     public boolean existsById(long userId) {
