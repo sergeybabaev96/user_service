@@ -13,5 +13,5 @@ public interface UserService {
 
     boolean existsById(long userId);
 
-    UserDto createUser(CreateUserDto userDto);
+    UserDto createUser(CreateUserDto createUserDto);
 }

@@ -115,7 +115,7 @@ class EventParticipationServiceImplTest {
                                 .email(USER_EMAIL)
                                 .build()
                 ));
-        List<UserDto> userDtos = List.of(new UserDto(USER_ID, USER_NAME, USER_EMAIL));
+        List<UserDto> userDtos = List.of(new UserDto(USER_ID, USER_NAME, USER_EMAIL, null));
         assertEquals(userDtos, participationService.getParticipants(EVENT_ID));
     }
 

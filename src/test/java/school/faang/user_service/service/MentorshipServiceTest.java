@@ -58,7 +58,7 @@ class MentorshipServiceTest {
             List<User> mentees = List.of(mentee);
             when(mentorshipRepository.findAllMenteesByMentorId(DEFAULT_MENTOR_ID)).thenReturn(mentees);
 
-            UserDto menteeDto = new UserDto(mentee.getId(), mentee.getUsername(), mentee.getEmail());
+            UserDto menteeDto = new UserDto(mentee.getId(), mentee.getUsername(), mentee.getEmail(), null);
             when(userMapper.toDto(mentee)).thenReturn(menteeDto);
 
             // when
@@ -108,7 +108,7 @@ class MentorshipServiceTest {
             List<User> mentors = List.of(mentor);
             when(mentorshipRepository.findAllMentorsByMenteeId(DEFAULT_MENTEE_ID)).thenReturn(mentors);
 
-            UserDto mentorDto = new UserDto(mentor.getId(), mentor.getUsername(), mentor.getEmail());
+            UserDto mentorDto = new UserDto(mentor.getId(), mentor.getUsername(), mentor.getEmail(), null);
             when(userMapper.toDto(mentor)).thenReturn(mentorDto);
 
             // when
