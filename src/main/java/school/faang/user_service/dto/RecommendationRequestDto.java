@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import school.faang.user_service.entity.RequestStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,6 +15,7 @@ public class RecommendationRequestDto {
     @NotBlank
     private String message;
 
+    @NotNull
     @NotEmpty
     private List<Long> skillIds;
 
@@ -25,7 +25,9 @@ public class RecommendationRequestDto {
     @NotNull
     private Long receiverId;
 
-    private RequestStatus status;
+    private RequestStatusDto status;
+
     private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
 }

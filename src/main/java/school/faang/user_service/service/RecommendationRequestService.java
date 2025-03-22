@@ -1,7 +1,9 @@
 package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.RecommendationRequestDto;
 import school.faang.user_service.dto.RejectionDto;
 import school.faang.user_service.dto.RequestFilterDto;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -33,24 +36,54 @@ public class RecommendationRequestService {
     private final RecommendationRequestMapper recommendationRequestMapper;
     private final List<RequestFilter> filters;
 
+    @Transactional
     public RecommendationRequestDto create(RecommendationRequestDto recommendationRequestDto) {
-        validateRecommendationRequest(recommendationRequestDto);
-
-        RecommendationRequest recommendationRequest = recommendationRequestMapper.toEntity(recommendationRequestDto);
         User requester = userRepository.findById(recommendationRequestDto.getRequesterId())
                 .orElseThrow(() -> new IllegalArgumentException("Requester not found"));
         User receiver = userRepository.findById(recommendationRequestDto.getReceiverId())
                 .orElseThrow(() -> new IllegalArgumentException("Receiver not found"));
+
+        Optional<RecommendationRequest> latestRequest = recommendationRequestRepository.findLatestPendingRequest(
+                recommendationRequestDto.getRequesterId(),
+                recommendationRequestDto.getReceiverId()
+        );
+
+        if (latestRequest.isPresent() && latestRequest.get().getCreatedAt().
+                isAfter(LocalDateTime.now().minusMonths(6))) {
+            throw new IllegalArgumentException("You can request a recommendation only once every 6 months");
+        }
+
+        RecommendationRequest recommendationRequest = recommendationRequestMapper.toEntity(recommendationRequestDto);
         recommendationRequest.setRequester(requester);
         recommendationRequest.setReceiver(receiver);
         recommendationRequest.setStatus(RequestStatus.PENDING);
+        recommendationRequest.setSkills(new ArrayList<>());
 
-        List<SkillRequest> savedSkills = saveSkills(recommendationRequestDto.getSkillIds(), recommendationRequest);
-
-        recommendationRequest.getSkills().addAll(savedSkills);
         recommendationRequest = recommendationRequestRepository.save(recommendationRequest);
 
+        recommendationRequest.getSkills().addAll(saveSkills(recommendationRequestDto.getSkillIds(), recommendationRequest));
+
         return recommendationRequestMapper.toDto(recommendationRequest);
+    }
+
+    public List<SkillRequest> saveSkills(List<Long> skillIds, RecommendationRequest recommendationRequest) {
+        List<Skill> skills = skillRepository.findAllByIdIn(skillIds);
+
+        if (skills.size() != skillIds.size()) {
+            throw new IllegalArgumentException("One or more skills not found");
+        }
+
+        List<SkillRequest> skillRequests = skills.stream()
+                .map(skill -> {
+                    SkillRequest skillRequest = new SkillRequest();
+                    skillRequest.setSkill(skill);
+                    skillRequest.setRequest(recommendationRequest);
+                    return skillRequest;
+                })
+                .collect(Collectors.toList());
+
+        skillRequestRepository.saveAll(skillRequests);
+        return skillRequests;
     }
 
     public List<RecommendationRequestDto> getRequests(RequestFilterDto filter) {
@@ -85,48 +118,5 @@ public class RecommendationRequestService {
         recommendationRequest.setRejectionReason(rejection.getReason());
         recommendationRequestRepository.save(recommendationRequest);
         return recommendationRequestMapper.toDto(recommendationRequest);
-    }
-
-    private void validateRecommendationRequest(RecommendationRequestDto recommendationRequestDto) {
-        if (!userRepository.existsById(recommendationRequestDto.getRequesterId())) {
-            throw new IllegalArgumentException("Requester not found");
-        }
-
-        if (!userRepository.existsById(recommendationRequestDto.getReceiverId())) {
-            throw new IllegalArgumentException("Receiver not found");
-        }
-
-        Optional<RecommendationRequest> latestRequest = recommendationRequestRepository.findLatestPendingRequest(
-                recommendationRequestDto.getRequesterId(),
-                recommendationRequestDto.getReceiverId()
-        );
-
-        if (latestRequest.isPresent() && latestRequest.get().getCreatedAt().
-                isAfter(LocalDateTime.now().minusMonths(6))) {
-            throw new IllegalArgumentException("You can request a recommendation only once every 6 months");
-        }
-
-        for (Long skillId : recommendationRequestDto.getSkillIds()) {
-            if (!skillRequestRepository.existsById(skillId)) {
-                throw new IllegalArgumentException("Skill with id " + skillId + " not found");
-            }
-        }
-    }
-
-    private List<SkillRequest> saveSkills(List<Long> skillIds, RecommendationRequest recommendationRequest) {
-        List<SkillRequest> skillRequests = new ArrayList<>();
-
-        for (Long skillId : skillIds) {
-            Skill skill = skillRepository.findById(skillId)
-                    .orElseThrow(() -> new IllegalArgumentException("Skill with id " + skillId + " not found"));
-
-            SkillRequest skillRequest = new SkillRequest();
-            skillRequest.setSkill(skill);
-            skillRequest.setRequest(recommendationRequest);
-            skillRequests.add(skillRequest);
-        }
-
-        skillRequestRepository.saveAll(skillRequests);
-        return skillRequests;
     }
 }

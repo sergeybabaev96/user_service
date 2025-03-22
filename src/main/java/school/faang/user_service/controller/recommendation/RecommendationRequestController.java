@@ -18,7 +18,6 @@ import school.faang.user_service.service.RecommendationRequestService;
 
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/recommendation")
 @RequiredArgsConstructor
