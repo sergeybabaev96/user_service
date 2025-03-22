@@ -1,8 +1,9 @@
 package school.faang.user_service.service.avatarGenerator;
 
-import java.io.IOException;
-import java.io.InputStream;
+import org.springframework.core.io.buffer.DataBuffer;
 
 public interface AvatarGeneratorService {
-    byte[] getRandomAvatar() throws IOException;
+    DataBuffer getRandomAvatar();
+
+    String getRandomAvatarContentType();
 }

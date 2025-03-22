@@ -4,14 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import school.faang.user_service.config.DicebearConfig;
 import school.faang.user_service.exception.ExternalResourceNotFoundException;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -27,7 +24,7 @@ public class DicebearAvatarGenerator implements AvatarGeneratorService {
     private final WebClient webClient;
 
     @Override
-    public byte[] getRandomAvatar() throws IOException {
+    public DataBuffer getRandomAvatar() {
         var styleName = getRandomElementFromList(dicebearConfig.getStyleNames());
         var seed = getRandomElementFromList(dicebearConfig.getSeeds());
 
@@ -39,28 +36,27 @@ public class DicebearAvatarGenerator implements AvatarGeneratorService {
                 .retrieve()
                 .bodyToMono(DataBuffer.class)
                 .onErrorMap(ex -> {
-                    var errorMessage = "Cannot get image from DiceBear server (styleName = %s, seed = %s): %s".formatted(
-                            styleName,
-                            seed,
-                            ex.getMessage());
+                    var errorMessage = "Cannot get image from DiceBear server (styleName = %s, seed = %s): %s"
+                            .formatted(styleName, seed, ex.getMessage());
                     log.error(errorMessage, ex);
 
-                    return new ExternalResourceNotFoundException(errorMessage);
+                    return new ExternalResourceNotFoundException(errorMessage, ex);
                 })
                 .block();
 
         if (imageBuffer == null) {
             throw new ExternalResourceNotFoundException(
                     "Cannot get image from DiceBear server (styleName = %s, seed = %s)".formatted(
-                    styleName,
-                    seed));
+                            styleName,
+                            seed));
         }
 
-        try (var stream = imageBuffer.asInputStream()) {
-            return stream.readAllBytes();
-        } finally {
-            DataBufferUtils.release(imageBuffer);
-        }
+        return imageBuffer;
+    }
+
+    @Override
+    public String getRandomAvatarContentType() {
+        return "image/svg+xml";
     }
 
     private String getRandomElementFromList(List<String> strings) {
