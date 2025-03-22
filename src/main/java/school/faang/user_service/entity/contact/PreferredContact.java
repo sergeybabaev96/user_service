@@ -9,6 +9,6 @@ public enum PreferredContact {
                 return contact;
             }
         }
-        throw new IllegalArgumentException("No contact preference with name " + preference + " found");
+        throw new IllegalArgumentException("No contact preference with username " + preference + " found");
     }
 }

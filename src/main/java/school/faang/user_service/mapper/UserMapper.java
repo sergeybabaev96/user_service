@@ -1,12 +1,20 @@
 package school.faang.user_service.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 
-@Mapper(componentModel = "spring")
+import java.util.List;
+
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
+
     User toEntity(UserDto dto);
 
     UserDto toDto(User user);
+
+    List<UserDto> toDtoList(List<User> users);
+
+    List<User> toEntityList(List<UserDto> userDtos);
 }

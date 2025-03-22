@@ -12,9 +12,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
+@Setter
 @Getter
 @Builder
 @NoArgsConstructor
@@ -22,7 +24,6 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "career")
 public class Career {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
