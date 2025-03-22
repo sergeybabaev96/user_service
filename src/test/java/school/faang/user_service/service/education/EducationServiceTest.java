@@ -38,7 +38,7 @@ class EducationServiceTest {
     private EducationMapper educationMapper;
 
     @InjectMocks
-    private EducationService educationService;
+    private EducationServiceImpl educationService;
 
     private User user;
     private EducationDto validEducationDto;

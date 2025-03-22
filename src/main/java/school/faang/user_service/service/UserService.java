@@ -1,33 +1,17 @@
 package school.faang.user_service.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.CreateUserDto;
+import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.repository.UserRepository;
 
-@Service
-@RequiredArgsConstructor
-public class UserService {
-    private final UserRepository userRepository;
+public interface UserService {
+    boolean doesUserExist(long userId);
 
-    public boolean doesUserExist(long userId) {
-        return userRepository.existsById(userId);
-    }
+    User getUserById(long userId);
 
-    public User getUserById(long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new DataRetrievalFailureException(
-                        "User with id %d is not found".formatted(userId)));
-    }
+    User findById(long userId);
 
-    public User findById(long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new DataValidationException("User not found"));
-    }
+    boolean existsById(long userId);
 
-    public boolean existsById(long userId) {
-        return userRepository.existsById(userId);
-    }
+    UserDto createUser(CreateUserDto userDto);
 }

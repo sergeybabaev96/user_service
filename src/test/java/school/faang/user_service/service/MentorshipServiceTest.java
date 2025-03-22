@@ -42,7 +42,7 @@ class MentorshipServiceTest {
     private UserMapper userMapper;
 
     @InjectMocks
-    private MentorshipService mentorshipService;
+    private MentorshipServiceImpl mentorshipService;
 
     @Nested
     class TestGetMentees {
