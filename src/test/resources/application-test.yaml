@@ -16,3 +16,9 @@ spring:
 
 server:
   port: 8080
+
+avatar:
+  bucket-name: avatars
+  size-mb: 5
+  big-side: 1080
+  small-side: 170

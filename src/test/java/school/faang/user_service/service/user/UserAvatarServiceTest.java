@@ -3,18 +3,17 @@ package school.faang.user_service.service.user;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.config.avatar.UserAvatarProperties;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
 import school.faang.user_service.repository.UserRepository;
-import school.faang.user_service.service.TestUserAvatarProperties;
 import school.faang.user_service.service.s3.S3Service;
 
 import java.io.ByteArrayInputStream;
@@ -27,22 +26,23 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@MockitoSettings(strictness = Strictness.LENIENT)
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@TestPropertySource(locations = "classpath:application-test.yaml")
 class UserAvatarServiceTest {
 
-    @Mock
+    @Autowired
     private UserAvatarProperties avatarProperties;
 
-    @Mock
+    @MockBean
     private UserRepository userRepository;
 
-    @Mock
+    @MockBean
     private S3Service s3Service;
 
     @Mock
     private MultipartFile avatarFile;
 
+    @Autowired
     private UserAvatarService userAvatarService;
 
     private final long userId = 1L;
@@ -52,8 +52,6 @@ class UserAvatarServiceTest {
 
     @BeforeEach
     void setUp() {
-        avatarProperties = TestUserAvatarProperties.createTestProperties();
-        userAvatarService = new UserAvatarService(userRepository, avatarProperties, s3Service);
         user = new User();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         MultipartFile avatarFile = mock(MultipartFile.class);
