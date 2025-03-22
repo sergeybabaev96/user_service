@@ -13,6 +13,7 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -85,9 +86,6 @@ public class EventService {
 
     public List<EventDTO> getParticipatedEvents(Long userId) {
         List<Event> userEvents = eventRepository.findParticipatedEventsByUserId(userId);
-        if (userEvents.isEmpty()) {
-            throw new DataValidationException("Haven`t participated events");
-        }
         return eventMapper.eventsToEventDTOs(userEvents);
     }
 
@@ -104,5 +102,18 @@ public class EventService {
                         eventDTO.getLocation()
                                 .equals(filter.getLocation()));
         return filteredEventDTOs.toList();
+    }
+
+    public void deleteAllByIds(List<Long> ids) {
+        eventRepository.deleteAllById(ids);
+    }
+
+    public void removeUserFromEvents(List<Long> goalIds, Long userId) {
+        List<Event> events = eventRepository.findAllById(goalIds);
+
+        events.forEach(event -> {
+            List<User> currentUsers = event.getAttendees();
+            event.setAttendees(currentUsers.stream().filter(user -> !Objects.equals(user.getId(), userId)).toList());
+        });
     }
 }
