@@ -11,6 +11,7 @@ public record GoalDto(
         Long parentId,
         String title,
         GoalStatus status,
-        List<Long> skillIds
+        List<Long> skillIds,
+        List<Long> userIds
 ) {
 }
