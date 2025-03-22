@@ -21,9 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -60,25 +57,22 @@ public class UserServiceTest {
 
     @Test
     public void testGetUserNotFound() {
-        doThrow(new EntityNotFoundException(USER_NOT_FOUND))
-                .when(userValidator).checkUserExistsById(USER_ID);
+        when(userRepository.findById(USER_ID))
+                .thenThrow(new EntityNotFoundException(USER_NOT_FOUND));
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> userService.getUser(USER_ID));
-        verify(userValidator, times(1)).checkUserExistsById(USER_ID);
         assertEquals(USER_NOT_FOUND, exception.getMessage());
-        verify(userRepository, never()).findById(USER_ID);
+        verify(userRepository, times(1)).findById(USER_ID);
         verify(userMapper, never()).toUser(any());
     }
 
     @Test
     public void testGetUserSuccessful() {
-        doNothing().when(userValidator).checkUserExistsById(USER_ID);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
 
         UserDto resultDto = userService.getUser(USER_ID);
 
-        verify(userValidator, times(1)).checkUserExistsById(USER_ID);
         verify(userRepository, times(1)).findById(USER_ID);
         verify(userMapper, times(1)).toUser(user);
         assertNotNull(resultDto);
@@ -87,24 +81,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testGetUsersByIdsUserNotFound() {
-        Long id = 2L;
-        doNothing().when(userValidator).checkUserExistsById(USER_ID);
-        doThrow(new EntityNotFoundException(USER_NOT_FOUND))
-                .when(userValidator).checkUserExistsById(id);
-
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> userService.getUsersByIds(userIds));
-        assertEquals(USER_NOT_FOUND, exception.getMessage());
-        verify(userValidator, times(1)).checkUserExistsById(USER_ID);
-        verify(userValidator, times(1)).checkUserExistsById(id);
-        verify(userRepository, never()).findAllById(userIds);
-        verify(userMapper, never()).toListUserDto(any());
-    }
-
-    @Test
     public void testGetUsersByIdsSuccessful() {
-        doNothing().when(userValidator).checkUserExistsById(anyLong());
         when(userRepository.findAllById(userIds)).thenReturn(users);
 
         List<UserDto> resultDtos = userService.getUsersByIds(userIds);
@@ -115,7 +92,6 @@ public class UserServiceTest {
         assertEquals(userDtos.get(0).getUsername(), resultDtos.get(0).getUsername());
         assertEquals(userDtos.get(1).getId(), resultDtos.get(1).getId());
         assertEquals(userDtos.get(1).getUsername(), resultDtos.get(1).getUsername());
-        verify(userValidator, times(2)).checkUserExistsById(anyLong());
         verify(userRepository, times(1)).findAllById(userIds);
         verify(userMapper, times(1)).toListUserDto(users);
     }
