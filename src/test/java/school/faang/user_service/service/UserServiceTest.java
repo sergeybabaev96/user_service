@@ -41,7 +41,7 @@ public class UserServiceTest {
     private UserFilterMapperImpl userFilterMapper;
 
     @InjectMocks
-    private UserService userService;
+    private UserServiceImpl userService;
 
     long userId;
 
