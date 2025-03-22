@@ -21,12 +21,12 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable Long userId) {
-        return ResponseEntity.ok(userService.getUserById(userId));
+    public ResponseEntity<UserDto> getUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getUser(userId));
     }
 
     @PostMapping
-    public ResponseEntity<List<UserDto>> getAllUsersById(@RequestBody List<Long> userIds) {
-        return ResponseEntity.ok(userService.getAllUsersFromListById(userIds));
+    public ResponseEntity<List<UserDto>> getUsersByIds(@RequestBody List<Long> userIds) {
+        return ResponseEntity.ok(userService.getUsersByIds(userIds));
     }
 }
