@@ -23,28 +23,21 @@ class GoalServiceTest {
     @Mock
     private GoalRepository goalRepository;
     @InjectMocks
-    private GoalService goalService;
+    private GoalServiceImpl goalService;
 
     @Test
     void testDeleteUserFromGoals() {
         Long userId = 1L;
-        User user = new User();
-        user.setId(userId);
+        User user = User.builder().id(userId).build();
 
-        Goal goal1 = new Goal();
-        goal1.setUsers(List.of(user));
-        goal1.setStatus(GoalStatus.ACTIVE);
+        Goal goal1 = Goal.builder().users(List.of(user)).status(GoalStatus.ACTIVE).build();
 
-        Goal goal2 = new Goal();
-        goal2.setUsers(List.of(user, new User()));
-        goal2.setStatus(GoalStatus.ACTIVE);
-
+        Goal goal2 = Goal.builder().users(List.of(user, new User()))
+                .status(GoalStatus.ACTIVE).build();
         List<Goal> goals = List.of(goal1, goal2);
-
         when(goalRepository.findGoalsByUserId(userId)).thenReturn(goals.stream());
 
         goalService.deleteUserFromGoals(userId);
-
 
         verify(goalRepository).delete(goal1);
         verify(goalRepository).saveAll(argThat(list ->

@@ -46,18 +46,12 @@ class EventServiceTest {
 
     @Test
     void testDeleteParticipationFromEvent() {
-
         Long userId = 1L;
-        User user1 = new User();
-        user1.setId(1L);
-        User user2 = new User();
-        user2.setId(2L);
+        User user1 = User.builder().id(1L).build();
+        User user2 = User.builder().id(2L).build();
 
-        Event event1 = new Event();
-        event1.setAttendees(List.of(user1, user2));
-        Event event2 = new Event();
-        event2.setAttendees(List.of(user1));
-
+        Event event1 = Event.builder().attendees(List.of(user1, user2)).build();
+        Event event2 = Event.builder().attendees(List.of(user1)).build();
         List<Event> events = List.of(event1, event2);
 
         when(eventRepository.findParticipatedEventsByUserId(userId)).thenReturn(events);
@@ -66,12 +60,9 @@ class EventServiceTest {
 
         ArgumentCaptor<List<Event>> captor = ArgumentCaptor.forClass(List.class);
         verify(eventRepository).saveAll(captor.capture());
-
         List<Event> savedEvents = captor.getValue();
-
         assertEquals(1, savedEvents.get(0).getAttendees().size());
         assertEquals(2L, savedEvents.get(0).getAttendees().get(0).getId());
-
         assertTrue(savedEvents.get(1).getAttendees().isEmpty());
     }
 }
