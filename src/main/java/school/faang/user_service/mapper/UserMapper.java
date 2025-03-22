@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface UserMapper {
     User toEntity(UserDto dto);
 
