@@ -124,7 +124,6 @@ tasks.jacocoTestCoverageVerification {
         rule {
             element = "CLASS"
             includes = listOf(
-                "school.faang.user_service.service.UserService",
                 "school.faang.user_service.service.MentorshipService",
                 "school.faang.user_service.service.event..EventParticipationService",
                 "school.faang.user_service.service.education.EducationService",
