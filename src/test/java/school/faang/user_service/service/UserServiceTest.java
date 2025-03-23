@@ -6,8 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataRetrievalFailureException;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.repository.UserRepository;
 
 import java.util.Optional;
@@ -25,7 +25,7 @@ public class UserServiceTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private UserService userService;
+    private UserServiceImpl userService;
 
     long userId;
 
@@ -52,7 +52,7 @@ public class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThrows(
-                DataRetrievalFailureException.class,
+                UserNotFoundException.class,
                 () -> userService.findUserById(userId));
         verify(userRepository, times(1)).findById(userId);
     }
