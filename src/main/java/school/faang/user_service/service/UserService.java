@@ -9,6 +9,7 @@ import school.faang.user_service.filter.user.UserFilter;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
 
+import java.util.Optional;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -27,5 +28,9 @@ public class UserService {
                 .forEach(userFilter -> userFilter.apply(premiumUsers, userFilterDto));
 
         return premiumUsers.map(userMapper::toDto).toList();
+    }
+
+    public Optional<User> findUserById(long userId) {
+            return userRepository.findById(userId);
     }
 }
