@@ -73,12 +73,12 @@ public class UserServiceImpl implements UserService {
         user.setUserProfilePic(userProfilePic);
         user.setCountry(country);
 
-        var savedUser = getSavedUser(createUserDto, user, randomAvatarResourceDto);
+        var savedUser = saveUser(createUserDto, user, randomAvatarResourceDto);
 
         return userMapper.toDto(savedUser);
     }
 
-    private User getSavedUser(CreateUserDto createUserDto, User user, ExternalResourceDto randomAvatarResourceDto) {
+    private User saveUser(CreateUserDto createUserDto, User user, ExternalResourceDto randomAvatarResourceDto) {
         try {
             return userRepository.save(user);
         } catch (Exception ex) {

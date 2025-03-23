@@ -125,10 +125,13 @@ tasks.jacocoTestCoverageVerification {
         rule {
             element = "CLASS"
             includes = listOf(
+                "school.faang.user_service.MentorshipService",
                 "school.faang.user_service.RecommendationRequestService",
                 "school.faang.user_service.SkillRequestService",
                 "school.faang.user_service.SkillService",
-                "school.faang.user_service.SkillService",
+                "school.faang.user_service.externalStorage.S3ServiceImpl",
+                "school.faang.user_service.avatarGenerator.DicebearAvatarGenerator",
+                "school.faang.user_service.CreateUserValidator",
                 )
 
             limit {
