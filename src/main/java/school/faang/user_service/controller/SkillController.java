@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.skill.SkillCandidateDto;
 import school.faang.user_service.dto.skill.SkillDto;
+import school.faang.user_service.service.SkillService;
 import school.faang.user_service.service.SkillServiceImpl;
 
 
@@ -14,7 +15,7 @@ import static school.faang.user_service.utils.ValidationUtils.validateSkill;
 @Controller
 @RequiredArgsConstructor
 public class SkillController {
-    private final SkillServiceImpl skillService;
+    private final SkillService skillService;
 
     public SkillDto create(SkillDto skill) {
         validateSkill(skill);

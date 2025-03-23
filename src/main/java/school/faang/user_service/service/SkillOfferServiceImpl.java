@@ -17,22 +17,27 @@ public class SkillOfferServiceImpl implements SkillOfferService {
     private int minSkillOffers;
     private final SkillOfferRepository skillOfferRepository;
 
+    @Override
     public List<SkillOffer> getSkillRequestsByRecommendationId(long recommendationId) {
         return skillOfferRepository.findAllByRecommendationId(recommendationId);
     }
 
-    public void deleteSkillOfferssByRecommendationId(long recommendationId) {
+    @Override
+    public void deleteSkillOffersByRecommendationId(long recommendationId) {
         skillOfferRepository.deleteAllByRecommendationId(recommendationId);
     }
 
+    @Override
     public Optional<SkillOffer> findSkillOfferBySkillAndRecommendationIds(long skillId, long recommendationId) {
         return skillOfferRepository.findBySkillIdAndRecommendationId(skillId, recommendationId);
     }
 
+    @Override
     public void createSkillOffer(long skillId, long recommendationId) {
         skillOfferRepository.create(skillId, recommendationId);
     }
 
+    @Override
     public void isEnoughAmountOffersToSkill(Long skillOfferId, Long userId) {
         int amountOffers = skillOfferRepository.findAllOffersOfSkill (skillOfferId,userId).size();
         if (amountOffers < minSkillOffers) {
@@ -40,6 +45,7 @@ public class SkillOfferServiceImpl implements SkillOfferService {
         };
     }
 
+    @Override
     public List<SkillOffer> getSkillOfferToUser(Long skillOfferId, Long userId) {
         return skillOfferRepository.findAllOffersOfSkill (skillOfferId,userId);
     }

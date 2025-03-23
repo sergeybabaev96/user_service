@@ -19,18 +19,20 @@ import java.util.stream.Collectors;
 public class SkillServiceImpl implements SkillService {
     private final SkillRepository skillRepository;
     private final SkillMapper skillMapper;
-    private final SkillOfferServiceImpl skillOfferService;
-    private final UserSkillGuaranteeServiceImpl userSkillGuaranteeService;
+    private final SkillOfferService skillOfferService;
+    private final UserSkillGuaranteeService userSkillGuaranteeService;
 
-
+    @Override
     public boolean doesSkillExists(long skillId) {
         return skillRepository.existsById(skillId);
     }
 
+    @Override
     public List<Skill> findSkillsByUserId(long userId) {
         return skillRepository.findAllByUserId(userId);
     }
 
+    @Override
     public SkillDto create(SkillDto skillDto) {
         if (skillRepository.existsByTitle(skillDto.title())) {
             throw new DataValidationException("This skill already exists");
@@ -40,12 +42,14 @@ public class SkillServiceImpl implements SkillService {
         return skillMapper.toDto(skill);
     }
 
+    @Override
     public List<SkillDto> getUserSkills(Long userId) {
         List<Skill> skills = skillRepository.findAllByUserId(userId);
         return skills.stream().map(skillMapper::toDto)
                 .toList();
     }
 
+    @Override
     public List<SkillCandidateDto> getOfferedSkills(Long userId) {
         List<Skill> offeredSkills = skillRepository.findSkillsOfferedToUser(userId);
         Map<Long, Long> skillCount = offeredSkills.stream()
@@ -58,6 +62,7 @@ public class SkillServiceImpl implements SkillService {
 
     }
 
+    @Override
     public SkillDto acquireSkillFromOffers(long skillId, long userId) {
 
         Optional<Skill> optionalSkill = skillRepository.findUserSkill(skillId, userId);

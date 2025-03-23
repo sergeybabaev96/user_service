@@ -15,14 +15,17 @@ public class UserSkillGuaranteeServiceImpl implements UserSkillGuaranteeService 
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
     private final SkillOfferServiceImpl skillOfferService;
 
+    @Override
     public void createUserSkillGuarantee(long userId, long skillId, long guarantorId) {
         userSkillGuaranteeRepository.create(userId, skillId, guarantorId);
     }
 
+    @Override
     public Optional<UserSkillGuarantee> findUserSkillGuaranteeByGuarantorId(long guarantorId) {
         return userSkillGuaranteeRepository.findByGuarantorId(guarantorId);
     }
 
+    @Override
     public void addUserSkillGuarantee(Long skillId, Long userId) {
         List<SkillOffer> skillOffers = skillOfferService.getSkillOfferToUser(skillId, userId);
         skillOffers.forEach(skillOffer -> {
