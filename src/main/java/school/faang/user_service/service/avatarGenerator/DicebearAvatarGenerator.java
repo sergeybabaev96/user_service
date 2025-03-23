@@ -28,7 +28,7 @@ public class DicebearAvatarGenerator implements AvatarGeneratorService {
         var styleName = getRandomElementFromList(dicebearConfig.getStyleNames());
         var seed = getRandomElementFromList(dicebearConfig.getSeeds());
 
-        var imageBuffer = webClient.get()
+        return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("%s/svg".formatted(styleName))
                         .queryParam(SEED_QUERY_PARAMETER, seed)
@@ -43,15 +43,6 @@ public class DicebearAvatarGenerator implements AvatarGeneratorService {
                     return new ExternalResourceNotFoundException(errorMessage, ex);
                 })
                 .block();
-
-        if (imageBuffer == null) {
-            throw new ExternalResourceNotFoundException(
-                    "Cannot get image from DiceBear server (styleName = %s, seed = %s)".formatted(
-                            styleName,
-                            seed));
-        }
-
-        return imageBuffer;
     }
 
     @Override

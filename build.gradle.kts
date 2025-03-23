@@ -75,6 +75,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("javax.servlet:javax.servlet-api:4.0.1")
+    testImplementation("org.wiremock:wiremock-standalone:3.9.2")
 }
 
 jsonSchema2Pojo {
@@ -131,7 +133,8 @@ tasks.jacocoTestCoverageVerification {
                 "school.faang.user_service.SkillService",
                 "school.faang.user_service.externalStorage.S3ServiceImpl",
                 "school.faang.user_service.avatarGenerator.DicebearAvatarGenerator",
-                "school.faang.user_service.CreateUserValidator",
+                "school.faang.user_service.validators.CreateUserValidator",
+                "school.faang.user_service.controller.UserController",
                 )
 
             limit {
