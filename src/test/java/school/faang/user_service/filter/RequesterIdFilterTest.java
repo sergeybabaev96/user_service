@@ -17,7 +17,7 @@ public class RequesterIdFilterTest {
     private final RequesterIdFilter requesterIdFilter = new RequesterIdFilter();
 
     @Test
-    void testisApplicableWhenRequesterIdIsNotNull() {
+    void testIsApplicableWhenRequesterIdIsNotNull() {
         RequestFilterDto filter = new RequestFilterDto();
         filter.setRequesterId(10L);
 
@@ -27,7 +27,7 @@ public class RequesterIdFilterTest {
     }
 
     @Test
-    void testisApplicableWhenRequesterIdIsNull() {
+    void testIsApplicableWhenRequesterIdIsNull() {
         RequestFilterDto filter = new RequestFilterDto();
 
         boolean result = requesterIdFilter.isApplicable(filter);
@@ -36,7 +36,7 @@ public class RequesterIdFilterTest {
     }
 
     @Test
-    void testisApplicableWhenRequesterIdIsNegative() {
+    void testIsApplicableWhenRequesterIdIsNegative() {
         RequestFilterDto filter = new RequestFilterDto();
         filter.setRequesterId(-1L);
 

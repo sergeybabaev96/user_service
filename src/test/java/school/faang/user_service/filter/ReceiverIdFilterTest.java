@@ -17,7 +17,7 @@ public class ReceiverIdFilterTest {
     private final ReceiverIdFilter receiverIdFilter = new ReceiverIdFilter();
 
     @Test
-    void testisApplicableWhenReceiverIdIsNotNull() {
+    void testIsApplicableWhenReceiverIdIsNotNull() {
         RequestFilterDto filter = new RequestFilterDto();
         filter.setReceiverId(20L);
 
@@ -27,7 +27,7 @@ public class ReceiverIdFilterTest {
     }
 
     @Test
-    void testisApplicableWhenReceiverIdIsNull() {
+    void testIsApplicableWhenReceiverIdIsNull() {
         RequestFilterDto filter = new RequestFilterDto();
 
         boolean result = receiverIdFilter.isApplicable(filter);
@@ -36,7 +36,7 @@ public class ReceiverIdFilterTest {
     }
 
     @Test
-    void testisApplicableWhenReceiverIdIsNegative() {
+    void testIsApplicableWhenReceiverIdIsNegative() {
         RequestFilterDto filter = new RequestFilterDto();
         filter.setReceiverId(-1L);
 

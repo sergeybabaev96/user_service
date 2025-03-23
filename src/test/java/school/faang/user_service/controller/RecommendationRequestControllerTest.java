@@ -35,12 +35,7 @@ public class RecommendationRequestControllerTest {
 
         RecommendationRequestDto result = recommendationRequestController.requestRecommendation(requestDto);
 
-        assertEquals(requestDto.getId(), result.getId());
-        assertEquals(requestDto.getMessage(), result.getMessage());
-        assertEquals(requestDto.getSkillIds(), result.getSkillIds());
-        assertEquals(requestDto.getRequesterId(), result.getRequesterId());
-        assertEquals(requestDto.getReceiverId(), result.getReceiverId());
-        assertEquals(requestDto.getStatus().getStatus(), result.getStatus().getStatus());
+        assertEquals(requestDto, result);
         verify(recommendationRequestService, times(1)).create(requestDto);
     }
 
