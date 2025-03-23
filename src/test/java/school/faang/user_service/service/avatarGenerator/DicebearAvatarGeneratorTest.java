@@ -14,7 +14,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -75,7 +74,7 @@ public class DicebearAvatarGeneratorTest {
                 .baseUrl(baseUrl)
                 .build();
 
-        ReflectionTestUtils.setField(dicebearAvatarGenerator, "webClient", mockWebClient);
+        dicebearAvatarGenerator = new DicebearAvatarGenerator(dicebearConfig, mockWebClient);
 
         when(dicebearConfig.getBaseUrl()).thenReturn(baseUrl);
         when(dicebearConfig.getStyleNames()).thenReturn(List.of(TEST_STYLE_NAME));
@@ -111,7 +110,7 @@ public class DicebearAvatarGeneratorTest {
 
         var readedBytes = new byte[result.readableByteCount()];
         result.read(readedBytes);
-        String resultContent = new String(readedBytes);
+        var resultContent = new String(readedBytes);
         assertEquals(testSvgContent, resultContent);
 
         verify(getRequestedFor(urlPathEqualTo(TEST_URI))
