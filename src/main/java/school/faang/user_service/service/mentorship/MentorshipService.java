@@ -32,7 +32,6 @@ public class MentorshipService {
         return getUserRelatedList(userId, User::getMentors);
     }
 
-
     @Transactional
     public void deleteMenteeAndMentor(long menteeId, long mentorId) {
         User mentor = getUserById(mentorId, "Mentor");
@@ -57,6 +56,4 @@ public class MentorshipService {
         return mentorshipRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(user + " with id: " + userId + " is not in the database"));
     }
-
-
 }

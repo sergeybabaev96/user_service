@@ -46,6 +46,7 @@ public class MentorshipControllerTest {
         List<User> mentees = List.of(
                 User.builder().id(1L).username("Hayotbek").build(),
                 User.builder().id(2L).username("Ilhan").build());
+                User.builder().id(3L).username("Sergey").build();
 
         expectedUsers = mentees.stream()
                 .map((user -> userMapper.toDto(user))).toList();
@@ -56,9 +57,10 @@ public class MentorshipControllerTest {
         when(mentorshipService.getMentees(1)).thenReturn(expectedUsers);
         mockMvc.perform(get("/api/mentor/1/mentees"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$[0].username", is("Hayotbek")))
-                .andExpect(jsonPath("$[1].username", is("Ilhan")));
+                .andExpect(jsonPath("$[1].username", is("Ilhan")))
+                .andExpect(jsonPath("$[2].username", is("Sergey")));
 
         verify(userMapper, times(expectedUsers.size())).toDto(any());
         verify(mentorshipService, times(1)).getMentees(1);
@@ -69,9 +71,10 @@ public class MentorshipControllerTest {
         when(mentorshipService.getMentors(1)).thenReturn(expectedUsers);
         mockMvc.perform(get("/api/mentee/1/mentors"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$[0].username", is("Hayotbek")))
-                .andExpect(jsonPath("$[1].username", is("Ilhan")));
+                .andExpect(jsonPath("$[1].username", is("Ilhan")))
+                .andExpect(jsonPath("$[2].username", is("Sergey")));
 
         verify(userMapper, times(expectedUsers.size())).toDto(any());
         verify(mentorshipService, times(1)).getMentors(1);
