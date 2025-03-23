@@ -34,7 +34,7 @@ public class UserServiceTest {
     @Spy private UserMapperImpl userMapper;
 
 
-    @InjectMocks private UserService userService;
+    @InjectMocks private UserServiceImpl userService;
     long userId;
 
     @BeforeEach

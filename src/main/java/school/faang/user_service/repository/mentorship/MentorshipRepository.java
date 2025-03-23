@@ -20,7 +20,7 @@ public interface MentorshipRepository extends CrudRepository<User, Long> {
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE mentorship m SET m.mentor_id = m.mentee_id WHERE m.mentor_id = :mentorI",
+    @Query(value = "UPDATE mentorship m SET m.mentor_id = m.mentee_id WHERE m.mentor_id = :mentorId",
     nativeQuery = true)
     void deactivateMentor(@Param("mentorId") Long mentorId);
 
