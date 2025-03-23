@@ -2,7 +2,6 @@ package school.faang.user_service.validator;
 
 import school.faang.user_service.dto.WorkScheduleDto;
 import school.faang.user_service.exception.DataValidationException;
-
 import java.time.LocalTime;
 
 public class WorkScheduleValidator {
