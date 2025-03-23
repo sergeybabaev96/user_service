@@ -79,7 +79,7 @@ public class RecommendationService {
 
         var updatedRecommendation = updatedRecommendation(recommendationDto);
 
-        skillOfferService.deleteSkillOfferssByRecommendationId(updatedRecommendation.getId());
+        skillOfferService.deleteSkillOffersByRecommendationId(updatedRecommendation.getId());
 
         var updatedRecommendationDto = recommendationMapper.toDto(updatedRecommendation);
 
