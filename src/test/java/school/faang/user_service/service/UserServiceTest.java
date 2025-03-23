@@ -10,9 +10,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.filter.user.UserFilter;
 import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.user.UserService;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -29,9 +29,6 @@ public class UserServiceTest {
     private static final String USER_EMAIL = "TonyStark@Email.com";
     @Mock
     private UserRepository userRepository;
-
-    @Mock
-    private List<UserFilter> users;
 
     @Spy
     private UserMapperImpl userMapper;
