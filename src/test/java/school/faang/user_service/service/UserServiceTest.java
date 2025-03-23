@@ -25,14 +25,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceTest {
+public class UserServiceTest {
 
     @Mock private EventService eventService;
     @Mock private GoalService goalService;
     @Mock private MentorshipService mentorshipService;
     @Mock private UserRepository userRepository;
     @Spy private UserMapperImpl userMapper;
-    @InjectMocks private UserService userService;
+
+
+    @InjectMocks private UserServiceImpl userService;
     long userId;
 
     @BeforeEach
@@ -41,26 +43,47 @@ class UserServiceTest {
     }
 
     @Test
-    public void testGetUserById_UserIsFound_ReturnsUser() {var testUser = User.builder().id(userId).build();when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));var result = userService.getUserById(userId);verify(userRepository, times(1)).findById(userId);assertEquals(testUser, result);}
-    @Test
-    void testDeactivateUsers() {
+    public void testGetUserById_UserIsFound_ReturnsUser() {
+        var testUser = User.builder()
+                .id(userId)
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
 
-        long userId = 1L;
-        User user = new User();
-        user.setId(userId);
-        user.setActive(true);
-        User deactivatedUser = new User();
-        deactivatedUser.setId(userId);
-        deactivatedUser.setActive(false);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenReturn(deactivatedUser);
-        UserDto result = userService.deactivateUser(userId);assertNotNull(result);verify(eventService).deleteEventByUserId(userId);verify(eventService).deleteParticipationFromEvent(userId);verify(goalService).deleteUserFromGoals(userId);verify(goalService).setNullInGoalsToMentor(userId);verify(mentorshipService).deleteMentorShipByDeactivatedUser(userId);verify(mentorshipService).deleteMenteeByDeactivatedUser(userId);verify(userRepository).save(any(User.class));verify(userMapper).toDto(deactivatedUser);assertFalse(deactivatedUser.isActive());
+        var result = userService.getUserById(userId);
+        verify(userRepository, times(1)).findById(userId);
+        assertEquals(testUser, result);
+    }
+
     @Test
     public void testGetUserById_UserIsNotFound_Throws() {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
         assertThrows(
                 DataRetrievalFailureException.class,
                 () -> userService.getUserById(userId));
         verify(userRepository, times(1)).findById(userId);
+
+    }
+
+    @Test
+    void testDeactivateUsers() {
+
+        long userId = 1L;
+        User user = User.builder().id(userId).active(true).build();
+        User deactivatedUser = User.builder().id(userId).active(false).build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenReturn(deactivatedUser);
+
+        UserDto result = userService.deactivateUser(userId);
+
+        assertNotNull(result);
+        verify(eventService).deleteEventByUserId(userId);
+        verify(eventService).deleteParticipationFromEvent(userId);
+        verify(goalService).deleteUserFromGoals(userId);
+        verify(mentorshipService).deleteMentorShipByDeactivatedUser(userId);
+        verify(mentorshipService).deleteMenteeByDeactivatedUser(userId);
+        verify(userRepository).save(any(User.class));
+        verify(userMapper).toDto(deactivatedUser);
+        assertFalse(deactivatedUser.isActive());
     }
 }
