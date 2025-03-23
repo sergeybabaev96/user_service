@@ -36,7 +36,7 @@ class GoalSkillsFilterTest {
     @BeforeEach
     void setUp() {
         goalFilterDto = new GoalFilterDto();
-        goalFilterDto.setSkillsToAchieve(List.of(1L, 2L, 3L));
+        goalFilterDto.setSkillsToAchieveId(List.of(1L, 2L, 3L));
 
         goal = new Goal();
         List<Skill> skills;
@@ -51,8 +51,8 @@ class GoalSkillsFilterTest {
     @Test
     @DisplayName("Фильтр с пустыми навыками")
     void isApplicableEmptySkills() {
-        goalFilterDto.setSkillsToAchieve(null);
-        List<Long> goalIds = goalFilterDto.getSkillsToAchieve();
+        goalFilterDto.setSkillsToAchieveId(null);
+        List<Long> goalIds = goalFilterDto.getSkillsToAchieveId();
         Mockito.when(skillRepository.findAllById(goalIds)).thenReturn(new ArrayList<>());
 
         boolean result = filter.isApplicable(goalFilterDto);
@@ -63,7 +63,7 @@ class GoalSkillsFilterTest {
     @Test
     @DisplayName("Фильтр с несуществующими навыками")
     void isApplicableNonExistentSkills() {
-        List<Long> goalIds = goalFilterDto.getSkillsToAchieve();
+        List<Long> goalIds = goalFilterDto.getSkillsToAchieveId();
         Mockito.when(skillRepository.findAllById(goalIds)).thenReturn(List.of(new Skill()));
 
         boolean result = filter.isApplicable(goalFilterDto);
@@ -74,7 +74,7 @@ class GoalSkillsFilterTest {
     @Test
     @DisplayName("Фильтр с валидными данными")
     void isApplicableTrue() {
-        List<Long> goalIds = goalFilterDto.getSkillsToAchieve();
+        List<Long> goalIds = goalFilterDto.getSkillsToAchieveId();
         Mockito.when(skillRepository.findAllById(goalIds)).thenReturn(goal.getSkillsToAchieve());
 
         boolean result = filter.isApplicable(goalFilterDto);
@@ -85,7 +85,7 @@ class GoalSkillsFilterTest {
     @Test
     @DisplayName("Успешное применение фильтра")
     void testApplyFilter() {
-        List<Long> goalIds = goalFilterDto.getSkillsToAchieve();
+        List<Long> goalIds = goalFilterDto.getSkillsToAchieveId();
         Mockito.when(skillRepository.findAllById(goalIds)).thenReturn(goal.getSkillsToAchieve());
         List<Skill> skillsFirst = List.of(
                 Skill.builder().title("discipline").build(),

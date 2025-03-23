@@ -64,32 +64,26 @@ public class GoalServiceTest {
 
     private GoalService goalService;
 
-    private Goal goal;
-    private GoalCreateDto goalCreateDto;
-    private GoalViewDto goalViewDto;
-    private GoalFilterDto filter;
-    private User user;
-    private Skill skill;
+    private final Goal goal = new Goal();
+    private final GoalCreateDto goalCreateDto = new GoalCreateDto();
+    private final GoalViewDto goalViewDto = new GoalViewDto();
+    private final GoalFilterDto filter = new GoalFilterDto();
+    private final User user = new User();
+    private final Skill skill = new Skill();
 
     @BeforeEach
     void setUp() {
-        user = new User();
         user.setId(1L);
         user.setGoals(new ArrayList<>());
         user.setSkills(new ArrayList<>());
 
-        goalCreateDto = new GoalCreateDto();
         goalCreateDto.setTitle("goal title");
-        goalViewDto = new GoalViewDto();
 
-        goal = new Goal();
         goal.setId(1L);
         goal.setSkillsToAchieve(new ArrayList<>());
 
-        skill = new Skill();
         skill.setId(1L);
 
-        filter = new GoalFilterDto();
         filter.setTitle("java");
         filter.setStatus(GoalStatus.ACTIVE);
 
@@ -125,17 +119,21 @@ public class GoalServiceTest {
         Mockito.when(userService.getUser(user.getId())).thenReturn(user);
         user.setGoals(List.of(goal));
 
-        assertThrows(EntityAlreadyExistException.class,
+        Exception exception = assertThrows(EntityAlreadyExistException.class,
                 () -> goalService.createGoal(user.getId(), goalCreateDto));
+
+        assertEquals("У пользователя " + user.getId() + " уже есть цель " + goal, exception.getMessage());
     }
 
     @Test
     @DisplayName("Создание цели для несуществующего пользователя")
     void createGoalNonExistentUser() {
-        Mockito.when(userService.getUser(user.getId())).thenThrow(DataValidationException.class);
+        Mockito.when(userService.getUser(user.getId())).thenThrow(new DataValidationException("Пользователь не найден"));
 
-        assertThrows(DataValidationException.class,
+        Exception exception = assertThrows(DataValidationException.class,
                 () -> goalService.createGoal(user.getId(), goalCreateDto));
+
+        assertEquals("Пользователь не найден", exception.getMessage());
     }
 
     @Test
@@ -184,10 +182,12 @@ public class GoalServiceTest {
     @Test
     @DisplayName("Удаление несуществующей цели")
     void deleteGoalNonExistentGoal() {
-        Mockito.when(goalRepository.findById(goal.getId())).thenThrow(EntityNotFoundException.class);
+        Mockito.when(goalRepository.findById(goal.getId())).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class,
+        Exception exception = assertThrows(EntityNotFoundException.class,
                 () -> goalService.deleteGoal(goal.getId()));
+
+        assertEquals("Цель " + goal.getId() + " не найдена", exception.getMessage());
     }
 
     @Test

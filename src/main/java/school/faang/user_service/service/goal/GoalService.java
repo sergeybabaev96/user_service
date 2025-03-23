@@ -23,6 +23,32 @@ import school.faang.user_service.validation.goal.GoalValidator;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Сервис для управления целями.
+ * <p>
+ * Этот сервис предоставляет методы для создания, обновления, удаления и получения целей.
+ * </p>
+ * <p>
+ * Основные функции:
+ * <ul>
+ *     <li>{@link #createGoal(Long, GoalCreateDto) Создание новой цели} с проверкой валидности данных.</li>
+ *     <li>{@link #updateGoal(Long, GoalCreateDto) Обновление существующей цели} с проверкой валидности данных.</li>
+ *     <li>{@link #deleteGoal(Long) Удаление цели} по её идентификатору.</li>
+ *     <li>{@link #findSubtasksByGoalId(Long, GoalFilterDto) Получение списка подцелей по родительской цели с применением фильтра}.</li>
+ *     <li>{@link #getGoalsByUser(Long, GoalFilterDto) Получение списка всех целей пользователя с применением фильтра}.</li>
+ * </ul>
+ * </p>
+ * @author juzu400
+ * @see GoalCreateDto
+ * @see GoalViewDto
+ * @see GoalFilterDto
+ * @see UserService
+ * @see GoalFilter
+ * @see Goal
+ * @see User
+ * @see Skill
+ * @see GoalValidator
+ */
 @Service
 @RequiredArgsConstructor
 public class GoalService {
@@ -34,21 +60,42 @@ public class GoalService {
     private final UserService userService;
     private final UserRepository userRepository;
 
+    /**
+     * Создание новой цели
+     *
+     * @param userId Идентификатор пользователя, для которого создаётся цель
+     * @param goal DTO с данными цели для её создания
+     * @return Созданная цель
+     */
     public GoalViewDto createGoal(@NotNull Long userId, @NotNull GoalCreateDto goal) {
-        goalValidator.validateCreation(userId, goal);
+        goalValidator.validateCreated(userId, goal);
         Goal goalEntity = goalMapper.toEntity(goal);
         userAddGoal(userId, goalEntity);
-        return goalMapper.toDto(goalRepository.save(goalEntity));
+        goalRepository.save(goalEntity);
+        return goalMapper.toDto(goalEntity);
     }
 
+    /**
+     * Обновление существующей цели
+     *
+     * @param goalId Идентификатор цели, которую необходимо обновить
+     * @param goalDto DTO с новыми данными цели
+     * @return Обновлённая цель
+     */
     public GoalViewDto updateGoal(@NotNull Long goalId, @NotNull GoalCreateDto goalDto) {
-        goalValidator.validateUpdate(goalId, goalDto);
+        goalValidator.validateUpdated(goalId, goalDto);
         Goal goal = findGoalById(goalId);
-        assignSkillsToUser(goal, goalDto);
+        isGoalCompleted(goal, goalDto);
         goalMapper.update(goalDto, goal);
-        return goalMapper.toDto(goalRepository.save(goal));
+        goalRepository.save(goal);
+        return goalMapper.toDto(goal);
     }
 
+    /**
+     * Удаление цели
+     *
+     * @param goalId Идентификатор цели, которую необходимо удалить
+     */
     public void deleteGoal(@NotNull Long goalId) {
         Goal goal = findGoalById(goalId);
         List<User> users = goalRepository.findUsersByGoalId(goalId);
@@ -59,16 +106,37 @@ public class GoalService {
         goalRepository.delete(goal);
     }
 
+    /**
+     * Получение подцелей по родительской цели с применением фильтра
+     *
+     * @param goalId Идентификатор родительской цели
+     * @param filter DTO с данными для фильтрации
+     * @return Список подцелей по фильтру
+     */
     public List<GoalViewDto> findSubtasksByGoalId(@NotNull Long goalId, @NotNull GoalFilterDto filter) {
         var goals = goalRepository.findByParent(goalId);
         return applyFilters(goals, filter);
     }
 
+    /**
+     * Получение списка целей пользователя с применением фильтра
+     *
+     * @param userId Идентификатор пользователя
+     * @param filter DTO с данными для фильтрации
+     * @return Список целей пользователя по фильтру
+     */
     public List<GoalViewDto> getGoalsByUser(@NotNull Long userId, @NotNull GoalFilterDto filter) {
         var goals = goalRepository.findGoalsByUserId(userId);
         return applyFilters(goals, filter);
     }
 
+    /**
+     * Добавление цели пользователю
+     *
+     * @param userId Идентификатор пользователя
+     * @param goal Цель
+     * @throws EntityAlreadyExistException Если у пользователя уже есть данная цель
+     */
     private void userAddGoal(Long userId, Goal goal) {
         User user = userService.getUser(userId);
         if (!user.getGoals().contains(goal)) {
@@ -79,6 +147,13 @@ public class GoalService {
         }
     }
 
+    /**
+     * Применение фильтров
+     *
+     * @param goals Поток целей, для которых применяется фильтрация
+     * @param filter DTO c данными для фильтрации
+     * @return Список отфильтрованных целей
+     */
     private List<GoalViewDto> applyFilters(Stream<Goal> goals, GoalFilterDto filter) {
         for (GoalFilter goalFilter : goalFilter) {
             if (goalFilter.isApplicable(filter)) {
@@ -90,21 +165,44 @@ public class GoalService {
                 .toList();
     }
 
+    /**
+     * Поиск цели по идентификатору
+     *
+     * @param goalId Идентификатор цели
+     * @return Найденная цель
+     * @throws EntityNotFoundException Если данная цель не существует
+     */
     private Goal findGoalById(Long goalId) {
         return goalRepository.findById(goalId)
                 .orElseThrow(() -> new EntityNotFoundException("Цель " + goalId + " не найдена"));
     }
 
-    private void assignSkillsToUser(Goal goal, GoalCreateDto goalDto) {
-        if (goalDto.getStatus() == GoalStatus.COMPLETED) {
-            List<Skill> skills = goal.getSkillsToAchieve();
-            List<User> users = goalRepository.findUsersByGoalId(goal.getId());
-            users.forEach(user -> {
-                skills.stream()
-                        .filter(skill -> !user.getSkills().contains(skill))
-                        .forEach(skill -> skillRepository.assignSkillToUser(skill.getId(), user.getId()));
-                userRepository.save(user);
-            });
+    /**
+     * Проверка, что цель стала завершённой
+     *
+     * @param goal Цель
+     * @param goalDto DTO с новыми данными для обновления цели
+     */
+    private void isGoalCompleted(Goal goal, GoalCreateDto goalDto) {
+        if (goalDto.getStatus() != GoalStatus.COMPLETED) {
+            return;
         }
+        List<Skill> skills = goal.getSkillsToAchieve();
+        assignSkillsToUsers(goalRepository.findUsersByGoalId(goal.getId()), skills);
+    }
+
+    /**
+     * Добавление пользователю навыков
+     *
+     * @param users Список пользователей
+     * @param skills Список навыков
+     */
+    private void assignSkillsToUsers(List<User> users, List<Skill> skills) {
+        users.forEach(user -> {
+            skills.stream()
+                    .filter(skill -> !user.getSkills().contains(skill))
+                    .forEach(skill -> skillRepository.assignSkillToUser(skill.getId(), user.getId()));
+            userRepository.save(user);
+        });
     }
 }

@@ -12,6 +12,9 @@ import school.faang.user_service.entity.goal.Goal;
 
 import java.util.List;
 
+/**
+ * Маппер для целей
+ */
 @Mapper(componentModel = "spring")
 public interface GoalMapper {
     @Mapping(target = "parent", ignore = true)
@@ -19,7 +22,6 @@ public interface GoalMapper {
     Goal toEntity(GoalCreateDto goal);
 
     @Mapping(source = "parent.id", target = "parentId")
-    @Mapping(source = "mentor.id", target = "mentorId")
     @Mapping(source = "users", target = "usersId", qualifiedByName = "usersToIds")
     @Mapping(source = "skillsToAchieve", target = "skillsToAchieveId", qualifiedByName = "skillsToIds")
     GoalViewDto toDto(Goal goal);
