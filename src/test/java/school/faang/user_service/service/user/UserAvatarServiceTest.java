@@ -3,12 +3,11 @@ package school.faang.user_service.service.user;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.config.avatar.UserAvatarProperties;
 import school.faang.user_service.entity.User;
@@ -26,23 +25,21 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@TestPropertySource(locations = "classpath:application-test.yaml")
+@ExtendWith(MockitoExtension.class)
 class UserAvatarServiceTest {
 
-    @Autowired
     private UserAvatarProperties avatarProperties;
 
-    @MockBean
+    @Mock
     private UserRepository userRepository;
 
-    @MockBean
+    @Mock
     private S3Service s3Service;
 
     @Mock
     private MultipartFile avatarFile;
 
-    @Autowired
+    @InjectMocks
     private UserAvatarService userAvatarService;
 
     private final long userId = 1L;
@@ -52,10 +49,16 @@ class UserAvatarServiceTest {
 
     @BeforeEach
     void setUp() {
+        avatarProperties = new UserAvatarProperties();
+        avatarProperties.setSizeMB(5);
+        avatarProperties.setBigSide(1080);
+        avatarProperties.setSmallSide(170);
+
+        userAvatarService = new UserAvatarService(userRepository, avatarProperties, s3Service);
+
         user = new User();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         MultipartFile avatarFile = mock(MultipartFile.class);
-
     }
 
     @Test

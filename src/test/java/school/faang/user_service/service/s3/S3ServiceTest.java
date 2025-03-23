@@ -2,11 +2,12 @@ package school.faang.user_service.service.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.TestPropertySource;
 import school.faang.user_service.config.avatar.UserAvatarProperties;
 
 import javax.annotation.processing.FilerException;
@@ -16,22 +17,27 @@ import java.io.InputStream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@TestPropertySource(locations = "classpath:application-test.yaml")
+@ExtendWith(MockitoExtension.class)
 public class S3ServiceTest {
 
-    @MockBean
+    @Mock
     private AmazonS3 s3Client;
 
     @Autowired
     private S3Service s3Service;
 
-    @Autowired
     private UserAvatarProperties avatarProperties;
 
     private final String fileKey = "testAvatar.jpeg";
     private final byte[] fileContent = "Test content".getBytes();
 
+    @BeforeEach
+    void setUp() {
+        avatarProperties = new UserAvatarProperties();
+        avatarProperties.setBucketName("avatar");
+
+        s3Service = new S3Service(s3Client, avatarProperties);
+    }
 
     @Test
     void testUploadFileSuccess() throws FilerException {
