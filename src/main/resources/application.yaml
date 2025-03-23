@@ -28,6 +28,7 @@ spring:
         follower-channel: follower_channel
         user-ban-channel: user_ban
         recommendation-mentorship-offered: recommendation_mentorship_offered
+        mentorship-accepted-channel: mentorship_accepted_channel
 
   mvc:
     servlet:

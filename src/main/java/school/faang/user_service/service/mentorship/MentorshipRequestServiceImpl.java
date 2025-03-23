@@ -10,8 +10,10 @@ import school.faang.user_service.dto.mentorship.MentorshipResponseDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.events.MentorshipAcceptedEvent;
 import school.faang.user_service.events.MentorshipOfferedEvent;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
+import school.faang.user_service.publisher.MentorshipAcceptedEventPublisher;
 import school.faang.user_service.publisher.MentorshipOfferedEventPublisher;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
@@ -32,6 +34,7 @@ public class MentorshipRequestServiceImpl implements MentorshipRequestService {
     private final MentorshipRequestMapper mapper;
     private final List<RequestFilter> requestFilters;
     private final MentorshipOfferedEventPublisher mentorshipOfferedEventPublisher;
+    private final MentorshipAcceptedEventPublisher mentorshipAcceptedEventPublisher;
 
     @Override
     public MentorshipResponseDto requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
@@ -86,6 +89,14 @@ public class MentorshipRequestServiceImpl implements MentorshipRequestService {
 
         requester.getMentors().add(receiver);
         request.setStatus(RequestStatus.ACCEPTED);
+
+        MentorshipAcceptedEvent mentorshipAcceptedEvent = MentorshipAcceptedEvent.builder()
+                .requesterId(requester.getId())
+                .mentorId(receiver.getId())
+                .requestId(requestId)
+                .build();
+
+        mentorshipAcceptedEventPublisher.publish(mentorshipAcceptedEvent);
     }
 
     @Override
