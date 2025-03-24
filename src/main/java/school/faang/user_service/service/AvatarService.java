@@ -11,6 +11,7 @@ import school.faang.user_service.config.properties.S3Properties;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
+import school.faang.user_service.exception.UserNotFoundException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -27,7 +28,8 @@ public class AvatarService {
     private final S3Properties s3Properties;
 
     public String generateAndUploadAvatar(UserDto userDto) {
-        User user = userService.getUserById(userDto.id());
+        User user = userService.findById(userDto.id())
+                .orElseThrow(() -> new UserNotFoundException(userDto.id()));
 
         byte[] imageBytes = dicebearWebClient
                 .get()
