@@ -12,6 +12,7 @@ import school.faang.user_service.repository.WorkScheduleRepository;
 import school.faang.user_service.service.work_schedule.WorkScheduleService;
 
 import java.time.LocalTime;
+import java.util.Optional;
 
 import static school.faang.user_service.exception.data_validation_exception.DataValidationException.*;
 
@@ -26,15 +27,17 @@ public class WorkScheduleServiceImpl implements WorkScheduleService {
 
     @Override
     public WorkScheduleDto addWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new DataValidationException(USER_DOESNT_EXIST));
-        checkData(workScheduleDto);
-        WorkSchedule savedSchedule = saveWorkSchedule(workScheduleDto, user);
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            throw new DataValidationException(USER_DOESNT_EXIST);
+        }
+        WorkSchedule savedSchedule = saveWorkSchedule(workScheduleDto, user.get());
         return workScheduleMapper.toDto(savedSchedule);
     }
 
     @Override
     public WorkScheduleDto updateWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
-        checkData(workScheduleDto);
+        checkSchedule(workScheduleDto);
         WorkSchedule workScheduleById = getWorkSchedule(workScheduleDto.getId());
         if(workScheduleById.getUser().getId() != userId) {
             throw new DataValidationException(USER_DOESNT_HAVE_ACCESS);
@@ -49,7 +52,7 @@ public class WorkScheduleServiceImpl implements WorkScheduleService {
         return workScheduleMapper.toDto(workScheduleById);
     }
 
-    private void checkData (WorkScheduleDto workScheduleDto) {
+    private void checkSchedule(WorkScheduleDto workScheduleDto) {
         LocalTime startTime = workScheduleDto.getStartTime();
         LocalTime startLunch = workScheduleDto.getStartLunch();
         LocalTime endLunch = workScheduleDto.getEndLunch();
