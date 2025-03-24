@@ -92,7 +92,8 @@ public class RecommendationRequestServiceTest {
 
         RecommendationRequest existingRequest = new RecommendationRequest();
         existingRequest.setCreatedAt(LocalDateTime.now().minusMonths(5));
-        when(recommendationRequestRepository.findLatestPendingRequest(1L, 2L)).thenReturn(Optional.of(existingRequest));
+        when(recommendationRequestRepository.findLatestPendingRequest(1L, 2L))
+                .thenReturn(Optional.of(existingRequest));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             recommendationRequestService.create(requestDto);
@@ -139,7 +140,7 @@ public class RecommendationRequestServiceTest {
         assertEquals(recommendationRequest, savedSkills.get(0).getRequest());
         assertEquals(recommendationRequest, savedSkills.get(1).getRequest());
 
-        verify(skillRepository, times(1)).findAllByIdIn(skillIds); // Проверяем вызов findAllByIdIn
+        verify(skillRepository, times(1)).findAllByIdIn(skillIds);
         verify(skillRequestRepository, times(1)).saveAll(anyList());
     }
 
@@ -163,7 +164,8 @@ public class RecommendationRequestServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(requester));
         when(userRepository.findById(2L)).thenReturn(Optional.of(receiver));
-        when(recommendationRequestRepository.findLatestPendingRequest(1L, 2L)).thenReturn(Optional.empty());
+        when(recommendationRequestRepository.findLatestPendingRequest(1L, 2L))
+                .thenReturn(Optional.empty());
         when(skillRepository.findAllByIdIn(List.of(101L, 102L)))
                 .thenReturn(List.of(new Skill(), new Skill()));
 
