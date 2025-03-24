@@ -13,4 +13,6 @@ public interface SkillOfferMapper {
     SkillOfferDto skillOfferToSkillOfferDto(SkillOffer skillOffer);
 
     List<SkillOffer> skillOfferDtosToSkillOffers(List<SkillOfferDto> skillOfferDtos);
+
+    List<SkillOfferDto> SkillOffersToSkillOfferDtos(List<SkillOffer> skillOffers);
 }
