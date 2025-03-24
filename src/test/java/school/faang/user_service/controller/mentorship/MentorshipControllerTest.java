@@ -11,6 +11,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.exception.GlobalExceptionHandler;
 import school.faang.user_service.mapper.user.UserMapperImpl;
 import school.faang.user_service.service.mentorship.MentorshipService;
 
@@ -18,9 +20,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.List;
 
@@ -42,11 +43,15 @@ public class MentorshipControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(mentorshipController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(mentorshipController).
+                setControllerAdvice(new GlobalExceptionHandler())
+                .build();
         List<User> mentees = List.of(
                 User.builder().id(1L).username("Hayotbek").build(),
-                User.builder().id(2L).username("Ilhan").build());
-                User.builder().id(3L).username("Sergey").build();
+                User.builder().id(2L).username("Ilhan").build(),
+                User.builder().id(3L).username("Sergey").build()
+        );
+
 
         expectedUsers = mentees.stream()
                 .map((user -> userMapper.toDto(user))).toList();
@@ -91,4 +96,36 @@ public class MentorshipControllerTest {
 
         verify(mentorshipService, times(1)).deleteMenteeAndMentor(menteeId, mentorId);
     }
+
+    @Test
+    void testGetMentees_MentorNotFound() throws Exception {
+        when(mentorshipService.getMentees(999L))
+                .thenThrow(new DataValidationException("Mentor not found"));
+
+        mockMvc.perform(get("/api/mentor/999/mentees"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Mentor not found"));
+    }
+
+    @Test
+    void testGetMentors_MenteeNotFound() throws Exception {
+        when(mentorshipService.getMentors(999L))
+                .thenThrow(new DataValidationException("Mentee not found"));
+
+        mockMvc.perform(get("/api/mentee/999/mentors"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Mentee not found"));
+    }
+
+    @Test
+    void testDeleteMentorAndMentee_RelationNotFound() throws Exception {
+        doThrow(new DataValidationException("Mentorship relation not found"))
+                .when(mentorshipService).deleteMenteeAndMentor(2, 1);
+
+        mockMvc.perform(delete("/api/mentee/2/mentor/1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Mentorship relation not found"));
+    }
 }
+
+
