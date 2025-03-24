@@ -15,8 +15,7 @@ public class DataValidationException extends RuntimeException {
     public static final int USER_DOESNT_HAVE_ACCESS_CODE = 703;
     private int exceptionCode;
 
-    public DataValidationException(String message, int exceptionCode) {
+    public DataValidationException(String message) {
         super(message);
-        this.exceptionCode = exceptionCode;
     }
 }
