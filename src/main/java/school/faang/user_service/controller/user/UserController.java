@@ -16,6 +16,10 @@ import school.faang.user_service.repository.UserRepository;
 
 import java.util.List;
 
+/**
+ * UserController реализует возможность получить одного пользователя по его идентификатору
+ * или сразу список всех пользователей по списку id этих пользователей.
+ */
 @Slf4j
 @RestController
 @RequiredArgsConstructor
