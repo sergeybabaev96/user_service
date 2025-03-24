@@ -64,12 +64,11 @@ public class RecommendationRequestService {
         }
 
         return requests.map(entity -> {
-                    var dto = recommendationRequestMapper.toDto(entity);
-                    dto.setSkills(skillRequestMapper.toDtos(entity.getSkills()));
+            var dto = recommendationRequestMapper.toDto(entity);
+            dto.setSkills(skillRequestMapper.toDtos(entity.getSkills()));
 
-                    return dto;
-                })
-                .toList();
+            return dto;
+        }).toList();
     }
 
     public RecommendationRequestDto getRequest(long id) {

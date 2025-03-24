@@ -166,11 +166,11 @@ public class RecommendationService {
     @NotNull
     private RecommendationDto toRecommendationDto(Recommendation recommendation) {
         var recommendationDto = recommendationMapper.toDto(recommendation);
-        var skillOfferDTOs = skillOfferService.getSkillRequestsByRecommendationId(recommendation.getId())
+        var skillOfferDtos = skillOfferService.getSkillRequestsByRecommendationId(recommendation.getId())
                 .stream()
                 .map(skillOfferMapper::toDto)
                 .toList();
-        recommendationDto.setSkillOffers(skillOfferDTOs);
+        recommendationDto.setSkillOffers(skillOfferDtos);
 
         return recommendationDto;
     }

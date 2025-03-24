@@ -35,7 +35,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testFindUserById_UserIsFound_ReturnsUser() {
+    public void testFindUserByIdUserIsFoundReturnsUser() {
         var testUser = User.builder()
                 .id(userId)
                 .build();
@@ -48,7 +48,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testFindUserById_UserIsNotFound_Throws() {
+    public void testFindUserByIdUserIsNotFoundThrows() {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThrows(
