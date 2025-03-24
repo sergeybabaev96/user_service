@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.event.EventFilterDto;
@@ -27,8 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 /**
@@ -165,12 +162,12 @@ public class EventTitleFilterTest {
     void getEventsByFilterShouldReturnFilteredEvents() {
         Event event1 = Event.builder()
                 .id(1L)
-                .title("Event 1")
+                .title("Event")
                 .build();
 
         Event event2 = Event.builder()
                 .id(2L)
-                .title("Event 2")
+                .title("Event")
                 .build();
 
         Event event3 = Event.builder()
@@ -183,7 +180,7 @@ public class EventTitleFilterTest {
                 .title("Another")
                 .build();
 
-        EventTitleFilter eventTitleFilter = Mockito.mock(EventTitleFilter.class);
+        EventTitleFilter eventTitleFilter = new EventTitleFilter();
 
         List<EventFilter> eventFilters = List.of(eventTitleFilter);
         eventService = new EventService(eventRepository, userRepository, skillRepository, eventMapper, eventFilters);
@@ -195,12 +192,6 @@ public class EventTitleFilterTest {
 
         when(eventMapper.toDto(event1)).thenReturn(new EventViewDto());
         when(eventMapper.toDto(event2)).thenReturn(new EventViewDto());
-
-        when(eventTitleFilter.isApplicable(filter)).thenReturn(true);
-        when(eventTitleFilter.apply(any(), eq(filter))).thenAnswer(invocation -> {
-            Stream<Event> inputStream = invocation.getArgument(0);
-            return inputStream.filter(event -> event.getTitle().contains(filter.getTitle()));
-        });
 
         List<EventViewDto> result = eventService.getEventsByFilter(filter);
 

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.event.EventFilterDto;
@@ -21,7 +20,6 @@ import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.service.event.EventService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -29,8 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 /**
@@ -157,7 +153,7 @@ public class EventEndDateFilterTest {
                 .endDate(LocalDateTime.parse("2021-10-10T10:10:10"))
                 .build();
 
-        EventEndDateFilter eventEndDateFilter = Mockito.mock(EventEndDateFilter.class);
+        EventEndDateFilter eventEndDateFilter = new EventEndDateFilter();
 
         List<EventFilter> eventFilters = List.of(eventEndDateFilter);
         eventService = new EventService(eventRepository, userRepository, skillRepository, eventMapper, eventFilters);
@@ -170,12 +166,6 @@ public class EventEndDateFilterTest {
         when(eventMapper.toDto(event1)).thenReturn(new EventViewDto());
         when(eventMapper.toDto(event3)).thenReturn(new EventViewDto());
         when(eventMapper.toDto(event4)).thenReturn(new EventViewDto());
-
-        when(eventEndDateFilter.isApplicable(filter)).thenReturn(true);
-        when(eventEndDateFilter.apply(any(), eq(filter))).thenAnswer(invocation -> {
-            Stream<Event> inputStream = invocation.getArgument(0);
-            return inputStream.filter(event -> event.getEndDate().isBefore(filter.getEndDate()));
-        });
 
         List<EventViewDto> result = eventService.getEventsByFilter(filter);
 

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.event.EventFilterDto;
@@ -28,8 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 /**
@@ -134,7 +131,7 @@ public class EventStartDateFilterTest {
                 .startDate(LocalDateTime.parse("2022-12-12T12:12:12"))
                 .build();
 
-        EventStartDateFilter eventStartDateFilter = Mockito.mock(EventStartDateFilter.class);
+        EventStartDateFilter eventStartDateFilter = new EventStartDateFilter();
 
         List<EventFilter> eventFilters = List.of(eventStartDateFilter);
         eventService = new EventService(eventRepository, userRepository, skillRepository, eventMapper, eventFilters);
@@ -146,12 +143,6 @@ public class EventStartDateFilterTest {
 
         when(eventMapper.toDto(event2)).thenReturn(new EventViewDto());
         when(eventMapper.toDto(event4)).thenReturn(new EventViewDto());
-
-        when(eventStartDateFilter.isApplicable(filter)).thenReturn(true);
-        when(eventStartDateFilter.apply(any(), eq(filter))).thenAnswer(invocation -> {
-            Stream<Event> inputStream = invocation.getArgument(0);
-            return inputStream.filter(event -> event.getStartDate().isAfter(filter.getStartDate()));
-        });
 
         List<EventViewDto> result = eventService.getEventsByFilter(filter);
 
