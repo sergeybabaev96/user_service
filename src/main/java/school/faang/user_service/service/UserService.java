@@ -4,15 +4,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
+
+import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     public boolean doesUserExist(long userId) {
         return userRepository.existsById(userId);
@@ -38,5 +43,10 @@ public class UserService {
 
     public boolean existsById(long userId) {
         return userRepository.existsById(userId);
+    }
+
+    public List<UserDto> findUsersByIds(List<Long> userIds) {
+        List<User> users = userRepository.findAllById(userIds);
+        return userMapper.toDtoList(users);
     }
 }
