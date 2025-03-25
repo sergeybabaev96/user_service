@@ -55,6 +55,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void checkUserExists(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            log.error("User with ID {} does not exist", userId);
+            throw new DataValidationException("User does not exist.");
+        }
+    }
+
+    @Override
     public boolean existsById(long userId) {
         return userRepository.existsById(userId);
     }

@@ -86,7 +86,6 @@ class EducationServiceTest {
         });
     }
 
-
     @Test
     void addEducation_ValidData_ReturnsEducationDto() {
         when(userService.existsById(1L)).thenReturn(true);
@@ -101,7 +100,6 @@ class EducationServiceTest {
         verify(userService, times(1)).findById(1L);
         verify(educationRepository, times(1)).save(any(Education.class));
     }
-
 
     @Test
     void addEducation_InvalidYearFrom_ThrowsException() {
@@ -121,7 +119,6 @@ class EducationServiceTest {
         verify(userService, never()).findById(anyLong());
         verify(educationRepository, never()).save(any(Education.class));
     }
-
 
     @Test
     void updateEducation_ValidData_ReturnsEducationDto() {

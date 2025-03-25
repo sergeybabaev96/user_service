@@ -11,6 +11,8 @@ public interface UserService {
 
     User findById(long userId);
 
+    void checkUserExists(Long userId);
+
     boolean existsById(long userId);
 
     UserDto createUser(CreateUserDto createUserDto);

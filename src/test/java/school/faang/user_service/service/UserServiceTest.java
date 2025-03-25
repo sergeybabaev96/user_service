@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.test.util.ReflectionTestUtils;
 import school.faang.user_service.dto.CreateUserDto;
 import school.faang.user_service.dto.externalStorage.ExternalResourceDto;
@@ -26,8 +27,10 @@ import school.faang.user_service.validator.CreateUserValidator;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -36,7 +39,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceImplTest {
+public class UserServiceTest {
+
     public static final String TEST_USER_AVATARS_AWS_FOLDER = "userAvatarsFolder";
 
     public static final String TEST_USERNAME = "Dummy username";
@@ -64,12 +68,39 @@ public class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userService;
 
+    long userId;
+
     @BeforeEach
-    public void setUp() {
+    public void init() {
+        userId = 10L;
+
         ReflectionTestUtils.setField(
                 userService,
                 "userAvatarsAwsFolder",
                 TEST_USER_AVATARS_AWS_FOLDER);
+    }
+
+    @Test
+    public void testGetUserById_UserIsFound_ReturnsUser() {
+        var testUser = User.builder()
+                .id(userId)
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+
+        var result = userService.getUserById(userId);
+
+        verify(userRepository, times(1)).findById(userId);
+        assertEquals(testUser, result);
+    }
+
+    @Test
+    public void testGetUserById_UserIsNotFound_Throws() {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(
+                DataRetrievalFailureException.class,
+                () -> userService.getUserById(userId));
+        verify(userRepository, times(1)).findById(userId);
     }
 
     @Test

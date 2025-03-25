@@ -25,8 +25,8 @@ public class EducationServiceImpl implements EducationService {
     private final EducationRepository educationRepository;
     private final EducationMapper educationMapper;
 
-    @Transactional
     @Override
+    @Transactional
     public EducationDto addEducation(@NotNull long userId, @Valid EducationDto educationDto) {
         log.info("Adding education for user with id: {}", userId);
 
@@ -52,8 +52,8 @@ public class EducationServiceImpl implements EducationService {
         return educationMapper.toEducationDto(savedEducation);
     }
 
-    @Transactional
     @Override
+    @Transactional
     public EducationDto updateEducation(@NotNull long userId, @Valid EducationDto educationDto) {
         log.info("Updating education with id: {} for user with id: {}", educationDto.id(), userId);
 
