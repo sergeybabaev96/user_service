@@ -30,9 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 @WebMvcTest(GoalController.class)
 public class GoalControllerTest {
@@ -51,7 +49,7 @@ public class GoalControllerTest {
     private final String createGoalUrl = "/goal?userId=" + userId;
     private final String updateOrDeleteGoalUrl = "/goal/" + goalId;
     private final String getSubtasksByGoalIdUrl = updateOrDeleteGoalUrl + "/subtasks";
-    private final String getGoalsByUserIdUrl = "/goal/filter?userId=" + userId;;
+    private final String getGoalsByUserIdUrl = "/goal/filter?userId=" + userId;
     private final String title = "title";
     private final String description = "description";
     private final Goal parent = Goal.builder().id(1L).build();
@@ -176,7 +174,7 @@ public class GoalControllerTest {
                                             String field, String message) throws Exception {
         fieldSetter.accept(field);
 
-        mockMvc.perform(post(createGoalUrl)
+        mockMvc.perform(builder.get()
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(goalDto)))
                 .andExpect(status().isBadRequest())
