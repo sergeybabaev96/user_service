@@ -6,7 +6,7 @@ public class DataValidationException extends RuntimeException {
         super(message);
     }
 
-    public static final String TIME_EXCEPTION = "time validation failed";
+    public static final String TIME_EXCEPTION = "time validation is failed";
     public static final String USER_DOESNT_EXIST = "user does not exist";
     public static final String WORK_SCHEDULE_DOESNT_EXIST = "work schedule does not exist";
     public static final String USER_DOESNT_HAVE_ACCESS = "you does not have access";
