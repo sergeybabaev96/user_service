@@ -3,8 +3,16 @@ package school.faang.user_service.controller.event;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.event.EventCreateDto;
 import school.faang.user_service.dto.event.EventViewDto;
 import school.faang.user_service.dto.event.EventFilterDto;
@@ -20,7 +28,8 @@ import java.util.List;
  * @author Zhltsk-V
  */
 @Slf4j
-@Controller
+@RestController
+@RequestMapping("/events")
 @Validated
 @RequiredArgsConstructor
 public class EventController {
@@ -32,7 +41,8 @@ public class EventController {
      * @param event DTO события, содержащее данные для создания.
      * @return Созданное событие в виде {@link EventViewDto}.
      */
-    public EventViewDto create(@Valid EventCreateDto event) {
+    @PostMapping
+    public EventViewDto create(@Valid @RequestBody EventCreateDto event) {
         log.info("Creating event with title: {}", event.getTitle());
         EventViewDto createdEvent = eventService.create(event);
         log.info("Event created successfully with ID: {}", createdEvent.getId());
@@ -45,7 +55,8 @@ public class EventController {
      * @param eventId Идентификатор события.
      * @return Событие в виде {@link EventViewDto}.
      */
-    public EventViewDto getEvent(long eventId) {
+    @GetMapping("/{eventId}")
+    public EventViewDto getEvent(@PathVariable("eventId") long eventId) {
         log.info("Fetching event with ID: {}", eventId);
         EventViewDto event = eventService.getEvent(eventId);
         log.info("Event fetched successfully: {}", event);
@@ -58,7 +69,8 @@ public class EventController {
      * @param filter DTO фильтра, содержащее критерии поиска.
      * @return Список событий в виде {@link List<EventViewDto>}.
      */
-    public List<EventViewDto> getEvents(@Valid EventFilterDto filter) {
+    @GetMapping("/filter")
+    public List<EventViewDto> getEvents(@Valid @ModelAttribute EventFilterDto filter) {
         log.info("Fetching events with filter: {}", filter);
         List<EventViewDto> events = eventService.getEventsByFilter(filter);
         log.info("Fetched {} events", events.size());
@@ -70,7 +82,8 @@ public class EventController {
      *
      * @param eventId Идентификатор события для удаления.
      */
-    public void deleteEvent(long eventId) {
+    @DeleteMapping("/{eventId}")
+    public void deleteEvent(@PathVariable("eventId") long eventId) {
         log.info("Deleting event with ID: {}", eventId);
         eventService.deleteEvent(eventId);
         log.info("Event deleted successfully");
@@ -79,11 +92,14 @@ public class EventController {
     /**
      * Обновляет существующее событие.
      *
+     * @param eventId Идентификатор события для обновления.
      * @param event DTO события, содержащее обновленные данные.
      * @return Обновленное событие в виде {@link EventViewDto}.
      */
-    public EventViewDto updateEvent(@Valid EventCreateDto event) {
-        EventViewDto updatedEvent = eventService.updateEvent(event);
+    @PutMapping("/{eventId}")
+    public EventViewDto updateEvent(@PathVariable("eventId") long eventId, @Valid @RequestBody EventCreateDto event) {
+        log.info("Updating event with ID: {}", eventId);
+        EventViewDto updatedEvent = eventService.updateEvent(eventId, event);
         log.info("Event updated successfully: {}", updatedEvent);
         return updatedEvent;
     }
@@ -94,7 +110,8 @@ public class EventController {
      * @param userId Идентификатор пользователя.
      * @return Список событий в виде {@link List<EventViewDto>}.
      */
-    public List<EventViewDto> getOwnerEvent(long userId) {
+    @GetMapping("/owner/{userId}")
+    public List<EventViewDto> getOwnerEvent(@PathVariable("userId") long userId) {
         log.info("Fetching events for owner with ID: {}", userId);
         List<EventViewDto> events = eventService.getOwnerEvent(userId);
         log.info("Fetched {} events for owner", events.size());
@@ -107,7 +124,8 @@ public class EventController {
      * @param userId Идентификатор пользователя.
      * @return Список событий в виде {@link List<EventViewDto>}.
      */
-    public List<EventViewDto> getParticipatedEvents(long userId) {
+    @GetMapping("/participated/{userId}")
+    public List<EventViewDto> getParticipatedEvents(@PathVariable("userId") long userId) {
         log.info("Fetching events participated by user with ID: {}", userId);
         List<EventViewDto> events = eventService.getParticipatedEvents(userId);
         log.info("Fetched {} participated events", events.size());
