@@ -44,6 +44,12 @@ dependencies {
      */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.464")
 
+
+    /**
+     * Swagger
+     */
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
+
     /**
      * Utils & Logging
      */
