@@ -54,21 +54,19 @@ public class SkillServiceImpl implements SkillService {
         List<Skill> offeredSkills = skillRepository.findSkillsOfferedToUser(userId);
         Map<Long, Long> skillCount = offeredSkills.stream()
                 .collect(Collectors.groupingBy(Skill::getId, Collectors.counting()));
-        List<SkillCandidateDto> offeredSkillsDto = skillCount.entrySet().stream().map(entry -> {
-            SkillDto skillDto = skillMapper.toDto(findSkillById(entry.getKey(), offeredSkills).get());
-            return new SkillCandidateDto(skillDto, entry.getValue());
-        }).toList();
-        return offeredSkillsDto;
+
+        return skillCount.entrySet().stream()
+                .map(entry -> toSkillCandidateDto(entry, offeredSkills))
+                .collect(Collectors.toList());
 
     }
 
     @Override
     public SkillDto acquireSkillFromOffers(long skillId, long userId) {
-
         Optional<Skill> optionalSkill = skillRepository.findUserSkill(skillId, userId);
         if (optionalSkill.isPresent()) {
-            throw new DataValidationException(String.format("This skill \"%s\" by user already exists"
-                    , optionalSkill.get().getTitle()));
+            throw new DataValidationException(String.format("This skill \"%s\" by user already exists",
+                    optionalSkill.get().getTitle()));
         }
         skillOfferService.isEnoughAmountOffersToSkill(skillId, userId);
 
@@ -76,6 +74,13 @@ public class SkillServiceImpl implements SkillService {
         userSkillGuaranteeService.addUserSkillGuarantee(skillId, userId);
 
         return skillMapper.toDto(skillRepository.findUserSkill(skillId, userId).get());
+    }
+
+    private SkillCandidateDto toSkillCandidateDto(Map.Entry<Long, Long> entry, List<Skill> offeredSkills) {
+        Skill skill = findSkillById(entry.getKey(), offeredSkills)
+                .orElseThrow(() -> new IllegalStateException("Skill not found for id: " + entry.getKey()));
+        SkillDto skillDto = skillMapper.toDto(skill);
+        return new SkillCandidateDto(skillDto, entry.getValue());
     }
 
     private Optional<Skill> findSkillById(Long id, List<Skill> skills) {

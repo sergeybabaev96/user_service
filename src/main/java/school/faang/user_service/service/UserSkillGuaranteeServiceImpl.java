@@ -29,10 +29,10 @@ public class UserSkillGuaranteeServiceImpl implements UserSkillGuaranteeService 
     public void addUserSkillGuarantee(Long skillId, Long userId) {
         List<SkillOffer> skillOffers = skillOfferService.getSkillOfferToUser(skillId, userId);
         skillOffers.forEach(skillOffer -> {
-            UserSkillGuarantee guarantee = new UserSkillGuarantee();
-            guarantee.setSkill(skillOffer.getSkill());
-            guarantee.setGuarantor(skillOffer.getRecommendation().getAuthor());
-            guarantee.setUser(skillOffer.getRecommendation().getReceiver());
+            UserSkillGuarantee guarantee = UserSkillGuarantee.builder()
+                    .skill(skillOffer.getSkill())
+                    .guarantor(skillOffer.getRecommendation().getAuthor())
+                    .user(skillOffer.getRecommendation().getReceiver()).build();
             userSkillGuaranteeRepository.save(guarantee);
         });
     }
