@@ -1,7 +1,6 @@
 package school.faang.user_service.service.mentorship;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,12 +25,10 @@ public class MentorshipService {
     private final UserMapper userMapper;
 
     public List<UserDto> getMentees(long userId) {
-        validateId(userId);
         return getUserRelatedList(userId, User::getMentees);
     }
 
     public List<UserDto> getMentors(long userId) {
-        validateId(userId);
         return getUserRelatedList(userId, User::getMentors);
     }
 
@@ -60,9 +57,4 @@ public class MentorshipService {
                 .orElseThrow(() -> new EntityNotFoundException(user + " with id: " + userId + " is not in the database"));
     }
 
-    private void validateId(long id){
-        if (id < 1) {
-            throw new ConstraintViolationException("mentorId must be greater than 0", null);
-        }
-    }
 }

@@ -17,28 +17,37 @@ import school.faang.user_service.service.mentorship.MentorshipService;
 
 import java.util.List;
 
-@Validated
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
+@Validated
 public class MentorshipController {
 
     private final MentorshipService mentorshipService;
 
     @GetMapping("/mentor/{mentorId}/mentees")
-    public List<UserDto> getMentees(@Valid @PathVariable @Positive @Min(1) long mentorId) {
+    public List<UserDto> getMentees(@PathVariable long mentorId) {
+        validateDate(mentorId);
         return mentorshipService.getMentees(mentorId);
     }
 
     @GetMapping("/mentee/{menteeId}/mentors")
-    public List<UserDto> getMentors(@PathVariable @Positive @Min(1) long menteeId) {
+    public List<UserDto> getMentors(@PathVariable  long menteeId) {
+        validateDate(menteeId);
         return mentorshipService.getMentors(menteeId);
     }
 
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @DeleteMapping("/mentee/{menteeId}/mentor/{mentorId}")
-    public void deleteMenteeAndMentor(@PathVariable @Positive @Min(1) long menteeId,
-                                      @PathVariable @Positive @Min(1) long mentorId) {
+    public void deleteMenteeAndMentor(@Valid @PathVariable @Positive @Min(1) long menteeId,
+                                      @Valid @PathVariable @Positive @Min(1) long mentorId) {
         mentorshipService.deleteMenteeAndMentor(menteeId, mentorId);
+    }
+
+    private void validateDate(long id){
+        if(id < 1){
+            throw new IllegalArgumentException("ID must be greater than or equal to 1");
+        }
     }
 }

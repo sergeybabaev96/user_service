@@ -126,6 +126,30 @@ public class MentorshipControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Mentorship relation not found"));
     }
+
+    @Test
+    void getMentees_ShouldReturnBadRequest_WhenMentorIdIsZero() throws Exception {
+        mockMvc.perform(get("/api/mentor/0/mentees"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getMentor_ShouldReturnBadRequest_WhenMenteeIdIsZero() throws Exception {
+        mockMvc.perform(get("/api/mentee/0/mentors"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getMentor_ShouldReturnBadRequest_WhenMentorIdIsString() throws Exception {
+        mockMvc.perform(get("/api/mentor/abc/mentees"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getMentee_ShouldReturnBadRequest_WhenMenteeIdIsString() throws Exception {
+        mockMvc.perform(get("/api/mentee/abc/mentors"))
+                .andExpect(status().isBadRequest());
+    }
 }
 
 
