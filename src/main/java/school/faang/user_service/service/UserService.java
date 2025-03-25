@@ -32,11 +32,6 @@ public class UserService {
 
     private static final int MONTHS = 3;
 
-    public User getUserById(long id) {
-        return userRepository.findById(id).orElseThrow(()
-                -> new RuntimeException("User with id " + id + " not found"));
-    }
-
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }
@@ -66,7 +61,7 @@ public class UserService {
 
     public UserDto activateUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("User with id " + id + " not found")
+                () -> new UserNotFoundException(id)
         );
 
         if (user.getUpdatedAt().isAfter(LocalDateTime.now().minusMonths(MONTHS))) {
@@ -78,7 +73,7 @@ public class UserService {
 
     public UserDto deactivateUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("User with id " + id + " not found")
+                () -> new UserNotFoundException(id)
         );
 
         stopUserGoals(id);
@@ -95,7 +90,7 @@ public class UserService {
         List<Long> userGoalsForDeleting = new ArrayList<>();
         List<Long> userGoalsForUpdating = new ArrayList<>();
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
         List<GoalDto> allGoals = user.getGoals().stream().map(goalMapper::goalToGoalDto).toList();
 
