@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
@@ -55,6 +56,15 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, String> errors = getErrorsMapWithExceptionTitle(e, "Illegal argument exception occurred");
+
+        logging(Level.WARN, errors);
+        return errors;
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleMaxUploadSizeExceededExceptionException(MaxUploadSizeExceededException e) {
+        Map<String, String> errors = getErrorsMapWithExceptionTitle(e, "Max upload file size exceeded");
 
         logging(Level.WARN, errors);
         return errors;

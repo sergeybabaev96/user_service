@@ -21,17 +21,34 @@ spring:
       port: 6379
       host: localhost
 
-server:
-  port: 8080
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 
-logging:
-  level:
-    root: info
+services:
+  server:
+    port: 8080
 
-project-service:
-  host: localhost
-  port: 8082
+  logging:
+    level:
+      root: info
 
-payment-service:
-  host: localhost
-  port: 9080
+  project-service:
+    host: localhost
+    port: 8082
+
+  payment-service:
+    host: localhost
+    port: 9080
+
+  s3:
+    endpoint: http://localhost:9000
+    accessKey: user
+    secretKey: password
+
+avatar:
+  bucket-name: avatars
+  size-mb: 5
+  big-side: 1080
+  small-side: 170
