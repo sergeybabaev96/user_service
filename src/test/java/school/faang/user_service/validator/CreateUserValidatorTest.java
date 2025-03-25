@@ -23,10 +23,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class CreateUserValidatorTest {
 
-    public static final String DUMMY_USERNAME = "Dummy username";
-    public static final String DUMMY_EMAIL = "example@mail.com";
-    public static final String DUMMY_PASSWORD = "Dummy password";
-    public static final String DUMMY_COUNTRY_TITLE = "Dummy country title";
+    public static final String TEST_USERNAME = "Dummy username";
+    public static final String TEST_EMAIL = "example@mail.com";
+    public static final String TEST_PASSWORD = "Dummy password";
+    public static final String TEST_COUNTRY_TITLE = "Dummy country title";
 
     @Mock
     private UserRepository userRepository;
@@ -40,7 +40,7 @@ public class CreateUserValidatorTest {
     @Test
     public void testValidateUsername_UsernameIsAlreadyExisted_Throws() {
         var username = "Already existed username";
-        var requestDto = new CreateUserDto(username, DUMMY_EMAIL, DUMMY_PASSWORD, DUMMY_COUNTRY_TITLE);
+        var requestDto = new CreateUserDto(username, TEST_EMAIL, TEST_PASSWORD, TEST_COUNTRY_TITLE);
         when(userRepository.existsByUsername(username)).thenReturn(true);
 
         assertThrows(
@@ -52,7 +52,7 @@ public class CreateUserValidatorTest {
     @Test
     public void testValidateUsername_UsernameDoesNotExist_Success() {
         var username = "Username which is not existed";
-        var requestDto = new CreateUserDto(username, DUMMY_EMAIL, DUMMY_PASSWORD, DUMMY_COUNTRY_TITLE);
+        var requestDto = new CreateUserDto(username, TEST_EMAIL, TEST_PASSWORD, TEST_COUNTRY_TITLE);
         when(userRepository.existsByUsername(username)).thenReturn(false);
 
         assertDoesNotThrow(() -> createUserValidator.validateUsername(requestDto));
@@ -62,7 +62,7 @@ public class CreateUserValidatorTest {
     @Test
     public void testValidateUserEmail_UserEmailIsAlreadyExisted_Throws() {
         var userEmail = "Already existed user email";
-        var requestDto = new CreateUserDto(DUMMY_USERNAME, userEmail, DUMMY_PASSWORD, DUMMY_COUNTRY_TITLE);
+        var requestDto = new CreateUserDto(TEST_USERNAME, userEmail, TEST_PASSWORD, TEST_COUNTRY_TITLE);
         when(userRepository.existsByEmail(userEmail)).thenReturn(true);
 
         assertThrows(
@@ -74,7 +74,7 @@ public class CreateUserValidatorTest {
     @Test
     public void testValidateUserEmail_UserEmailDoesNotExist_Success() {
         var userEmail = "User email which is not existed";
-        var requestDto = new CreateUserDto(DUMMY_USERNAME, userEmail, DUMMY_PASSWORD, DUMMY_COUNTRY_TITLE);
+        var requestDto = new CreateUserDto(TEST_USERNAME, userEmail, TEST_PASSWORD, TEST_COUNTRY_TITLE);
         when(userRepository.existsByEmail(userEmail)).thenReturn(false);
 
         assertDoesNotThrow(() -> createUserValidator.validateUserEmail(requestDto));
@@ -84,7 +84,7 @@ public class CreateUserValidatorTest {
     @Test
     public void testValidateCountryTitle_CountryDoesNotExist_Throws() {
         var countryTitle = "Country which is not existed";
-        var requestDto = new CreateUserDto(DUMMY_USERNAME, DUMMY_EMAIL, DUMMY_PASSWORD, countryTitle);
+        var requestDto = new CreateUserDto(TEST_USERNAME, TEST_EMAIL, TEST_PASSWORD, countryTitle);
         when(countryRepository.findByTitle(countryTitle)).thenReturn(Optional.empty());
 
         assertThrows(
@@ -96,7 +96,7 @@ public class CreateUserValidatorTest {
     @Test
     public void testValidateCountryTitle_CountryIsAlreadyExisted_ReturnsCountry() {
         var countryTitle = "Country email which is not existed";
-        var requestDto = new CreateUserDto(DUMMY_USERNAME, DUMMY_EMAIL, DUMMY_PASSWORD, countryTitle);
+        var requestDto = new CreateUserDto(TEST_USERNAME, TEST_EMAIL, TEST_PASSWORD, countryTitle);
         var expectedResult = Country.builder().title(countryTitle).build();
         when(countryRepository.findByTitle(countryTitle))
                 .thenReturn(Optional.of(expectedResult));
