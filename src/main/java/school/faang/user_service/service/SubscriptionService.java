@@ -42,7 +42,7 @@ public class SubscriptionService {
         }
 
         subscriptionRepository.followUser(followerId, followeeId);
-        followerEventPublisher.publish(new FollowerEvent(followerId, followeeId, LocalDateTime.now()));
+        followerEventPublisher.publish(new FollowerEvent(followerId, followeeId));
     }
 
     @Transactional
