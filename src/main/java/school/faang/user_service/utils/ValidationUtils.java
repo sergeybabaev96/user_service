@@ -1,12 +1,13 @@
 package school.faang.user_service.utils;
 
+import lombok.experimental.UtilityClass;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.skill.SkillDto;
 import school.faang.user_service.exception.DataValidationException;
-
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@UtilityClass
 public class ValidationUtils {
     public static void validateSkill(SkillDto skill) {
         if (skill == null || skill.title().isBlank()) {
@@ -15,9 +16,9 @@ public class ValidationUtils {
     }
 
     public static void validateEvent(EventDto event) {
-        if (event == null || event.getTitle().isBlank() || !Objects.nonNull(event.getStartDate())
-                || event.getStartDate().isBefore(LocalDateTime.now())
-                || event.getOwnerId() == null) {
+        if (event == null || event.title().isBlank() || !Objects.nonNull(event.startDate())
+                || event.startDate().isBefore(LocalDateTime.now())
+                || event.ownerId() == null ) {
             throw new DataValidationException("Event not confirmed");
         }
     }
@@ -28,4 +29,3 @@ public class ValidationUtils {
         }
     }
 }
-
