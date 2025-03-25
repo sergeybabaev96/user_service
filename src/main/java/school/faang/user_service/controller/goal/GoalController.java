@@ -1,10 +1,7 @@
 package school.faang.user_service.controller.goal;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,6 +37,7 @@ import java.util.List;
  *     <li>{@link #getGoalsByUser(Long, GoalFilterDto) Получение списка всех целей с применением фильтра}, для заданного пользователя.</li>
  * </ul>
  * </p>
+ *
  * @author juzu400
  * @see GoalViewDto
  * @see GoalCreateDto
@@ -49,7 +47,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/goals")
-@Tag(name = "Goal Management", description = "APIs for managing goals and subgoals")
+@Tag(name = "Goal Management", description = "Provides methods for working with goals")
 public class GoalController {
     private final GoalService goalService;
 
@@ -57,21 +55,18 @@ public class GoalController {
      * Создание цели для заданного пользователя
      *
      * @param userId Идентификатор пользователя
-     * @param goal DTO для создания цели
+     * @param goal   DTO для создания цели
      * @return созданная цель
      */
     @Operation(
             summary = "Create a new goal",
-            description = "Creates a new goal for the specified user",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Goal created successfully",
-                            content = @Content(schema = @Schema(implementation = GoalViewDto.class))),
-                    @ApiResponse(responseCode = "404", description = "User not found"),
-                    @ApiResponse(responseCode = "400", description = "Invalid input data")
-            }
+            description = "Creates a new goal for the specified user"
     )
     @PostMapping("/{userId}")
-    public GoalViewDto createGoal(@PathVariable Long userId, @RequestBody GoalCreateDto goal) {
+    public GoalViewDto createGoal(
+            @Parameter(description = "ID of the user who owns the goal", required = true, example = "123")
+            @PathVariable Long userId,
+            @RequestBody GoalCreateDto goal) {
         return goalService.createGoal(userId, goal);
     }
 
@@ -79,21 +74,18 @@ public class GoalController {
      * Обновление цели по её идентификатору
      *
      * @param goalId Идентификатор цели
-     * @param goal DTO с новыми значениями цели
+     * @param goal   DTO с новыми значениями цели
      * @return обновленная цель
      */
     @Operation(
             summary = "Update an existing goal",
-            description = "Updates the goal with the specified ID",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Goal updated successfully",
-                            content = @Content(schema = @Schema(implementation = GoalViewDto.class))),
-                    @ApiResponse(responseCode = "404", description = "Goal not found"),
-                    @ApiResponse(responseCode = "400", description = "Invalid input data")
-            }
+            description = "Updates the goal with the specified ID"
     )
     @PutMapping("/{goalId}")
-    public GoalViewDto updateGoal(@PathVariable Long goalId, @RequestBody GoalCreateDto goal) {
+    public GoalViewDto updateGoal(
+            @Parameter(description = "ID of the goal to update", required = true, example = "1")
+            @PathVariable Long goalId,
+            @RequestBody GoalCreateDto goal) {
         return goalService.updateGoal(goalId, goal);
     }
 
@@ -104,14 +96,12 @@ public class GoalController {
      */
     @Operation(
             summary = "Delete a goal",
-            description = "Deletes the goal with the specified ID",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Goal deleted successfully"),
-                    @ApiResponse(responseCode = "404", description = "Goal not found")
-            }
+            description = "Deletes the goal with the specified ID"
     )
     @DeleteMapping("/{goalId}")
-    public void deleteGoal(@PathVariable Long goalId) {
+    public void deleteGoal(
+            @Parameter(description = "ID of the goal to delete", required = true, example = "1")
+            @PathVariable Long goalId) {
         goalService.deleteGoal(goalId);
     }
 
@@ -124,15 +114,13 @@ public class GoalController {
      */
     @Operation(
             summary = "Get subgoals by goal ID",
-            description = "Returns a list of subgoals for the specified goal ID with optional filtering",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Subgoals retrieved successfully",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = GoalViewDto.class)))),
-                    @ApiResponse(responseCode = "404", description = "Parent goal not found")
-            }
+            description = "Returns a list of subgoals for the specified goal ID with optional filtering"
     )
     @GetMapping("/{goalId}/subGoals")
-    public List<GoalViewDto> findSubtasksByGoalId(@PathVariable Long goalId, @ModelAttribute GoalFilterDto filter) {
+    public List<GoalViewDto> findSubtasksByGoalId(
+            @Parameter(description = "ID of the parent goal", required = true, example = "1")
+            @PathVariable Long goalId,
+            @ModelAttribute GoalFilterDto filter) {
         return goalService.findSubtasksByGoalId(goalId, filter);
     }
 
@@ -145,15 +133,13 @@ public class GoalController {
      */
     @Operation(
             summary = "Get goals by user ID",
-            description = "Returns a list of goals for the specified user ID with optional filtering",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Goals retrieved successfully",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = GoalViewDto.class)))),
-                    @ApiResponse(responseCode = "404", description = "User not found")
-            }
+            description = "Returns a list of goals for the specified user ID with optional filtering"
     )
     @GetMapping("/{userId}")
-    public List<GoalViewDto> getGoalsByUser(@PathVariable Long userId, @ModelAttribute GoalFilterDto filter) {
+    public List<GoalViewDto> getGoalsByUser(
+            @Parameter(description = "ID of the user to filter goals", required = true, example = "123")
+            @PathVariable Long userId,
+            @ModelAttribute GoalFilterDto filter) {
         return goalService.getGoalsByUser(userId, filter);
     }
 }
