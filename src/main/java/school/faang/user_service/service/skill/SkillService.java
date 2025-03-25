@@ -32,7 +32,7 @@ public class SkillService {
         return skillIds.stream().allMatch(skillRepository::existsById);
     }
 
-    public void assignSkillToUser (long skillId, long userId) {
+    public void assignSkillToUser(long skillId, long userId) {
         skillRepository.assignSkillToUser(skillId, userId);
     }
 
@@ -65,11 +65,11 @@ public class SkillService {
                         .orElseThrow(() -> new RuntimeException("Error adding a skill to a user"));
 
                 skillOffers.forEach(skillOffer ->
-                    userSkillGuaranteeService.save(UserSkillGuarantee.builder()
-                            .user(skillOffer.getRecommendation().getReceiver())
-                            .skill(skillUser)
-                            .guarantor(skillOffer.getRecommendation().getAuthor())
-                            .build()));
+                        userSkillGuaranteeService.save(UserSkillGuarantee.builder()
+                                .user(skillOffer.getRecommendation().getReceiver())
+                                .skill(skillUser)
+                                .guarantor(skillOffer.getRecommendation().getAuthor())
+                                .build()));
             }
 
             return skillRepository.findUserSkill(skillId, userId)
