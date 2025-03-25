@@ -3,6 +3,7 @@ package school.faang.user_service.controller;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -14,21 +15,26 @@ import school.faang.user_service.exception.DataValidationException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final String HANDLE_FORM = "Обработано исключение {}: {}";
 
     @ExceptionHandler(DataValidationException.class)
     public ResponseEntity<String> handleDataValidationException(DataValidationException ex) {
+        log.error(HANDLE_FORM, "валидации данных", ex.getMessage(), ex);
         return BadRequest(ex);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
+        log.error(HANDLE_FORM, "отсутствия сущности", ex.getMessage(), ex);
         return NotFound(ex);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException ex) {
+        log.error(HANDLE_FORM, "нарушения ограничений", ex.getMessage(), ex);
         return BadRequest(ex);
     }
 
@@ -40,11 +46,13 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
+        log.error(HANDLE_FORM, "валидации аргументов метода", ex.getMessage(), ex);
         return ResponseEntity.badRequest().body(errors);
     }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
+        log.error(HANDLE_FORM, "в ходе работы программы", ex.getMessage(), ex);
         return InternalServerError(ex);
     }
 
