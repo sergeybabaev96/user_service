@@ -59,7 +59,7 @@ dependencies {
 
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.13.0")
     implementation("com.google.code.findbugs:jsr305:3.0.2")
-    
+
     /**
      * Test containers
      */
@@ -97,7 +97,7 @@ kotlin {
 }
 
 jacoco {
-    toolVersion = "0.8.12"
+    toolVersion = "0.8.8"
 }
 
 tasks.test {
@@ -118,7 +118,7 @@ tasks.jacocoTestReport {
 
 // This task verifies tests
 tasks.jacocoTestCoverageVerification {
-    dependsOn(tasks.test)      // To start task after tests
+    dependsOn(tasks.jacocoTestReport)    // To start task after jacocoTestReport
 
     violationRules {
         rule {
@@ -128,7 +128,7 @@ tasks.jacocoTestCoverageVerification {
                 "school.faang.user_service.SkillRequestService",
                 "school.faang.user_service.SkillService",
                 "school.faang.user_service.SkillService",
-                )
+            )
 
             limit {
                 counter = "LINE"    // Check line coverage
@@ -155,4 +155,19 @@ tasks.jacocoTestCoverageVerification {
 tasks.check {
     dependsOn(tasks.jacocoTestReport)
     dependsOn(tasks.jacocoTestCoverageVerification)
+}
+
+// To run check after build gradle
+tasks.build {
+    dependsOn(tasks.check)
+}
+
+// To run check after rebuild
+tasks.classes {
+    finalizedBy(tasks.check)
+}
+
+// To run check after rebuild
+tasks.compileJava {
+    finalizedBy(tasks.check)
 }
