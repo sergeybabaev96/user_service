@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -132,6 +133,7 @@ class GoalServiceTest {
         when(goalRepository.existsById(goalDto.getParentId())).thenReturn(false);
 
         assertThrows(EntityNotFoundException.class, () -> goalService.createGoal(userId, goalDto));
+        verify(skillService, never()).isAllSkillsExist(goalDto.getSkillIds());
         verify(userService, times(1)).isWithinGoalLimit(userId);
         verify(goalRepository, times(1)).existsById(goalDto.getParentId());
     }

@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.GoalFilterDto;
@@ -16,36 +18,37 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/goal")
 public class GoalController {
     private final GoalService goalService;
 
-    @PostMapping("/goal/{userId}")
-    public GoalDto createGoal(@PathVariable long userId, @RequestBody GoalDto goalDto) {
+    @PostMapping
+    public GoalDto createGoal(@RequestParam long userId, @RequestBody GoalDto goalDto) {
         validateStringField(goalDto.getTitle(), "title");
         validateStringField(goalDto.getDescription(), "description");
 
         return goalService.createGoal(userId, goalDto);
     }
 
-    @PutMapping("/goal/{goalId}")
+    @PutMapping("/{goalId}")
     public GoalDto updateGoal(@PathVariable long goalId, @RequestBody GoalDto goalDto) {
         validateStringField(goalDto.getTitle(), "title");
         return goalService.updateGoal(goalId, goalDto);
     }
 
-    @DeleteMapping("/goal/{goalId}")
+    @DeleteMapping("/{goalId}")
     public void deleteGoal(@PathVariable long goalId) {
         goalService.deleteGoal(goalId);
     }
 
-    @PostMapping("/goal/{goalId}/subtasks")
+    @PostMapping("/{goalId}/subtasks")
     public List<GoalDto> getSubtasksByGoalId(@PathVariable long goalId,
                                              @RequestBody(required = false) GoalFilterDto filter) {
         return goalService.getSubtasksByGoalId(goalId, filter);
     }
 
-    @PostMapping("/{userId}/goal")
-    public List<GoalDto> getGoalsByUserId(@PathVariable long userId,
+    @PostMapping("/filter")
+    public List<GoalDto> getGoalsByUserId(@RequestParam long userId,
                                           @RequestBody(required = false) GoalFilterDto filter) {
         return goalService.getGoalsByUserId(userId, filter);
     }

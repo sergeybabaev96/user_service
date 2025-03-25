@@ -1,4 +1,4 @@
-package school.faang.user_service.handler;
+package school.faang.user_service.controller;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import school.faang.user_service.exception.DataValidationException;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class Handler {
 
     @ExceptionHandler(DataValidationException.class)
     public ResponseEntity<String> handleDataValidationException(DataValidationException ex) {

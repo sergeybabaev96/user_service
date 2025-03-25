@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.GoalFilterDto;
@@ -28,6 +29,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @WebMvcTest(GoalController.class)
 public class GoalControllerTest {
@@ -41,11 +46,15 @@ public class GoalControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    private final long userId = 1;
+    private final long goalId = 1;
+    private final String createGoalUrl = "/goal?userId=" + userId;
+    private final String updateOrDeleteGoalUrl = "/goal/" + goalId;
+    private final String getSubtasksByGoalIdUrl = updateOrDeleteGoalUrl + "/subtasks";
+    private final String getGoalsByUserIdUrl = "/goal/filter?userId=" + userId;;
     private final String title = "title";
     private final String description = "description";
     private final Goal parent = Goal.builder().id(1L).build();
-    private final long userId = 1;
-    private final long goalId = 1;
 
     private final GoalFilterDto filter = GoalFilterDto.builder().build();
     private GoalDto goalDto;
@@ -81,113 +90,57 @@ public class GoalControllerTest {
     @Test
     public void testCreateGoal() throws Exception {
         when(goalService.createGoal(userId, goalDto)).thenReturn(expectedGoalDto);
-
-        mockMvc.perform(post("/goal/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(goalDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(2)))
-                .andExpect(jsonPath("$.title", is("title")))
-                .andExpect(jsonPath("$.description", is("description")))
-                .andExpect(jsonPath("$.skillIds", hasSize(3)))
-                .andExpect(jsonPath("$.skillIds[0]", is(0)))
-                .andExpect(jsonPath("$.skillIds[1]", is(1)))
-                .andExpect(jsonPath("$.skillIds[2]", is(2)))
-                .andExpect(jsonPath("$.parentId", is(1)))
-                .andExpect(jsonPath("$.status", is("ACTIVE")));
+        expectedOkWhen(() -> post(createGoalUrl));
     }
 
     @Test
     public void testNotCreateWithNullTitle() throws Exception {
-        goalDto.setTitle(null);
-
-        mockMvc.perform(post("/goal/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(goalDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Invalid title: null"))
-                .andReturn();
+        badRequestWhenInvalidField(() -> post(createGoalUrl),
+                goalDto::setTitle, null, "Invalid title: ");
     }
+
 
     @Test
     public void testNotCreateWithBlankTitle() throws Exception {
-        goalDto.setTitle("   ");
-
-        mockMvc.perform(post("/goal/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(goalDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Invalid title:    "))
-                .andReturn();
+        badRequestWhenInvalidField(() -> post(createGoalUrl),
+                goalDto::setTitle, "   ", "Invalid title: ");
     }
 
     @Test
     public void testNotCreateWithNullDescription() throws Exception {
-        goalDto.setDescription(null);
-
-        mockMvc.perform(post("/goal/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(goalDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Invalid description: null"))
-                .andReturn();
+        badRequestWhenInvalidField(() -> post(createGoalUrl),
+                goalDto::setDescription, null, "Invalid description: ");
     }
+
 
     @Test
     public void testNotCreateWithBlankDescription() throws Exception {
-        goalDto.setDescription("   ");
-
-        mockMvc.perform(post("/goal/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(goalDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Invalid description:    "))
-                .andReturn();
+        badRequestWhenInvalidField(() -> post(createGoalUrl),
+                goalDto::setDescription, "   ", "Invalid description: ");
     }
 
     @Test
     public void testUpdateGoal() throws Exception {
         when(goalService.updateGoal(goalId, goalDto)).thenReturn(expectedGoalDto);
-
-        mockMvc.perform(put("/goal/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(goalDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(2)))
-                .andExpect(jsonPath("$.title", is("title")))
-                .andExpect(jsonPath("$.description", is("description")))
-                .andExpect(jsonPath("$.skillIds", hasSize(3)))
-                .andExpect(jsonPath("$.skillIds[0]", is(0)))
-                .andExpect(jsonPath("$.skillIds[1]", is(1)))
-                .andExpect(jsonPath("$.skillIds[2]", is(2)))
-                .andExpect(jsonPath("$.parentId", is(1)))
-                .andExpect(jsonPath("$.status", is("ACTIVE")));
+        expectedOkWhen(() -> put(updateOrDeleteGoalUrl));
     }
 
     @Test
     public void testNotUpdateWithNullTitle() throws Exception {
-        goalDto.setTitle(null);
-
-        mockMvc.perform(put("/goal/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(goalDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Invalid title: null"))
-                .andReturn();
-
-
+        badRequestWhenInvalidField(() -> put(updateOrDeleteGoalUrl),
+                goalDto::setTitle, null, "Invalid title: ");
     }
 
     @Test
     public void testDeleteGoal() throws Exception {
-        mockMvc.perform(delete("/goal/1")).andExpect(status().isOk());
+        mockMvc.perform(delete(updateOrDeleteGoalUrl)).andExpect(status().isOk());
     }
 
     @Test
     public void testGetSubtasksByGoalId() throws Exception {
         when(goalService.getSubtasksByGoalId(goalId, filter)).thenReturn(goalDtos);
 
-        mockMvc.perform(post("/goal/1/subtasks")
+        mockMvc.perform(post(getSubtasksByGoalIdUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(filter)))
                 .andExpect(status().isOk());
@@ -197,10 +150,37 @@ public class GoalControllerTest {
     public void testGetSubtasksByUserId() throws Exception {
         when(goalService.getGoalsByUserId(userId, filter)).thenReturn(goalDtos);
 
-        mockMvc.perform(post("/1/goal")
+        mockMvc.perform(post(getGoalsByUserIdUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(filter)))
                 .andExpect(status().isOk());
     }
 
+    private void expectedOkWhen(Supplier<MockHttpServletRequestBuilder> builder) throws Exception {
+        mockMvc.perform(builder.get()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(goalDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(2)))
+                .andExpect(jsonPath("$.title", is("title")))
+                .andExpect(jsonPath("$.description", is("description")))
+                .andExpect(jsonPath("$.skillIds", hasSize(3)))
+                .andExpect(jsonPath("$.skillIds[0]", is(0)))
+                .andExpect(jsonPath("$.skillIds[1]", is(1)))
+                .andExpect(jsonPath("$.skillIds[2]", is(2)))
+                .andExpect(jsonPath("$.parentId", is(1)))
+                .andExpect(jsonPath("$.status", is("ACTIVE")));
+    }
+
+    private void badRequestWhenInvalidField(Supplier<MockHttpServletRequestBuilder> builder, Consumer<String> fieldSetter,
+                                            String field, String message) throws Exception {
+        fieldSetter.accept(field);
+
+        mockMvc.perform(post(createGoalUrl)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(goalDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(message + field))
+                .andReturn();
+    }
 }
