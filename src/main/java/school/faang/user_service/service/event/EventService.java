@@ -63,35 +63,4 @@ public class EventService {
         List<Event> participatedEvents = eventRepository.findParticipatedEventsByUserId(userId);
         return participatedEvents.stream().map(eventMapper::toEntity).toList();
     }
-
-    public EventDto getEvent(Long eventId) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new DataValidationException("Event with id = %d does not exist".formatted(eventId)));
-        return eventMapper.toEntity(event);
-    }
-
-    public List<EventDto> getEventsByFilter(EventFilterDto eventFilterDto) {
-        Stream<Event> allEvents = eventRepository.findAll().stream();
-        for (EventFilter eventFilter : eventFilters) {
-            if (eventFilter.isApplicable(eventFilterDto)) {
-                allEvents = eventFilter.apply(eventFilterDto, allEvents);
-            }
-        }
-        return allEvents.map(eventMapper::eventToEventDto).toList();
-    }
-
-    public void deleteEvent(Long eventId) {
-        eventRepository.deleteById(eventId);
-    }
-
-    public EventDto updateEvent(EventDto eventDto) {
-        eventSkill.checkSkillsToUser(eventDto);
-        Event updatedEvent = eventRepository.save(eventMapper.toEventDto(eventDto));
-        return eventMapper.toEntity(updatedEvent);
-    }
-
-    public List<EventDto> getPaticipatedEvents(Long userId) {
-        List<Event> paticipatedEvents = eventRepository.findParticipatedEventsByUserId(userId);
-        return paticipatedEvents.stream().map(eventMapper::eventToEventDto).toList();
-    }
 }
