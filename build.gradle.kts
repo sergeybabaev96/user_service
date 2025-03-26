@@ -92,6 +92,7 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 tasks.bootJar {
     archiveFileName.set("service.jar")
 }
+
 kotlin {
     jvmToolchain(17)
 }
