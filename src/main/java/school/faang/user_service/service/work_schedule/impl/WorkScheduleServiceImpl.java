@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.work_schedule.WorkScheduleDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.WorkSchedule;
-import school.faang.user_service.exception.data_validation_exception.DataValidationException;
 import school.faang.user_service.mapper.work_schedule.WorkScheduleMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.WorkScheduleRepository;
