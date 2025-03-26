@@ -43,6 +43,7 @@ public class RedisWarmUpService {
             userActivityRedisService.recordUserAction(userActivity,
                     userActivityMapper.toUserActivityRequestDto(userActivity));
         }
+
         List<UserPopularity> topPopularUsers = userPopularityRepository.getTopPopular(pageable);
         for (UserPopularity userImpact : topPopularUsers) {
             userPopularityRedisService.recordUserImpact(userImpact,
