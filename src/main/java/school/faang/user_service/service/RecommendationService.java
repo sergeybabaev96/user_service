@@ -29,9 +29,9 @@ import java.util.stream.IntStream;
 @RequiredArgsConstructor
 public class RecommendationService {
     private final RecommendationRepository recommendationRepository;
-    private final SkillOfferService skillOfferService;
-    private final SkillService skillService;
-    private final UserSkillGuaranteeService userSkillGuaranteeService;
+    private final SkillOfferServiceImpl skillOfferService;
+    private final SkillServiceImpl skillService;
+    private final UserSkillGuaranteeServiceImpl userSkillGuaranteeService;
     private final RecommendationMapper recommendationMapper;
     private final SkillOfferMapper skillOfferMapper;
 
@@ -79,7 +79,7 @@ public class RecommendationService {
 
         var updatedRecommendation = updatedRecommendation(recommendationDto);
 
-        skillOfferService.deleteSkillOfferssByRecommendationId(updatedRecommendation.getId());
+        skillOfferService.deleteSkillOffersByRecommendationId(updatedRecommendation.getId());
 
         var updatedRecommendationDto = recommendationMapper.toDto(updatedRecommendation);
 
