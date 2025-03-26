@@ -6,5 +6,5 @@ public interface GoalService {
 
     long countActiveGoalsPerUser(Long userId);
 
-    public void deleteUserFromGoals(Long userId);
+    void deleteUserFromGoals(Long userId);
 }
