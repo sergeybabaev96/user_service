@@ -11,6 +11,7 @@ public interface CareerMapper {
 
     @Mapping(source = "from", target = "dateFrom")
     @Mapping(source = "to", target = "dateTo")
+    @Mapping(target = "user", ignore = true)
     Career toCareer(CareerDto careerDto);
 
     @Mapping(source = "dateFrom", target = "from")
@@ -19,5 +20,6 @@ public interface CareerMapper {
 
     @Mapping(source = "from", target = "dateFrom")
     @Mapping(source = "to", target = "dateTo")
+    @Mapping(target = "user", ignore = true)
     Career updatedCareer(@MappingTarget Career career, CareerDto careerDto);
 }
