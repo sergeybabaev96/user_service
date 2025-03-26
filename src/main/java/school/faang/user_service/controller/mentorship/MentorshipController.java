@@ -28,13 +28,13 @@ public class MentorshipController {
 
     @GetMapping("/mentor/{mentorId}/mentees")
     public List<UserDto> getMentees(@PathVariable long mentorId) {
-        validateDId(mentorId);
+        validateId(mentorId);
         return mentorshipService.getMentees(mentorId);
     }
 
     @GetMapping("/mentee/{menteeId}/mentors")
     public List<UserDto> getMentors(@PathVariable  long menteeId) {
-        validateDId(menteeId);
+        validateId(menteeId);
         return mentorshipService.getMentors(menteeId);
     }
 
@@ -45,7 +45,7 @@ public class MentorshipController {
         mentorshipService.deleteMenteeAndMentor(menteeId, mentorId);
     }
 
-    private void validateDId(long id){
+    private void validateId(long id){
         if(id < 1){
             throw new IllegalArgumentException("ID must be greater than or equal to 1");
         }
