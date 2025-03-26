@@ -1,22 +1,24 @@
 package school.faang.user_service.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.skill.SkillCandidateDto;
+import school.faang.user_service.dto.skill.SkillDto;
 import school.faang.user_service.entity.Skill;
-import school.faang.user_service.repository.SkillRepository;
+import school.faang.user_service.exception.DataValidationException;
 
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class SkillService {
-    private final SkillRepository skillRepository;
 
-    public boolean doesSkillExists(long skillId) {
-        return skillRepository.existsById(skillId);
-    }
+public interface SkillService {
+     boolean doesSkillExists(long skillId);
 
-    public List<Skill> findSkillsByUserId(long userId) {
-        return skillRepository.findAllByUserId(userId);
-    }
+     List<Skill> findSkillsByUserId(long userId);
+
+     SkillDto create(SkillDto skillDto);
+
+     List<SkillDto> getUserSkills(Long userId);
+
+     List<SkillCandidateDto> getOfferedSkills(Long userId);
+
+     SkillDto acquireSkillFromOffers(long skillId, long userId);
+
 }
