@@ -3,6 +3,9 @@ package school.faang.user_service.controller.goal;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,6 +25,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -44,14 +48,18 @@ public class GoalControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    private String nullVal;
     private final long userId = 1;
     private final long goalId = 1;
+    private final String title = "title";
+    private final String description = "description";
+    private final String titleName = "title";
+    private final String descriptionName = "description";
     private final String createGoalUrl = "/goal?userId=" + userId;
     private final String updateOrDeleteGoalUrl = "/goal/" + goalId;
     private final String getSubtasksByGoalIdUrl = updateOrDeleteGoalUrl + "/subtasks";
-    private final String getGoalsByUserIdUrl = "/goal/filter?userId=" + userId;
-    private final String title = "title";
-    private final String description = "description";
+    private final String getGoalsByUserIdUrl =
+            String.format("/goal?userId=%d&titlePattern=%s&descriptionPattern=%s", userId, title, description);
     private final Goal parent = Goal.builder().id(1L).build();
 
     private final GoalFilterDto filter = GoalFilterDto.builder().build();
@@ -91,31 +99,28 @@ public class GoalControllerTest {
         expectedOkWhen(() -> post(createGoalUrl));
     }
 
-    @Test
-    public void testNotCreateWithNullTitle() throws Exception {
-        badRequestWhenInvalidField(() -> post(createGoalUrl),
-                goalDto::setTitle, null, "Invalid title: ");
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1})
+    public void testNotCreateWhenInvalidUserId(int userId) throws Exception {
+        badRequestWhenInvalidId(() -> post("/goal?userId=" + userId), "createGoal.userId");
     }
 
-
-    @Test
-    public void testNotCreateWithBlankTitle() throws Exception {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"   "})
+    public void testNotCreateWhenInvalidTitle(String title) throws Exception {
         badRequestWhenInvalidField(() -> post(createGoalUrl),
-                goalDto::setTitle, "   ", "Invalid title: ");
+                goalDto::setTitle, title, titleName);
     }
 
-    @Test
-    public void testNotCreateWithNullDescription() throws Exception {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"   "})
+    public void testNotCreateWhenInvalidDescription(String description) throws Exception {
         badRequestWhenInvalidField(() -> post(createGoalUrl),
-                goalDto::setDescription, null, "Invalid description: ");
+                goalDto::setDescription, description, descriptionName);
     }
 
-
-    @Test
-    public void testNotCreateWithBlankDescription() throws Exception {
-        badRequestWhenInvalidField(() -> post(createGoalUrl),
-                goalDto::setDescription, "   ", "Invalid description: ");
-    }
 
     @Test
     public void testUpdateGoal() throws Exception {
@@ -123,10 +128,26 @@ public class GoalControllerTest {
         expectedOkWhen(() -> put(updateOrDeleteGoalUrl));
     }
 
-    @Test
-    public void testNotUpdateWithNullTitle() throws Exception {
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1})
+    public void testNotUpdateWhenInvalidGoalId(int goalId) throws Exception {
+        badRequestWhenInvalidId(() -> put("/goal/" + goalId), "updateGoal.goalId");
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"   "})
+    public void testNotUpdateWhenInvalidTitle(String title) throws Exception {
         badRequestWhenInvalidField(() -> put(updateOrDeleteGoalUrl),
-                goalDto::setTitle, null, "Invalid title: ");
+                goalDto::setTitle, title, titleName);
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"   "})
+    public void testNotUpdateWhenInvalidDescription(String description) throws Exception {
+        badRequestWhenInvalidField(() -> put(updateOrDeleteGoalUrl),
+                goalDto::setDescription, description, descriptionName);
     }
 
     @Test
@@ -134,24 +155,42 @@ public class GoalControllerTest {
         mockMvc.perform(delete(updateOrDeleteGoalUrl)).andExpect(status().isOk());
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1})
+    public void testNotDeleteGoalWhenInvalidGoalId(int goalId) throws Exception {
+        badRequestWhenInvalidId(() -> delete("/goal/" + goalId), "deleteGoal.goalId");
+    }
+
     @Test
     public void testGetSubtasksByGoalId() throws Exception {
         when(goalService.getSubtasksByGoalId(goalId, filter)).thenReturn(goalDtos);
 
-        mockMvc.perform(post(getSubtasksByGoalIdUrl)
+        mockMvc.perform(get(getSubtasksByGoalIdUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(filter)))
                 .andExpect(status().isOk());
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1})
+    public void testNotGetSubtasksWhenInvalidGoalId(int goalId) throws Exception {
+        badRequestWhenInvalidId(() -> get("/goal/" + goalId + "/subtasks"), "getSubtasksByGoalId.goalId");
+    }
+
     @Test
-    public void testGetSubtasksByUserId() throws Exception {
+    public void testGetGoalsByUserId() throws Exception {
         when(goalService.getGoalsByUserId(userId, filter)).thenReturn(goalDtos);
 
-        mockMvc.perform(post(getGoalsByUserIdUrl)
+        mockMvc.perform(get(getGoalsByUserIdUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(filter)))
                 .andExpect(status().isOk());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1})
+    public void testNotGetGoalsWhenInvalidUserId(int userId) throws Exception {
+        badRequestWhenInvalidId(() -> get("/goal?userId=" + userId), "getGoalsByUserId.userId");
     }
 
     private void expectedOkWhen(Supplier<MockHttpServletRequestBuilder> builder) throws Exception {
@@ -170,15 +209,24 @@ public class GoalControllerTest {
                 .andExpect(jsonPath("$.status", is("ACTIVE")));
     }
 
-    private void badRequestWhenInvalidField(Supplier<MockHttpServletRequestBuilder> builder, Consumer<String> fieldSetter,
-                                            String field, String message) throws Exception {
-        fieldSetter.accept(field);
+    private void badRequestWhenInvalidId(Supplier<MockHttpServletRequestBuilder> builder, String argumentName) throws Exception {
+        mockMvc.perform(builder.get()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(goalDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(argumentName + ": can`t be less than 1"))
+                .andReturn();
+    }
+
+    private void badRequestWhenInvalidField(Supplier<MockHttpServletRequestBuilder> builder,
+                                            Consumer<String> fieldSetter, String val, String field) throws Exception {
+        fieldSetter.accept(val);
 
         mockMvc.perform(builder.get()
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(goalDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(message + field))
+                .andExpect(content().string(String.format("{\"%s\":\"can't be blank or null \"}", field)))
                 .andReturn();
     }
 }
