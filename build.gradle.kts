@@ -91,6 +91,7 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 tasks.bootJar {
     archiveFileName.set("service.jar")
 }
+
 kotlin {
     jvmToolchain(17)
 }
@@ -100,21 +101,26 @@ kotlin {
  */
 
 jacoco {
-    toolVersion = "0.8.9"
-    reportsDirectory.set(layout.buildDirectory.dir("$buildDir/reports/jacoco"))
+    toolVersion = "0.8.12"
+    reportsDirectory.set(layout.buildDirectory.dir("reports/jacoco"))
 }
 
-val exclusions = listOf(
-    "**/UserServiceApplication*",
-    "**/controller/**",
-    "**/mapper/**",
-    "**/entity/**",
-    "**/dto/**",
-    "**/exception/**",
-    "**/com/json/**",
-    "**/client/**",
-    "**/config/**"
-)
+val testClasses = sourceSets.main.get().output.asFileTree.matching {
+    include(listOf(
+        "**/controller/**",
+        "**/service/**",
+        "**/filter/**",
+        "**/validator/**"))
+    exclude(listOf(
+        "**/UserServiceApplication*",
+        "**/entity/**",
+        "**/dto/**",
+        "**/mapper/**",
+        "**/exception/**",
+        "**/com/json/**",
+        "**/client/**",
+        "**/config/**"))
+}
 
 tasks.test {
     finalizedBy(tasks.jacocoTestReport)
@@ -127,6 +133,9 @@ tasks.build {
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
+
+    classDirectories.setFrom(testClasses)
+
     reports {
         xml.required.set(false)
         csv.required.set(false)
@@ -136,13 +145,11 @@ tasks.jacocoTestReport {
 }
 
 tasks.jacocoTestCoverageVerification {
+    classDirectories.setFrom(testClasses)
     violationRules {
         rule {
             element = "CLASS"
             enabled = false
-            classDirectories.setFrom(
-                sourceSets.main.get().output.asFileTree.matching{ exclude(exclusions) }
-            )
             limit {
                 minimum = 0.7.toBigDecimal()
             }

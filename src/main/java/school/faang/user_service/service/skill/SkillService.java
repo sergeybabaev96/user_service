@@ -1,5 +1,6 @@
 package school.faang.user_service.service.skill;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.skill.SkillCandidateDto;
@@ -14,6 +15,7 @@ import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.service.user.UserSkillGuaranteeService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +29,7 @@ public class SkillService {
     private final SkillMapper skillMapper;
 
     public boolean isAllSkillsExist(List<Long> skillIds) {
-       return skillIds.stream().allMatch(skillRepository::existsById);
+        return skillIds.stream().allMatch(skillRepository::existsById);
     }
 
     public void assignSkillToUser(long skillId, long userId) {
@@ -55,6 +57,7 @@ public class SkillService {
     public SkillDto acquireSkillFromOffers(long skillId, long userId) {
         Skill skill = skillRepository.findUserSkill(skillId, userId).orElseGet(() -> {
             List<SkillOffer> skillOffers = skillOfferService.findAllOffersOfSkill(skillId, userId);
+
             if (skillOffers.size() >= MIN_SKILL_OFFERS) {
                 skillRepository.assignSkillToUser(skillId, userId);
 
@@ -76,6 +79,12 @@ public class SkillService {
         return skillMapper.toDto(skill);
     }
 
+    public List<Skill> getSkillsByIds(List<Long> skillIds) {
+        return skillIds.stream()
+                .map(skillId -> skillRepository.findById(skillId)
+                        .orElseThrow(() -> new EntityNotFoundException("skill with id " + skillId + " not exists")))
+                .collect(Collectors.toList());
+    }
     private void checkSkillNotExists(SkillDto skillDto) {
         if (skillRepository.existsByTitle(skillDto.getTitle())) {
             throw new DataValidationException("The skill already exists : " + skillDto.getTitle());

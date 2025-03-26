@@ -1,9 +1,9 @@
 package school.faang.user_service.service.user;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.UserRepository;
 
 import java.util.Optional;
@@ -15,10 +15,10 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public boolean isWithinGoalLimit(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new DataValidationException("user not found"));
-        int countGoals = user.getGoals().size();
-        return countGoals < GOALS_PER_USER;
+    public boolean isWithinGoalLimit(long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + userId + " not found"));
+        return user.getGoals().size() < GOALS_PER_USER;
     }
 
     public void save(User user) {
