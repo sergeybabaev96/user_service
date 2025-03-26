@@ -36,6 +36,12 @@ payment-service:
   host: localhost
   port: 9080
 
+user_service:
+  skill:
+    # minSkillOffers - the minimum number of offers for one skill
+    #so that the user can save it
+    minSkillOffers: 3
+
 services:
   s3:
     endpoint: http://localhost:9000
