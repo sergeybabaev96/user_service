@@ -2,12 +2,20 @@ package school.faang.user_service.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.exception.EntityAlreadyExistException;
 import school.faang.user_service.exception.EntityNotFoundException;
 import school.faang.user_service.exception.ErrorResponse;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -20,6 +28,23 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(exception.getMessage());
     }
 
+    @ExceptionHandler(EntityAlreadyExistException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleEntityAlreadyExistException(EntityAlreadyExistException exception) {
+        log.error("Entity already exist:", exception);
+        return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+        return exception.getBindingResult().getAllErrors().stream()
+                .collect(Collectors.toMap(
+                        error -> ((FieldError) error).getField(),
+                        error -> Objects.requireNonNullElse(error.getDefaultMessage(), "")
+                        )
+                );
+    }
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -34,9 +59,4 @@ public class GlobalExceptionHandler {
         log.error("Unchecked exception:", exception);
         return new ErrorResponse(exception.getMessage());
     }
-
-
-
-
-
 }
