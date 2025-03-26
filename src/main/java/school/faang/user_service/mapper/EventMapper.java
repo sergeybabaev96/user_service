@@ -13,13 +13,14 @@ import java.util.List;
 public interface EventMapper {
 
     @Mapping(target = "relatedSkills", ignore = true)
-    Event toEventDto(EventDto eventDto);
+    Event toEntity(EventDto eventDto);
 
     @Mapping(source = "owner.id", target = "ownerId")
     @Mapping(target = "relatedSkills", expression = "java( extractSkillIds(event.getRelatedSkills()))")
-    EventDto toEntity(Event event);
+    EventDto toDto(Event event);
 
     default List<Long> extractSkillIds(List<Skill> skills) {
         return skills.stream().map(Skill::getId).toList();
     }
 }
+

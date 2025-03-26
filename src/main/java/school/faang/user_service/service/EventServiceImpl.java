@@ -1,4 +1,4 @@
-package school.faang.user_service.service.event;
+package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,29 +16,32 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-public class EventService {
+public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
-    private final EventSkill eventSkill;
-    private final EventOwner eventOwner;
+    private final EventSkillImpl eventSkill;
+    private final EventOwnerImpl eventOwner;
     private final List<EventFilter> eventFilters;
 
+    @Override
     public EventDto create(EventDto eventDto) {
         eventSkill.checkSkillsToUser(eventDto);
-        Event event = eventMapper.toEventDto(eventDto);
-        event.setOwner(eventOwner.getOwner(eventDto.getOwnerId()));
-        event.setRelatedSkills(eventSkill.getSkills(eventDto.getRelatedSkills()));
+        Event event = eventMapper.toEntity(eventDto);
+        event.setOwner(eventOwner.getOwner(eventDto.ownerId()));
+        event.setRelatedSkills(eventSkill.getSkills(eventDto.relatedSkills()));
         Event savedEvent = eventRepository.save(event);
 
-        return eventMapper.toEntity(savedEvent);
+        return eventMapper.toDto(savedEvent);
     }
 
+    @Override
     public EventDto getEvent(Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new DataValidationException("Event with id = %d does not exist".formatted(eventId)));
-        return eventMapper.toEntity(event);
+        return eventMapper.toDto(event);
     }
 
+    @Override
     public List<EventDto> getEventsByFilter(EventFilterDto eventFilterDto) {
         Stream<Event> allEvents = eventRepository.findAll().stream();
         for (EventFilter eventFilter : eventFilters) {
@@ -46,21 +49,24 @@ public class EventService {
                 allEvents = eventFilter.apply(eventFilterDto, allEvents);
             }
         }
-        return allEvents.map(eventMapper::toEntity).toList();
+        return allEvents.map(eventMapper::toDto).toList();
     }
 
+    @Override
     public void deleteEvent(Long eventId) {
         eventRepository.deleteById(eventId);
     }
 
+    @Override
     public EventDto updateEvent(EventDto eventDto) {
         eventSkill.checkSkillsToUser(eventDto);
-        Event updatedEvent = eventRepository.save(eventMapper.toEventDto(eventDto));
-        return eventMapper.toEntity(updatedEvent);
+        Event updatedEvent = eventRepository.save(eventMapper.toEntity(eventDto));
+        return eventMapper.toDto(updatedEvent);
     }
 
+    @Override
     public List<EventDto> getParticipatedEvents(Long userId) {
         List<Event> participatedEvents = eventRepository.findParticipatedEventsByUserId(userId);
-        return participatedEvents.stream().map(eventMapper::toEntity).toList();
+        return participatedEvents.stream().map(eventMapper::toDto).toList();
     }
 }

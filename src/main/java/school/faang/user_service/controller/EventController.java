@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.event.EventFilterDto;
-import school.faang.user_service.service.event.EventService;
+import school.faang.user_service.service.EventServiceImpl;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import static school.faang.user_service.utils.ValidationUtils.validateEventId;
 @Controller
 @RequiredArgsConstructor
 public class EventController {
-    private final EventService eventService;
+    private final EventServiceImpl eventService;
 
     public EventDto create(EventDto eventDto) {
         validateEvent(eventDto);
