@@ -41,3 +41,9 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+user_service:
+  skill:
+    # minSkillOffers - the minimum number of offers for one skill
+    #so that the user can save it
+    minSkillOffers: 3
