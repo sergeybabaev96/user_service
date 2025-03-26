@@ -101,4 +101,9 @@ public class UserService {
         user.setActive(false);
         userRepository.save(user);
     }
+
+    @Transactional(readOnly = true)
+    public List<Long> findFollowersIdById(long id) {
+        return userRepository.findFollowersIdsById(id);
+    }
 }
