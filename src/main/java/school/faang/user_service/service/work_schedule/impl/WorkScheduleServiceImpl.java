@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.work_schedule.WorkScheduleDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.WorkSchedule;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.work_schedule.WorkScheduleMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.WorkScheduleRepository;
@@ -13,8 +14,6 @@ import school.faang.user_service.service.work_schedule.WorkScheduleService;
 import java.time.LocalTime;
 import java.util.Optional;
 
-import static school.faang.user_service.exception.data_validation_exception.DataValidationException.*;
-
 @Service
 @RequiredArgsConstructor
 public class WorkScheduleServiceImpl implements WorkScheduleService {
@@ -22,6 +21,12 @@ public class WorkScheduleServiceImpl implements WorkScheduleService {
     private final UserRepository userRepository;
     private final WorkScheduleRepository workScheduleRepository;
     private final WorkScheduleMapper workScheduleMapper;
+
+    public static final String USER_DOESNT_EXIST = "User does not exist";
+    public static final String USER_DOESNT_HAVE_ACCESS = "You does not have access";
+    public static final String TIME_EXCEPTION = "Time data is not valid";
+    public static final String WORK_SCHEDULE_DOESNT_EXIST = "Work schedule does not exist";
+
 
 
     @Override
