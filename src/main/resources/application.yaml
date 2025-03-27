@@ -46,6 +46,7 @@ spring:
     topics:
       goal-completed: goal-completed
       recommendation-requested: recommendation-requested
+      follower: follower_topic
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -59,9 +60,6 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-
-    topics:
-      follower: follower_topic
 
 server:
   port: ${SERVER_PORT:8080}

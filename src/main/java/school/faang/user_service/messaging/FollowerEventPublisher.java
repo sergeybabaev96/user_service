@@ -1,4 +1,4 @@
-package school.faang.user_service.rating.publisher;
+package school.faang.user_service.messaging;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,13 +12,13 @@ import school.faang.user_service.dto.FollowerEvent;
 @RequiredArgsConstructor
 public class FollowerEventPublisher {
 
-    private final KafkaTemplate<String, FollowerEvent> kafkaTemplate;
-
     @Value("${spring.kafka.topics.follower}")
     private String topic;
 
+    private final KafkaTemplate<String, FollowerEvent> kafkaTemplate;
+
     public void publish(FollowerEvent followerEvent) {
-        log.info("Publishing follower event: {}", followerEvent);
         kafkaTemplate.send(topic, followerEvent);
+        log.info("Publishing follower event: {}", followerEvent);
     }
 }

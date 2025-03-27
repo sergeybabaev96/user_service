@@ -13,7 +13,7 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.UserWasNotFoundException;
 import school.faang.user_service.mapper.UserFollowingMapper;
 import school.faang.user_service.rating.ActionType;
-import school.faang.user_service.rating.publisher.FollowerEventPublisher;
+import school.faang.user_service.messaging.FollowerEventPublisher;
 import school.faang.user_service.rating.publisher.UserEventPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
