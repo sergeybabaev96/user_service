@@ -12,9 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import school.faang.user_service.databuilder.event.EventBuilder;
-import school.faang.user_service.databuilder.event.EventDtoBuilder;
-import school.faang.user_service.databuilder.event.UserBuilder;
+import school.faang.user_service.databuilder.event.EventTestDataBuilder;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidationException;
@@ -69,8 +67,8 @@ class EventControllerTest {
         @Test
         @DisplayName("Should create event and return 201 with correct Location header")
         void testCreateValidEvent() throws Exception {
-            EventDto request = EventDtoBuilder.createValidEventDto(null);
-            EventDto response = EventDtoBuilder.createValidEventDto(EVENT_ID);
+            EventDto request = EventTestDataBuilder.createValidEventDto(null);
+            EventDto response = EventTestDataBuilder.createValidEventDto(EVENT_ID);
             when(eventService.create(any(EventDto.class))).thenReturn(response);
 
             mockMvc.perform(post("/events")
@@ -85,8 +83,8 @@ class EventControllerTest {
         @Test
         @DisplayName("Should validate event via EventDtoValidator on create")
         void testCreateEventCallsValidator() throws Exception {
-            EventDto request = EventDtoBuilder.createValidEventDto(null);
-            when(eventService.create(any())).thenReturn(EventDtoBuilder.createValidEventDto(EVENT_ID));
+            EventDto request = EventTestDataBuilder.createValidEventDto(null);
+            when(eventService.create(any())).thenReturn(EventTestDataBuilder.createValidEventDto(EVENT_ID));
 
             mockMvc.perform(post("/events")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -99,7 +97,7 @@ class EventControllerTest {
         @Test
         @DisplayName("Should return 400 when validation fails (startDate in past)")
         void testCreateEventInvalidStartDate() throws Exception {
-            EventDto invalidRequest = EventDtoBuilder.createInvalidEventDto();
+            EventDto invalidRequest = EventTestDataBuilder.createInvalidEventDto();
 
             mockMvc.perform(post("/events")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -116,7 +114,7 @@ class EventControllerTest {
         @Test
         @DisplayName("Should return event for existing ID")
         void testGetEventExistingId() throws Exception {
-            EventDto dto = EventDtoBuilder.createValidEventDto(EVENT_ID);
+            EventDto dto = EventTestDataBuilder.createValidEventDto(EVENT_ID);
             when(eventService.getEvent(EVENT_ID)).thenReturn(dto);
 
             mockMvc.perform(get("/events/{eventId}", EVENT_ID))
@@ -144,7 +142,7 @@ class EventControllerTest {
         @Test
         @DisplayName("Should update event and return 200 with updated data")
         void testUpdateEventValidData() throws Exception {
-            EventDto request = EventDtoBuilder.createValidEventDto(EVENT_ID);
+            EventDto request = EventTestDataBuilder.createValidEventDto(EVENT_ID);
             when(eventService.updateEvent(any(EventDto.class), any(Long.class))).thenReturn(request);
 
             mockMvc.perform(put("/events/{eventId}", EVENT_ID)
@@ -158,7 +156,7 @@ class EventControllerTest {
         @Test
         @DisplayName("Should validate event via EventDtoValidator on update")
         void testUpdateEventCallsValidator() throws Exception {
-            EventDto request = EventDtoBuilder.createValidEventDto(EVENT_ID);
+            EventDto request = EventTestDataBuilder.createValidEventDto(EVENT_ID);
             when(eventService.updateEvent(any(), eq(EVENT_ID))).thenReturn(request);
 
             mockMvc.perform(put("/events/{eventId}", EVENT_ID)
@@ -172,7 +170,7 @@ class EventControllerTest {
         @Test
         @DisplayName("Should return 400 when ID mismatch")
         void testUpdateEventIdMismatch() throws Exception {
-            EventDto request = EventDtoBuilder.createInvalidEventDto();
+            EventDto request = EventTestDataBuilder.createInvalidEventDto();
 
             mockMvc.perform(put("/events/{eventId}", EVENT_ID)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -208,11 +206,11 @@ class EventControllerTest {
             LocalDateTime endDate = BASELINE_TIME.plusDays(15);
             Long ownerId = 1L;
 
-            Event event1 = EventBuilder.createValidEvent(1L, UserBuilder.createValidUser(ownerId));
-            Event event2 = EventBuilder.createValidEvent(2L, UserBuilder.createValidUser(ownerId));
+            Event event1 = EventTestDataBuilder.createValidEvent(1L, EventTestDataBuilder.createValidUser(ownerId));
+            Event event2 = EventTestDataBuilder.createValidEvent(2L, EventTestDataBuilder.createValidUser(ownerId));
 
-            when(eventMapper.toDto(event1)).thenReturn(EventDtoBuilder.createValidEventDto(1L));
-            when(eventMapper.toDto(event2)).thenReturn(EventDtoBuilder.createValidEventDto(2L));
+            when(eventMapper.toDto(event1)).thenReturn(EventTestDataBuilder.createValidEventDto(1L));
+            when(eventMapper.toDto(event2)).thenReturn(EventTestDataBuilder.createValidEventDto(2L));
 
             when(eventService.getEventsByFilter(any(EventFilterDto.class)))
                     .thenAnswer(invocation -> {
@@ -255,7 +253,7 @@ class EventControllerTest {
         @Test
         @DisplayName("Should return events owned by user")
         void testGetOwnedEvents() throws Exception {
-            List<EventDto> expected = List.of(EventDtoBuilder.createValidEventDto(EVENT_ID));
+            List<EventDto> expected = List.of(EventTestDataBuilder.createValidEventDto(EVENT_ID));
             when(eventService.getOwnedEvents(USER_ID)).thenReturn(expected);
 
             mockMvc.perform(get("/events/owned/{userId}", USER_ID))
@@ -271,7 +269,7 @@ class EventControllerTest {
         @Test
         @DisplayName("Should return events in which user participates")
         void testGetParticipatedEvents() throws Exception {
-            List<EventDto> expected = List.of(EventDtoBuilder.createValidEventDto(EVENT_ID));
+            List<EventDto> expected = List.of(EventTestDataBuilder.createValidEventDto(EVENT_ID));
             when(eventService.getParticipatedEvents(USER_ID)).thenReturn(expected);
 
             mockMvc.perform(get("/events/participated/{userId}", USER_ID))

@@ -8,10 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mapstruct.factory.Mappers;
 import org.mockito.junit.jupiter.MockitoExtension;
-import school.faang.user_service.databuilder.event.EventBuilder;
-import school.faang.user_service.databuilder.event.EventDtoBuilder;
-import school.faang.user_service.databuilder.event.SkillBuilder;
-import school.faang.user_service.databuilder.event.UserBuilder;
+import school.faang.user_service.databuilder.event.EventTestDataBuilder;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
@@ -50,10 +47,10 @@ class EventMapperTest {
         @Test
         @DisplayName("Mapping entity to DTO works correctly")
         void testMapEntityToDto() {
-            Event event = EventBuilder.createValidEvent(1L, testOwner);
+            Event event = EventTestDataBuilder.createValidEvent(1L, testOwner);
             event.setAttendees(List.of(
-                    UserBuilder.createValidUser(1L),
-                    UserBuilder.createValidUser(2L))
+                    EventTestDataBuilder.createValidUser(1L),
+                    EventTestDataBuilder.createValidUser(2L))
             );
             event.setMaxAttendees(100);
 
@@ -91,8 +88,8 @@ class EventMapperTest {
         @Test
         @DisplayName("Mapping DTO to entity works correctly")
         void testMapDtoToEntity() {
-            EventDto dto = EventDtoBuilder.createValidEventDto(EVENT_ID);
-            when(skillRepository.findAllById(any())).thenReturn(List.of(SkillBuilder.createValidSkill(SKILL_JAVA_ID, "Java")));
+            EventDto dto = EventTestDataBuilder.createValidEventDto(EVENT_ID);
+            when(skillRepository.findAllById(any())).thenReturn(List.of(EventTestDataBuilder.createValidSkill(SKILL_JAVA_ID, "Java")));
 
             Event event = mapper.toEntity(dto, skillRepository);
 
@@ -125,7 +122,7 @@ class EventMapperTest {
         @Test
         @DisplayName("Updating an entity with non-null DTO updates the entity correctly")
         void testUpdateEntityWithNotNullDto() {
-            Event existing = EventBuilder.createValidEvent(EVENT_ID, testOwner);
+            Event existing = EventTestDataBuilder.createValidEvent(EVENT_ID, testOwner);
             EventType originalType = existing.getType();
             EventDto update = EventDto.builder()
                     .title("Updated Title")
@@ -146,7 +143,7 @@ class EventMapperTest {
         @Test
         @DisplayName("Updating an entity with a null DTO leaves the entity unchanged")
         void testUpdateEntityWithNullDto() {
-            Event original = EventBuilder.createValidEvent(EVENT_ID, testOwner);
+            Event original = EventTestDataBuilder.createValidEvent(EVENT_ID, testOwner);
             String originalTitle = original.getTitle();
             int originalMaxAttendees = original.getMaxAttendees();
             EventType originalType = original.getType();

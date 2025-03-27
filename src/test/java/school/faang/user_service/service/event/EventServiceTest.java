@@ -12,9 +12,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import school.faang.user_service.databuilder.event.EventBuilder;
-import school.faang.user_service.databuilder.event.EventDtoBuilder;
-import school.faang.user_service.databuilder.event.SkillBuilder;
+import school.faang.user_service.databuilder.event.EventTestDataBuilder;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.filter.Event.EventFilterDto;
 import school.faang.user_service.entity.User;
@@ -72,15 +70,15 @@ class EventServiceTest {
     @BeforeEach
     @DisplayName("Setup event DTO, valid user and event")
     void setUp() {
-        eventDto = EventDtoBuilder.createValidEventDto(EVENT_ID);
+        eventDto = EventTestDataBuilder.createValidEventDto(EVENT_ID);
         validUser = User.builder()
                 .id(eventDto.getOwnerId())
                 .skills(new ArrayList<>(List.of(
-                        SkillBuilder.createValidSkill(SKILL_JAVA_ID, "Java"),
-                        SkillBuilder.createValidSkill(SKILL_SQL_ID, "SQL")
+                        EventTestDataBuilder.createValidSkill(SKILL_JAVA_ID, "Java"),
+                        EventTestDataBuilder.createValidSkill(SKILL_SQL_ID, "SQL")
                 )))
                 .build();
-        event = EventBuilder.createValidEvent(EVENT_ID, validUser);
+        event = EventTestDataBuilder.createValidEvent(EVENT_ID, validUser);
     }
 
     @Nested
@@ -93,7 +91,7 @@ class EventServiceTest {
             when(userRepository.findById(eventDto.getOwnerId())).thenReturn(Optional.of(validUser));
             when(eventMapper.toEntity(eventDto, skillRepository)).thenReturn(event);
             when(eventRepository.save(event)).thenReturn(event);
-            when(eventMapper.toDto(event)).thenReturn(EventDtoBuilder.createValidEventDto(1L));
+            when(eventMapper.toDto(event)).thenReturn(EventTestDataBuilder.createValidEventDto(1L));
 
             EventDto result = eventService.create(eventDto);
 
@@ -187,7 +185,7 @@ class EventServiceTest {
             when(eventRepository.existsById(NON_EXISTING_EVENT_ID)).thenReturn(false);
 
             assertThrows(DataValidationException.class,
-                    () -> eventService.updateEvent(EventDtoBuilder.createValidEventDto(NON_EXISTING_EVENT_ID), NON_EXISTING_EVENT_ID)
+                    () -> eventService.updateEvent(EventTestDataBuilder.createValidEventDto(NON_EXISTING_EVENT_ID), NON_EXISTING_EVENT_ID)
             );
             verify(eventRepository, never()).getReferenceById(NON_EXISTING_EVENT_ID);
         }
@@ -230,7 +228,7 @@ class EventServiceTest {
         @DisplayName("Getting an event by an existing ID returns the full DTO.")
         void testGetEventExistingId() {
             when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.of(event));
-            when(eventMapper.toDto(event)).thenReturn(EventDtoBuilder.createValidEventDto(EVENT_ID));
+            when(eventMapper.toDto(event)).thenReturn(EventTestDataBuilder.createValidEventDto(EVENT_ID));
 
             EventDto result = eventService.getEvent(EVENT_ID);
 
@@ -262,9 +260,9 @@ class EventServiceTest {
             String title, Long ownerId, LocalDateTime startDate, LocalDateTime endDate, int expectedCount
     ) {
         List<Event> events = List.of(
-                EventBuilder.createValidEvent(1L, validUser),
-                EventBuilder.createValidEvent(2L, validUser),
-                EventBuilder.createValidEvent(3L, validUser)
+                EventTestDataBuilder.createValidEvent(1L, validUser),
+                EventTestDataBuilder.createValidEvent(2L, validUser),
+                EventTestDataBuilder.createValidEvent(3L, validUser)
         );
         when(eventRepository.findAll()).thenReturn(events);
 
