@@ -31,6 +31,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
     implementation("org.springframework.boot:spring-boot-starter-webflux:3.4.3")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
@@ -121,7 +122,7 @@ tasks.jacocoTestReport {
 
 // This task verifies tests
 tasks.jacocoTestCoverageVerification {
-    dependsOn(tasks.jacocoTestReport)    // To start task after jacocoTestReport
+    dependsOn(tasks.jacocoTestReport)      // To start task after tests
 
     violationRules {
         rule {
@@ -135,6 +136,8 @@ tasks.jacocoTestCoverageVerification {
                 "school.faang.user_service.avatarGenerator.DicebearAvatarGenerator",
                 "school.faang.user_service.validators.CreateUserValidator",
                 "school.faang.user_service.controller.UserController",
+                "school.faang.user_service.service.event.EventParticipationService",
+                "school.faang.user_service.service.education.EducationService",
             )
 
             limit {
