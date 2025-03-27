@@ -10,6 +10,7 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 public class EventParticipationController {
+
     private static final long MIN_ID_VALUE = 1;
 
     private final EventParticipationService eventParticipationService;
@@ -36,7 +37,7 @@ public class EventParticipationController {
 
     private void validateParticipant(long eventId, long userId) {
         if (eventId < MIN_ID_VALUE || userId < MIN_ID_VALUE) {
-            throw new IllegalArgumentException("Event ID and User ID must be positive numbers.");
+            throw new IllegalArgumentException("Event ID or User ID must be positive numbers.");
         }
     }
 

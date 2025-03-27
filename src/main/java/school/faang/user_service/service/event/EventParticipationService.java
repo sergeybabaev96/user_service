@@ -10,6 +10,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class EventParticipationService {
+
     private final EventParticipationRepository eventParticipationRepository;
 
     public void registerParticipant(long eventId, long userId) {
@@ -37,7 +38,8 @@ public class EventParticipationService {
     }
 
     public boolean isUserRegisteredForEvent(long eventId, long userId) {
-        List<User> participants = eventParticipationRepository.findAllParticipantsByEventId(eventId);
-        return participants.stream().anyMatch(user -> user.getId() == userId);
+        return eventParticipationRepository.findAllParticipantsByEventId(eventId)
+                .stream()
+                .anyMatch(user -> user.getId() == userId);
     }
 }
