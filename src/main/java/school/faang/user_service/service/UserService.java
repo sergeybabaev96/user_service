@@ -11,8 +11,8 @@ import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
 
 import java.util.List;
-@Slf4j
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {

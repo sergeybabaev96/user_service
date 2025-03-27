@@ -37,12 +37,12 @@ public class UserServiceTest {
     private UserService userService;
 
     long userId;
-    
+
     @BeforeEach
     public void init() {
         userId = 10L;
     }
-    
+
     @Test
     public void testGetUser_InvalidUserId_Throws() {
         var userId = 0L;
@@ -96,7 +96,7 @@ public class UserServiceTest {
             assertEquals(users.get(i).getEmail(), result.get(i).email());
         }
     }
-    
+
     @Test
     public void testGetUserById_UserIsFound_ReturnsUser() {
         var testUser = User.builder()
