@@ -34,23 +34,22 @@ public class MentorshipServiceTest {
     @InjectMocks
     private MentorshipService mentorshipService;
 
-    private User mentee1;
-    private User mentee2;
-    private MentorshipDto mentor1;
-    private MentorshipDto mentor2;
+    private UserWithDto user1, user2;
+    private User mentee1, mentee2;
+    private MentorshipDto mentor1, mentor2;
 
     @BeforeEach
     void setUp() {
-        Object[] user1 = createUserAndDto(1L, "Filipp");
-        mentee1 = (User) user1[0];
-        mentor1 = (MentorshipDto) user1[1];
+        user1 = createUserAndDto(1L, "Filipp");
+        mentee1 = user1.user();
+        mentor1 = user1.mentorDto();
 
-        Object[] user2 = createUserAndDto(2L, "Ivan");
-        mentee2 = (User) user2[0];
-        mentor2 = (MentorshipDto) user2[1];
+        user2 = createUserAndDto(2L, "Ivan");
+        mentee2 = user2.user();
+        mentor2 = user2.mentorDto();
     }
 
-    private Object[] createUserAndDto(Long id, String username) {
+    private UserWithDto createUserAndDto(Long id, String username) {
         User user = new User();
         user.setId(id);
         user.setUsername(username);
@@ -59,11 +58,14 @@ public class MentorshipServiceTest {
         dto.setId(id);
         dto.setUsername(username);
 
-        return new Object[]{user, dto};
+        return new UserWithDto(user, dto);
+    }
+
+    private record UserWithDto(User user, MentorshipDto mentorDto) {
     }
 
     @Test
-    public void shouldReturnMenteesList() {
+    public void testPositiveShouldReturnMenteesList() {
         when(mentorshipRepository.findAllMenteesByMentorId(1L))
                 .thenReturn(List.of(mentee1, mentee2));
         when(mentorshipMapper.toDto(mentee1)).thenReturn(mentor1);
@@ -81,7 +83,7 @@ public class MentorshipServiceTest {
     }
 
     @Test
-    public void shouldReturnEmptyListNoMentees() {
+    public void testNegativeShouldReturnEmptyListNoMentees() {
         when(mentorshipRepository.findAllMenteesByMentorId(1L))
                 .thenReturn(Collections.emptyList());
 
@@ -95,7 +97,7 @@ public class MentorshipServiceTest {
     }
 
     @Test
-    void shouldReturnEmptyListForMenteesWhenRepositoryReturnsNull() {
+    void testNegativeShouldReturnEmptyListForMenteesWhenRepositoryReturnsNull() {
         when(mentorshipRepository.findAllMenteesByMentorId(1L))
                 .thenReturn(null);
 
@@ -109,7 +111,7 @@ public class MentorshipServiceTest {
     }
 
     @Test
-    void shouldReturnMentorsList() {
+    void testPositiveShouldReturnMentorsList() {
         when(userRepository.findAllById(Collections.singleton(1L)))
                 .thenReturn(List.of(mentee1, mentee2));
         when(mentorshipMapper.toDto(mentee1)).thenReturn(mentor1);
@@ -128,7 +130,7 @@ public class MentorshipServiceTest {
 
 
     @Test
-    void shouldReturnEmptyListWhenNoMentors() {
+    void testNegativeShouldReturnEmptyListWhenNoMentors() {
         when(userRepository.findAllById(Collections.singleton(1L)))
                 .thenReturn(Collections.emptyList());
 
@@ -142,7 +144,7 @@ public class MentorshipServiceTest {
     }
 
     @Test
-    void shouldReturnEmptyListForMentorsWhenRepositoryReturnsNull() {
+    void testNegativeShouldReturnEmptyListForMentorsWhenRepositoryReturnsNull() {
         when(userRepository.findAllById(Collections.singleton(1L)))
                 .thenReturn(null);
 
@@ -156,7 +158,7 @@ public class MentorshipServiceTest {
     }
 
     @Test
-    void deleteMentee_ShouldDeleteMentee_WhenMenteeExists() {
+    void testPositiveDeleteMentee_ShouldDeleteMentee_WhenMenteeExists() {
         when(mentorshipRepository.findAllMenteesByMentorId(1L))
                 .thenReturn(Collections.singletonList(mentee1));
 
@@ -167,7 +169,7 @@ public class MentorshipServiceTest {
     }
 
     @Test
-    void deleteMentee_ShouldThrowException_WhenNoMenteesFound() {
+    void testNegativeDeleteMentee_ShouldThrowException_WhenNoMenteesFound() {
         when(mentorshipRepository.findAllMenteesByMentorId(1L))
                 .thenReturn(Collections.emptyList());
 
@@ -180,7 +182,7 @@ public class MentorshipServiceTest {
     }
 
     @Test
-    void deleteMentor_ShouldDeleteMentor_WhenMentorExists() {
+    void testPositiveDeleteMentor_ShouldDeleteMentor_WhenMentorExists() {
         when(userRepository.findAllById(Collections.singleton(2L)))
                 .thenReturn(Collections.singletonList(mentee1));
         when(mentorshipMapper.toDto(mentee1))
@@ -193,7 +195,7 @@ public class MentorshipServiceTest {
     }
 
     @Test
-    void deleteMentor_ShouldThrowException_WhenNoMentorsFound() {
+    void testNegativeDeleteMentor_ShouldThrowException_WhenNoMentorsFound() {
         when(userRepository.findAllById(Collections.singleton(2L)))
                 .thenReturn(Collections.emptyList());
 

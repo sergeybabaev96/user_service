@@ -18,15 +18,18 @@ public class MentorshipController {
     public List<MentorshipDto> getMentees(@PathVariable long mentorId) {
         return mentorshipService.getMentees(mentorId);
     }
+
     @GetMapping("/mentors/{userId}")
     public List<MentorshipDto> getMentors(@PathVariable long userId) {
         return mentorshipService.getMentors(userId);
     }
+
     @DeleteMapping("/mentor/{mentorId}/mentee/{menteeId}")
     public ResponseEntity<Void> deleteMentee(@PathVariable long mentorId, @PathVariable long menteeId) {
         mentorshipService.deleteMentee(menteeId, mentorId);
         return ResponseEntity.noContent().build();
     }
+
     @DeleteMapping("/mentee/{menteeId}/mentor/{mentorId}")
     public ResponseEntity<Void> deleteMentor(@PathVariable long menteeId, @PathVariable long mentorId) {
         mentorshipService.deleteMentor(menteeId, mentorId);

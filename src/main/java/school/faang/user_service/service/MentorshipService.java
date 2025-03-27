@@ -10,6 +10,7 @@ import school.faang.user_service.repository.mentorship.MentorshipRepository;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,6 +46,7 @@ public class MentorshipService {
             throw new IllegalArgumentException("У этого ментора нет менторов");
         }
         boolean isMentee = mentee.stream()
+                .filter(Objects::nonNull)
                 .anyMatch(user -> user.getId().equals(menteeId));
 
         if (isMentee) {
@@ -60,6 +62,7 @@ public class MentorshipService {
             throw new IllegalArgumentException("У данного менти нет менторов.");
         }
         boolean isMentor = mentors.stream()
+                .filter(Objects::nonNull)
                 .anyMatch(mentor -> mentor.getId().equals(mentorId));
         if (isMentor) {
             mentorshipRepository.deleteById(mentorId);
