@@ -10,12 +10,12 @@ import java.util.stream.Stream;
 public class EventStartAfterFilter implements EventFilter {
     @Override
     public boolean isApplicable(EventFilterDto eventFilterDto) {
-        return eventFilterDto.getStartDateAfter() != null;
+        return eventFilterDto.startDateAfter() != null;
     }
 
     @Override
     public Stream<Event> apply(EventFilterDto eventFilterDto, Stream<Event> eventStream) {
         return eventStream
-                .filter(event -> eventFilterDto.getStartDateAfter().isAfter(event.getStartDate()));
+                .filter(event -> eventFilterDto.startDateAfter().isAfter(event.getStartDate()));
     }
 }
