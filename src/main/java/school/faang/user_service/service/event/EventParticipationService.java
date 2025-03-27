@@ -38,8 +38,7 @@ public class EventParticipationService {
     }
 
     public boolean isUserRegisteredForEvent(long eventId, long userId) {
-        return eventParticipationRepository.findAllParticipantsByEventId(eventId)
-                .stream()
+        return eventParticipationRepository.findAllParticipantsByEventId(eventId).stream()
                 .anyMatch(user -> user.getId() == userId);
     }
 }
