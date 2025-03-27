@@ -43,6 +43,9 @@ spring:
       host: ${REDIS_HOST:localhost}
 
   kafka:
+    topics:
+      goal-completed: goal-completed
+      recommendation-requested: recommendation-requested
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
