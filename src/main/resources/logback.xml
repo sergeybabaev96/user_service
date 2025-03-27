@@ -18,13 +18,15 @@
 
     <springProfile name="local">
         <root level="DEBUG">
-            <appender-ref ref="STDOUT"/>
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
         </root>
     </springProfile>
 
     <springProfile name="prod">
         <root level="INFO">
-            <appender-ref ref="STDOUT"/>
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
         </root>
     </springProfile>
 </configuration>
