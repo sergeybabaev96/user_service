@@ -18,6 +18,7 @@ import school.faang.user_service.service.avatarGenerator.AvatarGeneratorService;
 import school.faang.user_service.service.externalStorage.S3Service;
 import school.faang.user_service.validator.CreateUserValidator;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -65,6 +66,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean existsById(long userId) {
         return userRepository.existsById(userId);
+    }
+
+    @Override
+    public UserDto getUser(long userId) {
+        var user = getUserById(userId);
+
+        return userMapper.toDto(user);
+    }
+
+    @Override
+    public List<UserDto> getUsersByIds(List<Long> ids) {
+        var users = userRepository.findAllById(ids);
+
+        return userMapper.toDtoList(users);
     }
 
     @Override

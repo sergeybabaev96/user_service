@@ -10,12 +10,12 @@ import java.util.stream.Stream;
 public class EventLocationFilter implements EventFilter{
     @Override
     public boolean isApplicable(EventFilterDto eventFilterDto) {
-        return eventFilterDto.getLocation() != null && !eventFilterDto.getLocation().isBlank();
+        return eventFilterDto.location() != null && !eventFilterDto.location().isBlank();
     }
 
     @Override
     public Stream<Event> apply(EventFilterDto eventFilterDto, Stream<Event> eventStream) {
         return eventStream
-                .filter(event -> event.getLocation().equalsIgnoreCase(eventFilterDto.getLocation()));
+                .filter(event -> event.getLocation().equalsIgnoreCase(eventFilterDto.location()));
     }
 }

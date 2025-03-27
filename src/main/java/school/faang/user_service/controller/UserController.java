@@ -3,10 +3,10 @@ package school.faang.user_service.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,7 +34,7 @@ public class UserController {
         return userService.getUser(userId);
     }
 
-    @PostMapping()
+    @PostMapping("/by-ids")
     @Operation(summary = "Get users by ids", description = "Returns a list of user DTOs")
     public List<UserDto> getUsersByIds(@RequestBody List<Long> ids) {
         return userService.getUsersByIds(ids);
@@ -44,8 +44,7 @@ public class UserController {
     @Operation(summary = "Create user")
     public ResponseEntity<UserDto> createUser(@RequestBody CreateUserDto userDto) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(userService.createUser(userDto));
+            return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userDto));
         } catch (DataValidationException ex) {
             return ResponseEntity.badRequest().build();
         } catch (ExternalResourceNotFoundException | ExternalServiceError ex) {
