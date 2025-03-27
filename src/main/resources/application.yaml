@@ -45,3 +45,12 @@ s3:
 
 dicebear:
   initials-url: https://api.dicebear.com/9.x/initials/png
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+    doc-expansion: none
+  api-docs:
+    path: /v3/api-docs
