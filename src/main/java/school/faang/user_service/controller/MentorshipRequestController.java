@@ -33,7 +33,7 @@ public class MentorshipRequestController {
     }
 
     @GetMapping("/getRequests")
-    public List<RequestFilterDto> getRequests(@RequestBody RequestFilterDto filter) {
+    public List<RequestFilterDto> getRequests(RequestFilterDto filter) {
         log.info(START_GETS_REQUEST);
         List<RequestFilterDto> requestFilterDtoList = mentorshipRequestService.getRequests(filter);
         log.info(END_GETS_REQUEST);
