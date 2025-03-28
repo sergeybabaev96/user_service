@@ -40,8 +40,8 @@ public class MentorshipController {
 
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @DeleteMapping("/mentee/{menteeId}/mentor/{mentorId}")
-    public void deleteMenteeAndMentor(@Valid @PathVariable @Positive @Min(1) long menteeId,
-                                      @Valid @PathVariable @Positive @Min(1) long mentorId) {
+    public void deleteMenteeAndMentor(@PathVariable @Positive @Min(1) long menteeId,
+                                       @PathVariable @Positive @Min(1) long mentorId) {
         mentorshipService.deleteMenteeAndMentor(menteeId, mentorId);
     }
 
