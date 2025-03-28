@@ -7,6 +7,10 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/***
+ * Класс для наполнения тела ответа в случае,
+ * если сработал глобальный обработчик исключений GlobalExceptionHandler
+ */
 @Data
 @Builder
 @AllArgsConstructor
