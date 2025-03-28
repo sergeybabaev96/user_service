@@ -16,7 +16,7 @@ import school.faang.user_service.databuilder.event.EventTestDataBuilder;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.exception.HandlerDataValidationException;
+import school.faang.user_service.exception.GlobalExceptionHandler;
 import school.faang.user_service.filter.Event.EventFilterDto;
 import school.faang.user_service.mapper.EventMapper;
 import school.faang.user_service.service.event.EventService;
@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(EventController.class)
-@ContextConfiguration(classes = {EventController.class, HandlerDataValidationException.class})
+@ContextConfiguration(classes = {EventController.class, GlobalExceptionHandler.class})
 @DisplayName("EventController MVC Tests")
 class EventControllerTest {
 
