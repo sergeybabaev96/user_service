@@ -34,4 +34,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             WHERE id IN :usersIds
             """)
     void banUsersByIds(List<Long> usersIds);
+
+    @Query("SELECT u.id FROM User u JOIN u.followees f WHERE f.id = :userId")
+    List<Long> findFollowersIdsById(Long userId);
 }

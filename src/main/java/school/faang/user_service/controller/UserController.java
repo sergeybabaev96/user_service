@@ -76,4 +76,9 @@ public class UserController {
         DeleteAvatarResponse response = avatarService.deleteAvatar(userId);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{userId}/followersIds")
+    public List<Long> getFollowers(@PathVariable Long userId) {
+        return userService.findFollowersIdById(userId);
+    }
 }
