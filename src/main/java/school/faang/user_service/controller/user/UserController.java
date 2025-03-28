@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapper;
+import school.faang.user_service.service.SubscriptionService;
 import school.faang.user_service.service.UserService;
 import school.faang.user_service.validator.UserIdValidator;
 
@@ -20,6 +21,7 @@ public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
     private  final UserIdValidator userIdValidator;
+    private final SubscriptionService subscriptionService;
 
     @GetMapping("/users/{userId}")
     public UserDto getUser(@PathVariable long userId) {
@@ -38,5 +40,10 @@ public class UserController {
     public List<UserDto> getUsersByIdsInGivenOrder(@RequestBody List<Long> ids) {
         List<User> users = userService.getUsersByIdsInGivenOrder(ids);
         return userMapper.toDtoList(users);
+    }
+
+    @GetMapping("/{authorId}/followers/ids")
+    public List<Long> getFollowerIds(@PathVariable Long authorId) {
+        return subscriptionService.getFollowerIds(authorId);
     }
 }

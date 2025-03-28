@@ -53,6 +53,11 @@ public class SubscriptionService {
                 .toList();
     }
 
+    @Transactional
+    public List<Long> getFollowerIds(long followerId) {
+        return subscriptionRepository.findFollowerIdsByFolloweeId(followerId);
+    }
+
     public int getFollowersCount(long followeeId) {
         log.info("Get followers count for followeeId {}", followeeId);
         return subscriptionRepository.findFollowersAmountByFolloweeId(followeeId);
