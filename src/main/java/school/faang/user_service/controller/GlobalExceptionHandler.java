@@ -16,6 +16,9 @@ import school.faang.user_service.exception.ErrorResponse;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
 /***
  * Глобальный обработчик исключений для мс UserService
  */
@@ -35,7 +38,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleEntityAlreadyExistException(EntityAlreadyExistException exception) {
         log.error("Entity already exist", exception);
-        return new ErrorResponse(exception.getMessage());
+        return new ErrorResponse(exception.getMessage(), "BAD_REQUEST", 409);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -52,16 +55,16 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(NOT_FOUND)
     public ErrorResponse handleEntityNotFoundException(EntityNotFoundException exception) {
         log.error("Entity not found exception", exception);
-        return new ErrorResponse(exception.getMessage());
+        return new ErrorResponse(exception.getMessage(),"NOT_FOUND", 404);
     }
 
     @ExceptionHandler(RuntimeException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
     public ErrorResponse handleRuntimeException(RuntimeException exception) {
         log.error("Unchecked exception", exception);
-        return new ErrorResponse(exception.getMessage());
+        return new ErrorResponse(exception.getMessage(),"INTERNAL_SERVER_ERROR", 500);
     }
 }
