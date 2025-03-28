@@ -27,10 +27,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -239,10 +236,15 @@ class EventControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 400 if filterDto is null")
+        @DisplayName("Should return 400 if required fields in EventFilterDto are missing or invalid")
         void testGetEventsByFilterWithNullFilter() throws Exception {
-            mockMvc.perform(get("/events/filter"))
-                    .andExpect(status().isBadRequest());
+            mockMvc.perform(get("/events/filter")
+                            .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.status").value(400))
+                    .andExpect(jsonPath("$.error").value("Bad Request"))
+                    .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Owner ID cannot be null")));
         }
     }
 
