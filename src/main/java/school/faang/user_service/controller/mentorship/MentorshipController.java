@@ -1,32 +1,54 @@
 package school.faang.user_service.controller.mentorship;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.user.UserDto;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.mentorship.MentorshipService;
 
 import java.util.List;
 
-@Controller
+
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/api")
+@Validated
 public class MentorshipController {
 
     private final MentorshipService mentorshipService;
 
-    public List<UserDto> getMentees(long userId) {
-        return mentorshipService.getMentees(userId);
+    @GetMapping("/mentor/{mentorId}/mentees")
+    public List<UserDto> getMentees(@PathVariable long mentorId) {
+        validateId(mentorId);
+        return mentorshipService.getMentees(mentorId);
     }
 
-    public List<UserDto> getMentors(long userid) {
-        return mentorshipService.getMentors(userid);
+    @GetMapping("/mentee/{menteeId}/mentors")
+    public List<UserDto> getMentors(@PathVariable  long menteeId) {
+        validateId(menteeId);
+        return mentorshipService.getMentors(menteeId);
     }
 
-    public void deleteMentee(long menteeId, long mentorId){
-        mentorshipService.deleteMentee(menteeId, mentorId);
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping("/mentee/{menteeId}/mentor/{mentorId}")
+    public void deleteMenteeAndMentor(@PathVariable @Positive @Min(1) long menteeId,
+                                       @PathVariable @Positive @Min(1) long mentorId) {
+        mentorshipService.deleteMenteeAndMentor(menteeId, mentorId);
     }
 
-    public void deleteMentor(long mentorId, long menteeId){
-        mentorshipService.deleteMentor(mentorId, menteeId);
+    private void validateId(long id){
+        if(id < 1){
+            throw new DataValidationException("ID must be greater than or equal to 1");
+        }
     }
-
 }
