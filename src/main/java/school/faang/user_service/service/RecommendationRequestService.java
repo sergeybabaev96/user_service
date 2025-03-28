@@ -31,7 +31,7 @@ public class RecommendationRequestService {
     private final UserService userService;
     private final RecommendationRequestRepository recommendationRequestRepository;
     private final SkillRequestService skillRequestService;
-    private final SkillServiceImpl skillService;
+    private final SkillService skillService;
     private final RecommendationRequestMapper recommendationRequestMapper;
     private final SkillRequestMapper skillRequestMapper;
     private final List<RecommendationRequestFilter> filters;

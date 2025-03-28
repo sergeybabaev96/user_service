@@ -30,6 +30,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
@@ -118,16 +119,15 @@ tasks.jacocoTestReport {
 
 // This task verifies tests
 tasks.jacocoTestCoverageVerification {
-    dependsOn(tasks.jacocoTestReport)    // To start task after jacocoTestReport
+    dependsOn(tasks.jacocoTestReport)      // To start task after tests
 
     violationRules {
         rule {
             element = "CLASS"
             includes = listOf(
-                "school.faang.user_service.RecommendationRequestService",
-                "school.faang.user_service.SkillRequestService",
-                "school.faang.user_service.SkillService",
-                "school.faang.user_service.SkillService",
+                "school.faang.user_service.service.MentorshipService",
+                "school.faang.user_service.service.event..EventParticipationService",
+                "school.faang.user_service.service.education.EducationService",
             )
 
             limit {

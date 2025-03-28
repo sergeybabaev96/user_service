@@ -11,6 +11,8 @@ import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.UserRepository;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -65,5 +67,19 @@ public class UserServiceImpl implements UserService {
     public boolean existsById(long userId) {
         return userRepository.existsById(userId);
 
+    }
+
+    @Override
+    public UserDto getUser(long userId) {
+        var user = getUserById(userId);
+
+        return userMapper.toDto(user);
+    }
+
+    @Override
+    public List<UserDto> getUsersByIds(List<Long> ids) {
+        var users = userRepository.findAllById(ids);
+
+        return userMapper.toDtoList(users);
     }
 }

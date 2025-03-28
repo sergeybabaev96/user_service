@@ -13,6 +13,7 @@ import school.faang.user_service.exception.EventParticipationException;
 import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.repository.event.EventParticipationRepository;
 import school.faang.user_service.repository.event.EventRepository;
+import school.faang.user_service.service.EventParticipationServiceImpl;
 
 import java.util.List;
 
