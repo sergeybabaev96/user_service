@@ -2,6 +2,8 @@ package school.faang.user_service.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.stream.StreamSupport;
 
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +25,10 @@ class GoalServiceTest {
 
     @Mock
     private GoalRepository goalRepository;
+
+    @Captor
+    private ArgumentCaptor<List<Goal>> goalCaptor;
+
     @InjectMocks
     private GoalServiceImpl goalService;
 
@@ -39,8 +46,8 @@ class GoalServiceTest {
 
         goalService.deleteUserFromGoals(userId);
 
-        verify(goalRepository).delete(goal1);
-        verify(goalRepository).saveAll(argThat(list ->
+        verify(goalRepository,times(1)).delete(goal1);
+        verify(goalRepository,times(1)).saveAll(argThat(list ->
                 StreamSupport.stream(list.spliterator(), false)
                         .noneMatch(goal -> goal.getUsers().contains(user))
         ));

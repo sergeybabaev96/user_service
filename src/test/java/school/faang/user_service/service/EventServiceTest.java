@@ -24,7 +24,7 @@ class EventServiceTest {
     private EventRepository eventRepository;
 
     @InjectMocks
-    private EventService eventService;
+    private EventServiceImpl eventService;
 
     @BeforeEach
     void setUp() {

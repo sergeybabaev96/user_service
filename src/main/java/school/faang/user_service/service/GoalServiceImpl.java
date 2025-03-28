@@ -34,6 +34,7 @@ public class GoalServiceImpl implements GoalService {
                     .filter(user -> !Objects.equals(user.getId(), userId)).toList();
             if (usersWithoutDeactivatedUser.isEmpty()) {
                 goalRepository.delete(goal);
+                goal.setUsers(usersWithoutDeactivatedUser);
             } else {
                 goal.setUsers(usersWithoutDeactivatedUser);
             }
