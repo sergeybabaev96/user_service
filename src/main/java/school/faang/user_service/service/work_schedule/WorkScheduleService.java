@@ -4,9 +4,9 @@ import school.faang.user_service.dto.work_schedule.WorkScheduleDto;
 
 public interface WorkScheduleService {
 
-    public WorkScheduleDto addWorkSchedule(long userId, WorkScheduleDto workScheduleDto);
+    WorkScheduleDto addWorkSchedule(long userId, WorkScheduleDto workScheduleDto);
 
-    public WorkScheduleDto updateWorkSchedule(long userId, WorkScheduleDto workScheduleDto);
+    WorkScheduleDto updateWorkSchedule(long userId, WorkScheduleDto workScheduleDto);
 
-    public WorkScheduleDto getById(long workScheduleId);
+    WorkScheduleDto getById(long workScheduleId);
 }

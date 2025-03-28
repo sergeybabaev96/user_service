@@ -9,10 +9,10 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import school.faang.user_service.controller.GlobalExceptionHandler;
 import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.exception.GlobalExceptionHandler;
 import school.faang.user_service.mapper.user.UserMapperImpl;
 import school.faang.user_service.service.mentorship.MentorshipService;
 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.user.UserDto;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.mentorship.MentorshipService;
 
 import java.util.List;
@@ -47,7 +48,7 @@ public class MentorshipController {
 
     private void validateId(long id){
         if(id < 1){
-            throw new IllegalArgumentException("ID must be greater than or equal to 1");
+            throw new DataValidationException("ID must be greater than or equal to 1");
         }
     }
 }
