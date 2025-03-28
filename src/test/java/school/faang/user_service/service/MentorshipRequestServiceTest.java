@@ -1,5 +1,8 @@
 package school.faang.user_service.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,15 +32,12 @@ import school.faang.user_service.filter.mentor.StatusFilter;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.mapper.RequestFilterMapper;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class MentorshipRequestServiceTest {
@@ -54,7 +54,6 @@ class MentorshipRequestServiceTest {
     private RequestFilter requestDescriptionFilter;
     @Mock
     private RequestFilter requestStatusFilter;
-
 
     @Spy
     private MentorshipRequestMapper mentorshipRequestMapper = Mappers.getMapper(MentorshipRequestMapper.class);
@@ -109,7 +108,7 @@ class MentorshipRequestServiceTest {
     //Positive
     @Test
     void testRequestMentorship() {
-        isExistById(true);
+        mockExistsById(true);
         when(userService.findById(requester.getId())).thenReturn(requester);
         when(userService.findById(receiver.getId())).thenReturn(receiver);
 
@@ -123,7 +122,7 @@ class MentorshipRequestServiceTest {
     }
 
     @Test
-    void testGetRequests() {
+    void testGetRequests_withRejectedRequests_shouldReturnEmptyList() {
         MentorshipRequest request1 = new MentorshipRequest();
         MentorshipRequest request2 = new MentorshipRequest();
         request1.setId(1);
@@ -141,7 +140,7 @@ class MentorshipRequestServiceTest {
     }
 
     @Test
-    void testGetRequests2() {
+    void testGetRequests_withAcceptedRequests_shouldReturnNonEmptyList() {
         MentorshipRequest request1 = new MentorshipRequest();
         MentorshipRequest request2 = new MentorshipRequest();
         request1.setId(1);
@@ -217,7 +216,7 @@ class MentorshipRequestServiceTest {
         List<Long> missingUser = Stream.of(mentorshipRequestDto.getRequesterId(), mentorshipRequestDto.getReceiverId())
                 .filter(id -> !mentorshipRequestRepository.existsById(id))
                 .toList();
-        isExistById(false);
+        mockExistsById(false);
 
         String missingIds = missingUser.stream()
                 .map(String::valueOf)
@@ -234,7 +233,7 @@ class MentorshipRequestServiceTest {
         MentorshipRequest oldRequest = new MentorshipRequest();
         oldRequest.setCreatedAt(oldRequestTime);
 
-        isExistById(true);
+        mockExistsById(true);
         when(mentorshipRequestRepository.findLatestRequest(requester.getId(), receiver.getId()))
                 .thenReturn(Optional.of(oldRequest));
 
@@ -323,7 +322,7 @@ class MentorshipRequestServiceTest {
         assertEquals(getAbsentRequestError(requestId), exception.getMessage());
     }
 
-    private void isExistById(boolean existById) {
+    private void mockExistsById(boolean existById) {
         when(mentorshipRequestRepository.existsById(requester.getId())).thenReturn(existById);
         when(mentorshipRequestRepository.existsById(receiver.getId())).thenReturn(existById);
     }

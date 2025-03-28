@@ -1,15 +1,16 @@
 package school.faang.user_service.filter.mentor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import school.faang.user_service.dto.mentor.RequestFilterDto;
 import school.faang.user_service.dto.mentor.RequestStatusDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
-
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class StatusFilterTest {
     private final StatusFilter statusFilter = new StatusFilter();
@@ -22,14 +23,14 @@ class StatusFilterTest {
 
     //Positive
     @Test
-    void isApplicable() {
+    void testIsApplicable() {
         requestFilterDto.setStatus(RequestStatusDto.ACCEPTED);
 
         assertTrue(statusFilter.isApplicable(requestFilterDto));
     }
 
     @Test
-    void apply() {
+    void testApplyFilter() {
         requestFilterDto.setStatus(RequestStatusDto.REJECTED);
         MentorshipRequest request1 = new MentorshipRequest();
         MentorshipRequest request2 = new MentorshipRequest();
@@ -45,14 +46,14 @@ class StatusFilterTest {
 
     //Negative
     @Test
-    void isApplicableNullDescription() {
+    void testIsApplicableNullDescription() {
         requestFilterDto.setStatus(null);
 
         assertFalse(statusFilter.isApplicable(requestFilterDto));
     }
 
     @Test
-    void applyEmptyListWhenNoMatches() {
+    void testApplyEmptyListWhenNoMatches() {
         requestFilterDto.setStatus(RequestStatusDto.REJECTED);
         MentorshipRequest request1 = new MentorshipRequest();
         request1.setStatus(RequestStatus.ACCEPTED);

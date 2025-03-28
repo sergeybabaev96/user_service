@@ -1,14 +1,15 @@
 package school.faang.user_service.filter.mentor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import school.faang.user_service.dto.mentor.RequestFilterDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.User;
-
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class UserFilterTest {
     private final UserFilter userFilter = new UserFilter();
@@ -33,7 +34,7 @@ class UserFilterTest {
 
     //Positive
     @Test
-    void isApplicable() {
+    void testIsApplicable() {
         requestFilterDto.setRequesterId(requester.getId());
         requestFilterDto.setReceiverId(receiver.getId());
 
@@ -41,7 +42,7 @@ class UserFilterTest {
     }
 
     @Test
-    void apply() {
+    void testApplyFilter() {
         requestFilterDto.setRequesterId(requester.getId());
         requestFilterDto.setReceiverId(receiver.getId());
         MentorshipRequest request1 = new MentorshipRequest();
@@ -61,14 +62,14 @@ class UserFilterTest {
 
     //Negative
     @Test
-    void isApplicableNullDescription() {
+    void testIsApplicableNullDescription() {
         requestFilterDto.setStatus(null);
 
         assertFalse(userFilter.isApplicable(requestFilterDto));
     }
 
     @Test
-    void isApplicableNullReceiver() {
+    void testIsApplicableNullReceiver() {
         requestFilterDto.setRequesterId(requester.getId());
         requestFilterDto.setReceiverId(null);
 
@@ -76,7 +77,7 @@ class UserFilterTest {
     }
 
     @Test
-    void isApplicableNullRequester() {
+    void testIsApplicableNullRequester() {
         requestFilterDto.setRequesterId(null);
         requestFilterDto.setReceiverId(receiver.getId());
 
@@ -84,7 +85,7 @@ class UserFilterTest {
     }
 
     @Test
-    void isApplicableNullRequesterAndReceiver() {
+    void testIsApplicableNullRequesterAndReceiver() {
         requestFilterDto.setRequesterId(null);
         requestFilterDto.setReceiverId(null);
 
@@ -92,7 +93,7 @@ class UserFilterTest {
     }
 
     @Test
-    void applyEmptyListWhenNoMatches() {
+    void testApplyEmptyListWhenNoMatches() {
         requestFilterDto.setRequesterId(requester.getId());
         requestFilterDto.setReceiverId(receiver.getId());
         MentorshipRequest request1 = new MentorshipRequest();

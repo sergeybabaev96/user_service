@@ -1,13 +1,16 @@
 package school.faang.user_service.filter.mentor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import school.faang.user_service.dto.mentor.RequestFilterDto;
 import school.faang.user_service.entity.MentorshipRequest;
-
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+
 
 class DescriptionFilterTest {
     private final DescriptionFilter descriptionFilter = new DescriptionFilter();
@@ -20,14 +23,14 @@ class DescriptionFilterTest {
 
     //Positive
     @Test
-    void isApplicable() {
+    void testIsApplicable() {
         requestFilterDto.setDescription("Text");
 
         assertTrue(descriptionFilter.isApplicable(requestFilterDto));
     }
 
     @Test
-    void apply() {
+    void testApplyFilter() {
         requestFilterDto.setDescription("Java");
         MentorshipRequest request1 = new MentorshipRequest();
         MentorshipRequest request2 = new MentorshipRequest();
@@ -42,7 +45,7 @@ class DescriptionFilterTest {
     }
 
     @Test
-    void applyCheckRegister() {
+    void testApplyCheckRegister() {
         requestFilterDto.setDescription("jAvA");
         MentorshipRequest request1 = new MentorshipRequest();
         MentorshipRequest request2 = new MentorshipRequest();
@@ -59,21 +62,21 @@ class DescriptionFilterTest {
 
     //Negative
     @Test
-    void isApplicableNullDescription() {
+    void testIsApplicableNullDescription() {
         requestFilterDto.setDescription(null);
 
         assertFalse(descriptionFilter.isApplicable(requestFilterDto));
     }
 
     @Test
-    void isApplicableBlankDescription() {
+    void testIsApplicableBlankDescription() {
         requestFilterDto.setDescription("");
 
         assertFalse(descriptionFilter.isApplicable(requestFilterDto));
     }
 
     @Test
-    void applyEmptyListWhenNoMatches() {
+    void testApplyEmptyListWhenNoMatches() {
         requestFilterDto.setDescription("Java");
         MentorshipRequest request1 = new MentorshipRequest();
         request1.setDescription("C# Developer");
