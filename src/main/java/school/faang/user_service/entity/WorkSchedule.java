@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalTime;
 
@@ -21,6 +22,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "work_schedule")
+@Setter
 public class WorkSchedule {
 
     @Id

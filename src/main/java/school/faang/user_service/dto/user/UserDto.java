@@ -1,8 +1,12 @@
 package school.faang.user_service.dto.user;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import java.util.List;
 
+@AllArgsConstructor
+@Builder
 @Data
 public class UserDto {
     private Long id;

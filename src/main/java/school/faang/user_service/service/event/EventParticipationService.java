@@ -16,16 +16,14 @@ public class EventParticipationService {
     private final EventParticipationRepository eventParticipationRepository;
 
     public void registerParticipant(long eventId, long userId) {
-        List<User> participants = eventParticipationRepository.findAllParticipantsByEventId(eventId);
-        if (participants.stream().anyMatch(user -> user.getId() == userId)) {
-            throw new DataValidationException("User is already registered for this event.");
+        if (isUserRegistered(eventId, userId)) {
+            throw new DataValidationException("User is already registered for this event");
         }
         eventParticipationRepository.register(eventId, userId);
     }
 
     public void unregisterParticipant(long eventId, long userId) {
-        List<User> participants = eventParticipationRepository.findAllParticipantsByEventId(eventId);
-        if (participants.stream().noneMatch(user -> user.getId() == userId)) {
+        if (!isUserRegistered(eventId, userId)) {
             throw new DataValidationException("User is not registered for this event.");
         }
         eventParticipationRepository.unregister(eventId, userId);
@@ -38,5 +36,11 @@ public class EventParticipationService {
 
     public int getParticipantsCount(long eventId) {
         return eventParticipationRepository.countParticipants(eventId);
+    }
+
+    private boolean isUserRegistered(long eventId, long userId) {
+        return eventParticipationRepository.findAllParticipantsByEventId(eventId)
+                .stream()
+                .anyMatch(user -> user.getId() == userId);
     }
 }

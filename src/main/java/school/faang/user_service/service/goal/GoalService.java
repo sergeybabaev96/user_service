@@ -1,7 +1,9 @@
 package school.faang.user_service.service.goal;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.GoalFilterDto;
 import school.faang.user_service.entity.goal.Goal;
@@ -26,88 +28,99 @@ public class GoalService {
     private final GoalMapper goalMapper;
     private final List<GoalFilter> goalFilters;
 
-    public GoalDto createGoal(Long userId, GoalDto goalDto) {
-        if (!userService.isWithinGoalLimit(userId)) {
-            throw new DataValidationException("User has the maximum number of goals");
-        }
-
-        if (!goalRepository.existsById(goalDto.getParentId())) {
-            throw new DataValidationException("Goal parent with id " + goalDto.getParentId() + " does not exist");
-        }
-
+    public GoalDto createGoal(long userId, GoalDto goalDto) {
+        validateUserGoalCount(userId);
+        validateExistsGoalParent(goalDto);
         validateExistsGoalSkills(goalDto.getSkillIds());
 
-        Long goalId = goalRepository.create(goalDto.getTitle(), goalDto.getDescription(),
-                goalDto.getParentId()).getId();
+        Goal goal = goalRepository.create(goalDto.getTitle(), goalDto.getDescription(),
+                goalDto.getParentId());
 
-        goalDto.getSkillIds().forEach(skillId -> goalRepository.addSkillToGoal(skillId, goalId));
-
-        Goal createdGoal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new RuntimeException("Goal with id " + goalId + " does not exist"));
+        goalDto.getSkillIds().forEach(skillId -> goalRepository.addSkillToGoal(skillId, goal.getId()));
+        Goal createdGoal = goalRepository.findById(goal.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Goal with id " + goal.getId() + " does not exist"));
 
         return goalMapper.toDto(createdGoal);
     }
 
-    public GoalDto updateGoal(Long goalId, GoalDto goalDto) {
-
+    public GoalDto updateGoal(long goalId, GoalDto goalDto) {
         Goal goal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new DataValidationException("Goal with id " + goalId + " does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException("Goal with id " + goalId + " does not exist"));
 
-        if (GoalStatus.COMPLETED.equals(goal.getStatus())) {
-            throw new DataValidationException("Cannot update a goal that is already completed");
-        }
-        if (GoalStatus.COMPLETED.equals(goalDto.getStatus())) {
-            validateExistsGoalSkills(goalDto.getSkillIds());
-            goal.getUsers().forEach(user ->
-                    goal.getSkillsToAchieve().forEach(skill ->
-                            skillService.assignSkillToUser(user.getId(), skill.getId())));
-        }
-        updateGoalSkills(goal, goalDto.getSkillIds());
-        Goal updatedGoal = goalRepository.save(goal);
+        validateStatuses(goalDto, goal);
+        validateExistsGoalSkills(goalDto.getSkillIds());
 
-        return goalMapper.toDto(updatedGoal);
+        assignSkillsToUsers(goal);
+
+        goalMapper.updateGoalFromDto(goalDto, goal);
+        goal.setParent(goalRepository.findById(goalDto.getParentId()).orElseThrow(
+                () -> new EntityNotFoundException("Goal parent with id " + goalDto.getParentId() + " not exists")));
+        goal.setSkillsToAchieve(skillService.getSkillsByIds(goalDto.getSkillIds()));
+
+        return goalMapper.toDto(goalRepository.save(goal));
     }
 
-    public void deleteGoal(Long goalId) {
-        if (!goalRepository.existsById(goalId)) {
-            throw new DataValidationException("Goal with id " + goalId + " does not exist");
-        }
-
+    public void deleteGoal(long goalId) {
+        validateExistsGoal(goalId);
         goalRepository.removeSkillsFromGoal(goalId);
         goalRepository.deleteById(goalId);
     }
 
-    public List<GoalDto> findSubtasksByGoalId(long goalId, GoalFilterDto filters) {
+    @Transactional(readOnly = true)
+    public List<GoalDto> getSubtasksByGoalId(long goalId, GoalFilterDto filters) {
         Stream<Goal> goals = goalRepository.findByParent(goalId);
-        return applyFilters(goals, filters)
-                .map(goalMapper::toDto)
-                .toList();
+        return applyFiltersAndConvertToDtos(goals, filters);
     }
 
-    public List<GoalDto> getGoalsByUser(Long userId, GoalFilterDto filters) {
-        Stream<Goal> goals = goalRepository.findGoalsByUserId(userId);
-        return applyFilters(goals, filters)
-                .map(goalMapper::toDto)
-                .toList();
+    @Transactional(readOnly = true)
+    public List<GoalDto> getGoalsByUserId(long userId, GoalFilterDto filters) {
+        Stream<Goal> userGoals = goalRepository.findGoalsByUserId(userId);
+        return applyFiltersAndConvertToDtos(userGoals, filters);
     }
 
-    private Stream<Goal> applyFilters(Stream<Goal> goals, GoalFilterDto filters) {
-        for (GoalFilter filter : goalFilters) {
-            if (filter.isApplicable(filters)) {
-                goals = filter.apply(filters, goals);
-            }
+    private void validateUserGoalCount(long userId) {
+        if (!userService.isWithinGoalLimit(userId)) {
+            throw new DataValidationException("User has the maximum number of goals");
         }
-        return goals;
+    }
+
+    private void validateExistsGoalParent(GoalDto goalDto) {
+        if (!goalRepository.existsById(goalDto.getParentId())) {
+            throw new EntityNotFoundException("Goal parent with id " + goalDto.getParentId() + " does not exist");
+        }
+    }
+
+    private void assignSkillsToUsers(Goal goal) {
+        goal.getUsers().forEach(user ->
+                goal.getSkillsToAchieve().forEach(skill ->
+                        skillService.assignSkillToUser(user.getId(), skill.getId())));
+    }
+
+    private static void validateStatuses(GoalDto goalDto, Goal goal) {
+        if (GoalStatus.COMPLETED.equals(goal.getStatus())) {
+            throw new DataValidationException("Cannot update a goal that is already completed");
+        }
+        if (!GoalStatus.COMPLETED.equals(goalDto.getStatus())) {
+            throw new DataValidationException("goalDto status should be completed");
+        }
+    }
+
+    private void validateExistsGoal(long goalId) {
+        if (!goalRepository.existsById(goalId)) {
+            throw new EntityNotFoundException("Goal with id " + goalId + " does not exist");
+        }
     }
 
     private void validateExistsGoalSkills(List<Long> skillIds) {
         if (!skillService.isAllSkillsExist(skillIds)) {
-            throw new RuntimeException("Skill ids do not exists");
+            throw new EntityNotFoundException("Some skill id do not exists");
         }
     }
 
-    private void updateGoalSkills(Goal goal, List<Long> newSillIds) {
-        goalRepository.removeSkillsFromGoal(goal.getId());
-        newSillIds.forEach(sillId -> goalRepository.addSkillToGoal(sillId, goal.getId()));
+    private List<GoalDto> applyFiltersAndConvertToDtos(Stream<Goal> goals, GoalFilterDto filters) {
+        return goalFilters.stream()
+                .reduce(goals, (stream, filter) -> filter.apply(stream, filters), (s1, s2) -> s2)
+                .map(goalMapper::toDto)
+                .toList();
     }
 }
