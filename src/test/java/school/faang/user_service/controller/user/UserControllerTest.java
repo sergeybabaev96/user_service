@@ -3,6 +3,7 @@ package school.faang.user_service.controller.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import org.mockito.Mockito;
@@ -63,7 +64,8 @@ class UserControllerTest {
     }
 
     @Test
-    void getUser_ReturnsValidResponseDto() throws Exception {
+    @DisplayName("Проверка успешного получения ответа на запрос по получению данных о пользователе по его id")
+    void givenUserId_WhenGetUser_ThenReturnUser() throws Exception {
         Mockito.when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         Mockito.when(userMapper.toViewDto(user)).thenReturn(userDto);
 
@@ -73,12 +75,13 @@ class UserControllerTest {
     }
 
     @Test
-    void getUsersByIds_ReturnsValidResponseDtoList() throws Exception {
+    @DisplayName("Проверка успешного получения ответа на запрос по получению данных о пользователях по их id")
+    void givenUsersIdsList_WhenGetUsersByIds_ThenReturnsUsers() throws Exception {
         Mockito.when(userRepository.findAllById(ids)).thenReturn(users);
         Mockito.when(userMapper.toViewDto(user)).thenReturn(userDto);
 
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON).content(
-                 objectMapper.writeValueAsString(ids)))
+                        objectMapper.writeValueAsString(ids)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(userDto.getId()));
     }
