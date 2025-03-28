@@ -47,6 +47,7 @@ payment-service:
   host: localhost
   port: 9080
 
+
 user-premium:
   cron: 0 0 03 * * MON
   partition-size: 50

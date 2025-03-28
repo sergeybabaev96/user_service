@@ -13,6 +13,30 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    //400
+    @ExceptionHandler(CsvParseException .class)
+    public ResponseEntity<Object> handleCsvParseException(CsvParseException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now().withNano(0));
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "CsvParseException");
+        body.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    //500
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleGeneric(Exception ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now().withNano(0));
+        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        body.put("error", "Internal Server Error");
+        body.put("message", cleanMessage(ex));
+
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(DataValidationException.class)
     public ResponseEntity<String> handleDataValidationException(DataValidationException e) {
         return ResponseEntity.badRequest().body(e.getMessage());
