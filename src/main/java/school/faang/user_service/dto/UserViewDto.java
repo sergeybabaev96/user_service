@@ -27,6 +27,7 @@ import java.util.List;
 public class UserViewDto {
     private Long id;
     private String username;
+    private String email;
     private List<Long> menteesIds;
     private List<Long> mentorsIds;
 }
