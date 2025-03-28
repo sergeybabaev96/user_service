@@ -14,6 +14,26 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     //400
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now().withNano(0));
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Bad Request");
+
+        String message = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(error -> error.getDefaultMessage())
+                .orElse("Validation error");
+
+        body.put("message", message);
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    //400
     @ExceptionHandler(CsvParseException .class)
     public ResponseEntity<Object> handleCsvParseException(CsvParseException ex) {
         Map<String, Object> body = new HashMap<>();
