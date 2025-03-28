@@ -23,13 +23,6 @@ import school.faang.user_service.service.event.EventService;
 
 import java.util.List;
 
-/**
- * Контроллер для управления событиями.
- * Предоставляет методы для создания, получения, обновления и удаления событий,
- * а также для получения событий по фильтрам и для конкретных пользователей.
- *
- * @author Zhltsk-V
- */
 @Slf4j
 @RestController
 @RequestMapping("/events")
@@ -39,12 +32,6 @@ import java.util.List;
 public class EventController {
     private final EventService eventService;
 
-    /**
-     * Создает новое событие.
-     *
-     * @param event DTO события, содержащее данные для создания.
-     * @return Созданное событие в виде {@link EventViewDto}.
-     */
     @Operation(
             summary = "Create new event",
             description = "Create new event with specified data"
@@ -57,12 +44,6 @@ public class EventController {
         return createdEvent;
     }
 
-    /**
-     * Получает событие по его идентификатору.
-     *
-     * @param eventId Идентификатор события.
-     * @return Событие в виде {@link EventViewDto}.
-     */
     @Operation(
             summary = "Get event by ID",
             description = "Get event by specified ID"
@@ -77,12 +58,6 @@ public class EventController {
         return event;
     }
 
-    /**
-     * Получает список событий, соответствующих заданному фильтру.
-     *
-     * @param filter DTO фильтра, содержащее критерии поиска.
-     * @return Список событий в виде {@link List<EventViewDto>}.
-     */
     @Operation(
             summary = "Get events by filter",
             description = "Get events by specified filter"
@@ -95,11 +70,6 @@ public class EventController {
         return events;
     }
 
-    /**
-     * Удаляет событие по его идентификатору.
-     *
-     * @param eventId Идентификатор события для удаления.
-     */
     @Operation(
             summary = "Delete event",
             description = "Delete event by specified ID"
@@ -113,13 +83,6 @@ public class EventController {
         log.info("Event deleted successfully");
     }
 
-    /**
-     * Обновляет существующее событие.
-     *
-     * @param eventId Идентификатор события для обновления.
-     * @param event   DTO события, содержащее обновленные данные.
-     * @return Обновленное событие в виде {@link EventViewDto}.
-     */
     @Operation(
             summary = "Update an existing event",
             description = "Update the event with the specified ID"
@@ -134,12 +97,6 @@ public class EventController {
         return updatedEvent;
     }
 
-    /**
-     * Получает список событий, созданных конкретным пользователем.
-     *
-     * @param userId Идентификатор пользователя.
-     * @return Список событий в виде {@link List<EventViewDto>}.
-     */
     @Operation(
             summary = "Get events by owner ID",
             description = "Get events created by the specified owner ID"
@@ -154,12 +111,6 @@ public class EventController {
         return events;
     }
 
-    /**
-     * Получает список событий, в которых участвовал конкретный пользователь.
-     *
-     * @param userId Идентификатор пользователя.
-     * @return Список событий в виде {@link List<EventViewDto>}.
-     */
     @Operation(
             summary = "Get events by participant ID",
             description = "Get events participated by the specified participant ID"

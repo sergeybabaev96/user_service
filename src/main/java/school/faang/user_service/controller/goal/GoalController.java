@@ -51,13 +51,6 @@ import java.util.List;
 public class GoalController {
     private final GoalService goalService;
 
-    /**
-     * Создание цели для заданного пользователя
-     *
-     * @param userId Идентификатор пользователя
-     * @param goal   DTO для создания цели
-     * @return созданная цель
-     */
     @Operation(
             summary = "Create a new goal",
             description = "Creates a new goal for the specified user"
@@ -70,13 +63,6 @@ public class GoalController {
         return goalService.createGoal(userId, goal);
     }
 
-    /**
-     * Обновление цели по её идентификатору
-     *
-     * @param goalId Идентификатор цели
-     * @param goal   DTO с новыми значениями цели
-     * @return обновленная цель
-     */
     @Operation(
             summary = "Update an existing goal",
             description = "Updates the goal with the specified ID"
@@ -89,11 +75,6 @@ public class GoalController {
         return goalService.updateGoal(goalId, goal);
     }
 
-    /**
-     * Удаление цели по её идентификатору
-     *
-     * @param goalId Идентификатор цели
-     */
     @Operation(
             summary = "Delete a goal",
             description = "Deletes the goal with the specified ID"
@@ -105,13 +86,6 @@ public class GoalController {
         goalService.deleteGoal(goalId);
     }
 
-    /**
-     * Получение списка подцелей для цели с применением фильтра
-     *
-     * @param goalId Идентификатор цели-родителя
-     * @param filter Фильтр для поиска
-     * @return Список подцелей цели по фильтру
-     */
     @Operation(
             summary = "Get subgoals by goal ID",
             description = "Returns a list of subgoals for the specified goal ID with optional filtering"
@@ -124,13 +98,6 @@ public class GoalController {
         return goalService.findSubtasksByGoalId(goalId, filter);
     }
 
-    /**
-     * Получение списка целей пользователя с применением фильтра
-     *
-     * @param userId Идентификатор пользователя
-     * @param filter Фильтр для поиска
-     * @return Список целей пользователя по фильтру
-     */
     @Operation(
             summary = "Get goals by user ID",
             description = "Returns a list of goals for the specified user ID with optional filtering"
