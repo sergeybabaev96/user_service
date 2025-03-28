@@ -91,8 +91,8 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.kafka:spring-kafka-test:3.3.3")
-    testImplementation("org.mockito:mockito-inline:4.0.0")
-    testImplementation("org.mockito:mockito-junit-jupiter:4.0.0")
+    //testImplementation("org.mockito:mockito-inline:4.0.0")
+    //testImplementation("org.mockito:mockito-junit-jupiter:4.0.0")
 
     /**
      * Thumbnail generation
