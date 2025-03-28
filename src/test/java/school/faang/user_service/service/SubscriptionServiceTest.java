@@ -23,6 +23,7 @@ public class SubscriptionServiceTest {
     public void testFollowUser() {
         long followerId = 1L;
         long followeeId = 2L;
+        when(repository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).thenReturn(false);
 
         service.followUser(followerId, followeeId);
         verify(repository).followUser(followerId, followeeId);
@@ -52,6 +53,7 @@ public class SubscriptionServiceTest {
     public void testUnfollowUser() {
         long followerId = 1L;
         long followeeId = 2L;
+        when(repository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).thenReturn(true);
 
         service.unfollowUser(followerId, followeeId);
         verify(repository).unfollowUser(followerId, followeeId);
@@ -73,7 +75,7 @@ public class SubscriptionServiceTest {
         when(repository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).thenReturn(false);
 
         assertThrows(DataValidationException.class, () -> {
-            service.followUser(followerId, followeeId);
+            service.unfollowUser(followerId, followeeId);
         });
     }
 
@@ -81,8 +83,8 @@ public class SubscriptionServiceTest {
     public void testGetFollowersCount() {
         long id = 1L;
 
-        service.getFollowingCount(id);
-        verify(repository).findFolloweesAmountByFollowerId(id);
+        service.getFollowersCount(id);
+        verify(repository).findFollowersAmountByFolloweeId(id);
     }
 
     @Test
@@ -90,6 +92,6 @@ public class SubscriptionServiceTest {
         long id = 1L;
 
         service.getFollowingCount(id);
-        verify(repository).findFollowersAmountByFolloweeId(id);
+        verify(repository).findFolloweesAmountByFollowerId(id);
     }
 }
