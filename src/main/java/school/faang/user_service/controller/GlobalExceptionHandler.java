@@ -16,6 +16,10 @@ import school.faang.user_service.exception.ErrorResponse;
 import java.util.HashMap;
 import java.util.Map;
 
+/***
+ * Глобальный обработчик исключений для мс UserService
+ */
+
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -23,14 +27,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleDataValidationException(DataValidationException exception) {
-        log.error("Data validation exception:", exception);
+        log.error("Data validation exception", exception);
         return new ErrorResponse(exception.getMessage());
     }
 
     @ExceptionHandler(EntityAlreadyExistException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleEntityAlreadyExistException(EntityAlreadyExistException exception) {
-        log.error("Entity already exist:", exception);
+        log.error("Entity already exist", exception);
         return new ErrorResponse(exception.getMessage());
     }
 
@@ -50,14 +54,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleEntityNotFoundException(EntityNotFoundException exception) {
-        log.error("Entity not found exception:", exception);
+        log.error("Entity not found exception", exception);
         return new ErrorResponse(exception.getMessage());
     }
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleRuntimeException(RuntimeException exception) {
-        log.error("Unchecked exception:", exception);
+        log.error("Unchecked exception", exception);
         return new ErrorResponse(exception.getMessage());
     }
 }
