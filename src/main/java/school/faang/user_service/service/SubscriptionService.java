@@ -19,20 +19,19 @@ public class SubscriptionService {
     private final UserMapper userMapper;
 
     public void followUser(long followerId, long targetId) {
-        ensureSubscriptionStateValidation(followerId, targetId, false);
+        if (followerId == targetId)
+            throw new DataValidationException("A user cannot follow themselves. UserId: " + targetId);
+        if (subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, targetId))
+            throw new DataValidationException("The subscription has already been issued");
         subscriptionRepository.followUser(followerId, targetId);
     }
 
     public void unfollowUser(long followerId, long targetId) {
-        ensureSubscriptionStateValidation(followerId, targetId, true);
-        subscriptionRepository.unfollowUser(followerId, targetId);
-    }
-
-    private void ensureSubscriptionStateValidation(long followerId, long targetId, boolean shouldExist) {
         if (followerId == targetId)
-            throw new DataValidationException("A user cannot follow themselves. UserId: " + targetId);
-        if (subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, targetId) != shouldExist)
-            throw new DataValidationException("The subscription has already been issued");
+            throw new DataValidationException("A user cannot unfollow themselves. UserId: " + targetId);
+        if (!subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, targetId))
+            throw new DataValidationException("The subscription does not exist");
+        subscriptionRepository.unfollowUser(followerId, targetId);
     }
 
     public List<UserDto> getFollowers(long id, UserFilterDto filterDto) {
@@ -50,7 +49,7 @@ public class SubscriptionService {
     }
 
     public long getFollowersCount(long id) {
-        return subscriptionRepository.findFolloweesAmountByFollowerId(id);
+        return subscriptionRepository.findFollowersAmountByFolloweeId(id);
     }
 
     public long getFollowingCount(long id) {

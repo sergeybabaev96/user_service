@@ -126,8 +126,12 @@ tasks.jacocoTestCoverageVerification {
             element = "CLASS"
             includes = listOf(
                 "school.faang.user_service.service.MentorshipService",
-                "school.faang.user_service.service.event..EventParticipationService",
+                "school.faang.user_service.service.event.EventParticipationService",
                 "school.faang.user_service.service.education.EducationService",
+                "school.faang.user_service.service.RecommendationRequestService",
+                "school.faang.user_service.service.SkillRequestService",
+                "school.faang.user_service.service.SkillService",
+                "school.faang.user_service.service.SkillService",
             )
 
             limit {
