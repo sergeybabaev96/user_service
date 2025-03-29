@@ -1,6 +1,5 @@
 package school.faang.user_service.repository.mentorship;
 
-import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.CrudRepository;
 import school.faang.user_service.entity.User;
@@ -19,13 +18,11 @@ public interface MentorshipRepository extends CrudRepository<User, Long> {
     List<User> findAllMentorsByMenteeId(@Param("menteeId") Long menteeId);
 
     @Modifying
-    @Transactional
     @Query(value = "UPDATE mentorship m SET m.mentor_id = m.mentee_id WHERE m.mentor_id = :mentorId",
     nativeQuery = true)
     void deactivateMentor(@Param("mentorId") Long mentorId);
 
     @Modifying
-    @Transactional
     @Query (value = "DELETE mentorship m WHERE m.mentee_id = :menteeId",
     nativeQuery = true)
     void deleteDeactivatedMentee(@Param("menteeId") Long menteeId);
