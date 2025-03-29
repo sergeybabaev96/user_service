@@ -80,14 +80,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getUser(long userId) {
         var user = getUserById(userId);
-
         return userMapper.toDto(user);
     }
 
     @Override
     public List<UserDto> getUsersByIds(List<Long> ids) {
         var users = userRepository.findAllById(ids);
-
         return userMapper.toDtoList(users);
     }
 }
