@@ -33,5 +33,4 @@ public class AvatarValidator {
             throw new DataValidationException("Avatar size cant be more 5 mb");
         }
     }
-
 }

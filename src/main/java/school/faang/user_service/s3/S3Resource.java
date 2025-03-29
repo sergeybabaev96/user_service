@@ -26,7 +26,7 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class S3Resource extends AbstractResource implements AutoCloseable {
     private final S3Object s3Object;
-    private final String filename;
+    private final String fileName;
 
     /**
      * Возвращает описание ресурса для логгирования и диагностики.
@@ -55,9 +55,8 @@ public class S3Resource extends AbstractResource implements AutoCloseable {
      *
      * @return Имя файла, переданное в конструктор
      */
-    @Override
-    public String getFilename() {
-        return filename;
+    public String getFileName() {
+        return fileName;
     }
 
     /**
@@ -86,9 +85,13 @@ public class S3Resource extends AbstractResource implements AutoCloseable {
     @Override
     public void close() throws IOException {
         try {
-            this.close();
+            if (getInputStream() != null) {
+                getInputStream().close();
+            }
         } finally {
-            s3Object.close();
+            if (s3Object != null) {
+                s3Object.close();
+            }
         }
     }
 }
