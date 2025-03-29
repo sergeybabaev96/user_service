@@ -9,6 +9,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      # Название сервиса
+      redis:
+        # Образ Docker для Redis
+        image: redis
+        # Порты, которые нужно открыть (6379 - стандартный порт Redis)
+        ports:
+          - 6379:6379
+        # Дополнительные настройки для обеспечения работоспособности
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
