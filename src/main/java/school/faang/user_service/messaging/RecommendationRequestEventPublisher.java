@@ -19,7 +19,7 @@ public class RecommendationRequestEventPublisher {
     @Value("${spring.kafka.topics.recommendation-requested}")
     private String recommendationRequestedTopic;
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
 

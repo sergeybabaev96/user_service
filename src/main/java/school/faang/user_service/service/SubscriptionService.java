@@ -1,10 +1,10 @@
 package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.dto.FollowerEvent;
 import school.faang.user_service.dto.FollowingFeatureDto;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
@@ -13,24 +13,28 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.UserWasNotFoundException;
 import school.faang.user_service.mapper.UserFollowingMapper;
 import school.faang.user_service.rating.ActionType;
+import school.faang.user_service.messaging.FollowerEventPublisher;
 import school.faang.user_service.rating.publisher.UserEventPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.filter.UserFilter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SubscriptionService {
+
     private final UserRepository userRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final UserEventPublisher userEventPublisher;
     private final UserFollowingMapper userFollowingMapper;
     private final List<UserFilter> filters;
-    private static final Logger logger = LoggerFactory.getLogger(SubscriptionService.class);
+    private final FollowerEventPublisher followerEventPublisher;
 
     public long getFollowersCount(long followeeId) {
         return subscriptionRepository.findFollowersAmountByFolloweeId(followeeId);
@@ -70,7 +74,7 @@ public class SubscriptionService {
         long followerId = followingFeatureDto.followerId();
         long followeeId = followingFeatureDto.followeeId();
 
-        logger.info("Trying to follow to user! : {} -> {}", followerId, followeeId);
+        log.info("Trying to follow to user! : {} -> {}", followerId, followeeId);
         checkIfOneUser(followerId, followeeId);
 
         User requestUser = findUserById(followerId);
@@ -79,7 +83,7 @@ public class SubscriptionService {
         List<User> followingUsers = requestedUser.getFollowees();
 
         if (existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
-            logger.error("The user already followed! : {} -> {}", followerId, followeeId);
+            log.error("The user already followed! : {} -> {}", followerId, followeeId);
             throw new DataValidationException("User already followed!");
         }
 
@@ -90,15 +94,15 @@ public class SubscriptionService {
         userRepository.save(requestedUser);
 
         userEventPublisher.publishEvent(ActionType.FOLLOW, followeeId);
-
-        logger.info("Succeed of following user!");
+        followerEventPublisher.publish(new FollowerEvent(followerId, followeeId, null, LocalDateTime.now()));
+        log.info("Succeed of following user!");
     }
 
     public void unfollowUser(FollowingFeatureDto followingFeatureDto) {
         long followerId = followingFeatureDto.followerId();
         long followeeId = followingFeatureDto.followeeId();
 
-        logger.info("Trying to unfollow to user! : {} -> {}", followerId, followeeId);
+        log.info("Trying to unfollow to user! : {} -> {}", followerId, followeeId);
         checkIfOneUser(followerId, followeeId);
         isFollowingUserNotFollower(followerId, followeeId);
 
@@ -115,7 +119,7 @@ public class SubscriptionService {
 
         userEventPublisher.publishEvent(ActionType.UNFOLLOW, followeeId);
 
-        logger.info("Succeed of unfollowing user!");
+        log.info("Succeed of unfollowing user!");
     }
 
     @Transactional(readOnly = true)
@@ -125,7 +129,7 @@ public class SubscriptionService {
 
     private void isFollowingUserNotFollower(long followerId, long followeeId) {
         if (!findUserById(followerId).getFollowees().contains(findUserById(followeeId))) {
-            logger.error("The followerId is not following followeeId : {} -> {}", followerId, followeeId);
+            log.error("The followerId is not following followeeId : {} -> {}", followerId, followeeId);
             throw new DataValidationException("Trying to follow to person not followed!");
         }
     }
@@ -134,7 +138,7 @@ public class SubscriptionService {
         User requestUser = findUserById(followerId);
         User requestedUser = findUserById(followeeId);
 
-        logger.info("Checked existing by follower and followee!");
+        log.info("Checked existing by follower and followee!");
         return requestUser.getFollowers().stream()
                 .anyMatch(follower -> Objects.equals(follower.getId(), requestedUser.getId()));
     }
@@ -146,7 +150,7 @@ public class SubscriptionService {
 
     private void checkIfOneUser(long followerId, long followeeId) {
         if (followerId == followeeId) {
-            logger.error("The followerId & followeeId is equals : {} -> {}", followerId, followeeId);
+            log.error("The followerId & followeeId is equals : {} -> {}", followerId, followeeId);
             throw new DataValidationException("Trying to follow to yourself!");
         }
     }

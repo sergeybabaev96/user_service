@@ -17,7 +17,7 @@ public class GoalCompletedEventPublisher {
     @Value("${spring.kafka.topics.goal-completed}")
     private String goalCompletedTopic;
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
     public void publish(GoalCompletedEvent event) {
