@@ -11,11 +11,11 @@ public class EventTitleFilter implements EventFilter {
 
     @Override
     public boolean isApplicable(EventFilterDto eventFilterDto) {
-        return eventFilterDto.getTitle() != null && !eventFilterDto.getTitle().isBlank();
+        return eventFilterDto.title() != null && !eventFilterDto.title().isBlank();
     }
 
     @Override
     public Stream<Event> apply(EventFilterDto eventFilterDto, Stream<Event> eventStream) {
-        return eventStream.filter(event -> eventFilterDto.getTitle().equalsIgnoreCase(event.getTitle()));
+        return eventStream.filter(event -> eventFilterDto.title().equalsIgnoreCase(event.getTitle()));
     }
 }

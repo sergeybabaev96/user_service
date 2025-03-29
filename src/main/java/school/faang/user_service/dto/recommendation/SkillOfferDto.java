@@ -5,8 +5,8 @@ import jakarta.validation.constraints.Positive;
 
 
 public record SkillOfferDto(
-        @NotNull(message = "Id can't be null")
-        @Positive(message = "Id can't be negative")
+        @NotNull(message = "Id of skill in SkillOfferDto can't be null")
+        @Positive(message = "Id of skill in SkillOfferDto can't be negative")
         long skillId
 ) {
 }

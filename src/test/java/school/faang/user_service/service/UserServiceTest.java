@@ -34,7 +34,7 @@ public class UserServiceTest {
     private UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 
     @InjectMocks
-    private UserService userService;
+    private UserServiceImpl userService;
 
     long userId;
 

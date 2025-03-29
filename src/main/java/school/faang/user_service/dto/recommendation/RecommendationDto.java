@@ -18,9 +18,9 @@ public class RecommendationDto {
     @Nullable
     private Long id;
     @NotNull
-    @Positive(message = "Id can't be negative")
+    @Positive(message = "Id author in recommendation can't be negative")
     private Long authorId;
-    @Positive(message = "Id can't be negative")
+    @Positive(message = "Id receiver in recommendation can't be negative")
     private Long receiverId;
     @NotNull
     private String content;

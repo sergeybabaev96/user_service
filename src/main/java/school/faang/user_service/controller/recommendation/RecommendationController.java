@@ -1,5 +1,6 @@
 package school.faang.user_service.controller.recommendation;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.exception.DataValidationException;
@@ -13,13 +14,13 @@ import java.util.List;
 public class RecommendationController {
     private final RecommendationService recommendationService;
 
-    public RecommendationDto giveRecommendation(RecommendationDto recommendation) {
+    public RecommendationDto giveRecommendation(@Valid RecommendationDto recommendation) {
         validateRecommendation(recommendation);
 
         return recommendationService.create(recommendation);
     }
 
-    public RecommendationDto updateRecommendation(RecommendationDto recommendation) {
+    public RecommendationDto updateRecommendation(@Valid RecommendationDto recommendation) {
         validateRecommendation(recommendation);
 
         return recommendationService.update(recommendation);
@@ -37,7 +38,7 @@ public class RecommendationController {
         return recommendationService.getAllGivenRecommendations(authorId);
     }
 
-    private static void validateRecommendation(RecommendationDto recommendation) {
+    private static void validateRecommendation(@Valid RecommendationDto recommendation) {
         if (recommendation.getContent().isBlank()) {
             throw new DataValidationException("Recommendation's content is required");
         }
