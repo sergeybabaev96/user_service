@@ -16,4 +16,5 @@ public class Channels {
     private String followerChannel;
     private String profileView;
     private String userBanChannel;
+    private String mentorshipAcceptedChannel;
 }

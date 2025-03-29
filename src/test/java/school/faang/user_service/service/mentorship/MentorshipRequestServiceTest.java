@@ -17,6 +17,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.events.MentorshipOfferedEvent;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.mapper.MentorshipRequestMapperImpl;
+import school.faang.user_service.publisher.MentorshipAcceptedEventPublisher;
 import school.faang.user_service.publisher.MentorshipOfferedEventPublisher;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
@@ -51,6 +52,7 @@ public class MentorshipRequestServiceTest {
 
     @Spy
     MentorshipOfferedEventPublisher mentorshipOfferedEventPublisher;
+    MentorshipAcceptedEventPublisher mentorshipAcceptedEventPublisher;
     UserDto user1;
     UserDto user2;
 
@@ -69,12 +71,18 @@ public class MentorshipRequestServiceTest {
         receiverFilterMock = Mockito.spy(ReceiverFilter.class);
         statusFilterMock = Mockito.spy(StatusFilter.class);
         mentorshipOfferedEventPublisher = Mockito.mock(MentorshipOfferedEventPublisher.class);
+        mentorshipAcceptedEventPublisher = Mockito.mock(MentorshipAcceptedEventPublisher.class);
 
         filters = List.of(authorFilterMock, descriptionFilterMock, receiverFilterMock, statusFilterMock);
 
-        mentorshipRequestService =
-                new MentorshipRequestServiceImpl(mentorshipRequestRepositoryMock, userRepositoryMock,
-                        mentorshipRequestMapperSpy, filters, mentorshipOfferedEventPublisher);
+        mentorshipRequestService = new MentorshipRequestServiceImpl(
+                mentorshipRequestRepositoryMock,
+                userRepositoryMock,
+                mentorshipRequestMapperSpy,
+                filters,
+                mentorshipOfferedEventPublisher,
+                mentorshipAcceptedEventPublisher
+        );
         user1 = UserDto.builder()
                 .userId(1L)
                 .build();
