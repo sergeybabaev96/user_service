@@ -1,5 +1,6 @@
 package school.faang.user_service.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataRetrievalFailureException;
@@ -63,4 +64,12 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.toDtoList(users);
     }
+
+    @Override
+    public User getReferenceById(long userId) {
+        if (!userRepository.existsById(userId))
+            throw new EntityNotFoundException("User not founds");
+        return userRepository.getReferenceById(userId);
+    }
+
 }

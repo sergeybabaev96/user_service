@@ -54,29 +54,6 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testGetUserById_UserIsFound_ReturnsUser() {
-        var testUser = User.builder()
-                .id(userId)
-                .build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-
-        var result = userService.getUserById(userId);
-
-        verify(userRepository, times(1)).findById(userId);
-        assertEquals(testUser, result);
-    }
-
-    @Test
-    public void testGetUserById_UserIsNotFound_Throws() {
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        assertThrows(
-                DataRetrievalFailureException.class,
-                () -> userService.getUserById(userId));
-        verify(userRepository, times(1)).findById(userId);
-    }
-
-    @Test
     public void testGetUser_UserId_ReturnsUserDto() {
         var userId = 1L;
         var user = createTestUser(userId, "Test user name", "example@gmail.com");
@@ -118,6 +95,29 @@ public class UserServiceTest {
             assertEquals(users.get(i).getUsername(), result.get(i).username());
             assertEquals(users.get(i).getEmail(), result.get(i).email());
         }
+    }
+
+    @Test
+    public void testGetUserById_UserIsFound_ReturnsUser() {
+        var testUser = User.builder()
+                .id(userId)
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+
+        var result = userService.getUserById(userId);
+
+        verify(userRepository, times(1)).findById(userId);
+        assertEquals(testUser, result);
+    }
+
+    @Test
+    public void testGetUserById_UserIsNotFound_Throws() {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(
+                DataRetrievalFailureException.class,
+                () -> userService.getUserById(userId));
+        verify(userRepository, times(1)).findById(userId);
     }
 
     private static User createTestUser(long userId, String username, String email) {

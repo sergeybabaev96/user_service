@@ -1,5 +1,6 @@
 package school.faang.user_service.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -41,6 +42,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataRetrievalFailureException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleDataRetrievalFailureException(DataRetrievalFailureException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleEntityNotFoundException(EntityNotFoundException e) {
         return new ErrorResponse(e.getMessage());
     }
 
