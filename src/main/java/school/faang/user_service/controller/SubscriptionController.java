@@ -1,5 +1,6 @@
 package school.faang.user_service.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.UserDto;
@@ -21,11 +22,11 @@ public class SubscriptionController {
         subscriptionService.unfollowUser(followerId, followeeId);
     }
 
-    public List<UserDto> getFollowers(long id, UserFilterDto filter) {
+    public List<UserDto> getFollowers(long id, @Valid UserFilterDto filter) {
         return subscriptionService.getFollowers(id, filter);
     }
 
-    public List<UserDto> getFollowing(long id, UserFilterDto filter) {
+    public List<UserDto> getFollowing(long id, @Valid UserFilterDto filter) {
         return subscriptionService.getFollowing(id, filter);
     }
 

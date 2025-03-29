@@ -1,4 +1,12 @@
 package school.faang.user_service.dto;
 
-public record UserDto(Long id, String username, String email) {
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+public record UserDto(
+        Long id,
+        @NotBlank
+        String username,
+        @Email
+        String email) {
 }

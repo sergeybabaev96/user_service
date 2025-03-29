@@ -1,5 +1,6 @@
 package school.faang.user_service.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.event.EventDto;
@@ -26,7 +27,7 @@ public class EventController {
         return eventService.getEvent(id);
     }
 
-    public List<EventDto> getEventsByFilter(EventFilterDto eventFilter) {
+    public List<EventDto> getEventsByFilter(@Valid EventFilterDto eventFilter) {
         return eventService.getEventsByFilter(eventFilter);
     }
 
@@ -35,7 +36,7 @@ public class EventController {
         eventService.deleteEvent(id);
     }
 
-    public EventDto updateEvent(EventDto eventDto) {
+    public EventDto updateEvent(@Valid EventDto eventDto) {
         validateEvent(eventDto);
         return eventService.updateEvent(eventDto);
     }
