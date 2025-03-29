@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Настройки для подключения к S3-совместимому хранилищу.
+ */
 @Configuration
 public class AwsConfig {
     @Value("${services.s3.accessKey}")

@@ -16,7 +16,7 @@ import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
-import school.faang.user_service.validation.RecommendationValidator;
+import school.faang.user_service.validation.recommendation.RecommendationValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -72,7 +72,7 @@ public class RecommendationValidatorTest {
                 .thenReturn(true);
 
         Assertions.assertDoesNotThrow(() ->
-            recommendationValidator.validate(recommendationCreateDto));
+                recommendationValidator.validate(recommendationCreateDto));
 
         Mockito.verify(userRepository, Mockito.times(1))
                 .findById(author.getId());
@@ -86,8 +86,8 @@ public class RecommendationValidatorTest {
         LocalDateTime lessThanSixMonthsAgo = LocalDateTime.now().minusMonths(5);
         recommendation.setUpdatedAt(lessThanSixMonthsAgo);
 
-        Exception exception =  Assertions.assertThrows(DataValidationException.class, () ->
-            recommendationValidator.validate(recommendationCreateDto));
+        Exception exception = Assertions.assertThrows(DataValidationException.class, () ->
+                recommendationValidator.validate(recommendationCreateDto));
         Assertions.assertEquals("Updated recommendation too early", exception.getMessage());
 
         Mockito.verify(userRepository, Mockito.times(1))
@@ -99,7 +99,7 @@ public class RecommendationValidatorTest {
     void validateRecommendationTimeIntervalWithoutInputsTest() {
         recommendation.setUpdatedAt(null);
 
-        Exception exception =  Assertions.assertThrows(DataValidationException.class, () ->
+        Exception exception = Assertions.assertThrows(DataValidationException.class, () ->
                 recommendationValidator.validate(recommendationCreateDto));
         Assertions.assertEquals("Update date is not found", exception.getMessage());
 
@@ -113,7 +113,7 @@ public class RecommendationValidatorTest {
         recommendationCreateDto.setSkillOffers(null);
 
         Exception exception = Assertions.assertThrows(DataValidationException.class, () ->
-            recommendationValidator.validate(recommendationCreateDto));
+                recommendationValidator.validate(recommendationCreateDto));
         Assertions.assertEquals("Skill offers list is null", exception.getMessage());
 
         Mockito.verify(userRepository, Mockito.times(1))

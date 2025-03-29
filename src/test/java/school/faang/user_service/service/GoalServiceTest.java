@@ -25,6 +25,7 @@ import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.goal.GoalService;
+import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.validation.goal.GoalValidator;
 
 import java.util.ArrayList;
