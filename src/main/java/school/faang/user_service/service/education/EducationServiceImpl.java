@@ -12,7 +12,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.education.EducationMapper;
 import school.faang.user_service.repository.EducationRepository;
-import school.faang.user_service.service.UserService;
+import school.faang.user_service.service.UserService1;
 
 import java.time.Year;
 
@@ -21,7 +21,7 @@ import java.time.Year;
 @RequiredArgsConstructor
 public class EducationServiceImpl implements EducationService {
 
-    private final UserService userService;
+    private final UserService1 userService;
     private final EducationRepository educationRepository;
     private final EducationMapper educationMapper;
 

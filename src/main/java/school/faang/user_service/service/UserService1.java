@@ -6,7 +6,7 @@ import school.faang.user_service.entity.User;
 
 import java.util.List;
 
-public interface UserService {
+public interface UserService1 {
 
 
     boolean doesUserExist(long userId);

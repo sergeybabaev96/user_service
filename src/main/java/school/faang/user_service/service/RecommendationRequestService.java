@@ -28,7 +28,7 @@ public class RecommendationRequestService {
     @Value("${recommendation-min-distance-months}")
     private int recommendationRequestMinDistanceMonths;
 
-    private final UserService userService;
+    private final UserService1 userService;
     private final RecommendationRequestRepository recommendationRequestRepository;
     private final SkillRequestService skillRequestService;
     private final SkillService skillService;

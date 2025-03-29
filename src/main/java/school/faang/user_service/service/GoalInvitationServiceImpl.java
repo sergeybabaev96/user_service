@@ -26,7 +26,7 @@ public class GoalInvitationServiceImpl implements GoalInvitationService {
 
     private final GoalInvitationRepository goalInvitationRepository;
     private final GoalService goalService;
-    private final UserService userService;
+    private final UserService1 userService;
     private final GoalInvitationMapper goalInvitationMapper;
 
     @Override
