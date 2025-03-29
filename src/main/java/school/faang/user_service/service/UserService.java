@@ -115,4 +115,8 @@ public class UserService {
         userRepository.save(user);
         return userMapper.toDto(user);
     }
+
+    public List<Long> getFollowers(long userId) {
+        return userRepository.getFollowers(userId);
+    }
 }
