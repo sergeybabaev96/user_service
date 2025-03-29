@@ -64,4 +64,9 @@ public class UserController {
     public List<UserDto> getUsersByIds(@RequestParam List<Long> ids) {
         return userService.getUsersByIds(ids);
     }
+
+    @GetMapping("/v1/followers/{authorId}")
+    public List<Long> getFollowerIds(@PathVariable Long authorId) {
+        return userService.getFollowers(authorId);
+    }
 }
