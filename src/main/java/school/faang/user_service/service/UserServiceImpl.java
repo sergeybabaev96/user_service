@@ -10,7 +10,6 @@ import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.UserMapper;
-import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.UserRepository;
 
 import java.util.List;
@@ -18,13 +17,14 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService1 {
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final EventService eventService;
     private final GoalService goalService;
     private final MentorshipService mentorshipService;
     private final UserMapper userMapper;
 
+    @Override
     public User getReferenceById(long userId) {
         if (!userRepository.existsById(userId))
             throw new EntityNotFoundException("User not founds");

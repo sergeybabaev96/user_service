@@ -11,7 +11,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.education.EducationMapper;
 import school.faang.user_service.repository.EducationRepository;
-import school.faang.user_service.service.UserService1;
+import school.faang.user_service.service.UserService;
 
 import java.time.Year;
 import java.util.Optional;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 class EducationServiceTest {
 
     @Mock
-    private UserService1 userService;
+    private UserService userService;
 
     @Mock
     private EducationRepository educationRepository;

@@ -6,8 +6,10 @@ import school.faang.user_service.entity.User;
 
 import java.util.List;
 
-public interface UserService1 {
+public interface UserService {
 
+
+    public User getReferenceById(long userId);
 
     boolean doesUserExist(long userId);
 
