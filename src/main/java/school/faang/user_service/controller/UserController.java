@@ -60,4 +60,9 @@ public class UserController {
     public List<UserDto> getUsersByIds(@RequestBody @NotNull List<@Positive Long> ids) {
         return userService.getUsersByIds(ids);
     }
+
+    @GetMapping("/{authorId}/followers")
+    public List<Long> getFollowerIdsByUserId(@PathVariable @NotNull @Positive Long authorId) {
+        return userService.getFollowersIds(authorId);
+    }
 }

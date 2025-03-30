@@ -166,4 +166,8 @@ public class UserService {
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public List<Long> getFollowersIds(Long authorId) {
+        return userRepository.findFollowersByUserId(authorId).stream().map(User::getId).toList();
+    }
 }
