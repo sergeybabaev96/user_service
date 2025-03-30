@@ -42,16 +42,16 @@ public class ImageResize {
      * @implNote Использует алгоритм масштабирования Scalr.Method.QUALITY для наилучшего качества
      */
     public MultipartFile resizeImage(MultipartFile file, int maxSize) {
-        ByteArrayOutputStream os;
+        ByteArrayOutputStream outputStream;
         try {
             BufferedImage originalImage = ImageIO.read(file.getInputStream());
             BufferedImage resizedImage = Scalr.resize(originalImage, Scalr.Method.QUALITY, Scalr.Mode.AUTOMATIC, maxSize);
 
-            os = new ByteArrayOutputStream();
-            ImageIO.write(resizedImage, "jpg", os);
+            outputStream = new ByteArrayOutputStream();
+            ImageIO.write(resizedImage, "jpg", outputStream);
         } catch (IOException e) {
             throw new FileException(e.getMessage());
         }
-        return new CustomMultipartFile(file.getOriginalFilename(), os.toByteArray(), file.getContentType());
+        return new CustomMultipartFile(file.getOriginalFilename(), outputStream.toByteArray(), file.getContentType());
     }
 }

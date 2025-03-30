@@ -80,7 +80,6 @@ public class S3Resource extends AbstractResource implements AutoCloseable {
      * </ol>
      * </p>
      *
-     * @throws IOException если произошла ошибка при закрытии ресурсов
      */
     @Override
     public void close() throws IOException {
