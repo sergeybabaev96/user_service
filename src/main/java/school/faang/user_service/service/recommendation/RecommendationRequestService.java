@@ -3,6 +3,7 @@ package school.faang.user_service.service.recommendation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.dto.RecommendationRequestedEvent;
 import school.faang.user_service.dto.recommendation.*;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
@@ -12,6 +13,7 @@ import school.faang.user_service.exception.RecommendationRequestCreatedException
 import school.faang.user_service.exception.RequestAlreadyProcessedException;
 import school.faang.user_service.exception.ResourceNotFoundException;
 import school.faang.user_service.mapper.RecommendationRequestMapper;
+import school.faang.user_service.messaging.RecommendationRequestEventPublisher;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 import school.faang.user_service.service.SkillRequestService;
 import school.faang.user_service.service.UserService;
@@ -30,6 +32,7 @@ public class RecommendationRequestService {
     private final SkillRequestService skillRequestService;
     private final RecommendationRequestMapper recommendationRequestMapper;
     private final RecommendationRequestFilter recommendationRequestFilter;
+    private final RecommendationRequestEventPublisher eventPublisher;
 
     @Transactional
     public CreateRecommendationRequestResponse create(CreateRecommendationRequestRequest createRecommendationRequestRequest) {
@@ -44,6 +47,14 @@ public class RecommendationRequestService {
         List<SkillRequest> skillRequests
                 = skillRequestService.createSkillRequests(recommendationRequest.getId(), createRecommendationRequestRequest.skills());
         recommendationRequest.setSkills(skillRequests);
+
+        RecommendationRequestedEvent event = RecommendationRequestedEvent.builder()
+                .requestAuthorId(requesterId)
+                .targetUserId(receiverId)
+                .recommendationRequestId(recommendationRequest.getId())
+                .build();
+        eventPublisher.publish(event);
+
         return recommendationRequestMapper.toCreateDto(recommendationRequest);
     }
 

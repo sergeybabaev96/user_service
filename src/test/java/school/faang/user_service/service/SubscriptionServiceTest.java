@@ -12,9 +12,9 @@ import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.UserWasNotFoundException;
-import school.faang.user_service.service.filter.UserFilter;
 import school.faang.user_service.mapper.UserFollowingMapper;
 import school.faang.user_service.mapper.UserFollowingMapperImpl;
+import school.faang.user_service.messaging.FollowerEventPublisher;
 import school.faang.user_service.rating.publisher.UserEventPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
@@ -24,10 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +35,8 @@ class SubscriptionServiceTest {
     private UserRepository userRepository;
     @Mock
     private UserEventPublisher userEventPublisher;
+    @Mock
+    private FollowerEventPublisher followerEventPublisher;
     @Mock
     private SubscriptionRepository subscriptionRepository;
     @Mock
@@ -195,6 +194,18 @@ class SubscriptionServiceTest {
         assertEquals("User was not found with id : 1", exception.getMessage());
 
         verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void isFollow_ShouldReturnTrueWhenFollowersExist() {
+        when(subscriptionRepository.existsByFollowerIdAndFolloweeId(anyLong(), anyLong())).thenReturn(true);
+        assertTrue(subscriptionService.isFollow(1L, 2L));
+    }
+
+    @Test
+    void isFollow_ShouldReturnFalseWhenFollowersNotExist() {
+        when(subscriptionRepository.existsByFollowerIdAndFolloweeId(anyLong(), anyLong())).thenReturn(false);
+        assertFalse(subscriptionService.isFollow(1L, 2L));
     }
 
     private User generateUser() {
