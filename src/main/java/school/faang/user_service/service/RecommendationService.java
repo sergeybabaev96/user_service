@@ -2,6 +2,7 @@ package school.faang.user_service.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 import static org.springframework.data.domain.Pageable.unpaged;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecommendationService {
@@ -42,7 +44,8 @@ public class RecommendationService {
 
     public RecommendationDto create(RecommendationDto recommendationDto) {
         validateRecommendation(recommendationDto);
-        Recommendation recommendation = saveRecommendation(recommendationDto);
+
+        Recommendation recommendation = createRecommendation(recommendationDto);
 
         List<Skill> skillOffers = recommendationDto.getSkillOffers().stream()
                 .map(SkillOfferDto::getSkillId)
@@ -64,6 +67,8 @@ public class RecommendationService {
                         addGuarantee(skill, recommendation.getAuthor(), recommendation.getReceiver());
                     }
                 });
+
+        log.info("Создание рекомендации с id {} прошло успешно", recommendation.getId());
 
         return recommendationMapper.toDto(recommendation);
     }
@@ -102,15 +107,22 @@ public class RecommendationService {
         Recommendation recommendationUpdate = recommendationRepository.findById(recommendation.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Рекомендации с ID "
                         + recommendation.getId() + " не существует"));
+
+        log.info("Обновление рекомендации с id {} прошло успешно", recommendation.getId());
         return recommendationMapper.toDto(recommendationUpdate);
     }
 
     public void delete(long id) {
+        if(!recommendationRepository.existsById(id)) {
+            log.error("Рекомендации с ID {} не существует", id);
+            throw new EntityNotFoundException("Рекомендации с ID " + id + " не существует");
+        }
         recommendationRepository.deleteById(id);
+        log.info("Удаление рекомендации с id {} прошло успешно", id);
     }
 
-    public List<RecommendationDto> getAllUserRecommendations(long recieverId) {
-        return getAllRecommendations(recommendationRepository::findAllByReceiverId, recieverId);
+    public List<RecommendationDto> getAllUserRecommendations(long receiverId) {
+        return getAllRecommendations(recommendationRepository::findAllByReceiverId, receiverId);
     }
 
     public List<RecommendationDto> getAllGivenRecommendations(long authorId) {
@@ -124,7 +136,7 @@ public class RecommendationService {
                 .toList();
     }
 
-    private Recommendation saveRecommendation(RecommendationDto recommendationDto) {
+    private Recommendation createRecommendation(RecommendationDto recommendationDto) {
         Long newIdRecommendation = recommendationRepository.create(
                 recommendationDto.getAuthorId(),
                 recommendationDto.getReceiverId(),
@@ -178,7 +190,7 @@ public class RecommendationService {
             throw new DataValidationException("Один или несколько навыков не существуют в системе");
         } else if (isRecentRecommendationExists(recommendationDto)) {
             throw new DataValidationException("Автор дает рекомендацию раньше," +
-                    "чем через 6 месяцев после его последней рекомендации этому пользователю.");
+                    "чем через " + COUNT_MONTHS + " месяцев после его последней рекомендации этому пользователю.");
         }
     }
 }
