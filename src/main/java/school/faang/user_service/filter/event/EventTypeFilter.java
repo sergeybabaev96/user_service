@@ -10,12 +10,12 @@ import java.util.stream.Stream;
 public class EventTypeFilter implements EventFilter {
     @Override
     public boolean isApplicable(EventFilterDto eventFilterDto) {
-        return eventFilterDto.getEventType() != null;
+        return eventFilterDto.eventType() != null;
     }
 
     @Override
     public Stream<Event> apply(EventFilterDto eventFilterDto, Stream<Event> eventStream) {
         return eventStream
-                .filter(event -> event.getType() == eventFilterDto.getEventType());
+                .filter(event -> event.getType() == eventFilterDto.eventType());
     }
 }

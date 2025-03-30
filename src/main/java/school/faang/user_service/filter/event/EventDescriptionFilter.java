@@ -10,12 +10,12 @@ import java.util.stream.Stream;
 public class EventDescriptionFilter implements EventFilter {
     @Override
     public boolean isApplicable(EventFilterDto eventFilterDto) {
-        return eventFilterDto.getDescription() != null && !eventFilterDto.getDescription().isBlank();
+        return eventFilterDto.description() != null && !eventFilterDto.description().isBlank();
     }
 
     @Override
     public Stream<Event> apply(EventFilterDto eventFilterDto, Stream<Event> eventStream) {
         return eventStream
-                .filter(event -> event.getDescription().contentEquals(eventFilterDto.getDescription()));
+                .filter(event -> event.getDescription().contentEquals(eventFilterDto.description()));
     }
 }
