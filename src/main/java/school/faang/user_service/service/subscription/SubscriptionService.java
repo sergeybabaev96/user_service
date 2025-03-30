@@ -11,6 +11,8 @@ public interface SubscriptionService {
 
     void unfollowUser(long followerId, long followeeId);
 
+    List<SubscriptionUserDto> getFollowers(long followeeId);
+
     List<SubscriptionUserDto> getFollowers(long followeeId, SubscriptionUserFilterDto filter);
 
     List<SubscriptionUserDto> getFollowing(long followeeId, SubscriptionUserFilterDto filter);
