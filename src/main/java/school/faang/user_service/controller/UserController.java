@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,10 +17,16 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/users")
+
+@RequestMapping("api/v1/users")
 @Tag(name = "User API", description = "Super API to interact with users table")
 public class UserController {
     private final UserService userService;
+
+    @PutMapping("/deactivate/{userId}")
+    public UserDto deactivateUser(@PathVariable Long userId) {
+        return userService.deactivateUser(userId);
+    }
 
     @GetMapping("/{userId}")
     @Operation(summary = "Get user by id", description = "Returns a user DTO")
