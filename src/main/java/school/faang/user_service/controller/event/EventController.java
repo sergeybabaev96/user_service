@@ -1,5 +1,8 @@
 package school.faang.user_service.controller.event;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,27 +23,19 @@ import school.faang.user_service.service.event.EventService;
 
 import java.util.List;
 
-/**
- * Контроллер для управления событиями.
- * Предоставляет методы для создания, получения, обновления и удаления событий,
- * а также для получения событий по фильтрам и для конкретных пользователей.
- *
- * @author Zhltsk-V
- */
 @Slf4j
 @RestController
 @RequestMapping("/events")
 @Validated
 @RequiredArgsConstructor
+@Tag(name = "Event Management", description = "Provides methods for working with events")
 public class EventController {
     private final EventService eventService;
 
-    /**
-     * Создает новое событие.
-     *
-     * @param event DTO события, содержащее данные для создания.
-     * @return Созданное событие в виде {@link EventViewDto}.
-     */
+    @Operation(
+            summary = "Create new event",
+            description = "Create new event with specified data"
+    )
     @PostMapping
     public EventViewDto create(@Valid @RequestBody EventCreateDto event) {
         log.info("Creating event with title: {}", event.getTitle());
@@ -49,26 +44,24 @@ public class EventController {
         return createdEvent;
     }
 
-    /**
-     * Получает событие по его идентификатору.
-     *
-     * @param eventId Идентификатор события.
-     * @return Событие в виде {@link EventViewDto}.
-     */
+    @Operation(
+            summary = "Get event by ID",
+            description = "Get event by specified ID"
+    )
     @GetMapping("/{eventId}")
-    public EventViewDto getEvent(@PathVariable("eventId") long eventId) {
+    public EventViewDto getEvent(
+            @Parameter(description = "ID of the event to retrieve", required = true, example = "1")
+            @PathVariable("eventId") long eventId) {
         log.info("Fetching event with ID: {}", eventId);
         EventViewDto event = eventService.getEvent(eventId);
         log.info("Event fetched successfully: {}", event);
         return event;
     }
 
-    /**
-     * Получает список событий, соответствующих заданному фильтру.
-     *
-     * @param filter DTO фильтра, содержащее критерии поиска.
-     * @return Список событий в виде {@link List<EventViewDto>}.
-     */
+    @Operation(
+            summary = "Get events by filter",
+            description = "Get events by specified filter"
+    )
     @GetMapping("/filter")
     public List<EventViewDto> getEvents(@Valid @ModelAttribute EventFilterDto filter) {
         log.info("Fetching events with filter: {}", filter);
@@ -77,55 +70,55 @@ public class EventController {
         return events;
     }
 
-    /**
-     * Удаляет событие по его идентификатору.
-     *
-     * @param eventId Идентификатор события для удаления.
-     */
+    @Operation(
+            summary = "Delete event",
+            description = "Delete event by specified ID"
+    )
     @DeleteMapping("/{eventId}")
-    public void deleteEvent(@PathVariable("eventId") long eventId) {
+    public void deleteEvent(
+            @Parameter(description = "ID of the event to delete", required = true, example = "1")
+            @PathVariable("eventId") long eventId) {
         log.info("Deleting event with ID: {}", eventId);
         eventService.deleteEvent(eventId);
         log.info("Event deleted successfully");
     }
 
-    /**
-     * Обновляет существующее событие.
-     *
-     * @param eventId Идентификатор события для обновления.
-     * @param event DTO события, содержащее обновленные данные.
-     * @return Обновленное событие в виде {@link EventViewDto}.
-     */
+    @Operation(
+            summary = "Update an existing event",
+            description = "Update the event with the specified ID"
+    )
     @PutMapping("/{eventId}")
-    public EventViewDto updateEvent(@PathVariable("eventId") long eventId, @Valid @RequestBody EventCreateDto event) {
+    public EventViewDto updateEvent(
+            @Parameter(description = "ID of the event to update", required = true, example = "1")
+            @PathVariable("eventId") long eventId, @Valid @RequestBody EventCreateDto event) {
         log.info("Updating event with ID: {}", eventId);
         EventViewDto updatedEvent = eventService.updateEvent(eventId, event);
         log.info("Event updated successfully: {}", updatedEvent);
         return updatedEvent;
     }
 
-    /**
-     * Получает список событий, созданных конкретным пользователем.
-     *
-     * @param userId Идентификатор пользователя.
-     * @return Список событий в виде {@link List<EventViewDto>}.
-     */
+    @Operation(
+            summary = "Get events by owner ID",
+            description = "Get events created by the specified owner ID"
+    )
     @GetMapping("/owner/{userId}")
-    public List<EventViewDto> getOwnerEvent(@PathVariable("userId") long userId) {
+    public List<EventViewDto> getOwnerEvent(
+            @Parameter(description = "ID of the owner (user) to filter events", required = true, example = "123")
+            @PathVariable("userId") long userId) {
         log.info("Fetching events for owner with ID: {}", userId);
         List<EventViewDto> events = eventService.getOwnerEvent(userId);
         log.info("Fetched {} events for owner", events.size());
         return events;
     }
 
-    /**
-     * Получает список событий, в которых участвовал конкретный пользователь.
-     *
-     * @param userId Идентификатор пользователя.
-     * @return Список событий в виде {@link List<EventViewDto>}.
-     */
+    @Operation(
+            summary = "Get events by participant ID",
+            description = "Get events participated by the specified participant ID"
+    )
     @GetMapping("/participated/{userId}")
-    public List<EventViewDto> getParticipatedEvents(@PathVariable("userId") long userId) {
+    public List<EventViewDto> getParticipatedEvents(
+            @Parameter(description = "ID of the participant (user) to filter events", required = true, example = "123")
+            @PathVariable("userId") long userId) {
         log.info("Fetching events participated by user with ID: {}", userId);
         List<EventViewDto> events = eventService.getParticipatedEvents(userId);
         log.info("Fetched {} participated events", events.size());
