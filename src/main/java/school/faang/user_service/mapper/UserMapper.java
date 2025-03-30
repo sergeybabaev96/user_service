@@ -1,6 +1,7 @@
 package school.faang.user_service.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 import school.faang.user_service.dto.UserDto;
@@ -19,5 +20,6 @@ public interface UserMapper {
 
     void updateUserChatId(@MappingTarget User user, UserChatIdUpdateDto userChatIdUpdateDto);
 
+    @Mapping(source = "contactPreference.preference", target = "preference")
     UserNotificationDto toNotificationDto(User userById);
 }
