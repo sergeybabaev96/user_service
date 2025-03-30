@@ -26,7 +26,7 @@ public interface RecommendationRequestRepository extends JpaRepository<Recommend
     @Modifying
     RecommendationRequest create(long requesterId, long receiverId, String message);
 
-    Optional<RecommendationRequest> findByRequesterAndReceiverAndCreatedDateAfter(User requester,
-                                                                                  User receiver, LocalDateTime date);
+    Optional<RecommendationRequest> findByRequesterAndReceiverAndCreatedAtAfter(User requester,
+                                                                                User receiver, LocalDateTime date);
 
 }

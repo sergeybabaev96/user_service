@@ -15,7 +15,6 @@ import school.faang.user_service.repository.recommendation.RecommendationRequest
 import school.faang.user_service.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -51,7 +50,7 @@ public class RecommendationRequestService {
             throw new NotFoundException("Receiver not found with ID " + dto.getReceiverId());
         }
         Optional<RecommendationRequest> existingRequest = recommendationRequestRepository
-                .findByRequesterAndReceiverAndCreatedDateAfter(requester, receiver, SIX_MONTHS_AGO);
+                .findByRequesterAndReceiverAndCreatedAtAfter(requester, receiver, SIX_MONTHS_AGO);
         if (existingRequest.isPresent()) {
             throw new IllegalStateException("Recommendation request already sent within the last 6 months.");
         }
