@@ -67,6 +67,7 @@ public class UserController {
     @GetMapping("/{authorId}/followers")
     public List<Long> getFollowerIdsByUserId(@PathVariable @NotNull @Positive Long authorId) {
         return userService.getFollowersIds(authorId);
+    }
 
     @GetMapping("/{userId}/notify-info")
     public UserNotificationDto getUserNotification(@NotNull @PathVariable @Positive Long userId) {
