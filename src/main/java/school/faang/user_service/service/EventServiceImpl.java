@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.event.EventFilterDto;
+import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.event.EventFilter;
@@ -11,6 +12,7 @@ import school.faang.user_service.mapper.EventMapper;
 import school.faang.user_service.repository.event.EventRepository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 
@@ -68,5 +70,23 @@ public class EventServiceImpl implements EventService {
     public List<EventDto> getParticipatedEvents(Long userId) {
         List<Event> participatedEvents = eventRepository.findParticipatedEventsByUserId(userId);
         return participatedEvents.stream().map(eventMapper::toDto).toList();
+    }
+
+    @Override
+    public void deleteEventByUserId(Long userId) {
+        List<Event> eventToUser = eventRepository.findAllByUserId(userId);
+        eventRepository.deleteAll(eventToUser);
+    }
+
+    @Override
+    public void deleteParticipationFromEvent(Long userId) {
+        List<Event> eventsWhereUserParticipation = eventRepository
+                .findParticipatedEventsByUserId(userId);
+        for (Event event : eventsWhereUserParticipation) {
+            List<User> participationWithoutDeactivatedUser = event.getAttendees().stream()
+                    .filter(user-> !Objects.equals(user.getId(), userId)).toList();
+            event.setAttendees(participationWithoutDeactivatedUser);
+        }
+        eventRepository.saveAll(eventsWhereUserParticipation);
     }
 }

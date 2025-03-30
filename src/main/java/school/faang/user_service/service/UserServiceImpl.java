@@ -1,5 +1,7 @@
 package school.faang.user_service.service;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +31,9 @@ public class UserServiceImpl implements UserService {
 
     private final AvatarGeneratorService avatarGeneratorService;
     private final S3Service s3Service;
+    private final EventService eventService;
+    private final GoalService goalService;
+    private final MentorshipService mentorshipService;
 
     private final CreateUserValidator createUserValidator;
 
@@ -36,6 +41,15 @@ public class UserServiceImpl implements UserService {
 
     @Value("user-avatars-aws-folder")
     private String userAvatarsAwsFolder;
+
+    @Override
+    public User getReferenceById(long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException("User not founds");
+        }
+
+        return userRepository.getReferenceById(userId);
+    }
 
     @Override
     public boolean doesUserExist(long userId) {
@@ -47,6 +61,20 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new DataRetrievalFailureException(
                         "User with id %d is not found".formatted(userId)));
+    }
+
+    @Override
+    @Transactional
+    public UserDto deactivateUser(long userId) {
+        eventService.deleteEventByUserId(userId);
+        eventService.deleteParticipationFromEvent(userId);
+        goalService.deleteUserFromGoals(userId);
+        mentorshipService.deleteMentorShipByDeactivatedUser(userId);
+        mentorshipService.deleteMenteeByDeactivatedUser(userId);
+        User user = getUserById(userId);
+        user.setActive(false);
+        User deactivatedUser = userRepository.save(user);
+        return userMapper.toDto(deactivatedUser);
     }
 
     @Override
