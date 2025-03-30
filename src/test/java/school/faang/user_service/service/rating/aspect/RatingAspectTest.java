@@ -1,4 +1,4 @@
-package school.faang.user_service.service.rating;
+package school.faang.user_service.service.rating.aspect;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -13,6 +13,8 @@ import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.enums.RatingType;
+import school.faang.user_service.service.rating.RatingAspect;
+import school.faang.user_service.service.rating.RatingService;
 import school.faang.user_service.service.rating.annotation.RatingChanging;
 
 import java.lang.reflect.Method;
@@ -23,7 +25,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@Disabled
 @ExtendWith(MockitoExtension.class)
 class RatingAspectTest {
 
@@ -39,16 +40,16 @@ class RatingAspectTest {
     @Mock
     private MethodSignature methodSignature;
 
-    @Mock
-    private Method method;
-
-    @Mock
-    private RatingChangingForTest ratingAnnotation;
-
     @InjectMocks
     private RatingAspect ratingAspect;
 
     private abstract class RatingChangingForTest implements RatingChanging{} //this is a workaround for mocking RatingChanging annotation
+
+    /**Map used to provide {@link Method} instance annotated with {@link RatingChanging}*/
+    private static Map<RatingType, Method> methodsPerPositiveRatingType;
+
+    /**Map used to provide {@link Method} instance annotated with {@link RatingChanging}*/
+    private static Map<RatingType, Method> methodsPerNegativeRatingType;
 
     /**Args that ratingAspect will use to determine affectedUsers.<br/>If no RatingType is specified, by default userContext is used*/
     private static Map<RatingType, Object[]> argsPerRatingsMap;
@@ -67,15 +68,28 @@ class RatingAspectTest {
     private static User userB = User.builder().id(2L).build();
 
     @BeforeEach
-    void setUp() {
-        //MockitoAnnotations.openMocks(this);
+    void setUp() throws NoSuchMethodException {
         when(userContext.getUserId()).thenReturn(userA.getId());
         when(joinPoint.getSignature()).thenReturn(methodSignature);
-        when(methodSignature.getMethod()).thenReturn(method);
-        when(method.getAnnotation(RatingChanging.class)).thenReturn(ratingAnnotation);
 
         recommendation = Recommendation.builder().author(userA).receiver(userB).build();
 
+        methodsPerPositiveRatingType = Map.of(
+                RatingType.GOAL_RATING, PositiveRatingAnnotatedMethods.class.getMethod("goalRatingMethod"),
+                RatingType.PREMIUM_RATING, PositiveRatingAnnotatedMethods.class.getMethod("premiumRatingMethod"),
+                RatingType.SKILL_RATING, PositiveRatingAnnotatedMethods.class.getMethod("skillRatingMethod"),
+                RatingType.SUBSCRIPTION_RATING, PositiveRatingAnnotatedMethods.class.getMethod("subscriptionRatingMethod"),
+                RatingType.RECOMMENDATION_RATING, PositiveRatingAnnotatedMethods.class.getMethod("recommendationRatingMethod"),
+                RatingType.EVENT_RATING, PositiveRatingAnnotatedMethods.class.getMethod("eventRatingMethod")
+        );
+        methodsPerNegativeRatingType = Map.of(
+                RatingType.GOAL_RATING, NegativeRatingAnnotatedMethods.class.getMethod("goalRatingMethod"),
+                RatingType.PREMIUM_RATING, NegativeRatingAnnotatedMethods.class.getMethod("premiumRatingMethod"),
+                RatingType.SKILL_RATING, NegativeRatingAnnotatedMethods.class.getMethod("skillRatingMethod"),
+                RatingType.SUBSCRIPTION_RATING, NegativeRatingAnnotatedMethods.class.getMethod("subscriptionRatingMethod"),
+                RatingType.RECOMMENDATION_RATING, NegativeRatingAnnotatedMethods.class.getMethod("recommendationRatingMethod"),
+                RatingType.EVENT_RATING, NegativeRatingAnnotatedMethods.class.getMethod("eventRatingMethod")
+        );
         argsPerRatingsMap = Map.ofEntries(
                 Map.entry(RatingType.RECOMMENDATION_RATING, new Object[]{recommendation}),
                 Map.entry(RatingType.SUBSCRIPTION_RATING, new Long[]{userA.getId(), userB.getId()}),
@@ -98,13 +112,16 @@ class RatingAspectTest {
 
         //go through each rating type and test it
         for (RatingType ratingType : RatingType.values()) {
-
-            when(ratingAnnotation.ratingType()).thenReturn(ratingType);
             when(joinPoint.getArgs()).thenReturn(argsPerRatingsMap.get(ratingType));
 
             for (Boolean positiveAction : booleans) {
                 userIds = new Long[]{userContext.getUserId()};
-                when(ratingAnnotation.positiveAction()).thenReturn(positiveAction);
+
+                if (positiveAction) {
+                    when(methodSignature.getMethod()).thenReturn(methodsPerPositiveRatingType.get(ratingType));
+                } else {
+                    when(methodSignature.getMethod()).thenReturn(methodsPerNegativeRatingType.get(ratingType));
+                }
 
                 ratingAspect.changeRating(joinPoint);
 
