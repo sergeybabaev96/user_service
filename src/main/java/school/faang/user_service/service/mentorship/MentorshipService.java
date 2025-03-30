@@ -48,7 +48,7 @@ public class MentorshipService {
                 .toList();
     }
 
-    public void deleteUserFromRelation(long ownerId, long targetId, boolean isMentee) {
+    private void deleteUserFromRelation(long ownerId, long targetId, boolean isMentee) {
         User owner = mentorshipRepository.findById(ownerId).orElseThrow(() ->
                 new RuntimeException(isMentee ? "Mentor doesn't exist" : "Mentee doesn't exist"));
 
