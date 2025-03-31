@@ -16,6 +16,7 @@ import school.faang.user_service.exception.ErrorResponse;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -29,16 +30,18 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleDataValidationException(DataValidationException exception) {
+    public ResponseEntity<ErrorResponse> handleDataValidationException(DataValidationException exception) {
         log.error("Data validation exception", exception);
-        return new ErrorResponse(exception.getMessage());
+        return new ResponseEntity<>(
+                new ErrorResponse(exception.getMessage(), BAD_REQUEST).getHttpStatus());
     }
 
     @ExceptionHandler(EntityAlreadyExistException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleEntityAlreadyExistException(EntityAlreadyExistException exception) {
+    public ResponseEntity<ErrorResponse> handleEntityAlreadyExistException(EntityAlreadyExistException exception) {
         log.error("Entity already exist", exception);
-        return new ErrorResponse(exception.getMessage(), "BAD_REQUEST", 409);
+        return new ResponseEntity<>(
+                new ErrorResponse(exception.getMessage(), BAD_REQUEST).getHttpStatus());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -50,21 +53,25 @@ public class GlobalExceptionHandler {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
+
         });
         return ResponseEntity.badRequest().body(errors);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(NOT_FOUND)
-    public ErrorResponse handleEntityNotFoundException(EntityNotFoundException exception) {
+    public ResponseEntity<ErrorResponse> handleEntityNotFoundException(EntityNotFoundException exception) {
         log.error("Entity not found exception", exception);
-        return new ErrorResponse(exception.getMessage(),"NOT_FOUND", 404);
+        return new ResponseEntity<>(
+                new ErrorResponse(exception.getMessage(), NOT_FOUND).getHttpStatus());
     }
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleRuntimeException(RuntimeException exception) {
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException exception) {
         log.error("Unchecked exception", exception);
-        return new ErrorResponse(exception.getMessage(),"INTERNAL_SERVER_ERROR", 500);
+
+        return new ResponseEntity<>(
+                new ErrorResponse("Unchecked exception", INTERNAL_SERVER_ERROR).getHttpStatus());
     }
 }
