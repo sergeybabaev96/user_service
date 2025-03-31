@@ -192,6 +192,11 @@ public class UserService {
     }
 
     @Transactional
+    public List<Long> getFollowersIds(Long authorId) {
+        return userRepository.findFollowersByUserId(authorId).stream().map(User::getId).toList();
+    }
+  
+    @Transactional
     public void processCsvFile(MultipartFile csvFile) {
         try {
             InputStream file = csvFile.getInputStream();
