@@ -186,7 +186,9 @@ public class RecommendationService {
     }
 
     private void validateRecommendation(RecommendationDto recommendationDto) {
-        if (!isAllSkillsExist(recommendationDto)) {
+        if (recommendationDto.getAuthorId().equals(recommendationDto.getReceiverId())) {
+            throw new DataValidationException("Пользователь не может дать рекомендацию себе");
+        } else if (!isAllSkillsExist(recommendationDto)) {
             throw new DataValidationException("Один или несколько навыков не существуют в системе");
         } else if (isRecentRecommendationExists(recommendationDto)) {
             throw new DataValidationException("Автор дает рекомендацию раньше," +
