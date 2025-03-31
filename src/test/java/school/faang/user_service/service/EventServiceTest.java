@@ -3,6 +3,7 @@ package school.faang.user_service.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -23,6 +24,9 @@ class EventServiceTest {
     @Mock
     private EventRepository eventRepository;
 
+    @Captor
+    private ArgumentCaptor<List<Event>> captor;
+
     @InjectMocks
     private EventServiceImpl eventService;
 
@@ -33,8 +37,7 @@ class EventServiceTest {
 
     @Test
     void testDeleteEventByUserId() {
-
-        Long userId = 1L;
+        long userId = 1L;
         List<Event> events = List.of(new Event(), new Event());
 
         when(eventRepository.findAllByUserId(userId)).thenReturn(events);
@@ -46,7 +49,7 @@ class EventServiceTest {
 
     @Test
     void testDeleteParticipationFromEvent() {
-        Long userId = 1L;
+        long userId = 1L;
         User user1 = User.builder().id(1L).build();
         User user2 = User.builder().id(2L).build();
 
@@ -58,7 +61,6 @@ class EventServiceTest {
 
         eventService.deleteParticipationFromEvent(userId);
 
-        ArgumentCaptor<List<Event>> captor = ArgumentCaptor.forClass(List.class);
         verify(eventRepository).saveAll(captor.capture());
         List<Event> savedEvents = captor.getValue();
         assertEquals(1, savedEvents.get(0).getAttendees().size());

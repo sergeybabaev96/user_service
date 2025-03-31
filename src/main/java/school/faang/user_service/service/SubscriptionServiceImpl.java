@@ -48,7 +48,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public long getFollowersCount(long id) {
-        return subscriptionRepository.findFolloweesAmountByFollowerId(id);
+        return subscriptionRepository.findFollowersAmountByFolloweeId(id);
     }
 
     @Override

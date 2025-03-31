@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -19,10 +18,8 @@ import school.faang.user_service.dto.CreateUserDto;
 import school.faang.user_service.dto.externalStorage.ExternalResourceDto;
 import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.entity.UserProfilePic;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.avatarGenerator.AvatarGeneratorService;
@@ -41,7 +38,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
@@ -67,7 +63,6 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    @Spy
     @Mock
     private AvatarGeneratorService avatarGeneratorService;
     @Mock
@@ -128,12 +123,10 @@ public class UserServiceTest {
                 DataRetrievalFailureException.class,
                 () -> userService.getUserById(userId));
         verify(userRepository, times(1)).findById(userId);
-
     }
 
     @Test
     void testDeactivateUsers() {
-
         long userId = 1L;
         User user = User.builder().id(userId).active(true).build();
         User deactivatedUser = User.builder().id(userId).active(false).build();

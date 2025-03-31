@@ -59,4 +59,12 @@ public class MentorshipServiceImpl implements MentorshipService {
         }
         mentorshipRepository.save(mentee);
     }
+
+    public void deleteMentorShipByDeactivatedUser(Long mentorID) {
+        mentorshipRepository.deactivateMentor(mentorID);
+    }
+
+    public void deleteMenteeByDeactivatedUser(Long menteeId) {
+        mentorshipRepository.deleteDeactivatedMentee(menteeId);
+    }
 }
