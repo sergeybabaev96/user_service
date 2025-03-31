@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -11,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import school.faang.user_service.dto.goal.CreateGoalRequestDto;
 import school.faang.user_service.dto.goal.CreateGoalResponse;
+import school.faang.user_service.dto.goal.GoalCompletedEvent;
 import school.faang.user_service.dto.goal.GoalFilterDto;
 import school.faang.user_service.dto.goal.UpdateGoalRequestDto;
 import school.faang.user_service.dto.goal.UpdateGoalResponse;
@@ -20,6 +22,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.goal.data.GoalDataFilter;
 import school.faang.user_service.mapper.goal.GoalMapper;
+import school.faang.user_service.publisher.GoalCompletedEventPublisher;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.goal.operations.GoalAssignmentHelper;
 import school.faang.user_service.service.goal.operations.GoalValidator;
@@ -43,6 +46,8 @@ class GoalServiceTest {
     private GoalValidator goalValidator;
     @Mock
     private GoalAssignmentHelper goalAssignmentHelper;
+    @Mock
+    private GoalCompletedEventPublisher eventPublisher;
     @Mock
     private GoalDataFilter goalDataFilter1;
     @Mock
@@ -152,14 +157,23 @@ class GoalServiceTest {
     }
 
     @Test
-    void testUpdateGoal_ShouldAssignSkillsWhenCompleted() {
+    void testUpdateGoal_ShouldAssignSkillsAndPublishEvent_WhenCompleted() {
         updateGoalRequestDto.setGoalId(goalId);
+        updateGoalRequestDto.setUserId(userId);
         updateGoalRequestDto.setStatus(GoalStatus.COMPLETED);
+
         when(goalRepository.findById(goalId)).thenReturn(Optional.of(existingGoal));
 
         goalService.updateGoal(updateGoalRequestDto);
 
         verify(goalAssignmentHelper).assignSkillsToUsers(existingGoal, updateGoalRequestDto.getSkillIds());
+
+        ArgumentCaptor<GoalCompletedEvent> captor = ArgumentCaptor.forClass(GoalCompletedEvent.class);
+        verify(eventPublisher).publish(captor.capture());
+
+        GoalCompletedEvent publishedEvent = captor.getValue();
+        Assertions.assertEquals(userId, publishedEvent.getUserId());
+        Assertions.assertEquals(goalId, publishedEvent.getGoalId());
     }
 
     @Test

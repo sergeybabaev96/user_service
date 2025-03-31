@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.goal.CreateGoalRequestDto;
 import school.faang.user_service.dto.goal.CreateGoalResponse;
+import school.faang.user_service.dto.goal.GoalCompletedEvent;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.GoalFilterDto;
 import school.faang.user_service.dto.goal.UpdateGoalRequestDto;
@@ -14,6 +15,7 @@ import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.goal.data.GoalDataFilter;
 import school.faang.user_service.mapper.goal.GoalMapper;
+import school.faang.user_service.publisher.GoalCompletedEventPublisher;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.goal.operations.GoalAssignmentHelper;
 import school.faang.user_service.service.goal.operations.GoalValidator;
@@ -30,6 +32,7 @@ public class GoalService {
     private final List<GoalDataFilter> goalDataFilters;
     private final GoalValidator goalValidator;
     private final GoalAssignmentHelper goalAssignmentHelper;
+    private final GoalCompletedEventPublisher eventPublisher;
 
     @Transactional
     public CreateGoalResponse createGoal(CreateGoalRequestDto request) {
@@ -56,6 +59,9 @@ public class GoalService {
 
         if (request.getStatus() == GoalStatus.COMPLETED) {
             goalAssignmentHelper.assignSkillsToUsers(existingGoal, request.getSkillIds());
+
+            GoalCompletedEvent event = new GoalCompletedEvent(request.getUserId(), request.getGoalId());
+            eventPublisher.publish(event);
         }
 
         goalRepository.save(existingGoal);

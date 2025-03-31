@@ -11,6 +11,9 @@ import java.util.List;
 public class UpdateGoalRequestDto {
 
     @NotNull(message = "User ID cannot be null")
+    private Long userId;
+
+    @NotNull(message = "Goal ID cannot be null")
     private Long goalId;
 
     @Size(max = 64, message = "Title must be at most 64 characters")

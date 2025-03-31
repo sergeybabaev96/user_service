@@ -38,6 +38,9 @@ spring:
         max.poll.interval.ms: 600000
         fetch.max.wait.ms: 5000
 
+  redis:
+    topic:
+      goal-completed: goal-completed-topic
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
@@ -69,6 +72,12 @@ user:
 recommendation:
   analytic:
     recommendation-topic: "recommendation-create"
+
+goal-event:
+  async:
+    core-pool-size: 2
+    max-pool-size: 4
+    queue-capacity: 100
 
 services:
   s3:
