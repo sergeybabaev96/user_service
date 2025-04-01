@@ -1,5 +1,6 @@
 package school.faang.user_service.exception;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,6 +13,11 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(DataValidationException.class)
+    public ResponseEntity<String> handleDataValidationException(DataValidationException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
 
     //400
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -33,7 +39,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    //400
     @ExceptionHandler(CsvParseException .class)
     public ResponseEntity<Object> handleCsvParseException(CsvParseException ex) {
         Map<String, Object> body = new HashMap<>();
@@ -112,6 +117,10 @@ public class GlobalExceptionHandler {
         body.put("error", error);
         body.put("message", message);
         return new ResponseEntity<>(body, status);
+    }
+
+    private ResponseEntity<Object> buildErrorResponse(Exception ex, HttpStatus status, String error) {
+        return buildErrorResponse(cleanMessage(ex), status, error);
     }
 
     private String cleanMessage(Exception ex) {
