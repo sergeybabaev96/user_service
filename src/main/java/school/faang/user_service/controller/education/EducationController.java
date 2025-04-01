@@ -1,6 +1,7 @@
 package school.faang.user_service.controller.education;
 
-import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -10,27 +11,26 @@ import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.EducationDto;
 import school.faang.user_service.service.education.EducationService;
 
+
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/education")
 public class EducationController {
+
     private final EducationService educationService;
 
-    public EducationController(EducationService educationService) {
-        this.educationService = educationService;
-    }
-
     @PostMapping("/{userId}")
-    public EducationDto addEducation(@PathVariable long userId,
-                                    @Valid @RequestBody EducationDto educationDto) {
+    public EducationDto addEducation(@PathVariable long userId, @RequestBody EducationDto educationDto) {
         return educationService.addEducation(userId, educationDto);
     }
 
     @PutMapping("/{userId}")
-    public EducationDto updateEducation(@PathVariable long userId,
-                                        @RequestBody EducationDto educationDto) {
-
-            return educationService.updateEducation(userId, educationDto);
+    public EducationDto updateEducation(@PathVariable long userId, @RequestBody EducationDto educationDto) {
+        return educationService.updateEducation(userId, educationDto);
     }
 
+    @GetMapping("/{educationId}")
+    public EducationDto getEducationById(@PathVariable long educationId) {
+        return educationService.getEducationById(educationId);
+    }
 }
-
