@@ -42,7 +42,7 @@ public class Goal {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="parent_goal_id")
+    @JoinColumn(name = "parent_goal_id")
     private Goal parent;
 
     @Column(name = "title", length = 64, nullable = false, unique = true)
@@ -91,4 +91,9 @@ public class Goal {
             inverseJoinColumns = @JoinColumn(name = "skill_id")
     )
     private List<Skill> skillsToAchieve;
+
+    public Goal(Long parentId) {
+        this.parent = new Goal();
+        this.parent.setId(parentId);
+    }
 }

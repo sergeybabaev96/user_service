@@ -35,3 +35,22 @@ project-service:
 payment-service:
   host: localhost
   port: 9080
+
+s3:
+  endpoint: http://localhost:9000
+  accessKey: user
+  secretKey: password
+  bucketName: corpbucket
+  isMocked: false
+
+dicebear:
+  initials-url: https://api.dicebear.com/9.x/initials/png
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+    doc-expansion: none
+  api-docs:
+    path: /v3/api-docs
