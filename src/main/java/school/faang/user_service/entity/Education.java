@@ -13,6 +13,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import school.faang.user_service.dto.EducationDto;
 
 @Getter
 @Builder
@@ -21,7 +22,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "education")
-public class Education {
+public class Education extends EducationDto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

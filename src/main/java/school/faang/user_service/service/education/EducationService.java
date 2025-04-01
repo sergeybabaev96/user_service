@@ -58,4 +58,3 @@ public class EducationService {
                 .orElseThrow(() -> new DataValidationException("Education record not found"));
     }
 }
-
