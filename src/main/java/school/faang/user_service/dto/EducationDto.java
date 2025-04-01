@@ -10,5 +10,4 @@ public class EducationDto {
     private String institution;
     private String educationLevel;
     private String specialization;
-
 }
