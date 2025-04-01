@@ -112,4 +112,9 @@ public class UserService {
 
         return premiumUsers.map(userMapper::toDto).toList();
     }
+
+    public List<Long> getFollowerIds(Long userId) {
+        log.info("ghbdtn");
+        return userRepository.getFollowerIds(userId);
+    }
 }

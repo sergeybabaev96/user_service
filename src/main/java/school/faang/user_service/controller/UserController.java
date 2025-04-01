@@ -35,4 +35,9 @@ public class UserController {
         userValidation.validateUserId(userId);
         return userService.deactivate(userId);
     }
+
+    @GetMapping("/{userId}/followers/ids")
+    public List<Long> getFollowerIds(@PathVariable Long userId) {
+        return userService.getFollowerIds(userId);
+    }
 }
