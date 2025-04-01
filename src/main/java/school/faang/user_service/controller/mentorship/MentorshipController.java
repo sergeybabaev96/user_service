@@ -25,15 +25,13 @@ public class MentorshipController {
     }
 
     @DeleteMapping("/mentor/{mentorId}/mentee/{menteeId}")
-    public ResponseEntity<Void> deleteMentee(@PathVariable long mentorId, @PathVariable long menteeId) {
+    public void deleteMentee(@PathVariable long mentorId, @PathVariable long menteeId) {
         mentorshipService.deleteMentee(menteeId, mentorId);
-        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/mentee/{menteeId}/mentor/{mentorId}")
-    public ResponseEntity<Void> deleteMentor(@PathVariable long menteeId, @PathVariable long mentorId) {
+    public void deleteMentor(@PathVariable long menteeId, @PathVariable long mentorId) {
         mentorshipService.deleteMentor(menteeId, mentorId);
-        return ResponseEntity.noContent().build();
     }
 }
 

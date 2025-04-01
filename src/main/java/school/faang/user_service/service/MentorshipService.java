@@ -1,6 +1,7 @@
 package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.MentorshipDto;
 import school.faang.user_service.entity.User;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MentorshipService {
@@ -43,6 +45,7 @@ public class MentorshipService {
     public void deleteMentee(long menteeId, long mentorId) {
         List<User> mentee = mentorshipRepository.findAllMenteesByMentorId(mentorId);
         if (mentee == null || mentee.isEmpty()) {
+            log.warn("Попытка удалить менти у ментора с ID {}, но у него нет подопечных", mentorId);
             throw new IllegalArgumentException("У этого ментора нет менторов");
         }
         boolean isMentee = mentee.stream()
@@ -51,7 +54,9 @@ public class MentorshipService {
 
         if (isMentee) {
             mentorshipRepository.deleteById(menteeId);
+            log.info("Удалён менти с ID {} у ментора с ID {}", menteeId, mentorId);
         } else {
+            log.warn("Ментор с ID {} не менторит менти с ID {}, удаление невозможно", mentorId, menteeId);
             throw new IllegalArgumentException("Ментор не ментерит данного менти");
         }
     }
@@ -59,14 +64,18 @@ public class MentorshipService {
     public void deleteMentor(Long menteeId, Long mentorId) {
         List<MentorshipDto> mentors = getMentors(menteeId);
         if (mentors == null || mentors.isEmpty()) {
+            log.warn("Попытка удалить ментора у менти с ID {}, но у него нет менторов", menteeId);
             throw new IllegalArgumentException("У данного менти нет менторов.");
         }
         boolean isMentor = mentors.stream()
                 .filter(Objects::nonNull)
                 .anyMatch(mentor -> mentor.getId().equals(mentorId));
+
         if (isMentor) {
             mentorshipRepository.deleteById(mentorId);
+            log.info("Удалён ментор с ID {} у менти с ID {}", mentorId, menteeId);
         } else {
+            log.warn("Ментор с ID {} не является наставником менти с ID {}, удаление невозможно", mentorId, menteeId);
             throw new IllegalArgumentException("Ментор не ментерит данного менти");
         }
     }
