@@ -12,6 +12,7 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.entity.recommendation.Recommendation;
+import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.repository.SkillRepository;
@@ -47,13 +48,13 @@ public class RecommendationService {
 
         Recommendation recommendation = createRecommendation(recommendationDto);
 
-        List<Skill> skillOffers = recommendationDto.getSkillOffers().stream()
+        List<Skill> skills = recommendationDto.getSkillOffers().stream()
                 .map(SkillOfferDto::getSkillId)
                 .map(skillId -> skillRepository.findById(skillId).orElseThrow(() ->
                         new RuntimeException("Навык не найден"))).toList();
 
         List<Skill> userSkills = skillRepository.findAllByUserId(recommendationDto.getReceiverId());
-        Map<Boolean, List<Skill>> partitionedSkills = skillOffers.stream()
+        Map<Boolean, List<Skill>> partitionedSkills = skills.stream()
                 .collect(Collectors.partitioningBy(userSkills::contains));
 
         partitionedSkills.get(false)
@@ -67,6 +68,17 @@ public class RecommendationService {
                         addGuarantee(skill, recommendation.getAuthor(), recommendation.getReceiver());
                     }
                 });
+
+        User receiver = userRepository.findById(recommendationDto.getReceiverId())
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
+
+        for (var skill : skills) {
+            if (!skillRepository.findAllByUserId(receiver.getId()).contains(skill)) {
+                skill.getUsers().add(receiver);
+                skill.setUsers(skill.getUsers());
+                skillRepository.save(skill);
+            }
+        }
 
         log.info("Создание рекомендации с id {} прошло успешно", recommendation.getId());
 
@@ -113,7 +125,7 @@ public class RecommendationService {
     }
 
     public void delete(long id) {
-        if(!recommendationRepository.existsById(id)) {
+        if (!recommendationRepository.existsById(id)) {
             log.error("Рекомендации с ID {} не существует", id);
             throw new EntityNotFoundException("Рекомендации с ID " + id + " не существует");
         }
@@ -147,14 +159,29 @@ public class RecommendationService {
     }
 
     private boolean needsGuarantee(Skill skill, User guarantor, User receiver) {
-        List<UserSkillGuarantee> guarantees = skill.getGuarantees();
+        List<Recommendation> recommendations =
+                recommendationRepository.findAllByReceiverId(receiver.getId(), Pageable.unpaged()).toList().stream()
+                        .filter(recommendation -> recommendation.getAuthor().equals(guarantor)).toList();
+        for (var recommendation : recommendations) {
+            long count = recommendation.getSkillOffers().stream()
+                    .map(SkillOffer::getSkill)
+                    .filter(skillUser -> skillUser.equals(skill)).count();
+
+            if (count == 1) {
+                return true;
+            }
+        }
+
+        return false;
+
+        /*List<UserSkillGuarantee> guarantees = skill.getGuarantees();
         if (skill.getGuarantees() == null) {
             return false;
         }
         return guarantees.stream()
                 .noneMatch(userSkillGuarantee ->
                         userSkillGuarantee.getUser().equals(receiver) &&
-                                userSkillGuarantee.getGuarantor().equals(guarantor));
+                                userSkillGuarantee.getGuarantor().equals(guarantor));*/
     }
 
     private void addGuarantee(Skill skill, User guarantor, User receiver) {

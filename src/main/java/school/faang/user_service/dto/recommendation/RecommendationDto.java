@@ -23,7 +23,7 @@ public class RecommendationDto {
     private Long receiverId;
 
     @NotNull(message = "Содержание рекомендации не может быть пустым")
-    @Size(min = 10, max = 1000, message = "Рекомендация должна содержать от 1 до 100 символов")
+    @Size(min = 10, max = 1000, message = "Рекомендация должна содержать от 10 до 1000 символов")
     private String content;
 
     private List<SkillOfferDto> skillOffers;
