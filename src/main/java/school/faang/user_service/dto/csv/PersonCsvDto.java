@@ -21,7 +21,7 @@ public class PersonCsvDto {
     private Integer yearOfStudy;
     private String major;
     @JsonProperty("GPA")
-    private Double GPA;
+    private Double gpa;
     private String status;
     private String admissionDate;
     private String graduationDate;

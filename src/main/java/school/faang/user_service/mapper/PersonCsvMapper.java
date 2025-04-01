@@ -41,7 +41,7 @@ public interface PersonCsvMapper {
         edu.setFaculty(dto.getFaculty());
         edu.setYearOfStudy(dto.getYearOfStudy());
         edu.setMajor(dto.getMajor());
-        edu.setGpa(dto.getGPA());
+        edu.setGpa(dto.getGpa());
         return edu;
     }
 
