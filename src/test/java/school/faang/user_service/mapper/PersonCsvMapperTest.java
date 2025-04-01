@@ -27,7 +27,7 @@ class PersonCsvMapperTest {
         dto.setFaculty("Computer Science");
         dto.setYearOfStudy(3);
         dto.setMajor("Software Engineering");
-        dto.setGPA(3.75);
+        dto.setGpa(3.75);
 
         dto.setDegree("Bachelor");
         dto.setInstitution("XYZ University");
