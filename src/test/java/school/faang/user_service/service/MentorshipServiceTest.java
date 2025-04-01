@@ -33,21 +33,6 @@ public class MentorshipServiceTest {
     @InjectMocks
     private MentorshipService mentorshipService;
 
-    private UserWithDto createUserAndDto(Long id, String username) {
-        User user = new User();
-        user.setId(id);
-        user.setUsername(username);
-
-        MentorshipDto dto = new MentorshipDto();
-        dto.setId(id);
-        dto.setUsername(username);
-
-        return new UserWithDto(user, dto);
-    }
-
-    private record UserWithDto(User user, MentorshipDto mentorDto) {
-    }
-
     @Test
     public void testPositiveShouldReturnMenteesList() {
 
@@ -201,5 +186,20 @@ public class MentorshipServiceTest {
 
         verify(mentorshipRepository, never()).deleteById(anyLong());
         assertEquals("У данного менти нет менторов.", exception.getMessage());
+    }
+
+    private UserWithDto createUserAndDto(Long id, String username) {
+        User user = new User();
+        user.setId(id);
+        user.setUsername(username);
+
+        MentorshipDto dto = new MentorshipDto();
+        dto.setId(id);
+        dto.setUsername(username);
+
+        return new UserWithDto(user, dto);
+    }
+
+    private record UserWithDto(User user, MentorshipDto mentorDto) {
     }
 }
