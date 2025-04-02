@@ -2,7 +2,8 @@ package school.faang.user_service.exception;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
-import org.joda.time.LocalDateTime;
+
+import java.time.LocalDateTime;
 
 
 @Getter
