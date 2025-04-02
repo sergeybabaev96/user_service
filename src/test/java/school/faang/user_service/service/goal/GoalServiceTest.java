@@ -126,7 +126,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testCreateGoal_ShouldValidateAndSave() {
+    void testCreateGoalShouldValidateAndSave() {
         when(goalMapper.toEntity(createGoalRequestDto)).thenReturn(goal);
         when(goalRepository.save(any(Goal.class))).thenReturn(goal);
         when(goalMapper.toCreateResponse(any(Goal.class))).thenReturn(createGoalResponse);
@@ -141,7 +141,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testUpdateGoal_ShouldValidateAndUpdate() {
+    void testUpdateGoalShouldValidateAndUpdate() {
         updateGoalRequestDto.setGoalId(goalId);
         when(goalRepository.findById(goalId)).thenReturn(Optional.of(existingGoal));
         when(goalMapper.toUpdateResponse(existingGoal)).thenReturn(updateGoalResponse);
@@ -157,7 +157,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testUpdateGoal_ShouldAssignSkillsAndPublishEvent_WhenCompleted() {
+    void testUpdateGoalShouldAssignSkillsAndPublishEventWhenCompleted() {
         updateGoalRequestDto.setGoalId(goalId);
         updateGoalRequestDto.setUserId(userId);
         updateGoalRequestDto.setStatus(GoalStatus.COMPLETED);
@@ -177,7 +177,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testDeleteGoal_ShouldFindAndDelete() {
+    void testDeleteGoalShouldFindAndDelete() {
         when(goalRepository.findById(goalId)).thenReturn(Optional.of(existingGoal));
 
         goalService.deleteGoal(goalId);
@@ -186,7 +186,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testFindSubtasksByGoalId_CallsRepository() {
+    void testFindSubtasksByGoalIdCallsRepository() {
         when(goalRepository.findByParent(goalId)).thenReturn(Stream.of(goal));
 
         goalService.findSubtasksByGoalId(goalId, goalFilterDto);
@@ -195,7 +195,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testUpdateGoal_ShouldThrowExceptionIfGoalNotFound() {
+    void testUpdateGoalShouldThrowExceptionIfGoalNotFound() {
         updateGoalRequestDto.setGoalId(goalId);
         when(goalRepository.findById(goalId)).thenReturn(Optional.empty());
 
@@ -206,7 +206,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testDeleteGoal_ShouldThrowExceptionIfGoalNotFound() {
+    void testDeleteGoalShouldThrowExceptionIfGoalNotFound() {
         when(goalRepository.findById(goalId)).thenReturn(Optional.empty());
 
         DataValidationException exception = assertThrows(DataValidationException.class,
@@ -216,7 +216,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testGetGoalsByUser_CallsRepository() {
+    void testGetGoalsByUserCallsRepository() {
         when(goalRepository.findGoalsByUserId(userId)).thenReturn(Stream.of(goal));
 
         goalService.getGoalsByUser(userId, goalFilterDto);
@@ -225,7 +225,7 @@ class GoalServiceTest {
     }
   
     @Test
-    void testStopGoalsByUser_ShouldRemoveUserFromParticipantsList() {
+    void testStopGoalsByUserShouldRemoveUserFromParticipantsList() {
         User user1 = User.builder().id(1L).build();
         User user2 = User.builder().id(2L).build();
         Stream<Goal> goals = Stream.of(Goal.builder()
@@ -241,7 +241,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testStopGoalsByUser_Success() {
+    void testStopGoalsByUserSuccess() {
         Goal goal = Goal.builder()
                 .title("Goal 1")
                 .users(List.of(User.builder().id(1L).build()))
