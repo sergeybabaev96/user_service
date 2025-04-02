@@ -10,11 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.user.UserDto;
-import school.faang.user_service.dto.user.UserNotificationDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.UserMapper;
-import school.faang.user_service.mapper.UserNotificationMapper;
 import school.faang.user_service.service.user.DeactivateUserService;
 
 @RestController
@@ -25,7 +23,6 @@ public class UserController {
 
     private DeactivateUserService deactivateUserService;
     private UserMapper userMapper;
-    private UserNotificationMapper userNotificationMapper;
     private static final String NEGATIVE_ID = "userId is negative";
 
     @PostMapping("/deactivate")
@@ -51,17 +48,6 @@ public class UserController {
         }
     }
 
-    @GetMapping("{userId}/notification")
-    @ResponseBody
-    public UserNotificationDto getNotificationUser(@PathVariable Long userId) {
-        if(idIsValid(userId)) {
-            User user = deactivateUserService.getUser(userId);
-            return userNotificationMapper.toDto(user);
-        } else {
-            log.error(NEGATIVE_ID);
-            throw new DataValidationException(NEGATIVE_ID);
-        }
-    }
 
     private boolean idIsValid(Long id) {
         return id >= 0;
