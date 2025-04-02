@@ -39,7 +39,7 @@ public class AvatarValidator {
     }
 
     public void checkFileType(MultipartFile avatar) {
-        if (!Objects.equals(avatar.getContentType(), "jpg")) {
+        if (!Objects.equals(avatar.getContentType(), "image/jpeg")) {
             throw new DataValidationException("file content type is not jpg");
         }
     }
