@@ -82,4 +82,19 @@ public class MentorshipServiceImpl implements MentorshipService {
         String message = messageGenerator.apply(mentorId, menteeId);
         return new SuccessResponseDto(message);
     }
+
+//    TODO: метод не соответствует условию в задаче BJS2-66001: После деактивации профиля: если пользователь был
+//     ментором других пользователей — необходимо остановить менторство. Для этого нужно написать соответствующий метод
+//     в MentorshipService. Ментор должен пропасть из списка менторов своих менти. При этом все цели, которые ментор
+//     поставил менти сохраняются, но больше не хранят mentorId — теперь они выглядят так,
+//     как будто менти поставил их себе сам. Про ЦЕЛИ речь в условии, а не про связи в mentorship. Метод ниже
+//     устанавливает менти самого себе ментором.
+//    public void deleteMentorShipByDeactivatedUser(Long mentorID) {
+//        mentorshipRepository.deactivateMentor(mentorID);
+//    }
+
+    // TODO: удаление в задаче BJS2-66001 делать не просили
+//    public void deleteMenteeByDeactivatedUser(Long menteeId) {
+//        mentorshipRepository.deleteDeactivatedMentee(menteeId);
+//    }
 }
