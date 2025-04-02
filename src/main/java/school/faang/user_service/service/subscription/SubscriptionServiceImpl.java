@@ -54,6 +54,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return getFilteredUsers(users, filterDto);
     }
 
+    public List<SubscriptionUserDto> getFollowers(long followeeId) {
+        Stream<User> users = subscriptionRepository.findByFolloweeId(followeeId);
+        return users
+                .map(subscriptionUserMapper::toSubscriptionUserDto)
+                .toList();
+    }
+
     public List<SubscriptionUserDto> getFollowing(long followeeId, SubscriptionUserFilterDto filterDto) {
         Stream<User> users = subscriptionRepository.findByFolloweeId(followeeId);
         return getFilteredUsers(users, filterDto);
