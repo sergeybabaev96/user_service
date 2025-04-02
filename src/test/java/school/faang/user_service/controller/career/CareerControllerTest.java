@@ -44,7 +44,6 @@ public class CareerControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-
     long userId = 1L;
     long careerId = 1L;
     CareerDto careerDto = new CareerDto();

@@ -104,4 +104,9 @@ public class UserService {
         User user = personMapper.toUser(person, country);
         userRepository.save(user);
     }
+
+    public User getUserFromDb(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
 }
