@@ -1,6 +1,7 @@
 package school.faang.user_service.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataRetrievalFailureException;
@@ -18,7 +19,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final EventService eventService;
+    private final GoalService goalService;
+    private final MentorshipService mentorshipService;
     private final UserMapper userMapper;
+
+    @Override
+    public User getReferenceById(long userId) {
+        if (!userRepository.existsById(userId))
+            throw new EntityNotFoundException("User not founds");
+        return userRepository.getReferenceById(userId);
+    }
 
     @Override
     public boolean doesUserExist(long userId) {
@@ -30,6 +41,20 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new DataRetrievalFailureException(
                         "User with id %d is not found".formatted(userId)));
+    }
+
+    @Override
+    @Transactional
+    public UserDto deactivateUser(long userId) {
+        eventService.deleteEventByUserId(userId);
+        eventService.deleteParticipationFromEvent(userId);
+        goalService.deleteUserFromGoals(userId);
+        mentorshipService.deleteMentorShipByDeactivatedUser(userId);
+        mentorshipService.deleteMenteeByDeactivatedUser(userId);
+        User user = getUserById(userId);
+        user.setActive(false);
+        User deactivatedUser = userRepository.save(user);
+        return userMapper.toDto(deactivatedUser);
     }
 
     @Override
@@ -49,27 +74,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean existsById(long userId) {
         return userRepository.existsById(userId);
+
     }
 
     @Override
     public UserDto getUser(long userId) {
         var user = getUserById(userId);
-
         return userMapper.toDto(user);
     }
 
     @Override
     public List<UserDto> getUsersByIds(List<Long> ids) {
         var users = userRepository.findAllById(ids);
-
         return userMapper.toDtoList(users);
     }
-
-    @Override
-    public User getReferenceById(long userId) {
-        if (!userRepository.existsById(userId))
-            throw new EntityNotFoundException("User not founds");
-        return userRepository.getReferenceById(userId);
-    }
-
 }

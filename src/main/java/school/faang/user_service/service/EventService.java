@@ -17,4 +17,9 @@ public interface EventService {
     EventDto updateEvent(EventDto eventDto);
 
     List<EventDto> getParticipatedEvents(Long userId);
+
+    void deleteEventByUserId(Long userId);
+
+    void deleteParticipationFromEvent(Long userId);
+
 }
