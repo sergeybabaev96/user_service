@@ -4,8 +4,10 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +21,7 @@ import java.util.List;
 @RestController
 @Validated
 @RequiredArgsConstructor
-@RequestMapping("/mentorship_request")
+@RequestMapping("/mentorship-requests")
 public class MentorshipRequestController {
     private final MentorshipRequestService mentorshipRequestService;
 
@@ -28,17 +30,17 @@ public class MentorshipRequestController {
         return mentorshipRequestService.requestMentorship(mentorshipRequestDto);
     }
 
-    @PostMapping("/get")
-    public List<MentorshipRequestDto> getRequests(@RequestBody MentorshipRequestFilterDto filter) {
+    @GetMapping("/filter")
+    public List<MentorshipRequestDto> getRequests(MentorshipRequestFilterDto filter) {
         return mentorshipRequestService.getRequests(filter);
     }
 
-    @PostMapping("/accept/{id}")
+    @PutMapping("/{id}/accept")
     public MentorshipRequestDto acceptRequest(@PathVariable @Positive long id) {
         return mentorshipRequestService.acceptRequest(id);
     }
 
-    @PostMapping("/reject/{id}")
+    @PutMapping("/{id}/reject")
     public MentorshipRequestDto rejectRequest(
             @PathVariable @Positive long id,
             @Valid @RequestBody MentorshipRejectionDto rejection) {

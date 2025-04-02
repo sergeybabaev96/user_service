@@ -3,7 +3,6 @@ package school.faang.user_service.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import school.faang.user_service.dto.MentorshipDeleteDto;
 import school.faang.user_service.dto.SuccessResponseDto;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.Mentorship;
@@ -64,22 +63,20 @@ public class MentorshipServiceImpl implements MentorshipService {
 
     @Override
     @Transactional
-    public SuccessResponseDto deleteMentee(MentorshipDeleteDto mentorshipDeleteDto) {
-        return deleteMentorship(mentorshipDeleteDto, (mentorId, menteeId) ->
-                "Mentee with ID %d successfully deleted from mentor with ID %d".formatted(menteeId, mentorId));
+    public SuccessResponseDto deleteMentee(Long mentorId, Long menteeId) {
+        return deleteMentorship(mentorId, menteeId, (idMentor, idMentee) ->
+                "Mentee with ID %d successfully deleted from mentor with ID %d".formatted(idMentee, idMentor));
     }
 
     @Override
     @Transactional
-    public SuccessResponseDto deleteMentor(MentorshipDeleteDto mentorshipDeleteDto) {
-        return deleteMentorship(mentorshipDeleteDto,
+    public SuccessResponseDto deleteMentor(Long mentorId, Long menteeId) {
+        return deleteMentorship(mentorId, menteeId,
                 "Mentor with ID %d successfully deleted from mentee with ID %d"::formatted);
     }
 
-    private SuccessResponseDto deleteMentorship(MentorshipDeleteDto dto,
+    private SuccessResponseDto deleteMentorship(Long mentorId, Long menteeId,
                                                 BiFunction<Long, Long, String> messageGenerator) {
-        long mentorId = dto.mentorId();
-        long menteeId = dto.menteeId();
         long mentorshipId = findMentorshipConnectionId(mentorId, menteeId);
         mentorshipRepository.deleteById(mentorshipId);
         String message = messageGenerator.apply(mentorId, menteeId);

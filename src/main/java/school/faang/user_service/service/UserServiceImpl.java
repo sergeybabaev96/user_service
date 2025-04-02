@@ -5,7 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.UserNotFoundException;
-import school.faang.user_service.exception.UsernameIsNotUniqueException;
+import school.faang.user_service.exception.UsernameNotFoundException;
+import school.faang.user_service.exception.UsernameNotUniqueException;
 import school.faang.user_service.repository.UserRepository;
 
 import java.util.List;
@@ -22,13 +23,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public long getUniqueIdByUsername(String username) {
-        List<Long> userIds = userRepository.findIdByUsername(username);
+    public long findUniqueIdByUsername(String username) {
+        List<Long> userIds = userRepository.findIdByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "Username '%s' not found".formatted(username)));
         long userId;
         if (userIds.size() == 1) {
             userId = userIds.get(0);
         } else {
-            throw new UsernameIsNotUniqueException("The username '%s' is not unique".formatted(username));
+            throw new UsernameNotUniqueException("Username '%s' must be unique".formatted(username));
         }
         return userId;
     }
@@ -37,7 +40,7 @@ public class UserServiceImpl implements UserService {
     public User findUserById(long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(
-                        "User with id %d is not found".formatted(userId)));
+                        "User with id %d not found".formatted(userId)));
     }
 
     @Override
@@ -48,12 +51,8 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
     public boolean existsById(long userId) {
         return userRepository.existsById(userId);
-    }
-
-    public User findById(long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
 }

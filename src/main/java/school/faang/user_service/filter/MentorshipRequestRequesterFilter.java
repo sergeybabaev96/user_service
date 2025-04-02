@@ -22,7 +22,7 @@ public class MentorshipRequestRequesterFilter implements MentorshipRequestFilter
     public Stream<MentorshipRequest> apply(Stream<MentorshipRequest> mentorshipRequests,
                                            MentorshipRequestFilterDto mentorshipRequestFilterDto) {
         return mentorshipRequests.filter(
-                mentorshipRequest -> userService.getUniqueIdByUsername(mentorshipRequestFilterDto.requesterUsername())
+                mentorshipRequest -> userService.findUniqueIdByUsername(mentorshipRequestFilterDto.requesterUsername())
                         == mentorshipRequest.getRequester().getId());
     }
 }

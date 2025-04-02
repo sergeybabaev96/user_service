@@ -38,8 +38,8 @@ public class MentorshipRequestServiceImpl implements MentorshipRequestService {
     @Override
     @Transactional
     public MentorshipRequestDto requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
-        long requesterId = userService.getUniqueIdByUsername(mentorshipRequestDto.requesterUsername());
-        long receiverId = userService.getUniqueIdByUsername(mentorshipRequestDto.receiverUsername());
+        long requesterId = userService.findUniqueIdByUsername(mentorshipRequestDto.requesterUsername());
+        long receiverId = userService.findUniqueIdByUsername(mentorshipRequestDto.receiverUsername());
 
         if (requesterId == receiverId) {
             throw new SelfMentorshipRequestException("User cannot request mentorship from themselves.");

@@ -1,6 +1,5 @@
 package school.faang.user_service.service;
 
-import school.faang.user_service.dto.MentorshipDeleteDto;
 import school.faang.user_service.dto.SuccessResponseDto;
 import school.faang.user_service.dto.UserDto;
 
@@ -17,7 +16,7 @@ public interface MentorshipService {
 
     List<UserDto> getMentors(long menteeId);
 
-    SuccessResponseDto deleteMentee(MentorshipDeleteDto mentorshipDeleteDto);
+    SuccessResponseDto deleteMentee(Long menteeId, Long mentorId);
 
-    SuccessResponseDto deleteMentor(MentorshipDeleteDto mentorshipDeleteDto);
+    SuccessResponseDto deleteMentor(Long menteeId, Long mentorId);
 }

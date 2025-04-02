@@ -1,13 +1,12 @@
 package school.faang.user_service.controller;
 
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import school.faang.user_service.dto.MentorshipDeleteDto;
 import school.faang.user_service.dto.SuccessResponseDto;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.service.MentorshipService;
@@ -21,23 +20,25 @@ public class MentorshipController {
 
     private final MentorshipService mentorshipService;
 
-    @GetMapping("/get_mentees")
+    @GetMapping("/get-mentees")
     public List<UserDto> getMentees(Long mentorId) {
         return mentorshipService.getMentees(mentorId);
     }
 
-    @GetMapping("/get_mentors")
+    @GetMapping("/get-mentors")
     public List<UserDto> getMentors(Long menteeId) {
         return mentorshipService.getMentors(menteeId);
     }
 
-    @PostMapping("/delete_mentee")
-    public SuccessResponseDto deleteMentee(@RequestBody @Valid MentorshipDeleteDto mentorshipDeleteDto) {
-        return mentorshipService.deleteMentee(mentorshipDeleteDto);
+    @DeleteMapping("/delete-mentee")
+    public SuccessResponseDto deleteMentee(@PathVariable @Positive long menteeId,
+                                           @PathVariable @Positive long mentorId) {
+        return mentorshipService.deleteMentee(menteeId, mentorId);
     }
 
-    @PostMapping("/delete_mentor")
-    public SuccessResponseDto deleteMentor(@RequestBody @Valid MentorshipDeleteDto mentorshipDeleteDto) {
-        return mentorshipService.deleteMentor(mentorshipDeleteDto);
+    @DeleteMapping("/delete-mentor")
+    public SuccessResponseDto deleteMentor(@PathVariable @Positive long menteeId,
+                                           @PathVariable @Positive long mentorId) {
+        return mentorshipService.deleteMentor(menteeId, mentorId);
     }
 }

@@ -40,7 +40,7 @@ public class EducationServiceImpl implements EducationService {
             throw new DataValidationException("User not found");
         }
 
-        User user = userService.findById(userId);
+        User user = userService.findUserById(userId);
         log.info("User found with id: {}", userId);
 
         Education education = educationMapper.toEducation(educationDto);

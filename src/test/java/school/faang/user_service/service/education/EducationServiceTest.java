@@ -89,7 +89,7 @@ class EducationServiceTest {
     @Test
     void addEducation_ValidData_ReturnsEducationDto() {
         when(userService.existsById(1L)).thenReturn(true);
-        when(userService.findById(1L)).thenReturn(user);
+        when(userService.findUserById(1L)).thenReturn(user);
         when(educationRepository.save(any(Education.class))).thenAnswer(invocation
                 -> invocation.getArgument(0));
 
@@ -97,7 +97,7 @@ class EducationServiceTest {
 
         assertNotNull(result);
         assertEquals(validEducationDto.institution(), result.institution());
-        verify(userService, times(1)).findById(1L);
+        verify(userService, times(1)).findUserById(1L);
         verify(educationRepository, times(1)).save(any(Education.class));
     }
 
@@ -105,7 +105,7 @@ class EducationServiceTest {
     void addEducation_InvalidYearFrom_ThrowsException() {
         assertThrows(DataValidationException.class, ()
                 -> educationService.addEducation(1L, invalidYearFromEducationDto));
-        verify(userService, never()).findById(anyLong());
+        verify(userService, never()).findUserById(anyLong());
         verify(educationRepository, never()).save(any(Education.class));
     }
 
@@ -116,7 +116,7 @@ class EducationServiceTest {
         assertThrows(DataValidationException.class, () -> educationService.addEducation(1L, validEducationDto));
 
         verify(userService, times(1)).existsById(1L);
-        verify(userService, never()).findById(anyLong());
+        verify(userService, never()).findUserById(anyLong());
         verify(educationRepository, never()).save(any(Education.class));
     }
 

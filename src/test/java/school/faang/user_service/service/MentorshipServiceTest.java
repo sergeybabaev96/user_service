@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import school.faang.user_service.dto.MentorshipDeleteDto;
 import school.faang.user_service.dto.SuccessResponseDto;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
@@ -147,35 +146,34 @@ class MentorshipServiceTest {
     class TestDeleteMentee {
 
         @Test
-        void testDeleteMentee_shouldRemoveRelationship_whenExists() {
+        void shouldRemoveRelationshipWhenDeleteMentee() {
             // Arrange
             long mentorId = 1L;
             long menteeId = 2L;
             long mentorshipId = 10L;
-            MentorshipDeleteDto dto = new MentorshipDeleteDto(mentorId, menteeId);
 
             when(mentorshipRepository.findIdByMentorIdAndMenteeId(mentorId, menteeId))
                     .thenReturn(Optional.of(mentorshipId));
             // Act
-            SuccessResponseDto response = mentorshipService.deleteMentee(dto);
+            SuccessResponseDto response = mentorshipService.deleteMentee(mentorId, menteeId);
 
             // Assert
+            verify(mentorshipRepository).findIdByMentorIdAndMenteeId(mentorId, menteeId);
             verify(mentorshipRepository).deleteById(mentorshipId);
             assertEquals("Mentee with ID 2 successfully deleted from mentor with ID 1", response.message());
         }
 
         @Test
-        void testDeleteMentee_shouldThrowException_whenRelationshipNotFound() {
+        void shouldThrowExceptionWhenDeleteMenteeAndRelationshipNotFound() {
             // Arrange
             long mentorId = 1L;
             long menteeId = 2L;
-            MentorshipDeleteDto dto = new MentorshipDeleteDto(mentorId, menteeId);
 
             when(mentorshipRepository.findIdByMentorIdAndMenteeId(mentorId, menteeId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(MentorshipNotFoundException.class, () -> mentorshipService.deleteMentee(dto));
+            assertThrows(MentorshipNotFoundException.class, () -> mentorshipService.deleteMentee(mentorId, menteeId));
         }
     }
 
@@ -183,58 +181,35 @@ class MentorshipServiceTest {
     class TestDeleteMentor {
 
         @Test
-        void testDeleteMentor_shouldRemoveRelationship_whenExists() {
+        void shouldRemoveRelationshipWhenDeleteMentor() {
             // Arrange
             long mentorId = 1L;
             long menteeId = 2L;
             long mentorshipId = 10L;
-            MentorshipDeleteDto dto = new MentorshipDeleteDto(mentorId, menteeId);
 
             when(mentorshipRepository.findIdByMentorIdAndMenteeId(mentorId, menteeId))
                     .thenReturn(Optional.of(mentorshipId));
 
             // Act
-            SuccessResponseDto response = mentorshipService.deleteMentor(dto);
+            SuccessResponseDto response = mentorshipService.deleteMentor(mentorId, menteeId);
 
             // Assert
+            verify(mentorshipRepository).findIdByMentorIdAndMenteeId(mentorId, menteeId);
             verify(mentorshipRepository).deleteById(mentorshipId);
             assertEquals("Mentor with ID 1 successfully deleted from mentee with ID 2", response.message());
         }
 
         @Test
-        void testDeleteMentor_shouldThrowException_whenMenteeNotFound() {
+        void shouldThrowExceptionWhenDeleteMentorAndRelationshipNotFound() {
             // Arrange
             long mentorId = 1L;
             long menteeId = 2L;
-            MentorshipDeleteDto dto = new MentorshipDeleteDto(mentorId, menteeId);
 
             when(mentorshipRepository.findIdByMentorIdAndMenteeId(mentorId, menteeId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(MentorshipNotFoundException.class, () -> mentorshipService.deleteMentor(dto));
-        }
-
-        @Test
-        void testFindMentorshipConnectionId_shouldThrowException_whenRelationshipNotFound() {
-            // Arrange
-            long mentorId = 1L;
-            long menteeId = 2L;
-
-            when(mentorshipRepository.findIdByMentorIdAndMenteeId(mentorId, menteeId))
-                    .thenReturn(Optional.empty());
-
-            // Act
-            MentorshipNotFoundException exception = assertThrows(
-                    MentorshipNotFoundException.class,
-                    () -> mentorshipService.findMentorshipConnectionId(mentorId, menteeId)
-            );
-
-            // Assert
-            assertEquals(
-                    "No mentorship relationship found for mentor 1 and mentee 2",
-                    exception.getMessage()
-            );
+            assertThrows(MentorshipNotFoundException.class, () -> mentorshipService.deleteMentor(mentorId, menteeId));
         }
     }
 }
