@@ -14,7 +14,7 @@ import school.faang.user_service.controller.subscription.SubscriptionController;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.exception.HandlerDataValidationException;
+import school.faang.user_service.exception.GlobalExceptionHandler;
 import school.faang.user_service.service.subscription.SubscriptionService;
 
 import java.util.List;
@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(SubscriptionController.class)
-@ContextConfiguration(classes = {SubscriptionController.class, HandlerDataValidationException.class})
+@ContextConfiguration(classes = {SubscriptionController.class, GlobalExceptionHandler.class})
 public class SubscriptionControllerTest {
     @Autowired
     private MockMvc mockMvc;
