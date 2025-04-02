@@ -19,4 +19,8 @@ public interface MentorshipService {
     SuccessResponseDto deleteMentee(Long menteeId, Long mentorId);
 
     SuccessResponseDto deleteMentor(Long menteeId, Long mentorId);
+
+    void deleteMentorShipByDeactivatedUser(Long mentorID);
+
+    void deleteMenteeByDeactivatedUser(Long menteeId);
 }

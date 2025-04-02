@@ -12,10 +12,14 @@ import school.faang.user_service.repository.UserRepository;
 import java.util.List;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final EventService eventService;
+    private final GoalService goalService;
+    private final MentorshipService mentorshipService;
+    private final UserMapper userMapper;
 
     @Override
     public User getReferenceById(long userId) {
@@ -54,5 +58,31 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean existsById(long userId) {
         return userRepository.existsById(userId);
+    }
+
+    @Override
+    @Transactional
+    public UserDto deactivateUser(long userId) {
+        eventService.deleteEventByUserId(userId);
+        eventService.deleteParticipationFromEvent(userId);
+        goalService.deleteUserFromGoals(userId);
+        mentorshipService.deleteMentorShipByDeactivatedUser(userId);  // TODO check necessary of both methods
+        mentorshipService.deleteMenteeByDeactivatedUser(userId);
+        User user = getUserById(userId);
+        user.setActive(false);
+        User deactivatedUser = userRepository.save(user);
+        return userMapper.toDto(deactivatedUser);
+    }
+
+    @Override
+    public UserDto getUser(long userId) {
+        var user = getUserById(userId);
+        return userMapper.toDto(user);
+    }
+
+    @Override
+    public List<UserDto> getUsersByIds(List<Long> ids) {
+        var users = userRepository.findAllById(ids);
+        return userMapper.toDtoList(users);
     }
 }

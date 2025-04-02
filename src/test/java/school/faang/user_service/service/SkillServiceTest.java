@@ -18,7 +18,7 @@ public class SkillServiceTest {
     private SkillRepository skillRepository;
 
     @InjectMocks
-    private SkillService skillService;
+    private SkillServiceImpl skillService;
 
     @Test
     public void testDoesSkillExists_RequestDataFromRepository_ReturnsTrue() {

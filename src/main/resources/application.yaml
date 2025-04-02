@@ -36,8 +36,18 @@ payment-service:
   host: localhost
   port: 9080
 
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
 user_service:
   mentorship:
     # allowedRequestFrequency - the number of months that must pass before user A can
     # send another mentorship request to the same user B
     allowedRequestFrequency: 3
+  skill:
+    # minSkillOffers - the minimum number of offers for one skill
+    #so that the user can save it
+    minSkillOffers: 3
