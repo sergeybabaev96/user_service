@@ -1,5 +1,6 @@
 package school.faang.user_service.service.avatar;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.imgscalr.Scalr;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ public class ImageResize {
      * @apiNote Всегда сохраняет результат в формате JPG независимо от исходного формата
      * @implNote Использует алгоритм масштабирования Scalr.Method.QUALITY для наилучшего качества
      */
-    public MultipartFile resizeImage(MultipartFile file, int maxSize) {
+    public MultipartFile resizeImage(@NotNull MultipartFile file, int maxSize) {
         ByteArrayOutputStream outputStream;
         try {
             BufferedImage originalImage = ImageIO.read(file.getInputStream());

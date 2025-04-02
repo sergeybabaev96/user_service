@@ -1,7 +1,9 @@
 package school.faang.user_service.service.avatar;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,8 +28,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AvatarService {
-    private final String SMALL_AVATAR_SIZE = "small";
-    private final String LARGE_AVATAR_SIZE = "large";
+    @Value("${avatar.sizes.small}")
+    private String SMALL_AVATAR_SIZE;
+    @Value("${avatar.sizes.large}")
+    private String LARGE_AVATAR_SIZE;
 
     private final AvatarConfig avatarConfig;
     private final S3Service s3Service;
@@ -51,9 +55,10 @@ public class AvatarService {
      * @throws IllegalArgumentException если файл аватара не проходит валидацию
      */
     @Transactional
-    public void addUserAvatar(long userId, MultipartFile avatar) {
+    public void addUserAvatar(long userId, @NotNull MultipartFile avatar) {
         User user = userService.getUser(userId);
         avatarValidator.checkAvatarSize(avatar);
+        avatarValidator.checkFileType(avatar);
 
         String folder = buildUserFolder(user);
 

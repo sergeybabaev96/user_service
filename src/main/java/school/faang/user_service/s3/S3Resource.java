@@ -1,6 +1,8 @@
 package school.faang.user_service.s3;
 
 import com.amazonaws.services.s3.model.S3Object;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.AbstractResource;
 
@@ -25,7 +27,14 @@ import java.io.InputStream;
  */
 @RequiredArgsConstructor
 public class S3Resource extends AbstractResource implements AutoCloseable {
+    @NotNull(message = "S3Object cant be null")
     private final S3Object s3Object;
+    /**
+     * -- GETTER --
+     *  Возвращает имя файла, ассоциированное с ресурсом.
+     *
+     */
+    @Getter
     private final String fileName;
 
     /**
@@ -42,31 +51,20 @@ public class S3Resource extends AbstractResource implements AutoCloseable {
      * Открывает поток для чтения данных из S3-объекта.
      *
      * @return InputStream для чтения содержимого файла
-     * @throws IOException если произошла ошибка при открытии потока
      * @throws IllegalStateException если S3-объект уже был закрыт
      */
     @Override
-    public InputStream getInputStream() throws IOException {
+    public InputStream getInputStream() {
         return s3Object.getObjectContent();
-    }
-
-    /**
-     * Возвращает имя файла, ассоциированное с ресурсом.
-     *
-     * @return Имя файла, переданное в конструктор
-     */
-    public String getFileName() {
-        return fileName;
     }
 
     /**
      * Возвращает размер содержимого S3-объекта в байтах.
      *
      * @return Размер файла в байтах
-     * @throws IOException если произошла ошибка при получении метаданных
      */
     @Override
-    public long contentLength() throws IOException {
+    public long contentLength() {
         return s3Object.getObjectMetadata().getContentLength();
     }
 
@@ -84,9 +82,7 @@ public class S3Resource extends AbstractResource implements AutoCloseable {
     @Override
     public void close() throws IOException {
         try {
-            if (getInputStream() != null) {
-                getInputStream().close();
-            }
+            getInputStream().close();
         } finally {
             if (s3Object != null) {
                 s3Object.close();

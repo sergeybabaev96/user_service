@@ -1,10 +1,13 @@
 package school.faang.user_service.validation.avatar;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.config.avatar.AvatarConfig;
 import school.faang.user_service.exception.DataValidationException;
+
+import java.util.Objects;
 
 /**
  * Валидатор для проверки аватаров пользователей.
@@ -14,6 +17,7 @@ import school.faang.user_service.exception.DataValidationException;
  *   <li>Размер файла (не должен превышать {@link AvatarConfig#getMaxSizeBytes()})</li>
  * </ul>
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AvatarValidator {
@@ -31,6 +35,12 @@ public class AvatarValidator {
         long avatarSize = avatar.getSize();
         if (avatarSize > avatarConfig.getMaxSizeBytes()) {
             throw new DataValidationException("Avatar size cant be more 5 mb");
+        }
+    }
+
+    public void checkFileType(MultipartFile avatar) {
+        if (!Objects.equals(avatar.getContentType(), "jpg")) {
+            throw new DataValidationException("file content type is not jpg");
         }
     }
 }

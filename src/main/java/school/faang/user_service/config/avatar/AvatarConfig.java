@@ -1,5 +1,6 @@
 package school.faang.user_service.config.avatar;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -16,6 +17,10 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "avatar")
 public class AvatarConfig {
     private long maxSizeBytes;
+
+    @NotNull(message = "folderTemplate can not be null")
     private String folderTemplate;
+
+    @NotNull(message = "sizes can not be null")
     private Map<String, Integer> sizes;
 }

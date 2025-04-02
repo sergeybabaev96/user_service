@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,19 +43,20 @@ public class S3Service {
      * @throws FileException если произошла ошибка при загрузке
      *
      */
-    public String uploadFile(MultipartFile file, String folder) {
+    public String uploadFile(@NotNull MultipartFile file,
+                             @NotNull String folder) {
         long fileSize = file.getSize();
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(fileSize);
         objectMetadata.setContentType(file.getContentType());
-        String key = String.format("%s/%s", folder, file.getOriginalFilename());
+        String key = createKey(file, folder);
 
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(
                     bucket, key, file.getInputStream(), objectMetadata);
             s3Client.putObject(putObjectRequest);
         } catch (Exception exception) {
-            log.error(exception.getMessage());
+            log.error("file is not upload: {}", exception.getMessage());
             throw new FileException(exception.getMessage());
         }
         return key;
@@ -66,13 +68,14 @@ public class S3Service {
      * @param fileId ключ (путь) к файлу в S3 (например, "users/123/avatars/profile.jpg")
      * @return InputStream с содержимым файла
      */
-    public Resource downloadFile(String fileId) {
+    public Resource downloadFile(@NotNull String fileId) {
         try {
             S3Object s3Object = s3Client.getObject(bucket, fileId);
 
             return new S3Resource(s3Object, fileId);
-        } catch (Exception e) {
-            throw new FileException(e.getMessage());
+        } catch (Exception exception) {
+            log.error("file is not download {}", exception.getMessage());
+            throw new FileException(exception.getMessage());
         }
     }
 
@@ -81,11 +84,17 @@ public class S3Service {
      *
      * @param fileId ключ (путь) к файлу в S3 (например, "users/123/avatars/profile.jpg")
      */
-    public void deleteFile(String fileId) {
+    public void deleteFile(@NotNull String fileId) {
         try {
             s3Client.deleteObject(bucket, fileId);
         } catch (Exception e) {
+            log.error("file is not delete {}", e.getMessage());
             throw new FileException(e.getMessage());
         }
+    }
+
+    @NotNull
+    private static String createKey(@NotNull MultipartFile file, @NotNull String folder) {
+        return String.format("%s/%s", folder, file.getOriginalFilename());
     }
 }

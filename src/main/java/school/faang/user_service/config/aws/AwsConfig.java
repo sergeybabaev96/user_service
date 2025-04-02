@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Objects;
+
 /**
  * Настройки для подключения к S3-совместимому хранилищу.
  */
@@ -26,7 +28,9 @@ public class AwsConfig {
 
     @Bean
     public AmazonS3 amazonS3() {
-        AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+        AWSCredentials credentials = new BasicAWSCredentials
+                (Objects.requireNonNull(accessKey, "Minio access key must not be null"),
+                        Objects.requireNonNull(secretKey, "Minio secret key must not be null"));
         return AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withEndpointConfiguration(
