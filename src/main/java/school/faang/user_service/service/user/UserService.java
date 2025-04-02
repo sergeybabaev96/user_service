@@ -4,33 +4,21 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.dto.csv.CsvUserDto;
-import school.faang.user_service.entity.Country;
-import school.faang.user_service.entity.Education;
-import school.faang.user_service.entity.PreviousEducation;
-import school.faang.user_service.entity.User;
+import school.faang.user_service.entity.*;
 import school.faang.user_service.mapper.csv.CsvUserMapper;
-import school.faang.user_service.repository.CountryRepository;
-import school.faang.user_service.repository.EducationRepository;
-import school.faang.user_service.repository.PreviousEducationRepository;
-import school.faang.user_service.repository.UserRepository;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
-
-
-import java.util.Random;
-
+import school.faang.user_service.repository.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
+import java.util.*;
 
 @Slf4j
 @Service
@@ -46,7 +34,6 @@ public class UserService {
     private final PreviousEducationRepository previousEducationRepository;
     private final Validator validator;
 
-
     public boolean isWithinGoalLimit(long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User with id " + userId + " not found"));
@@ -61,6 +48,7 @@ public class UserService {
         return userRepository.findById(id);
     }
 
+    @Transactional
     public void processCsv(MultipartFile file) throws IOException {
         InputStream inputStream = file.getInputStream();
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
@@ -71,39 +59,48 @@ public class UserService {
                 .readValues(inputStream);
         List<CsvUserDto> users = it.readAll();
 
-        users.forEach(userDto -> {
-            Set<ConstraintViolation<CsvUserDto>> violations = validator.validate(userDto);
+        log.info("📄 Total rows parsed from CSV: {}", users.size());
+
+        List<CsvUserDto> validUsers = new ArrayList<>();
+
+        for (CsvUserDto dto : users) {
+            Set<ConstraintViolation<CsvUserDto>> violations = validator.validate(dto);
             if (!violations.isEmpty()) {
-                log.warn("UserDto validation failed:");
-                violations.forEach(v -> {
-                    log.warn("  {} - {}", v.getPropertyPath(), v.getMessage());
-                    return;
-                });
+                log.warn("❌ Validation failed for user: {}", dto.getEmail());
+                violations.forEach(v -> log.warn("  {} - {}", v.getPropertyPath(), v.getMessage()));
+                continue;
             }
-            if(isDuplicate(userDto)){
-                return;
+
+            if (isDuplicate(dto)) {
+                log.warn("⛔ Duplicate found for user: {}", dto.getEmail());
+                continue;
             }
-        });
 
-        users.forEach(userDto -> {
+            validUsers.add(dto);
+        }
 
-            User user = csvUserMapper.toUser(userDto);
+        log.info("✅ Valid users to save: {}", validUsers.size());
+
+        for (CsvUserDto dto : validUsers) {
+            User user = csvUserMapper.toUser(dto);
             user.setPassword(generatePassword());
-            user.setCountry(getOrCreateCountry(userDto.getCountry()));
+            user.setCountry(getOrCreateCountry(dto.getCountry()));
             user.setActive(true);
-            userRepository.save(user);
-            log.info("User saved: {}", user.getUsername());
 
-            Education education = csvUserMapper.toEducation(userDto);
+            log.info("💾 Saving user: {} ({})", user.getUsername(), user.getEmail());
+            userRepository.save(user);
+
+            Education education = csvUserMapper.toEducation(dto);
             education.setUser(user);
             educationRepository.save(education);
 
-            PreviousEducation previousEducation = csvUserMapper.toPreviousEducation(userDto);
-            previousEducation.setUser(user);
-            previousEducationRepository.save(previousEducation);
-        });
-    }
+//            PreviousEducation previousEducation = csvUserMapper.toPreviousEducation(dto);
+//            previousEducation.setUser(user);
+//            previousEducationRepository.save(previousEducation);
 
+            log.info("📚 Education and previous education saved for: {}", user.getUsername());
+        }
+    }
 
     private String generatePassword() {
         int length = 12;
@@ -126,14 +123,13 @@ public class UserService {
     }
 
     private boolean isDuplicate(CsvUserDto dto) {
-        if (userRepository.existsByEmail(dto.getEmail())) {
-            log.warn("Email already exists {}", dto.getEmail());
-            return true;
+        boolean emailExists = userRepository.existsByEmail(dto.getEmail());
+        boolean phoneExists = userRepository.existsByPhone(dto.getPhone());
+
+        if (emailExists || phoneExists) {
+            log.warn("⛔ Duplicate: email = {}, phone = {}", dto.getEmail(), dto.getPhone());
         }
-        if (userRepository.existsByPhone(dto.getPhone())) {
-            log.warn("Phone already exists {}", dto.getPhone());
-            return true;
-        }
-        return false;
+
+        return emailExists || phoneExists;
     }
 }
