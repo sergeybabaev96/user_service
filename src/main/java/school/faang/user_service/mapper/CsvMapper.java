@@ -20,7 +20,7 @@ public class CsvMapper {
     }
 
     private void personDtoToUser(PersonDto personDto, User user) {
-        user.setUsername(String.join(" ", (personDto.getFirstName() + personDto.getLastName())));
+        user.setUsername(String.join(" ", personDto.getFirstName(), personDto.getLastName()));
     }
 
     private void personContactDtoToUser(PersonContactDto personContactDto, User user) {
@@ -32,10 +32,10 @@ public class CsvMapper {
 
     private void personAboutDtoToUser(PersonAboutDto personAboutDto, User user) {
         user.setAboutMe(String.join(". ",
-                personAboutDto.getEmployer() +
-                personAboutDto.getFaculty() +
-                personAboutDto.getMajor() +
-                personAboutDto.getYearOfStudy() +
+                personAboutDto.getEmployer(),
+                personAboutDto.getFaculty(),
+                personAboutDto.getMajor(),
+                personAboutDto.getYearOfStudy(),
                 personAboutDto.getState()));
     }
 

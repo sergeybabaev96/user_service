@@ -34,7 +34,7 @@ public class UserService {
     private final CountryRepository countryRepository;
     private final PasswordService passwordService;
     private static final int PASSWORD_LENGTH = 10;
-    private static final int MIN_DATA_LENGTH = 24;
+    private static final int MIN_DATA_LENGTH = 6;
 
     public List<UserDto> registerUserFromFile(MultipartFile file) {
         List<String> validatedFile = validateAndReadFile(file);
@@ -53,7 +53,9 @@ public class UserService {
     private UserDto registerUserFromLine(String line) {
         String[] fields = line.split(",");
         if (fields.length < MIN_DATA_LENGTH) {
-            throw new DataValidationException("Некорректный формат данных в файле");
+            throw new DataValidationException(
+                    "Некорректный формат данных в файле, ожидается %d поля, получено %d",
+                    MIN_DATA_LENGTH, fields.length);
         }
 
         PersonDto personDto = parsePersonDto(fields);
@@ -112,18 +114,14 @@ public class UserService {
     }
 
     private PersonDto parsePersonDto(String[] fields) {
-        PersonDto personDto = new PersonDto();
-        personDto.setFirstName(fields[0]);
-        personDto.setLastName(fields[1]);
-        return personDto;
+        return PersonDto.builder()
+                .firstName(fields[0])
+                .lastName(fields[1])
+                .build();
     }
 
-    private PersonContactDto parsePersonContactDto(String[] fields) {
-        PersonContactDto personContactDto = new PersonContactDto();
 
-        personContactDto.setEmail(fields[5]);
-        personContactDto.setPhone(fields[6]);
-        personContactDto.setCity(fields[8]);
+    private PersonContactDto parsePersonContactDto(String[] fields) {
         String countryTitle = fields[10];
         Country country = countryRepository.findByTitle(countryTitle)
                 .orElseGet(() -> {
@@ -131,16 +129,23 @@ public class UserService {
                     newCountry.setTitle(countryTitle);
                     return countryRepository.save(newCountry);
                 });
-        personContactDto.setCountry(country);
-        return personContactDto;
+
+        return PersonContactDto.builder()
+                .email(fields[5])
+                .phone(fields[6])
+                .city(fields[8])
+                .country(country)
+                .build();
     }
 
+
     private PersonAboutDto parsePersonAboutDto(String[] fields) {
-        PersonAboutDto personAboutDto = new PersonAboutDto();
-        personAboutDto.setFaculty(fields[12]);
-        personAboutDto.setYearOfStudy(fields[13]);
-        personAboutDto.setMajor(fields[14]);
-        personAboutDto.setEmployer(fields[23]);
-        return personAboutDto;
+        return PersonAboutDto.builder()
+                .faculty(fields[12])
+                .yearOfStudy(fields[13])
+                .major(fields[14])
+                .employer(fields[23])
+                .build();
     }
+
 }

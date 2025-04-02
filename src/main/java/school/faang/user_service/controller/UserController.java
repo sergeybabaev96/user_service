@@ -1,6 +1,5 @@
 package school.faang.user_service.controller;
 
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,9 +23,9 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register-from-file")
-    public ResponseEntity<String> registerUserFromFile(@RequestParam("file") MultipartFile file) {
-        userService.registerUserFromFile(file);
-        return ResponseEntity.ok("Файл успешно обработан.");
+    public ResponseEntity<List<UserDto>> registerUserFromFile(@RequestParam("file") MultipartFile file) {
+        List<UserDto> registeredUsers = userService.registerUserFromFile(file);
+        return ResponseEntity.ok(registeredUsers);
     }
 
     @GetMapping("/{userId}")

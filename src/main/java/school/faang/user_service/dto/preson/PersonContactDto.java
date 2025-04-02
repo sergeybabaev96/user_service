@@ -1,9 +1,11 @@
 package school.faang.user_service.dto.preson;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
 import school.faang.user_service.entity.Country;
 
+@Builder
 @Data
 public class PersonContactDto {
 
