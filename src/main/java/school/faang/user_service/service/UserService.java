@@ -1,6 +1,7 @@
 package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.dto.UserDto;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserService {
@@ -65,6 +67,7 @@ public class UserService {
         User user = csvMapper.toUser(personDto, personContactDto, personAboutDto);
         user.setPassword(passwordService.generateRandomPassword(PASSWORD_LENGTH));
         userRepository.save(user);
+        log.info("User with id: {} registered", user.getId());
 
         return userMapper.toDto(user);
     }
