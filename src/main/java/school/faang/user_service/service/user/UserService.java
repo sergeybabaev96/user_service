@@ -1,8 +1,6 @@
 package school.faang.user_service.service.user;
 
-import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
@@ -15,9 +13,10 @@ import school.faang.user_service.dto.csv.CsvUserDto;
 import school.faang.user_service.entity.*;
 import school.faang.user_service.mapper.csv.CsvUserMapper;
 import school.faang.user_service.repository.*;
+import school.faang.user_service.service.csv.CsvParsingService;
 
 import java.io.IOException;
-import java.io.InputStream;
+
 import java.util.*;
 
 @Slf4j
@@ -31,8 +30,8 @@ public class UserService {
     private final CsvUserMapper csvUserMapper;
     private final EducationRepository educationRepository;
     private final CountryRepository countryRepository;
-    private final PreviousEducationRepository previousEducationRepository;
     private final Validator validator;
+    private final CsvParsingService csvParsingService;
 
     public boolean isWithinGoalLimit(long userId) {
         User user = userRepository.findById(userId)
@@ -50,14 +49,8 @@ public class UserService {
 
     @Transactional
     public void processCsv(MultipartFile file) throws IOException {
-        InputStream inputStream = file.getInputStream();
-        CsvSchema schema = CsvSchema.emptySchema().withHeader();
 
-        MappingIterator<CsvUserDto> it = csvMapper
-                .readerFor(CsvUserDto.class)
-                .with(schema)
-                .readValues(inputStream);
-        List<CsvUserDto> users = it.readAll();
+        List<CsvUserDto> users = csvParsingService.parseUsers(file);
 
         log.info("📄 Total rows parsed from CSV: {}", users.size());
 
@@ -93,10 +86,6 @@ public class UserService {
             Education education = csvUserMapper.toEducation(dto);
             education.setUser(user);
             educationRepository.save(education);
-
-//            PreviousEducation previousEducation = csvUserMapper.toPreviousEducation(dto);
-//            previousEducation.setUser(user);
-//            previousEducationRepository.save(previousEducation);
 
             log.info("📚 Education and previous education saved for: {}", user.getUsername());
         }
