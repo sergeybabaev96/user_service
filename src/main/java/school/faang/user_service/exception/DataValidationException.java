@@ -1,7 +1,12 @@
 package school.faang.user_service.exception;
 
 public class DataValidationException extends RuntimeException {
-    public DataValidationException(String description) {
+    
+  public DataValidationException(String description) {
         super(description);
+    }
+}
+    public DataValidationException(String message) {
+        super(message);
     }
 }
