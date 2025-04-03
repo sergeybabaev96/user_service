@@ -2,6 +2,7 @@ package school.faang.user_service.service.event;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.event.EventDTO;
 import school.faang.user_service.dto.event.EventFilterDTO;
@@ -12,7 +13,12 @@ import school.faang.user_service.mapper.event.EventMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -23,6 +29,9 @@ public class EventService {
     private final UserRepository userRepository;
     private final EventMapper eventMapper;
     private final EventUtil eventUtil = new EventUtil();
+
+    @Value("${thread-pool.delete-events-max-threads}")
+    private int deleteEventsThreads;
 
     @Autowired
     public EventService(EventRepository eventRepository1, UserRepository userRepository, EventMapper eventMapper) {
@@ -104,5 +113,34 @@ public class EventService {
                         eventDTO.getLocation()
                                 .equals(filter.getLocation()));
         return filteredEventDTOs.toList();
+    }
+
+    public void deletePastEvents() {
+        List<Event> events = eventRepository.findPastEventsByDateEnd(LocalDateTime.now());
+
+        int portion = events.size() / deleteEventsThreads;
+        if (portion > 0) {
+            ExecutorService executorService = Executors.newFixedThreadPool(deleteEventsThreads);
+
+            for (int i=0; i<deleteEventsThreads; i++) {
+                int startIndex = i * portion;
+                int endIndex = (i == deleteEventsThreads-1) ? events.size() : startIndex+portion;
+
+                var list = new ArrayList<>(events.subList(startIndex, endIndex));
+                executorService.execute(() -> eventRepository.deleteAll(list));
+            }
+
+            executorService.shutdown();
+            try {
+                if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+                    executorService.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                executorService.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        } else {
+            eventRepository.deleteAll(events);
+        }
     }
 }
