@@ -4,7 +4,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.csv.model.person.Person;
@@ -18,7 +17,6 @@ import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.CountryRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.parser.CsvParserService;
-import school.faang.user_service.validator.user.UserValidator;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,8 +27,9 @@ import java.util.Map;
 @Slf4j
 public class UserService {
 
+    private static final String USER_NOT_FOUND_MESSAGE = "User not found";
+
     private final UserRepository userRepository;
-    private final UserValidator userValidator;
     private final UserMapper userMapper;
     private final CountryRepository countryRepository;
     private final CsvParserService csvParserService;
@@ -39,7 +38,7 @@ public class UserService {
 
     public UserDto getUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND_MESSAGE));
         return userMapper.toUser(user);
     }
 
@@ -107,6 +106,6 @@ public class UserService {
 
     public User getUserFromDb(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND_MESSAGE));
     }
 }

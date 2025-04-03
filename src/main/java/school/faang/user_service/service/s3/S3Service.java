@@ -10,6 +10,7 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import school.faang.user_service.exception.FileModificationException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -54,7 +55,7 @@ public class S3Service {
             return key;
         } catch (IOException e) {
             log.error("Error: ", e);
-            throw new RuntimeException("Error: " + e.getMessage());
+            throw new FileModificationException("Error: " + e.getMessage());
         }
     }
 
@@ -64,7 +65,7 @@ public class S3Service {
             return s3Object.getObjectContent();
         } catch (Exception e) {
             log.error("Error: ", e);
-            throw new RuntimeException("Error: " + e.getMessage());
+            throw new FileModificationException("Error: " + e.getMessage());
         }
     }
 
@@ -73,7 +74,7 @@ public class S3Service {
             s3Client.deleteObject(bucketName, key);
         } catch (Exception e) {
             log.error("Error: ", e);
-            throw new RuntimeException("Error: " + e.getMessage());
+            throw new FileModificationException("Error: " + e.getMessage());
         }
     }
 
