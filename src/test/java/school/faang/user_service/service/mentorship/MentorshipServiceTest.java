@@ -1,5 +1,7 @@
 package school.faang.user_service.service.mentorship;
 
+import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,10 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class MentorshipServiceTest {
@@ -46,28 +48,33 @@ public class MentorshipServiceTest {
             UserDto.builder().id(mentorId).username("username3").email("user3@test.com").build(),
             UserDto.builder().id(5L).username("username5").email("user5@test.com").build()
     );
-    private final User user = User.builder()
-            .id(userId)
-            .username("username1")
-            .email("user1@test.com")
-            .mentees(new ArrayList<>(List.of(
-                    User.builder().id(menteeId).username("username2").email("user2@test.com").build(),
-                    User.builder().id(4L).username("username4").email("user4@test.com").build())))
-            .mentors(new ArrayList<>(List.of(
-                    User.builder().id(mentorId).username("username3").email("user3@test.com").build(),
-                    User.builder().id(5L).username("username5").email("user5@test.com").build())))
-            .build();
 
+    private User user;
 
-    @Test
-    void getMentees_shouldThrowRuntimeExceptionWhenUserNotFindById() {
-        when(userService.findById(userId)).thenReturn(Optional.empty());
-
-        assertThrows(RuntimeException.class, () -> mentorshipService.getMentees(userId));
+    @BeforeEach
+    public void setUser() {
+        user = User.builder()
+                .id(userId)
+                .username("username1")
+                .email("user1@test.com")
+                .mentees(new ArrayList<>(List.of(
+                        User.builder().id(menteeId).username("username2").email("user2@test.com").build(),
+                        User.builder().id(4L).username("username4").email("user4@test.com").build())))
+                .mentors(new ArrayList<>(List.of(
+                        User.builder().id(mentorId).username("username3").email("user3@test.com").build(),
+                        User.builder().id(5L).username("username5").email("user5@test.com").build())))
+                .build();
     }
 
     @Test
-    void getMentees_shouldReturnMenteeDtosListWhenUserNotEmpty() {
+    void getMentees_shouldThrowExceptionWhenUserNotFindById() {
+        when(userService.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> mentorshipService.getMentees(userId));
+    }
+
+    @Test
+    void getMentees_shouldReturnMenteeDtos() {
         when(userService.findById(userId)).thenReturn(Optional.of(user));
 
         List<UserDto> result = mentorshipService.getMentees(userId);
@@ -76,14 +83,14 @@ public class MentorshipServiceTest {
     }
 
     @Test
-    void getMentors_shouldThrowRuntimeExceptionWhenUserNotFindById() {
+    void getMentors_shouldThrowExceptionWhenUserNotFindById() {
         when(userService.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> mentorshipService.getMentors(userId));
+        assertThrows(EntityNotFoundException.class, () -> mentorshipService.getMentors(userId));
     }
 
     @Test
-    void getMentors_shouldReturnMentorsDtosListWhenUserNotEmpty() {
+    void getMentors_shouldReturnMentorsDtos() {
         when(userService.findById(userId)).thenReturn(Optional.of(user));
 
         List<UserDto> result = mentorshipService.getMentors(userId);
@@ -92,16 +99,15 @@ public class MentorshipServiceTest {
     }
 
     @Test
-    void deleteMentee_shouldThrowRuntimeExceptionWhenUserNotFindById() {
-        when(mentorshipRepository.findById(menteeId)).thenReturn(Optional.empty());
+    void deleteMentee_shouldThrowWhenUserNotFindById() {
+        when(mentorshipRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> mentorshipService.deleteMentee(menteeId, mentorId));
+        assertThrows(EntityNotFoundException.class, () -> mentorshipService.deleteMentee(menteeId, userId));
     }
 
     @Test
-    void deleteMentee_shouldDeleteMenteeWhenUserNotEmpty() {
-        User branchUser = user;
-        when(mentorshipRepository.findById(userId)).thenReturn(Optional.of(branchUser));
+    void deleteMentee_shouldDeleteMentee() {
+        when(mentorshipRepository.findById(userId)).thenReturn(Optional.of(user));
 
         mentorshipService.deleteMentee(menteeId, userId);
 
@@ -110,16 +116,15 @@ public class MentorshipServiceTest {
     }
 
     @Test
-    void deleteMentor_shouldThrowRuntimeExceptionWhenUserNotFindById() {
-        when(mentorshipRepository.findById(mentorId)).thenReturn(Optional.empty());
+    void deleteMentor_shouldThrowExceptionWhenUserNotFindById() {
+        when(mentorshipRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> mentorshipService.deleteMentor(mentorId, menteeId));
+        assertThrows(EntityNotFoundException.class, () -> mentorshipService.deleteMentor(mentorId, userId));
     }
 
     @Test
-    void deleteMentor_shouldDeleteMentorWhenUserNotEmpty() {
-        User branchUser = user;
-        when(mentorshipRepository.findById(userId)).thenReturn(Optional.of(branchUser));
+    void deleteMentor_shouldDeleteMentor() {
+        when(mentorshipRepository.findById(userId)).thenReturn(Optional.of(user));
 
         mentorshipService.deleteMentor(mentorId, userId);
 
