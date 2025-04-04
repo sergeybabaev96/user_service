@@ -42,8 +42,8 @@ public class SubscriptionControllerTest {
 
     @Test
     public void testGetFollowers() {
-        UserDto firstUser = new UserDto(1, "Bob", "bob@yandex.ru");
-        UserDto secondUser = new UserDto(2, "Ron", "ron90@gmail.com");
+        UserDto firstUser = new UserDto(1, "Bob", "bob@yandex.ru", true);
+        UserDto secondUser = new UserDto(2, "Ron", "ron90@gmail.com", true);
         List<UserDto> followers = Arrays.asList(firstUser, secondUser);
         when(subscriptionService.getFollowers(followeeId, filterDto)).thenReturn(followers);
         List<UserDto> result = subscriptionController.getFollowers(followeeId, filterDto);
@@ -62,8 +62,8 @@ public class SubscriptionControllerTest {
 
     @Test
     public void testGetFollowing() {
-        UserDto firstUser = new UserDto(1, "Bob", "bob@yandex.ru");
-        UserDto secondUser = new UserDto(2, "Ron", "ron90@gmail.com");
+        UserDto firstUser = new UserDto(1, "Bob", "bob@yandex.ru", true);
+        UserDto secondUser = new UserDto(2, "Ron", "ron90@gmail.com", true);
         List<UserDto> following = Arrays.asList(firstUser, secondUser);
         when(subscriptionService.getFollowing(followeeId, filterDto)).thenReturn(following);
         List<UserDto> result = subscriptionController.getFollowing(followeeId, filterDto);
