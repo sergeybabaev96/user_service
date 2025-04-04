@@ -118,29 +118,38 @@ public class EventService {
     public void deletePastEvents() {
         List<Event> events = eventRepository.findPastEventsByDateEnd(LocalDateTime.now());
 
+        if (events.isEmpty()) {
+            return;
+        }
+
         int portion = events.size() / deleteEventsThreads;
         if (portion > 0) {
-            ExecutorService executorService = Executors.newFixedThreadPool(deleteEventsThreads);
-
-            for (int i=0; i<deleteEventsThreads; i++) {
-                int startIndex = i * portion;
-                int endIndex = (i == deleteEventsThreads-1) ? events.size() : startIndex+portion;
-
-                var list = new ArrayList<>(events.subList(startIndex, endIndex));
-                executorService.execute(() -> eventRepository.deleteAll(list));
-            }
-
-            executorService.shutdown();
-            try {
-                if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
-                    executorService.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                executorService.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
+            deleteEventsByPortions(events, portion);
         } else {
             eventRepository.deleteAll(events);
+        }
+    }
+
+    private void deleteEventsByPortions(List<Event> events, int portion) {
+        ExecutorService executorService = Executors.newFixedThreadPool(deleteEventsThreads);
+
+        for (int i=0; i<deleteEventsThreads; i++) {
+            int startIndex = i * portion;
+            int endIndex = (i == deleteEventsThreads-1) ? events.size() : startIndex+portion;
+
+            var list = new ArrayList<>(events.subList(startIndex, endIndex));
+            executorService.execute(() -> eventRepository.deleteAll(list));
+        }
+
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            log.error("Thread was interrupted while deleting events", e);
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 }
