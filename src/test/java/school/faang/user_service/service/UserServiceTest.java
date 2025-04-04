@@ -102,7 +102,7 @@ public class UserServiceTest {
     }
 
     private UserDto createUserDto(Long id) {
-        return new UserDto(id, "test", "test");
+        return new UserDto(id, "test", "test", true);
     }
 
     private List<UserDto> createUserDtos(List<User> users) {
