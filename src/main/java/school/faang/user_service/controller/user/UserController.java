@@ -66,6 +66,12 @@ public class UserController {
         return ResponseEntity.ok(userDtoList);
     }
 
+    @PostMapping("/list-by-ids")
+    public ResponseEntity<List<UserDto>> getUsersByIdsByIdList(@RequestBody List<Long> ids) {
+        List<User> users = userService.getUsersByIdList(ids);
+        return ResponseEntity.ok(userMapper.toUserDtoList(users));
+    }
+
     @DeleteMapping("/deactivate")
     public ResponseEntity<Void> deactivateUser(@RequestParam("userId") Long userId) {
         userService.deactivateUser(userId);

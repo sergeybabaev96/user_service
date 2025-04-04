@@ -89,7 +89,12 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        return userRepository.findAllByActiveTrue();
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> getUsersByIdList(List<Long> ids) {
+        return userRepository.findAllById(ids);
     }
 
     @Transactional
