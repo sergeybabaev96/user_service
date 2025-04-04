@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -11,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import school.faang.user_service.dto.goal.CreateGoalRequestDto;
 import school.faang.user_service.dto.goal.CreateGoalResponse;
+import school.faang.user_service.dto.goal.GoalCompletedEvent;
 import school.faang.user_service.dto.goal.GoalFilterDto;
 import school.faang.user_service.dto.goal.UpdateGoalRequestDto;
 import school.faang.user_service.dto.goal.UpdateGoalResponse;
@@ -20,6 +22,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.goal.data.GoalDataFilter;
 import school.faang.user_service.mapper.goal.GoalMapper;
+import school.faang.user_service.publisher.GoalCompletedEventPublisher;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.goal.operations.GoalAssignmentHelper;
 import school.faang.user_service.service.goal.operations.GoalValidator;
@@ -43,6 +46,8 @@ class GoalServiceTest {
     private GoalValidator goalValidator;
     @Mock
     private GoalAssignmentHelper goalAssignmentHelper;
+    @Mock
+    private GoalCompletedEventPublisher eventPublisher;
     @Mock
     private GoalDataFilter goalDataFilter1;
     @Mock
@@ -121,7 +126,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testCreateGoal_ShouldValidateAndSave() {
+    void testCreateGoalShouldValidateAndSave() {
         when(goalMapper.toEntity(createGoalRequestDto)).thenReturn(goal);
         when(goalRepository.save(any(Goal.class))).thenReturn(goal);
         when(goalMapper.toCreateResponse(any(Goal.class))).thenReturn(createGoalResponse);
@@ -136,7 +141,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testUpdateGoal_ShouldValidateAndUpdate() {
+    void testUpdateGoalShouldValidateAndUpdate() {
         updateGoalRequestDto.setGoalId(goalId);
         when(goalRepository.findById(goalId)).thenReturn(Optional.of(existingGoal));
         when(goalMapper.toUpdateResponse(existingGoal)).thenReturn(updateGoalResponse);
@@ -152,18 +157,27 @@ class GoalServiceTest {
     }
 
     @Test
-    void testUpdateGoal_ShouldAssignSkillsWhenCompleted() {
+    void testUpdateGoalShouldAssignSkillsAndPublishEventWhenCompleted() {
         updateGoalRequestDto.setGoalId(goalId);
+        updateGoalRequestDto.setUserId(userId);
         updateGoalRequestDto.setStatus(GoalStatus.COMPLETED);
+
         when(goalRepository.findById(goalId)).thenReturn(Optional.of(existingGoal));
 
         goalService.updateGoal(updateGoalRequestDto);
 
         verify(goalAssignmentHelper).assignSkillsToUsers(existingGoal, updateGoalRequestDto.getSkillIds());
+
+        ArgumentCaptor<GoalCompletedEvent> captor = ArgumentCaptor.forClass(GoalCompletedEvent.class);
+        verify(eventPublisher).publish(captor.capture());
+
+        GoalCompletedEvent publishedEvent = captor.getValue();
+        Assertions.assertEquals(userId, publishedEvent.getUserId());
+        Assertions.assertEquals(goalId, publishedEvent.getGoalId());
     }
 
     @Test
-    void testDeleteGoal_ShouldFindAndDelete() {
+    void testDeleteGoalShouldFindAndDelete() {
         when(goalRepository.findById(goalId)).thenReturn(Optional.of(existingGoal));
 
         goalService.deleteGoal(goalId);
@@ -172,7 +186,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testFindSubtasksByGoalId_CallsRepository() {
+    void testFindSubtasksByGoalIdCallsRepository() {
         when(goalRepository.findByParent(goalId)).thenReturn(Stream.of(goal));
 
         goalService.findSubtasksByGoalId(goalId, goalFilterDto);
@@ -181,7 +195,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testUpdateGoal_ShouldThrowExceptionIfGoalNotFound() {
+    void testUpdateGoalShouldThrowExceptionIfGoalNotFound() {
         updateGoalRequestDto.setGoalId(goalId);
         when(goalRepository.findById(goalId)).thenReturn(Optional.empty());
 
@@ -192,7 +206,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testDeleteGoal_ShouldThrowExceptionIfGoalNotFound() {
+    void testDeleteGoalShouldThrowExceptionIfGoalNotFound() {
         when(goalRepository.findById(goalId)).thenReturn(Optional.empty());
 
         DataValidationException exception = assertThrows(DataValidationException.class,
@@ -202,7 +216,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testGetGoalsByUser_CallsRepository() {
+    void testGetGoalsByUserCallsRepository() {
         when(goalRepository.findGoalsByUserId(userId)).thenReturn(Stream.of(goal));
 
         goalService.getGoalsByUser(userId, goalFilterDto);
@@ -211,7 +225,7 @@ class GoalServiceTest {
     }
   
     @Test
-    void testStopGoalsByUser_ShouldRemoveUserFromParticipantsList() {
+    void testStopGoalsByUserShouldRemoveUserFromParticipantsList() {
         User user1 = User.builder().id(1L).build();
         User user2 = User.builder().id(2L).build();
         Stream<Goal> goals = Stream.of(Goal.builder()
@@ -227,7 +241,7 @@ class GoalServiceTest {
     }
 
     @Test
-    void testStopGoalsByUser_Success() {
+    void testStopGoalsByUserSuccess() {
         Goal goal = Goal.builder()
                 .title("Goal 1")
                 .users(List.of(User.builder().id(1L).build()))
