@@ -1,5 +1,6 @@
 package school.faang.user_service.service.user;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,6 @@ import static school.faang.user_service.messages.ErrorMessages.*;
 @Slf4j
 @RequiredArgsConstructor
 public class UserService {
-
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
@@ -33,5 +33,17 @@ public class UserService {
             throw new UserNotFoundException(message);
         }
         return userMapper.toDto(userOptional.get());
+    }
+
+    @Transactional
+    public void banUser(Long userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            String message = USER_NOT_FOUND_ERROR.formatted(userId);
+            log.error(message);
+            throw new UserNotFoundException(message);
+        }
+        User user = userOptional.get();
+        user.setBanned(true);
     }
 }
