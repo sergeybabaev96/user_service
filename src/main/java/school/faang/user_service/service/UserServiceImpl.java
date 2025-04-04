@@ -26,8 +26,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getReferenceById(long userId) {
-        if (!userRepository.existsById(userId))
+        if (!userRepository.existsById(userId)) {
             throw new EntityNotFoundException("User not founds");
+        }
         return userRepository.getReferenceById(userId);
     }
 
@@ -87,5 +88,13 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getUsersByIds(List<Long> ids) {
         var users = userRepository.findAllById(ids);
         return userMapper.toDtoList(users);
+    }
+
+    @Override
+    public void banUserById(long userId) {
+        var userToBan = getUserById(userId);
+
+        userToBan.setBanned(true);
+        userRepository.save(userToBan);
     }
 }

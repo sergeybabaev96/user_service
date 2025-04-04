@@ -1,0 +1,2 @@
+ALTER TABLE users
+ADD COLUMN if NOT EXISTS banned boolean DEFAULT false NOT NULL
