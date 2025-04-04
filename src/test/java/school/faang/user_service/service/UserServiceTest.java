@@ -36,8 +36,6 @@ public class UserServiceTest {
     @Mock private UserRepository userRepository;
     @Spy private UserMapperImpl userMapper;
 
-
-
     @InjectMocks private UserServiceImpl userService;
     long userId;
 
@@ -145,7 +143,6 @@ public class UserServiceTest {
             assertEquals(users.get(i).getEmail(), result.get(i).email());
         }
     }
-
 
     private static User createTestUser(long userId, String username, String email) {
         return User.builder()
