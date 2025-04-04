@@ -3,7 +3,9 @@ package school.faang.user_service.controller.avatar;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,13 +32,19 @@ public class AvatarController {
             @RequestBody @NotNull MultipartFile file) {
         avatarService.addUserAvatar(userId, file);
         System.out.println(file.getOriginalFilename());
-        return ResponseEntity.ok(HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping("/get")
-    public ResponseEntity<InputStream> getUserAvatar(
+    public ResponseEntity<InputStreamResource> getUserAvatar(
             @PathVariable @NotNull Long userId) {
-        return ResponseEntity.ok(avatarService.getUserAvatar(userId));
+        InputStream avatar = avatarService.getUserAvatar(userId);
+        if (avatar == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(new InputStreamResource(avatar));
     }
 
     @DeleteMapping()

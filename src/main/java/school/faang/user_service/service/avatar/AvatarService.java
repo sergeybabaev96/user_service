@@ -20,10 +20,8 @@ public class AvatarService {
 
     @Value("${user-avatar.max-size-bytes}")
     private long permittedSize;
-    @Value("${user-avatar.sizes.small}")
-    private int smallerSize;
-    @Value("${user-avatar.sizes.large}")
-    private int largerSize;
+    private static final int SMALL_SIZE = 170;
+    private static final int LARGE_SIZE = 1080;
 
     private final UserRepository userRepository;
     private final S3Service s3Service;
@@ -35,9 +33,12 @@ public class AvatarService {
         User user = userService.getUserFromDb(userId);
         fileSizeValidator.checkMaxFileSize(file, permittedSize);
         String folder = userId + "_user_avatars";
-        UserProfilePic userProfilePic = new UserProfilePic();
-        userProfilePic.setFileId(s3Service.uploadFile(file, folder, largerSize));
-        userProfilePic.setSmallFileId(s3Service.uploadFile(file, folder, smallerSize));
+        UserProfilePic userProfilePic = user.getUserProfilePic();
+        if (userProfilePic == null) {
+            userProfilePic = new UserProfilePic();
+        }
+        userProfilePic.setFileId(s3Service.uploadFile(file, folder, LARGE_SIZE));
+        userProfilePic.setSmallFileId(s3Service.uploadFile(file, folder, SMALL_SIZE));
         user.setUserProfilePic(userProfilePic);
         userRepository.save(user);
     }
