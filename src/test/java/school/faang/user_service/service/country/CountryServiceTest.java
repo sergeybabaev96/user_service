@@ -59,11 +59,11 @@ class CountryServiceTest {
     @Test
     @DisplayName("getCountry(). Positive. Get Country from Repository.")
     void getCountry() {
-        Mockito.when(countryRepository.findAll()).thenReturn(List.of(COUNTRY_IN_DB));
+        Mockito.when(countryRepository.findByTitle(Mockito.any())).thenReturn(Optional.of(COUNTRY_IN_DB));
 
         Optional<Country> optional = countryService.getCountry(NAME_OF_COUNTRY_IN_DB);
 
-        Mockito.verify(countryRepository, Mockito.times(1)).findAll();
+        Mockito.verify(countryRepository, Mockito.times(1)).findByTitle(Mockito.any());
     }
 
     @Test
