@@ -21,15 +21,14 @@ spring:
       hibernate:
         format_sql: true
 
-  spring:
-    kafka:
-      bootstrap-servers: localhost:9092
-      consumer:
-        auto-offset-reset: earliest
-        max-poll-records: 100
-        session-timeout-ms: 20000
-        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-        value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      auto-offset-reset: earliest
+      max-poll-records: 100
+      session-timeout-ms: 20000
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
