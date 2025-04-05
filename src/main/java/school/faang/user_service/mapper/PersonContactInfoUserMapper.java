@@ -4,14 +4,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
-import school.faang.user_service.dto.user.Person;
+import school.faang.user_service.dto.person.ContactInfo;
 import school.faang.user_service.entity.User;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface PersonContactInfoUserMapper {
@@ -24,5 +18,5 @@ public interface PersonContactInfoUserMapper {
     @Mapping(target = "address.state", ignore = true)
     @Mapping(target = "address.country", source = "user.country.title")
     @Mapping(target = "address.postalCode", ignore = true)
-    Person.ContactInfo toContactInfo(User user);
+    ContactInfo toContactInfo(User user);
 }
