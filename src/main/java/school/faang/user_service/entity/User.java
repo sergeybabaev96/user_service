@@ -168,6 +168,6 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<WorkSchedule> workSchedule;
 
-    @Column(name = "verified", nullable = false)
+    @Column(name = "banned", nullable = false)
     private boolean banned;
 }
