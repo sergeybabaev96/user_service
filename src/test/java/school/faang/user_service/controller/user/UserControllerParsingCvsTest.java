@@ -12,7 +12,7 @@ import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.PersonCsvMapper;
 import school.faang.user_service.mapper.UserMapperImpl;
-import school.faang.user_service.service.user.UserService;
+import school.faang.user_service.service.user.CreateUserService;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 class UserControllerParsingCvsTest {
 
     @Mock
-    private UserService userService;
+    private CreateUserService createUserService;
     @Mock
     private PersonCsvMapper personCsvMapper;
     @Mock
@@ -43,7 +43,7 @@ class UserControllerParsingCvsTest {
     @Test
     void createUsersFromCsvFilePositiveTest() throws IOException {
         when(personCsvMapper.toPersons(any(MultipartFile.class))).thenReturn(List.of(new Person(), new Person()));
-        when(userService.createUsers(any(List.class))).thenReturn(List.of(new User(), new User()));
+        when(createUserService.createUsers(any(List.class))).thenReturn(List.of(new User(), new User()));
         when(userMapper.toDto(any(User.class))).thenReturn(USER_DTOS.get(0)).thenReturn(USER_DTOS.get(1));
         List<UserDto> result = userController.createUsersFromCsvFile(MULTIPART_FILE);
 
@@ -53,7 +53,7 @@ class UserControllerParsingCvsTest {
     @Test
     void createUsersFromCsvFileNegative() throws IOException {
         when(personCsvMapper.toPersons(null)).thenReturn(List.of());
-        when(userService.createUsers(any(List.class))).thenReturn(List.of());
+        when(createUserService.createUsers(any(List.class))).thenReturn(List.of());
         List<UserDto> result = userController.createUsersFromCsvFile(null);
 
         verify(userMapper, never()).toDto(any(User.class));

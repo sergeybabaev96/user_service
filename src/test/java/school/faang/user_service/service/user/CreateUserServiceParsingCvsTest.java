@@ -17,7 +17,6 @@ import school.faang.user_service.dto.person.Person;
 import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.PersonUserMapper;
-import school.faang.user_service.repository.CountryRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.country.CountryService;
 
@@ -28,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceParsingCvsTest {
+class CreateUserServiceParsingCvsTest {
 
     @Mock
     private UserRepository userRepository;
@@ -38,9 +37,9 @@ class UserServiceParsingCvsTest {
     private CountryService countryService;
 
     @InjectMocks
-    private UserService userService;
+    private CreateUserService createUserService;
     @Spy
-    private UserService userServiceMock = new UserService(userRepository, personUserMapper, countryService);
+    private CreateUserService createUserServiceMock = new CreateUserService(userRepository, personUserMapper, countryService);
 
     @ParameterizedTest
     @CsvSource({"1", "12", "121"})
@@ -51,24 +50,24 @@ class UserServiceParsingCvsTest {
             persons.add(new Person());
         }
 
-        Mockito.doReturn(new User()).when(userServiceMock).createUser(any(Person.class));
-        List<User> users = userServiceMock.createUsers(persons);
-        Mockito.verify(userServiceMock,Mockito.times(size)).createUser(any(Person.class));
+        Mockito.doReturn(new User()).when(createUserServiceMock).createUser(any(Person.class));
+        List<User> users = createUserServiceMock.createUsers(persons);
+        Mockito.verify(createUserServiceMock,Mockito.times(size)).createUser(any(Person.class));
     }
 
     @ParameterizedTest
     @NullAndEmptySource
     @DisplayName("createUsers(). Negative. Create Users from List<Person>, when list is null and empty")
     public void  createUsersFromListPersonWhenListIsNullOrEmpty(List<Person> persons) {
-        List<User> users = userServiceMock.createUsers(persons);
-        Mockito.verify(userServiceMock,Mockito.never()).createUser(any(Person.class));
+        List<User> users = createUserServiceMock.createUsers(persons);
+        Mockito.verify(createUserServiceMock,Mockito.never()).createUser(any(Person.class));
     }
 
 
     @Test
     @DisplayName("createUser(). Negative. Create User from Person, when Person is null")
     public void createUserFromPersonWhenPersonIsNull() {
-        assertThrows(RuntimeException.class, () -> userService.createUser(null) );
+        assertThrows(RuntimeException.class, () -> createUserService.createUser(null) );
     }
 
     @Test
@@ -81,7 +80,7 @@ class UserServiceParsingCvsTest {
         Mockito.when(personUserMapper.toUser(any(Person.class))).thenReturn(new User());
         Mockito.when(countryService.getOrCreateCountry(countryName)).thenReturn(country);
 
-        User result = userService.createUser(person);
+        User result = createUserService.createUser(person);
 
         Mockito.verify(userRepository, Mockito.times(1)).save(any(User.class));
         Mockito.verify(countryService, Mockito.times(1)).getOrCreateCountry(countryName);

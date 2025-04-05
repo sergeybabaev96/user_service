@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.mapper.PersonCsvMapper;
 import school.faang.user_service.mapper.UserMapper;
-import school.faang.user_service.service.user.UserService;
+import school.faang.user_service.service.user.CreateUserService;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 
@@ -36,7 +36,7 @@ public class UserController {
     private static final String NEGATIVE_ID = "userId is negative";
 
     private final DeactivateUserService deactivateUserService;
-    private final UserService userService;
+    private final CreateUserService createUserService;
     private final PersonCsvMapper personCsvMapper;
     private final UserMapper userMapper;
 
@@ -76,7 +76,7 @@ public class UserController {
             @RequestBody MultipartFile file)
             throws IOException {
 
-        return userService.createUsers(
+        return createUserService.createUsers(
                 personCsvMapper.toPersons(file))
                 .stream()
                 .map(userMapper::toDto)

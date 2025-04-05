@@ -3,24 +3,18 @@ package school.faang.user_service.service.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.person.Person;
-import school.faang.user_service.dto.user.UserDto;
-import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.PersonUserMapper;
-import school.faang.user_service.mapper.UserMapper;
-import school.faang.user_service.repository.CountryRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.country.CountryService;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class CreateUserService {
 
     private final UserRepository userRepository;
     private final PersonUserMapper personUserMapper;
