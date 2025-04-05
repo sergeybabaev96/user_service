@@ -13,6 +13,7 @@ import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.event.EventRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -87,6 +88,10 @@ public class EventService {
 
     public List<Event> getParticipatedEvents(long userId) {
         return eventRepository.findParticipatedEventsByUserId(userId);
+    }
+
+    public List<Event> getEventsStartingAt(LocalDateTime startTime, LocalDateTime doubleStartTime) {
+        return eventRepository.findEventsByStartTime(startTime, doubleStartTime);
     }
 
     private boolean userHasRequiredSkills(Long ownerId, List<Long> requiredSkills) {
