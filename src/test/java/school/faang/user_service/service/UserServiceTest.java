@@ -1,37 +1,64 @@
 package school.faang.user_service.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
+import school.faang.user_service.config.context.UserContext;
+import school.faang.user_service.dto.FileData;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.entity.UserProfilePic;
+import school.faang.user_service.exception.FileTooLargeException;
+import school.faang.user_service.exception.InvalidImageFormatException;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
     @Mock
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Mock
-    UserMapper userMapper;
+    private UserMapper userMapper;
+
+    @Mock
+    private UserContext userContext;
+
+    @Mock
+    private S3StorageService s3Service;
+
+    @Mock
+    private ImageCompressorService compressorService;
 
     @InjectMocks
-    UserService userService;
+    private UserService userService;
 
     @Test
     @DisplayName("Negative: error when user not found")
@@ -89,6 +116,83 @@ public class UserServiceTest {
         assertEquals(userDtos, result);
     }
 
+    @Test
+    void testNegativeCreateAvatarWhenFileTypeIncorrect() {
+        MockMultipartFile imageFile = createImageFile("image/pdf", new byte[]{0x1, 0x2, 0x3});
+
+        assertThrows(InvalidImageFormatException.class, () -> userService.createUserAvatar(imageFile));
+    }
+
+    @Test
+    void testNegativeCreateAvatarWhenFileSizeIncorrect() {
+        byte[] bytes = new byte[6 * 1024 * 1024];
+        Arrays.fill(bytes, (byte) 0x1);
+        MockMultipartFile imageFile = createImageFile("image/jpeg", bytes);
+
+        assertThrows(FileTooLargeException.class, () -> userService.createUserAvatar(imageFile));
+    }
+
+    @Test
+    void testNegativeCreateAvatarWhenUserNotFound() {
+        MockMultipartFile imageFile = createImageFile("image/jpeg", new byte[]{0x1, 0x2, 0x3});
+
+        assertThrows(UserNotFoundException.class, () -> userService.createUserAvatar(imageFile));
+    }
+
+    @Test
+    void testPositiveCreateAvatar() {
+        Long id = 1L;
+        MockMultipartFile imageFile = createImageFile("image/jpeg", new byte[]{0x1, 0x2, 0x3});
+        when(userContext.getUserId()).thenReturn(id);
+        when(userRepository.findById(id)).thenReturn(Optional.of(createUser(id)));
+
+        userService.createUserAvatar(imageFile);
+
+        ArgumentCaptor<Integer> sizeCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(userRepository, times(1)).save(any(User.class));
+        verify(compressorService, times(2)).compressImage(
+                any(MultipartFile.class),
+                sizeCaptor.capture()
+        );
+        assertTrue(sizeCaptor.getAllValues().containsAll(List.of(1080, 170)));
+    }
+
+    @Test
+    void testNegativeGetAvatarWhenAvatarNotFound() {
+        assertThrows(EntityNotFoundException.class, () -> userService.getUserAvatar(1L));
+    }
+
+    @Test
+    void testPositiveGetAvatar() throws IOException {
+        Long id = 1L;
+        byte[] imageData = new byte[]{0x1, 0x2, 0x3};
+        String expectedFileName = "file";
+        InputStream fixedInputStream = new ByteArrayInputStream(imageData);
+        User user = createUserWithAvatar(id);
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+        when(s3Service.getFile(expectedFileName)).thenReturn(fixedInputStream);
+        when(s3Service.getContentType(expectedFileName)).thenReturn("image/jpeg");
+
+        FileData resultFile = userService.getUserAvatar(id);
+
+        byte[] resultBytes = toByteArray(resultFile.content());
+        assertArrayEquals(imageData, resultBytes);
+        assertEquals("image/jpeg", resultFile.contentType());
+    }
+
+    @Test
+    void testPositiveRemoveAvatar() {
+        Long id = 1L;
+        User user = createUserWithAvatar(id);
+        when(userContext.getUserId()).thenReturn(id);
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
+        userService.removeUserAvatar();
+
+        verify(s3Service, times(2)).deleteFile(anyString());
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
     private User createUser(Long id) {
         User user = new User();
         user.setId(id);
@@ -109,5 +213,30 @@ public class UserServiceTest {
         return users.stream()
                 .map(user -> createUserDto(user.getId()))
                 .toList();
+    }
+
+    private MockMultipartFile createImageFile(String contentType, byte[] bytes) {
+        return new MockMultipartFile(
+                "file",
+                "avatar.jpg",
+                contentType,
+                bytes
+        );
+    }
+
+    private User createUserWithAvatar(Long id) {
+        return User.builder()
+                .id(id)
+                .userProfilePic(UserProfilePic.builder()
+                        .fileId("file")
+                        .smallFileId("smallfile")
+                        .build())
+                .build();
+    }
+
+    private byte[] toByteArray(InputStream inputStream) throws IOException {
+        try (inputStream) {
+            return inputStream.readAllBytes();
+        }
     }
 }

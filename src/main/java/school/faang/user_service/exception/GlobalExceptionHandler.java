@@ -1,6 +1,7 @@
 package school.faang.user_service.exception;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,7 +19,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             UserNotFoundException.class,
-            AmazonS3Exception.class
+            AmazonS3Exception.class,
+            EntityNotFoundException.class,
     })
     @ResponseStatus(NOT_FOUND)
     public ErrorResponse handleExceptionsWithStatusNotFound(Exception ex) {

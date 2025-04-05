@@ -3,14 +3,11 @@ package school.faang.user_service.service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.constants.goal.ImageConstants;
+import school.faang.user_service.dto.FileData;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
@@ -78,6 +75,9 @@ public class UserService {
         }
         User user = getUserById(userContext.getUserId());
 
+        if (user.getUserProfilePic() != null) {
+            removeUserAvatar();
+        }
         String fileName = generateFileKey(file.getOriginalFilename(), user.getId());
         String smallFileName = generateFileKey("small" + file.getOriginalFilename(), user.getId());
 
@@ -92,7 +92,7 @@ public class UserService {
         log.info("Avatar created for user with id: {}", user.getId());
     }
 
-    public ResponseEntity<Resource> getUserAvatar(Long userId) {
+    public FileData getUserAvatar(Long userId) {
         User user = getUserById(userId);
         validateUserProfilePic(user);
 
@@ -100,9 +100,7 @@ public class UserService {
         InputStream fileStream = s3Service.getFile(fileName);
         String contentType = s3Service.getContentType(fileName);
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .body(new InputStreamResource(fileStream));
+        return createFileContainer(fileStream, contentType);
     }
 
     public void removeUserAvatar() {
@@ -122,6 +120,13 @@ public class UserService {
         return UserProfilePic.builder()
                 .smallFileId(smallId)
                 .fileId(id)
+                .build();
+    }
+
+    private FileData createFileContainer(InputStream stream, String contentType) {
+        return FileData.builder()
+                .contentType(contentType)
+                .content(stream)
                 .build();
     }
 
