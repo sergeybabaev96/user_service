@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class NotificationEventStartEvent implements Event {
+public class NotificationEventStartEvent {
     @NotEmpty
     private Long eventId;
     private Long ownerId;
