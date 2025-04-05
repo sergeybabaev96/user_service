@@ -29,6 +29,10 @@ spring:
       session-timeout-ms: 20000
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      topics:
+        user-ban: "user-ban-topic"
+      groups:
+        user-ban: "user-ban-group"
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml

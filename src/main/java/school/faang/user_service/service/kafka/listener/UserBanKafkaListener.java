@@ -12,7 +12,10 @@ import school.faang.user_service.service.user.UserService;
 public class UserBanKafkaListener {
     private final UserService userService;
 
-    @KafkaListener(topics = "user-ban-topic", groupId = "user-ban-group")
+    @KafkaListener(
+            topics = "${spring.kafka.consumer.topics.user-ban}",
+            groupId = "${spring.kafka.consumer.groups.user-ban}"
+    )
     public void listenUserBan(String userId) {
         log.info("Received request from kafka to ban user with ID {}", userId);
         userService.banUser(Long.valueOf(userId));
