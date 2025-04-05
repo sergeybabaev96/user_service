@@ -7,13 +7,10 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import school.faang.user_service.exception.FileModificationException;
@@ -39,13 +36,8 @@ public class S3ServiceTest {
     String folder;
     int maxSize;
 
-    private MockMultipartFile mockFile;
-
     @BeforeEach
     void setUp() {
-        mockFile = new MockMultipartFile(
-                "file", "test.jpg", "image/jpeg", "test-image-data".getBytes()
-        );
         folder = "avatars";
         maxSize = 1080;
         ReflectionTestUtils.setField(s3Service, "bucketName", bucketName);

@@ -20,7 +20,7 @@ import school.faang.user_service.service.avatar.AvatarService;
 import java.io.InputStream;
 
 @RestController
-@RequestMapping("/api/v1/users/{userId}/avatar")
+@RequestMapping("/users/{userId}/avatar")
 @RequiredArgsConstructor
 public class AvatarController {
 
@@ -31,17 +31,13 @@ public class AvatarController {
             @PathVariable @Min(1) @NotNull Long userId,
             @RequestBody @NotNull MultipartFile file) {
         avatarService.addUserAvatar(userId, file);
-        System.out.println(file.getOriginalFilename());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @GetMapping("/get")
+    @GetMapping()
     public ResponseEntity<InputStreamResource> getUserAvatar(
-            @PathVariable @NotNull Long userId) {
+            @PathVariable @Min(1) @NotNull Long userId) {
         InputStream avatar = avatarService.getUserAvatar(userId);
-        if (avatar == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_JPEG)
                 .body(new InputStreamResource(avatar));
@@ -49,7 +45,7 @@ public class AvatarController {
 
     @DeleteMapping()
     public ResponseEntity<Void> removeUserAvatar(
-            @PathVariable @NotNull Long userId) {
+            @PathVariable @Min(1) @NotNull Long userId) {
         avatarService.removeUserAvatar(userId);
         return ResponseEntity.noContent().build();
     }

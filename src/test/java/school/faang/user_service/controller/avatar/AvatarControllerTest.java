@@ -43,7 +43,7 @@ public class AvatarControllerTest {
 
         doNothing().when(avatarService).addUserAvatar(anyLong(), any());
 
-        mockMvc.perform(multipart("/api/v1/users/{userId}/avatar/new", userId)
+        mockMvc.perform(multipart("/users/{userId}/avatar/new", userId)
                         .file(file))
                 .andExpect(status().isCreated());
     }
@@ -53,7 +53,7 @@ public class AvatarControllerTest {
         InputStream avatarStream = new ByteArrayInputStream("image".getBytes());
         when(avatarService.getUserAvatar(userId)).thenReturn(avatarStream);
 
-        mockMvc.perform(get("/api/v1/users/{userId}/avatar/get", userId))
+        mockMvc.perform(get("/users/{userId}/avatar", userId))
                 .andExpect(status().isOk());
     }
 
@@ -61,7 +61,7 @@ public class AvatarControllerTest {
     void testRemoveUserAvatar() throws Exception {
         doNothing().when(avatarService).removeUserAvatar(userId);
 
-        mockMvc.perform(delete("/api/v1/users/{userId}/avatar", userId))
+        mockMvc.perform(delete("/users/{userId}/avatar", userId))
                 .andExpect(status().isNoContent());
     }
 

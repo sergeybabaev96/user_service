@@ -10,7 +10,7 @@ import school.faang.user_service.entity.UserProfilePic;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.UserService;
 import school.faang.user_service.service.s3.S3Service;
-import school.faang.user_service.validator.avatar.FileSizeValidator;
+import school.faang.user_service.validator.avatar.AvatarValidator;
 
 import java.io.InputStream;
 
@@ -20,25 +20,27 @@ public class AvatarService {
 
     @Value("${user-avatar.max-size-bytes}")
     private long permittedSize;
-    private static final int SMALL_SIZE = 170;
-    private static final int LARGE_SIZE = 1080;
+    @Value("${user-avatar.sizes.small}")
+    private int smallerSize;
+    @Value("${user-avatar.sizes.large}")
+    private int largerSize;
 
     private final UserRepository userRepository;
     private final S3Service s3Service;
-    private final FileSizeValidator fileSizeValidator;
+    private final AvatarValidator avatarValidator;
     private final UserService userService;
 
     @Transactional
     public void addUserAvatar(Long userId, MultipartFile file) {
         User user = userService.getUserFromDb(userId);
-        fileSizeValidator.checkMaxFileSize(file, permittedSize);
+        avatarValidator.checkMaxFileSize(file, permittedSize);
         String folder = userId + "_user_avatars";
         UserProfilePic userProfilePic = user.getUserProfilePic();
         if (userProfilePic == null) {
             userProfilePic = new UserProfilePic();
         }
-        userProfilePic.setFileId(s3Service.uploadFile(file, folder, LARGE_SIZE));
-        userProfilePic.setSmallFileId(s3Service.uploadFile(file, folder, SMALL_SIZE));
+        userProfilePic.setFileId(s3Service.uploadFile(file, folder, largerSize));
+        userProfilePic.setSmallFileId(s3Service.uploadFile(file, folder, smallerSize));
         user.setUserProfilePic(userProfilePic);
         userRepository.save(user);
     }
@@ -47,6 +49,7 @@ public class AvatarService {
         User user = userService.getUserFromDb(userId);
         UserProfilePic userProfilePic = user.getUserProfilePic();
         String avatarKey = userProfilePic.getFileId();
+        avatarValidator.checkAvatarKey(avatarKey);
         return s3Service.downloadFile(avatarKey);
     }
 
@@ -54,8 +57,10 @@ public class AvatarService {
     public void removeUserAvatar(Long userId) {
         User user = userService.getUserFromDb(userId);
         UserProfilePic userProfilePic = user.getUserProfilePic();
-        s3Service.deleteFile(userProfilePic.getFileId());
-        s3Service.deleteFile(userProfilePic.getSmallFileId());
+        if (userProfilePic != null) {
+            s3Service.deleteFile(userProfilePic.getFileId());
+            s3Service.deleteFile(userProfilePic.getSmallFileId());
+        }
         user.setUserProfilePic(null);
         userRepository.save(user);
     }

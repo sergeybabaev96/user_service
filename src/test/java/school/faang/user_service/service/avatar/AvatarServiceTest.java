@@ -6,13 +6,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.UserService;
 import school.faang.user_service.service.s3.S3Service;
-import school.faang.user_service.validator.avatar.FileSizeValidator;
+import school.faang.user_service.validator.avatar.AvatarValidator;
 
 import java.io.InputStream;
 
@@ -36,7 +37,7 @@ public class AvatarServiceTest {
     private S3Service s3Service;
 
     @Mock
-    private FileSizeValidator fileSizeValidator;
+    private AvatarValidator avatarValidator;
 
     @Mock
     private UserService userService;
@@ -47,11 +48,11 @@ public class AvatarServiceTest {
     @InjectMocks
     private AvatarService avatarService;
 
+    private final int largerSize = 1080;
+    private final int smallerSize = 170;
+    private final long userId = 1L;
     User user = new User();
     UserProfilePic userProfilePic;
-    private final long userId = 1L;
-    private int largerSize;
-    private int smallerSize;
     String largeFileId = "large-avatar-key";
     String smallFileId = "small-avatar-key";
 
@@ -60,8 +61,8 @@ public class AvatarServiceTest {
         user.setId(userId);
         userProfilePic = new UserProfilePic();
         user.setUserProfilePic(userProfilePic);
-        largerSize = 1080;
-        smallerSize = 170;
+        ReflectionTestUtils.setField(avatarService, "largerSize", 1080);
+        ReflectionTestUtils.setField(avatarService, "smallerSize", 170);
     }
 
     @Test
@@ -69,7 +70,7 @@ public class AvatarServiceTest {
         String folder = userId + "_user_avatars";
 
         when(userService.getUserFromDb(userId)).thenReturn(user);
-        doNothing().when(fileSizeValidator).checkMaxFileSize(any(MultipartFile.class), anyLong());
+        doNothing().when(avatarValidator).checkMaxFileSize(any(MultipartFile.class), anyLong());
         when(s3Service.uploadFile(multipartFile, folder, largerSize)).thenReturn(largeFileId);
         when(s3Service.uploadFile(multipartFile, folder, smallerSize)).thenReturn(smallFileId);
         System.out.println("Uploading with size: " + largerSize);
