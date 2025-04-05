@@ -16,7 +16,7 @@ import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.mapper.SkillMapper;
-import school.faang.user_service.service.RecommendationService;
+import school.faang.user_service.service.recommendation.RecommendationService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
