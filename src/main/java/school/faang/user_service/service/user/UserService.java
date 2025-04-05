@@ -60,9 +60,7 @@ public class UserService {
     }
 
     private Optional<Country> getCountry(String country) {
-        return ((Collection<Country>) countryRepository.findAll()).stream()
-                .filter(c -> country.equals(c.getTitle()))
-                .findFirst();
+        return countryRepository.findByTitle(country);
     }
 
     private Country createCountry(String country) {
