@@ -13,25 +13,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
+@Mapper(componentModel = "spring"
+        , unmappedTargetPolicy = ReportingPolicy.ERROR
+        , uses = {PersonEducationUserMapper.class, PersonContactInfoUserMapper.class})
 public interface PersonUserMapper {
 
     @Mapping(target = "firstName", ignore = true)
     @Mapping(target = "lastName", ignore = true)
-    @Mapping(target = "contactInfo", ignore = true)
-    @Mapping(target = "education", ignore = true)
+    @Mapping(target = "contactInfo", source = "user", qualifiedByName = "mapContactInfo")
     @Mapping(target = "employer", ignore = true)
-    @Mapping(target = "contactInfo.email", ignore = true)
-    @Mapping(target = "contactInfo.phone", ignore = true)
-    @Mapping(target = "contactInfo.address.street", ignore = true)
-    @Mapping(target = "contactInfo.address.city", ignore = true)
-    @Mapping(target = "contactInfo.address.state", ignore = true)
-    @Mapping(target = "contactInfo.address.country", ignore = true)
-    @Mapping(target = "contactInfo.address.postalCode", ignore = true)
-    @Mapping(target = "education.faculty", ignore = true)
-    @Mapping(target = "education.yearsOfStudy", ignore = true)
-    @Mapping(target = "education.major", ignore = true)
-    @Mapping(target = "education.GPA", ignore = true)
+    @Mapping(target = "education", source = "user", qualifiedByName = "mapEducation")
     Person toPerson(User user);
 
 
