@@ -1,11 +1,13 @@
 package school.faang.user_service.service;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.exception.DataValidationException;
 
 import java.security.SecureRandom;
 
-@Service
+@Component
 public class PasswordService {
     private static final String CHAR_LOWER = "abcdefghijklmnopqrstuvwxyz";
     private static final String CHAR_UPPER = CHAR_LOWER.toUpperCase();
@@ -13,10 +15,13 @@ public class PasswordService {
     private static final String SPECIAL = "!@#$%^&*()_+-=[]{}|;:,.<>?";
     private static final String ALL_CHARS = CHAR_LOWER + CHAR_UPPER + DIGITS + SPECIAL;
 
+    @Value("$.{app.security.password-length}")
+    private int passwordLength;
+
     private final SecureRandom random = new SecureRandom();
 
     public String generateRandomPassword(int length) {
-        if (length < 10) {
+        if (length < passwordLength) {
             throw new DataValidationException("Пароль должен быть минимум 10 символов");
         }
 

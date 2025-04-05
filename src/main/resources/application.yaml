@@ -54,3 +54,8 @@ springdoc:
     doc-expansion: none
   api-docs:
     path: /v3/api-docs
+
+  app:
+    security:
+      password-length: 10
+      min-data-length: 6

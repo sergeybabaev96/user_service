@@ -1,5 +1,7 @@
 package school.faang.user_service.service;
 
+import lombok.NoArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@NoArgsConstructor
 public class UserServiceTest {
 
     @Mock
@@ -50,8 +53,21 @@ public class UserServiceTest {
     @Spy
     CsvMapper csvMapper;
 
-    @InjectMocks
-    UserService userService;
+    private UserService userService;
+
+    @BeforeEach
+    void setUp() {
+        userService = new UserService(
+                userRepository,
+                csvMapper,
+                userMapper,
+                countryRepository,
+                passwordService,
+                10,
+                6
+        );
+
+    }
 
     @Test
     @DisplayName("Negative: error when user not found")
@@ -131,15 +147,15 @@ public class UserServiceTest {
 
         List<UserDto> result = userService.registerUserFromFile(file);
 
-        assertNotNull(result);
-        assertEquals(1, result.size());
-
         UserDto userDto = result.get(0);
-        assertEquals("John Doe", userDto.username());
-        assertEquals("johndoe@example.com", userDto.email());
 
         verify(passwordService).generateRandomPassword(10);
         verify(userRepository).save(any(User.class));
+
+        assertEquals("John Doe", userDto.username());
+        assertEquals("johndoe@example.com", userDto.email());
+        assertNotNull(result);
+        assertEquals(1, result.size());
     }
 
     @Test

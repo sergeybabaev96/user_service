@@ -2,6 +2,7 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.dto.UserDto;
@@ -35,8 +36,12 @@ public class UserService {
     private final UserMapper userMapper;
     private final CountryRepository countryRepository;
     private final PasswordService passwordService;
-    private static final int PASSWORD_LENGTH = 10;
-    private static final int MIN_DATA_LENGTH = 6;
+
+    @Value("$.{app.security.password-length}")
+    private final int passwordLength;
+
+    @Value("$.{app.security.password-length}")
+    private final int minDataLength;
 
     public List<UserDto> registerUserFromFile(MultipartFile file) {
         List<String> validatedFile = validateAndReadFile(file);
@@ -54,10 +59,10 @@ public class UserService {
 
     private UserDto registerUserFromLine(String line) {
         String[] fields = line.split(",");
-        if (fields.length < MIN_DATA_LENGTH) {
+        if (fields.length < minDataLength) {
             throw new DataValidationException(
                     "Некорректный формат данных в файле, ожидается %d поля, получено %d",
-                    MIN_DATA_LENGTH, fields.length);
+                    minDataLength, fields.length);
         }
 
         PersonDto personDto = parsePersonDto(fields);
@@ -65,7 +70,7 @@ public class UserService {
         PersonAboutDto personAboutDto = parsePersonAboutDto(fields);
 
         User user = csvMapper.toUser(personDto, personContactDto, personAboutDto);
-        user.setPassword(passwordService.generateRandomPassword(PASSWORD_LENGTH));
+        user.setPassword(passwordService.generateRandomPassword(passwordLength));
         userRepository.save(user);
         log.info("User with id: {} registered", user.getId());
 
