@@ -40,9 +40,9 @@ public class CustomMultipartFile implements MultipartFile {
         return new ByteArrayInputStream(content);
     }
 
-    public void transferTo(File dest) {
+    public void transferTo(File destination) {
         try {
-            Files.write(dest.toPath(), content);
+            Files.write(destination.toPath(), content);
         } catch (IOException ex) {
             log.error("Transfer error. {}", ex.toString());
         }

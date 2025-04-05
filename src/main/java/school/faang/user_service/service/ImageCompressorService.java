@@ -20,6 +20,7 @@ public class ImageCompressorService {
 
     public MultipartFile compressImage(MultipartFile file, int size) {
         try {
+            log.debug("Start to compress image");
             BufferedImage originalImage = ImageIO.read(file.getInputStream());
 
             if (originalImage == null) {
@@ -42,12 +43,13 @@ public class ImageCompressorService {
                         .build();
             }
         } catch (IOException ex) {
-            log.error("Image compression failed", ex);
-            throw new RuntimeException("Image processing error", ex);
+            log.error("Image compression failed. {}", ex.toString());
+            throw new RuntimeException(ex.getMessage());
         }
     }
 
     private int[] calculateNewSize(int width, int height, int maxSize) {
+        log.debug("Calculating new size of image");
         boolean isLandscape = width > height;
 
         if (isLandscape) {
@@ -66,6 +68,7 @@ public class ImageCompressorService {
                 RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         graphics.drawImage(original, 0, 0, width, height, null);
         graphics.dispose();
+        log.debug("Image resize completed");
         return resized;
     }
 

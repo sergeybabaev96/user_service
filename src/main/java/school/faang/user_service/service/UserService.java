@@ -2,6 +2,7 @@ package school.faang.user_service.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -27,6 +28,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class UserService {
 
     private static final int MAX_AVATAR_FILE_SIZE = 5 * 1024 * 1024;
@@ -67,6 +69,7 @@ public class UserService {
     }
 
     public void createUserAvatar(MultipartFile file) {
+        log.debug("Start creating user avatar");
         if (!Objects.requireNonNull(file.getContentType()).matches(ImageConstants.IMAGE_FORMAT_REGEX)) {
             throw new InvalidImageFormatException("Invalid type file with name: %s", file.getOriginalFilename());
         }
@@ -86,6 +89,7 @@ public class UserService {
 
         user.setUserProfilePic(createUserProfilePic(smallFileKey, fileKey));
         userRepository.save(user);
+        log.info("Avatar created for user with id: {}", user.getId());
     }
 
     public ResponseEntity<Resource> getUserAvatar(Long userId) {
@@ -102,6 +106,7 @@ public class UserService {
     }
 
     public void removeUserAvatar() {
+        log.debug("Start removing user avatar");
         User user = getUserById(userContext.getUserId());
         validateUserProfilePic(user);
 
@@ -110,6 +115,7 @@ public class UserService {
 
         user.setUserProfilePic(null);
         userRepository.save(user);
+        log.info("Avatar removed for user with id: {}", user.getId());
     }
 
     private UserProfilePic createUserProfilePic(String smallId, String id) {

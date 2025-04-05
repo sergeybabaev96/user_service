@@ -2,7 +2,6 @@ package school.faang.user_service.repository.goal;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 
 import java.util.List;
@@ -41,10 +40,6 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
             """)
     Stream<Goal> findByParent(long goalId);
 
-    @Query(nativeQuery = true, value = """
-            SELECT u.* FROM users u
-            JOIN user_goal ug ON u.id = ug.user_id
-            WHERE ug.goal_id = :goalId
-            """)
-    List<User> findUsersByGoalId(long goalId);
+    @Query(nativeQuery = true, value = "SELECT user_id FROM user_goal WHERE goal_id = :goalId")
+    List<Long> findUserIdsByGoalId(long goalId);
 }
