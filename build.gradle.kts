@@ -32,6 +32,11 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
+     * Swagger
+     */
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+
+    /**
      * Database
      */
     implementation("org.liquibase:liquibase-core")
@@ -72,6 +77,11 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    /**
+     * Resize  Image
+     */
+    implementation("org.imgscalr:imgscalr-lib:4.2")
 }
 
 jsonSchema2Pojo {
