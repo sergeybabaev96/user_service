@@ -35,11 +35,12 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testFindById() {
+    public void findById_shouldFind() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         Optional<User> result = userService.findById(userId);
 
+        Mockito.verify(userRepository, Mockito.times(1)).findById(userId);
         assertTrue(result.isPresent());
         assertEquals(user, result.get());
     }

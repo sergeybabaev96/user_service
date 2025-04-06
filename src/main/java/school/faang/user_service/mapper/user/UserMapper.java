@@ -7,6 +7,8 @@ import school.faang.user_service.entity.User;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -21,12 +23,18 @@ public interface UserMapper {
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .mentorIds(user.getMentors() == null || user.getMentors().isEmpty()
+                        ? null
+                        : user.getMentors().stream().map(User::getId).toList())
+                .menteeIds(user.getMentees() == null || user.getMentees().isEmpty()
+                        ? null
+                        : user.getMentees().stream().map(User::getId).toList())
                 .build();
     }
 
 
     static List<Long> toIds(List<User> users) {
-        return users == null ? List.of() : users.stream().map(User::getId).toList();
+        return users == null ? List.of() : users.stream().map(User::getId).collect(Collectors.toList());
     }
 
     static List<UserDto> usersToUserDtos(List<User> users) {
