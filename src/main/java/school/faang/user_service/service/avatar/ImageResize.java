@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Сервис для изменения размера изображений.
@@ -43,15 +44,18 @@ public class ImageResize {
      * @implNote Использует алгоритм масштабирования Scalr.Method.QUALITY для наилучшего качества
      */
     public MultipartFile resizeImage(@NotNull MultipartFile file, int maxSize) {
-        try {
-            BufferedImage originalImage = ImageIO.read(file.getInputStream());
+        try (InputStream inputStream = file.getInputStream();
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+
+            BufferedImage originalImage = ImageIO.read(inputStream);
             BufferedImage resizedImage = Scalr.resize(originalImage, Scalr.Method.QUALITY, Scalr.Mode.AUTOMATIC, maxSize);
 
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ImageIO.write(resizedImage, "jpg", outputStream);
-            return new CustomMultipartFile(file.getOriginalFilename()
-                    , outputStream.toByteArray()
-                    , file.getContentType());
+            return new CustomMultipartFile(
+                    file.getOriginalFilename(),
+                    outputStream.toByteArray(),
+                    file.getContentType()
+            );
         } catch (IOException e) {
             throw new FileException(e.getMessage());
         }
