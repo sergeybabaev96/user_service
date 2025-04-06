@@ -2,7 +2,11 @@ package school.faang.user_service.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.event.EventFilterDto;
 import school.faang.user_service.service.EventServiceImpl;
@@ -12,12 +16,13 @@ import java.util.List;
 import static school.faang.user_service.utils.ValidationUtils.validateEvent;
 import static school.faang.user_service.utils.ValidationUtils.validateEventId;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class EventController {
     private final EventServiceImpl eventService;
 
-    public EventDto create(EventDto eventDto) {
+    @PostMapping
+    public EventDto create(@Valid @RequestBody EventDto eventDto) {
         validateEvent(eventDto);
         return eventService.create(eventDto);
     }
@@ -27,7 +32,8 @@ public class EventController {
         return eventService.getEvent(id);
     }
 
-    public List<EventDto> getEventsByFilter(@Valid EventFilterDto eventFilter) {
+    @GetMapping
+    public List<EventDto> getEventsByFilter(@Valid @RequestBody EventFilterDto eventFilter) {
         return eventService.getEventsByFilter(eventFilter);
     }
 
@@ -36,7 +42,8 @@ public class EventController {
         eventService.deleteEvent(id);
     }
 
-    public EventDto updateEvent(@Valid EventDto eventDto) {
+    @PutMapping
+    public EventDto updateEvent(@Valid @RequestBody EventDto eventDto) {
         validateEvent(eventDto);
         return eventService.updateEvent(eventDto);
     }

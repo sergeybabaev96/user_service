@@ -2,6 +2,9 @@ package school.faang.user_service.controller.career;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.CareerDto;
 import school.faang.user_service.service.career.CareerService;
@@ -11,11 +14,13 @@ import school.faang.user_service.service.career.CareerService;
 public class CareerController {
     private final CareerService careerService;
 
-    public CareerDto addCareer(long userId, @Valid CareerDto careerDto) {
+    @PostMapping
+    public CareerDto addCareer(long userId, @Valid @RequestBody CareerDto careerDto) {
         return careerService.addCareer(userId, careerDto);
     }
 
-    public CareerDto updateCareer(long userId,@Valid CareerDto careerDto) {
+    @PutMapping
+    public CareerDto updateCareer(long userId,@Valid @RequestBody CareerDto careerDto) {
         return careerService.updateCareer(userId, careerDto);
     }
 

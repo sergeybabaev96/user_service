@@ -13,7 +13,6 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.SkillMapperImpl;
 import school.faang.user_service.repository.SkillRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -55,15 +54,24 @@ public class SkillServiceTest {
     public void testCreate() {
         SkillDto skillDto = new SkillDto(null,"Java");
         when(skillRepository.existsByTitle(skillDto.title())).thenReturn(false);
-        skillService.create(skillDto);
+        SkillDto result = skillService.create(skillDto);
         verify(skillMapper, times(1)).toEntity(skillDto);
         verify(skillRepository, times(1)).save(any(Skill.class));
+        assertEquals("Java", result.title());
     }
 
     @Test
     public void testGetUserSkills() {
-        when(skillRepository.findAllByUserId(1L)).thenReturn(new ArrayList<Skill>());
-        skillService.getUserSkills(1L);
+        long userId = 1L;
+        Skill skill1 = Skill.builder().id(1).title("Java").build();
+        Skill skill2 = Skill.builder().id(2).title("Python").build();
+        Skill skill3 = Skill.builder().id(3).title("JavaScript").build();
+        List<Skill> skills = List.of(skill1, skill2, skill3);
+        when(skillRepository.findAllByUserId(userId)).thenReturn(skills);
+        List<SkillDto> result = skillService.getUserSkills(1L);
+        verify(skillRepository, times(1)).findAllByUserId(userId);
+        assertEquals(3, result.size());
+
     }
 
     @Test
