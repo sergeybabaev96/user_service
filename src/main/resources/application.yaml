@@ -35,3 +35,8 @@ project-service:
 payment-service:
   host: localhost
   port: 9080
+
+  scheduler:
+    event-cleanup:
+      cron: "0 0 3 ? * SUN"
+      batch-size: 50
