@@ -1,4 +1,4 @@
-package school.faang.user_service.service.career;
+package school.faang.user_service.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class CareerService {
         validateFromDateBeforeNow(careerDto);
         Career existingCareer = careerRepository.findById(careerDto.id()).orElseThrow(() ->
                 new EntityNotFoundException("Career not found."));
-        if(existingCareer.getUser().getId() != userId) {
+        if (existingCareer.getUser().getId() != userId) {
             throw new DataValidationException("User cannot update someone else's career.");
         }
         Career career = careerMapper.toCareer(careerDto);
@@ -49,8 +49,8 @@ public class CareerService {
         return careerMapper.toCareerDto(career);
     }
 
-    private void validateFromDateBeforeNow(CareerDto careerDto){
-        if(!careerDto.from().isBefore(LocalDate.now())) {
+    private void validateFromDateBeforeNow(CareerDto careerDto) {
+        if (!careerDto.from().isBefore(LocalDate.now())) {
             throw new DataValidationException("Career start date must be in the past. Current value: " +
                     careerDto.from());
         }

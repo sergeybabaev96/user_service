@@ -1,4 +1,4 @@
-package school.faang.user_service.service.education;
+package school.faang.user_service.service;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

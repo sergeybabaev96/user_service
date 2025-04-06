@@ -1,4 +1,4 @@
-package school.faang.user_service.service.education;
+package school.faang.user_service.service;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +12,6 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.education.EducationMapper;
 import school.faang.user_service.repository.EducationRepository;
-import school.faang.user_service.service.UserService;
 
 import java.time.Year;
 
@@ -40,7 +39,7 @@ public class EducationServiceImpl implements EducationService {
             throw new DataValidationException("User not found");
         }
 
-        User user = userService.findById(userId);
+        User user = userService.findUserById(userId);
         log.info("User found with id: {}", userId);
 
         Education education = educationMapper.toEducation(educationDto);

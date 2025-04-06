@@ -3,7 +3,7 @@ package school.faang.user_service.controller.workschedule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.WorkScheduleDto;
-import school.faang.user_service.service.workschedule.WorkScheduleService;
+import school.faang.user_service.service.WorkScheduleService;
 
 @Controller
 @RequiredArgsConstructor
