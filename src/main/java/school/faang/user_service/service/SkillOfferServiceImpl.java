@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.recommendation.SkillOffer;
-import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.exception.NotEnoughOffersException;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 
 import java.util.List;
@@ -39,14 +39,14 @@ public class SkillOfferServiceImpl implements SkillOfferService {
 
     @Override
     public void isEnoughAmountOffersToSkill(Long skillOfferId, Long userId) {
-        int amountOffers = skillOfferRepository.findAllOffersOfSkill (skillOfferId,userId).size();
+        int amountOffers = skillOfferRepository.findAllOffersOfSkill(skillOfferId, userId).size();
         if (amountOffers < minSkillOffers) {
-            throw new DataValidationException("User has less than 3 offers");
-        };
+            throw new NotEnoughOffersException("User has less than 3 offers");
+        }
     }
 
     @Override
     public List<SkillOffer> getSkillOfferToUser(Long skillOfferId, Long userId) {
-        return skillOfferRepository.findAllOffersOfSkill (skillOfferId,userId);
+        return skillOfferRepository.findAllOffersOfSkill(skillOfferId, userId);
     }
 }

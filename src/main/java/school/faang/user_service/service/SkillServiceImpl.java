@@ -6,6 +6,7 @@ import school.faang.user_service.dto.skill.SkillCandidateDto;
 import school.faang.user_service.dto.skill.SkillDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.exception.SkillNotFoundException;
 import school.faang.user_service.mapper.SkillMapper;
 import school.faang.user_service.repository.SkillRepository;
 
@@ -65,25 +66,26 @@ public class SkillServiceImpl implements SkillService {
     public SkillDto acquireSkillFromOffers(long skillId, long userId) {
         Optional<Skill> optionalSkill = skillRepository.findUserSkill(skillId, userId);
         if (optionalSkill.isPresent()) {
-            throw new DataValidationException(String.format("This skill \"%s\" by user already exists",
-                    optionalSkill.get().getTitle()));
+            throw new DataValidationException("This skill \"%s\" by user already exists"
+                    .formatted(optionalSkill.get().getTitle()));
         }
         skillOfferService.isEnoughAmountOffersToSkill(skillId, userId);
 
         skillRepository.assignSkillToUser(skillId, userId);
         userSkillGuaranteeService.addUserSkillGuarantee(skillId, userId);
 
-        return skillMapper.toDto(skillRepository.findUserSkill(skillId, userId).get());
+        return skillMapper.toDto(skillRepository.findUserSkill(skillId, userId).orElseThrow(
+                () -> new SkillNotFoundException("Skill id %d not found for userId %d".formatted(skillId, userId))));
     }
 
-    private SkillCandidateDto toSkillCandidateDto(Map.Entry<Long, Long> entry, List<Skill> offeredSkills) {
+    SkillCandidateDto toSkillCandidateDto(Map.Entry<Long, Long> entry, List<Skill> offeredSkills) {
         Skill skill = findSkillById(entry.getKey(), offeredSkills)
-                .orElseThrow(() -> new IllegalStateException("Skill not found for id: " + entry.getKey()));
+                .orElseThrow(() -> new SkillNotFoundException("Skill not found for id: %d".formatted(entry.getKey())));
         SkillDto skillDto = skillMapper.toDto(skill);
         return new SkillCandidateDto(skillDto, entry.getValue());
     }
 
-    private Optional<Skill> findSkillById(Long id, List<Skill> skills) {
+    Optional<Skill> findSkillById(Long id, List<Skill> skills) {
         return skills.stream().filter(skill -> skill.getId() == id).findFirst();
     }
 }

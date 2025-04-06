@@ -52,8 +52,8 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.slf4j:slf4j-api:2.0.5")
     implementation("ch.qos.logback:logback-classic:1.4.6")
-    implementation("org.projectlombok:lombok:1.18.26")
-    annotationProcessor("org.projectlombok:lombok:1.18.26")
+    implementation("org.projectlombok:lombok:1.18.30")
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
@@ -86,9 +86,21 @@ jsonSchema2Pojo {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+    }
+    outputs.upToDateWhen { false }
 }
 
-val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
+tasks.withType<JavaCompile> {
+    options.compilerArgs.addAll(
+        listOf(
+            "-Amapstruct.defaultComponentModel=spring",
+            "-Alombok.addLombokGeneratedAnnotation=true" // Важно для Jacoco
+        )
+    )
+}
 
 tasks.bootJar {
     archiveFileName.set("service.jar")
@@ -119,19 +131,34 @@ tasks.jacocoTestReport {
 
 // This task verifies tests
 tasks.jacocoTestCoverageVerification {
+    classDirectories.setFrom(
+        sourceSets.main.get().output.asFileTree.matching {
+            include(
+                "school/faang/user_service/service/*Impl.class",
+                "school/faang/user_service/service/**/*Impl.class"
+            )
+            exclude(
+                "**/dto/**",
+                "**/mapper/**",
+                "**/config/**",
+                "**/entity/**"
+            )
+        }
+    )
+
     dependsOn(tasks.jacocoTestReport)      // To start task after tests
 
     violationRules {
         rule {
             element = "CLASS"
             includes = listOf(
-                "school.faang.user_service.service.MentorshipService",
-                "school.faang.user_service.service.event.EventParticipationService",
-                "school.faang.user_service.service.education.EducationService",
-                "school.faang.user_service.service.RecommendationRequestService",
-                "school.faang.user_service.service.SkillRequestService",
-                "school.faang.user_service.service.SkillService",
-                "school.faang.user_service.service.SkillService",
+                "school.faang.user_service.service.*ServiceImpl*"
+//                "school.faang.user_service.service.MentorshipService",
+//                "school.faang.user_service.service.EventParticipationService",
+//                "school.faang.user_service.service.EducationService",
+//                "school.faang.user_service.service.RecommendationRequestService",
+//                "school.faang.user_service.service.SkillRequestService",
+//                "school.faang.user_service.service.SkillService",
             )
 
             limit {
@@ -174,4 +201,14 @@ tasks.classes {
 // To run check after rebuild
 tasks.compileJava {
     finalizedBy(tasks.check)
+}
+
+tasks.register("debugJacoco") {
+    doLast {
+        println("Jacoco report will be generated at: ${tasks.jacocoTestReport.get().reports.html.outputLocation.get()}")
+        println("Included classes:")
+        sourceSets.main.get().output.asFileTree.matching {
+            include("school/faang/user_service/service/*Impl.class")
+        }.forEach { println(it) }
+    }
 }

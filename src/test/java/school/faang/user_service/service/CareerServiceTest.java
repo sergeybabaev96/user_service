@@ -17,7 +17,6 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.CareerMapperImpl;
 import school.faang.user_service.repository.CareerRepository;
 import school.faang.user_service.repository.UserRepository;
-import school.faang.user_service.service.career.CareerService;
 
 import java.time.LocalDate;
 import java.util.Optional;
