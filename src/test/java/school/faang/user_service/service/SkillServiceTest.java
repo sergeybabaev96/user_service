@@ -51,19 +51,10 @@ public class SkillServiceTest {
     private SkillOfferServiceImpl skillOfferService;
 
     @Mock
-    private UserSkillGuaranteeServiceImpl skillUserGuarantee;
+    private UserSkillGuaranteeServiceImpl userSkillGuaranteeService;
 
     @Spy
     private SkillMapperImpl skillMapper;
-
-    @Mock
-    private SkillMapper skillMapper;
-
-    @Mock
-    private SkillOfferService skillOfferService;
-
-    @Mock
-    private UserSkillGuaranteeService userSkillGuaranteeService;
 
     @InjectMocks
     private SkillServiceImpl skillService;
@@ -144,23 +135,20 @@ public class SkillServiceTest {
 
         long userId = 1L;
         long skillId = 2L;
-        Skill newSkill = new Skill();
-        newSkill.setTitle("Java");
-        newSkill.setId(1L);
+        Skill newSkill = Skill.builder().id(skillId).title("Java").build();
         when(skillRepository.findUserSkill(skillId, userId))
                 .thenReturn(Optional.empty())
                 .thenReturn(Optional.of(newSkill));
+        doNothing().when(skillOfferService).isEnoughAmountOffersToSkill(skillId, userId);
+        doNothing().when(skillRepository).assignSkillToUser(skillId, userId);
+        doNothing().when(userSkillGuaranteeService).addUserSkillGuarantee(skillId, userId);
         SkillDto skillDto = skillService.acquireSkillFromOffers(skillId, userId);
         verify(skillOfferService, times(1)).isEnoughAmountOffersToSkill(skillId, userId);
         verify(skillRepository, times(1)).assignSkillToUser(skillId, userId);
-        verify(skillUserGuarantee, times(1)).addUserSkillGuarantee(skillId, userId);
+        verify(userSkillGuaranteeService, times(1)).addUserSkillGuarantee(skillId, userId);
         verify(skillMapper, times(1)).toDto(newSkill);
         assertEquals("Java", skillDto.title());
     }
-    @Test
-    public void testDoesSkillExists_RequestDataFromRepository_ReturnsTrue() {
-        var skillId = 10L;
-        when(skillRepository.existsById(skillId)).thenReturn(true);
     @Nested
     class DoesSkillExistTests {
 
