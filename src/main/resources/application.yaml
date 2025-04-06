@@ -47,3 +47,7 @@ user_service:
     # minSkillOffers - the minimum number of offers for one skill
     #so that the user can save it
     minSkillOffers: 3
+
+events:
+  cleanup:
+    cron: "0 0 0 * * ?" # Every day at midnight
