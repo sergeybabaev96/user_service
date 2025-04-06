@@ -1,44 +1,17 @@
 package school.faang.user_service.service.event;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import school.faang.user_service.entity.User;
-import school.faang.user_service.repository.event.EventParticipationRepository;
+import school.faang.user_service.dto.UserDto;
 
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class EventParticipationService {
+public interface EventParticipationService {
 
-    private final EventParticipationRepository eventParticipationRepository;
+    void registerParticipant(long eventId, long userId);
 
-    public void registerParticipant(long eventId, long userId) {
-        if (isUserRegisteredForEvent(eventId, userId)) {
-            throw new IllegalStateException("User is already registered for this event");
-        }
+    void unregisterParticipant(long eventId, long userId);
 
-        eventParticipationRepository.register(eventId, userId);
-    }
+    List<UserDto> getParticipants(long eventId);
 
-    public void unregisterParticipant(long eventId, long userId) {
-        if (!isUserRegisteredForEvent(eventId, userId)) {
-            throw new IllegalStateException("User is not registered for this event");
-        }
-
-        eventParticipationRepository.unregister(eventId, userId);
-    }
-
-    public List<User> getParticipants(long eventId) {
-        return eventParticipationRepository.findAllParticipantsByEventId(eventId);
-    }
-
-    public int getParticipantsCount(long eventId) {
-        return eventParticipationRepository.countParticipants(eventId);
-    }
-
-    public boolean isUserRegisteredForEvent(long eventId, long userId) {
-        return eventParticipationRepository.findAllParticipantsByEventId(eventId).stream()
-                .anyMatch(user -> user.getId() == userId);
-    }
+    int getParticipantsCount(long eventId);
 }
+
