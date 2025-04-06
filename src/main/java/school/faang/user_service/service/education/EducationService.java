@@ -15,7 +15,7 @@ import java.time.Year;
 
 @RequiredArgsConstructor
 @Service
-public class EducationService {
+public class EducationService implements EducationServiceInt {
     private final UserRepository userRepository;
     private final EducationRepository educationRepository;
     private final EducationMapper educationMapper;

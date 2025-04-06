@@ -9,12 +9,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.EducationDto;
+import school.faang.user_service.entity.Education;
 import school.faang.user_service.service.education.EducationService;
 
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/education")
+@RequestMapping("/educations")
 public class EducationController {
 
     private final EducationService educationService;
@@ -30,7 +31,7 @@ public class EducationController {
     }
 
     @GetMapping("/{educationId}")
-    public EducationDto getEducationById(@PathVariable long educationId) {
+    public Education getEducationById(@PathVariable long educationId) {
         return educationService.getEducationById(educationId);
     }
 }
