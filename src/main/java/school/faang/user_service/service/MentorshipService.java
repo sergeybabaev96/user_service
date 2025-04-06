@@ -20,14 +20,8 @@ public interface MentorshipService {
 
     SuccessResponseDto deleteMentor(Long menteeId, Long mentorId);
 
-//    TODO: метод не соответствует условию в задаче BJS2-66001: После деактивации профиля: если пользователь был
-//     ментором других пользователей — необходимо остановить менторство. Для этого нужно написать соответствующий метод
-//     в MentorshipService. Ментор должен пропасть из списка менторов своих менти. При этом все цели, которые ментор
-//     поставил менти сохраняются, но больше не хранят mentorId — теперь они выглядят так,
-//     как будто менти поставил их себе сам. Про ЦЕЛИ речь в условии, а не про связи в mentorship. Метод ниже
-//     устанавливает менти самого себе ментором.
-//    void deleteMentorShipByDeactivatedUser(Long mentorID);
 
-    // TODO: удаление в задаче BJS2-66001 делать не просили
-//    void deleteMenteeByDeactivatedUser(Long menteeId);
+    void deleteFromMentorShipDeactivatedUser(Long mentorID);
+
+
 }
