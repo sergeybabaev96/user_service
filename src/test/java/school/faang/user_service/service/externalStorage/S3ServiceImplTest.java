@@ -1,7 +1,6 @@
 package school.faang.user_service.service.externalStorage;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +32,7 @@ public class S3ServiceImplTest {
     public final String TEST_FILENAME = "test filename";
     public final String TEST_FILE_CONTENT = "test content";
     private final String TEST_CONTENT_TYPE = "content type";
+    private final String TEST_RESOURCE_KEY = "test resource key";
 
     private final int fileContentSize = TEST_FILE_CONTENT.length();
     private final InputStream testFileDataStream = new ByteArrayInputStream(TEST_FILE_CONTENT.getBytes());
@@ -46,23 +46,20 @@ public class S3ServiceImplTest {
     @Captor
     ArgumentCaptor<PutObjectRequest> putObjectRequestCaptor;
 
-    @Captor
-    ArgumentCaptor<DeleteObjectRequest> deleteObjectRequestCaptor;
-
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(s3Service, "bucketName", TEST_BUCKET_NAME);
     }
 
     @Test
-    public void testUploadFile_S3ClientThrows_Throws() {
+    public void testUploadFile_s3ClientThrows_throws() {
         doThrow(new RuntimeException("S3 ошибка")).when(s3Client).putObject(any());
 
         assertThrows(ExternalServiceError.class, () -> runUploadFile(TEST_CONTENT_TYPE));
     }
 
     @Test
-    public void testUploadFile_UseDefaultContentTypeAndS3ClientSuccess_ReturnsExternalResourceDto() {
+    public void testUploadFile_useDefaultContentTypeAndS3ClientSuccess_returnsExternalResourceDto() {
         // Act
         var result = runUploadFile(null);
 
@@ -76,7 +73,7 @@ public class S3ServiceImplTest {
     }
 
     @Test
-    public void testUploadFile_ContentTypePresentAndS3ClientSuccess_ReturnsExternalResourceDto() {
+    public void testUploadFile_contentTypePresentAndS3ClientSuccess_returnsExternalResourceDto() {
         // Act
         var result = runUploadFile(TEST_CONTENT_TYPE);
 
@@ -94,36 +91,13 @@ public class S3ServiceImplTest {
         assertEquals(TEST_FILENAME, result.name());
     }
 
-    @Test
-    public void testDeleteFile_S3ClientThrows_Throws() {
-        var key = "test-key";
-        doThrow(new RuntimeException("S3 ошибка")).when(s3Client).deleteObject(any());
-
-        assertThrows(ExternalServiceError.class, () -> s3Service.deleteFile(key));
-    }
-
-    @Test
-    public void testDeleteFile_S3ClientSuccess_Success() {
-        // Arrange
-        var key = "test-key";
-
-        // Act
-        s3Service.deleteFile(key);
-
-        // Assert
-        verify(s3Client).deleteObject(deleteObjectRequestCaptor.capture());
-        var capturedRequest = deleteObjectRequestCaptor.getValue();
-
-        assertEquals(TEST_BUCKET_NAME, capturedRequest.getBucketName());
-        assertEquals(key, capturedRequest.getKey());
-    }
-
     private ExternalResourceDto runUploadFile(String TEST_CONTENT_TYPE) {
         return s3Service.uploadFile(
                 testFileDataStream,
                 fileContentSize,
                 TEST_CONTENT_TYPE,
                 TEST_FILENAME,
-                TEST_FOLDER);
+                TEST_FOLDER,
+                TEST_RESOURCE_KEY);
     }
 }

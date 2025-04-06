@@ -4,14 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.CreateUserDto;
 import school.faang.user_service.dto.UserDto;
-import school.faang.user_service.dto.externalStorage.ExternalResourceDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
+import school.faang.user_service.exception.ExternalServiceError;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.exception.UsernameNotFoundException;
-import school.faang.user_service.exception.ExternalServiceError;
 import school.faang.user_service.exception.UsernameNotUniqueException;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
@@ -92,53 +92,37 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto createUser(CreateUserDto createUserDto) {
         createUserValidator.validateUsername(createUserDto);
         createUserValidator.validateUserEmail(createUserDto);
         var country = createUserValidator.validateCountryTitle(createUserDto);
 
-        var randomAvatarResourceDto = getRandomAvatarResourceDto();
+        var resourceKey = s3Service.getResourceKey(getAvatarFilename(), userAvatarsAwsFolder);
 
         var user = userMapper.toEntity(createUserDto);
         var userProfilePic = new UserProfilePic();
-        userProfilePic.setFileId(randomAvatarResourceDto.key());
+        userProfilePic.setFileId(resourceKey);
         user.setUserProfilePic(userProfilePic);
         user.setCountry(country);
 
-        var savedUser = saveUser(createUserDto, user, randomAvatarResourceDto);
+        var savedUser = userRepository.save(user);
+
+        uploadFileToS3Storage(resourceKey);
 
         return userMapper.toDto(savedUser);
     }
 
-    private User saveUser(CreateUserDto createUserDto, User user, ExternalResourceDto randomAvatarResourceDto) {
-        try {
-            return userRepository.save(user);
-        } catch (Exception ex) {
-            var errorMessage = "Cannot create user %s".formatted(createUserDto.username());
-            log.error(errorMessage, ex);
-
-            try {
-                s3Service.deleteFile(randomAvatarResourceDto.key());
-            } catch (Exception deleteRandomAvatarFileException) {
-                log.error(
-                        "Cannot delete random avatar: {}",
-                        deleteRandomAvatarFileException.getMessage(),
-                        deleteRandomAvatarFileException);
-            }
-
-            throw ex;
-        }
-    }
-
-    private ExternalResourceDto getRandomAvatarResourceDto() {
+    private void uploadFileToS3Storage(String resourceKey) {
         var imageData = avatarGeneratorService.getRandomAvatar();
         try (var imageDataStream = imageData.asInputStream()) {
-            return s3Service.uploadFile(
+            s3Service.uploadFile(
                     imageDataStream,
                     imageData.readableByteCount(),
                     avatarGeneratorService.getRandomAvatarContentType(),
                     getAvatarFilename(),
-                    userAvatarsAwsFolder);
+                    userAvatarsAwsFolder,
+                    resourceKey);
         } catch (Exception e) {
             var errorMessage = "Cannot create random avatar stream: %s".formatted(e.getMessage());
             log.error(errorMessage, e);

@@ -1,7 +1,6 @@
 package school.faang.user_service.service.externalStorage;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +32,8 @@ public class S3ServiceImpl implements S3Service {
             long dataSize,
             @Nullable String contentType,
             String filename,
-            String folder) {
+            String folder,
+            String resourceKey) {
         var objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(dataSize);
         if (contentType == null) {
@@ -41,9 +41,7 @@ public class S3ServiceImpl implements S3Service {
         }
         objectMetadata.setContentType(contentType);
 
-        var key = getResourceKey(folder, filename);
-
-        var s3Request = new PutObjectRequest(bucketName, key, inputStream, objectMetadata);
+        var s3Request = new PutObjectRequest(bucketName, resourceKey, inputStream, objectMetadata);
 
         try {
             s3Client.putObject(s3Request);
@@ -61,7 +59,7 @@ public class S3ServiceImpl implements S3Service {
         var creationDateTime = LocalDateTime.now();
 
         return new ExternalResourceDto(
-                key,
+                resourceKey,
                 BigInteger.valueOf(dataSize),
                 creationDateTime,
                 creationDateTime,
@@ -69,21 +67,7 @@ public class S3ServiceImpl implements S3Service {
                 filename);
     }
 
-    @Override
-    public void deleteFile(String key) {
-        var s3Request = new DeleteObjectRequest(bucketName, key);
-
-        try {
-            s3Client.deleteObject(s3Request);
-        } catch (Exception ex) {
-            var errorMessage = "Cannot delete object %s AWS in folder: %s".formatted(key, bucketName);
-            log.error(errorMessage, ex);
-
-            throw new ExternalServiceError(errorMessage, ex);
-        }
-    }
-
-    private String getResourceKey(String folder, String fileName) {
+    public String getResourceKey(String folder, String fileName) {
         return "%s:%s/%s".formatted(UUID.randomUUID().toString(), folder, fileName);
     }
 }
