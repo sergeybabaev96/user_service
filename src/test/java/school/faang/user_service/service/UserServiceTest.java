@@ -7,6 +7,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import school.faang.user_service.config.context.UserContext;
+import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.UserMapperImpl;
@@ -17,8 +20,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,6 +42,8 @@ public class UserServiceTest {
     private UserRepository userRepository;
     @Spy
     private UserMapperImpl userMapper;
+    @Mock
+    private UserContext userContext;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -81,28 +89,37 @@ public class UserServiceTest {
 
     }
 
-    // TODO: задача BJS2-66001 сделана неверно
-//    @Test
-//    void testDeactivateUsers() {
-//
-//        long userId = 1L;
-//        User user = User.builder().id(userId).active(true).build();
-//        User deactivatedUser = User.builder().id(userId).active(false).build();
-//        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-//        when(userRepository.save(any(User.class))).thenReturn(deactivatedUser);
-//
-//        UserDto result = userService.deactivateUser(userId);
-//
-//        assertNotNull(result);
-//        verify(eventService).deleteEventByUserId(userId);
-//        verify(eventService).deleteParticipationFromEvent(userId);
-//        verify(goalService).deleteUserFromGoals(userId);
-//        verify(mentorshipService).deleteMentorShipByDeactivatedUser(userId);
-//        verify(mentorshipService).deleteMenteeByDeactivatedUser(userId);
-//        verify(userRepository).save(any(User.class));
-//        verify(userMapper).toDto(deactivatedUser);
-//        assertFalse(deactivatedUser.isActive());
-//    }
+    @Test
+    public void testDeactivateUsers_throw_WhenUserIdIsNull() {
+        when(userContext.getUserId()).thenThrow();
+        Exception exception = assertThrows(DataValidationException.class, ()->
+                userService.deactivateUser());
+        assertEquals("User id cannot be null", exception.getMessage());
+    }
+
+
+    @Test
+    public void testDeactivateUsers() {
+
+        long userId = 1L;
+        User user = User.builder().id(userId).active(true).build();
+        User deactivatedUser = User.builder().id(userId).active(false).build();
+        when(userContext.getUserId()).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenReturn(deactivatedUser);
+
+        UserDto result = userService.deactivateUser();
+
+        assertNotNull(result);
+        verify(eventService).deleteEventByUserId(userId);
+        verify(eventService).deleteParticipationFromEvent(userId);
+        verify(goalService).deleteUserFromGoals(userId);
+        verify(mentorshipService).deleteFromMentorShipDeactivatedUser(userId);
+        verify(userRepository).save(any(User.class));
+        verify(userMapper).toDto(deactivatedUser);
+        verify(userContext,times(1)).getUserId();
+        assertFalse(deactivatedUser.isActive());
+    }
 
     @Test
     public void testGetUser_UserId_ReturnsUserDto() {

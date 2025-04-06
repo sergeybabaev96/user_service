@@ -3,8 +3,11 @@ package school.faang.user_service.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
+import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.exception.UsernameNotFoundException;
 import school.faang.user_service.exception.UsernameNotUniqueException;
@@ -18,10 +21,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    //    private final EventService eventService;
-//    private final GoalService goalService;
-//    private final MentorshipService mentorshipService;
+    private final EventService eventService;
+    private final GoalService goalService;
+    private final MentorshipService mentorshipService;
     private final UserMapper userMapper;
+    private final UserContext userContext;
 
     @Override
     public User getReferenceById(long userId) {
@@ -64,19 +68,20 @@ public class UserServiceImpl implements UserService {
 
     // TODO: задача BJS2-66001 сделана неверно
 
-//    @Override
-//    @Transactional
-//    public UserDto deactivateUser(long userId) {
-//        eventService.deleteEventByUserId(userId);
-//        eventService.deleteParticipationFromEvent(userId);
-//        goalService.deleteUserFromGoals(userId);
-//        mentorshipService.deleteMentorShipByDeactivatedUser(userId);
-//        mentorshipService.deleteMenteeByDeactivatedUser(userId);
-//        User user = findUserById(userId);
-//        user.setActive(false);
-//        User deactivatedUser = userRepository.save(user);
-//        return userMapper.toDto(deactivatedUser);
-//    }
+    @Override
+    @Transactional
+    public UserDto deactivateUser() {
+        long userId = getUserFromUserContext();
+        eventService.deleteEventByUserId(userId);
+        eventService.deleteParticipationFromEvent(userId);
+        goalService.deleteUserFromGoals(userId);
+        goalService.deleteMentorFromGoals(userId);
+        mentorshipService.deleteFromMentorShipDeactivatedUser(userId);
+        User user = findUserById(userId);
+        user.setActive(false);
+        User deactivatedUser = userRepository.save(user);
+        return userMapper.toDto(deactivatedUser);
+    }
 
     @Override
     public UserDto getUser(long userId) {
@@ -88,5 +93,13 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getUsersByIds(List<Long> ids) {
         var users = userRepository.findAllById(ids);
         return userMapper.toDtoList(users);
+    }
+
+    private long getUserFromUserContext() {
+        try {
+            return userContext.getUserId();
+        } catch (Exception e) {
+            throw new DataValidationException("User id cannot be null");
+        }
     }
 }

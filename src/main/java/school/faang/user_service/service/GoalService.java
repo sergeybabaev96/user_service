@@ -7,4 +7,6 @@ public interface GoalService {
     long countActiveGoalsPerUser(Long userId);
 
     void deleteUserFromGoals(Long userId);
+
+    void deleteMentorFromGoals(Long userId);
 }
