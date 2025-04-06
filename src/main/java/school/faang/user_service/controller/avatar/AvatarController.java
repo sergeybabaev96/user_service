@@ -29,7 +29,7 @@ public class AvatarController {
             summary = "Upload user avatar",
             description = "Upload or update a user's profile picture"
     )
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<Void> addUserAvatar(
             @Parameter(description = "ID of the user", example = "123", required = true)
             @PathVariable
@@ -42,7 +42,7 @@ public class AvatarController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/get")
+    @GetMapping
     @Operation(
             summary = "Get user avatar",
             description = "Retrieve the user's profile picture"
@@ -62,7 +62,7 @@ public class AvatarController {
             summary = "Delete user avatar",
             description = "Remove the user's profile picture"
     )
-    @DeleteMapping("/delete")
+    @DeleteMapping
     public ResponseEntity<Void> deleteUserAvatar(
             @Parameter(description = "ID of the user", example = "123", required = true)
             @PathVariable

@@ -114,7 +114,8 @@ public class AvatarService {
      * @return путь к папке пользователя
      */
     private String buildUserFolder(User user) {
-        return avatarConfig.getFolderTemplate().replace("{username}", user.getUsername());
+        return avatarConfig.getFolderTemplate()
+                .replace("{username}", user.getUsername());
     }
 
     /**
