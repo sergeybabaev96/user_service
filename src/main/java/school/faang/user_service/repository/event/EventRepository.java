@@ -3,6 +3,7 @@ package school.faang.user_service.repository.event;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.entity.event.Event;
 
@@ -26,5 +27,5 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM event WHERE id IN (:ids)", nativeQuery = true)
-    void deleteByIds(List<Long> batch);
+    void deleteByIds(@Param("ids") List<Long> batch);
 }
