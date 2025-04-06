@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
+import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.exception.UsernameNotFoundException;
 import school.faang.user_service.exception.UsernameNotUniqueException;
@@ -23,6 +25,7 @@ public class UserServiceImpl implements UserService {
     private final GoalService goalService;
     private final MentorshipService mentorshipService;
     private final UserMapper userMapper;
+    private final UserContext userContext;
 
     @Override
     public User getReferenceById(long userId) {
@@ -67,10 +70,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto deactivateUser(long userId) {
+    public UserDto deactivateUser() {
+        long userId = getUserFromUserContext();
         eventService.deleteEventByUserId(userId);
         eventService.deleteParticipationFromEvent(userId);
         goalService.deleteUserFromGoals(userId);
+        goalService.deleteMentorFromGoals(userId);
         mentorshipService.deleteFromMentorShipDeactivatedUser(userId);
         User user = findUserById(userId);
         user.setActive(false);
@@ -88,5 +93,13 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getUsersByIds(List<Long> ids) {
         var users = userRepository.findAllById(ids);
         return userMapper.toDtoList(users);
+    }
+
+    private long getUserFromUserContext() {
+        try {
+          return userContext.getUserId();
+        } catch (Exception e) {
+            throw new DataValidationException("User id cannot be null");
+        }
     }
 }

@@ -28,6 +28,7 @@ class GoalServiceTest {
     @InjectMocks
     private GoalServiceImpl goalService;
 
+
     @Test
     void testDeleteUserFromGoals() {
         Long userId = 1L;
@@ -47,6 +48,26 @@ class GoalServiceTest {
                 StreamSupport.stream(list.spliterator(), false)
                         .noneMatch(goal -> goal.getUsers().contains(user))
         ));
+    }
+
+    @Test
+    void testDeleteMentorFromGoals() {
+        long userId = 1L;
+        User user = User.builder().id(userId).build();
+        Goal goal1 = Goal.builder().mentor(user).status(GoalStatus.ACTIVE).build();
+        Goal goal2 = Goal.builder().mentor(user).status(GoalStatus.ACTIVE).build();
+        Goal goal3 = Goal.builder().mentor(user).status(GoalStatus.COMPLETED).build();
+        List<Goal> goals = List.of(goal1, goal2, goal3);
+
+        when(goalRepository.findAllByMentorId(userId)).thenReturn(goals);
+
+        goalService.deleteMentorFromGoals(userId);
+        verify(goalRepository,times(1)).findAllByMentorId(userId);
+        verify(goalRepository,times(1)).saveAll(argThat(list ->
+                StreamSupport.stream(list.spliterator(), false)
+                .allMatch(goal -> goal.getMentor()==null)
+        ));
+
     }
 
 }

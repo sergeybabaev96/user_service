@@ -16,7 +16,7 @@ public interface UserService {
 
     boolean existsById(long userId);
 
-    UserDto deactivateUser(long userId);
+    UserDto deactivateUser();
 
     UserDto getUser(long userId);
 
