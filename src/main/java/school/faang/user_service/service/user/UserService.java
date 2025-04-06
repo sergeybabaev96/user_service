@@ -4,7 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.user.UserBanDto;
+import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.UserMapper;
@@ -36,10 +37,10 @@ public class UserService {
     }
 
     @Transactional
-    public void banUser(Long userId) {
-        Optional<User> userOptional = userRepository.findById(userId);
+    public void banUser(UserBanDto userBanDto) {
+        Optional<User> userOptional = userRepository.findById(userBanDto.getUserId());
         if (userOptional.isEmpty()) {
-            String message = USER_NOT_FOUND_ERROR.formatted(userId);
+            String message = USER_NOT_FOUND_ERROR.formatted(userBanDto.getUserId());
             log.error(message);
             throw new UserNotFoundException(message);
         }
