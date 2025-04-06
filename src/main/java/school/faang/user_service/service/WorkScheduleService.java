@@ -1,4 +1,4 @@
-package school.faang.user_service.service.workschedule;
+package school.faang.user_service.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,6 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.EntityAlreadyExistsException;
 import school.faang.user_service.mapper.WorkScheduleMapper;
 import school.faang.user_service.repository.WorkScheduleRepository;
-import school.faang.user_service.service.UserService;
 
 @Service
 @RequiredArgsConstructor

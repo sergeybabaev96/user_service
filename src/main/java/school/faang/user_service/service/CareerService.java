@@ -1,4 +1,4 @@
-package school.faang.user_service.service.career;
+package school.faang.user_service.service;
 
 import school.faang.user_service.dto.CareerDto;
 

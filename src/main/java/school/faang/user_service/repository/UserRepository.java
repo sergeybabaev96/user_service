@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import school.faang.user_service.entity.User;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -29,4 +30,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
+
+    @Query(nativeQuery = true, value = """
+            SELECT id FROM users
+            WHERE username = ?1
+            """)
+    Optional<List<Long>> findIdByUsername(String username);
 }

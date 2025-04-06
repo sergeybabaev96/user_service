@@ -3,23 +3,50 @@ package school.faang.user_service.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.dto.SuccessResponseDto;
 import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.entity.Mentorship;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.MentorshipNotFoundException;
 import school.faang.user_service.mapper.UserMapper;
-import school.faang.user_service.repository.mentorship.MentorshipRepository;
+import school.faang.user_service.repository.MentorshipRepository;
 
 import java.util.List;
+import java.util.function.BiFunction;
 
 @Service
 @RequiredArgsConstructor
 public class MentorshipServiceImpl implements MentorshipService {
-
     private final MentorshipRepository mentorshipRepository;
+    private final UserService userService;
     private final UserMapper userMapper;
 
     @Override
-    public List<UserDto> getMentees(Long mentorId) {
+    @Transactional
+    public void createMentorship(long mentorId, long menteeId) {
+        User mentor = userService.getReferenceById(mentorId);
+        User mentee = userService.getReferenceById(menteeId);
+
+        Mentorship mentorship = new Mentorship();
+        mentorship.setMentor(mentor);
+        mentorship.setMentee(mentee);
+        mentorshipRepository.save(mentorship);
+    }
+
+    @Override
+    public boolean existsByMentorIdAndMenteeId(long mentorId, long menteeId) {
+        return mentorshipRepository.existsByMentorIdAndMenteeId(mentorId, menteeId);
+    }
+
+    @Override
+    public Long findMentorshipConnectionId(long mentorId, long menteeId) {
+        return mentorshipRepository.findIdByMentorIdAndMenteeId(mentorId, menteeId)
+                .orElseThrow(() -> new MentorshipNotFoundException(
+                        "No mentorship relationship found for mentor %d and mentee %d".formatted(mentorId, menteeId)));
+    }
+
+    @Override
+    public List<UserDto> getMentees(long mentorId) {
         List<User> mentees = mentorshipRepository.findAllMenteesByMentorId(mentorId);
         return mentees.stream()
                 .map(userMapper::toDto)
@@ -27,44 +54,47 @@ public class MentorshipServiceImpl implements MentorshipService {
     }
 
     @Override
-    public List<UserDto> getMentors(Long menteeId) {
+    public List<UserDto> getMentors(long menteeId) {
         List<User> mentors = mentorshipRepository.findAllMentorsByMenteeId(menteeId);
         return mentors.stream()
                 .map(userMapper::toDto)
                 .toList();
     }
 
-    @Transactional
     @Override
-    public void deleteMentee(Long menteeId, Long mentorId) {
-        User mentor = mentorshipRepository.findById(mentorId)
-                .orElseThrow(() -> new MentorshipNotFoundException("Mentor not found: " + mentorId));
-        boolean removed = mentor.getMentees().removeIf(mentee -> mentee.getId().equals(menteeId));
-        if (!removed) {
-            throw new MentorshipNotFoundException("No mentorship relationship found for mentor "
-                    + mentorId + " and mentee " + menteeId);
-        }
-        mentorshipRepository.save(mentor);
-    }
-
     @Transactional
+    public SuccessResponseDto deleteMentee(Long mentorId, Long menteeId) {
+        return deleteMentorship(mentorId, menteeId, (idMentor, idMentee) ->
+                "Mentee with ID %d successfully deleted from mentor with ID %d".formatted(idMentee, idMentor));
+    }
+
     @Override
-    public void deleteMentor(Long menteeId, Long mentorId) {
-        User mentee = mentorshipRepository.findById(menteeId)
-                .orElseThrow(() -> new MentorshipNotFoundException("Mentee not found: " + menteeId));
-        boolean removed = mentee.getMentors().removeIf(mentor -> mentor.getId().equals(mentorId));
-        if (!removed) {
-            throw new MentorshipNotFoundException("No mentorship relationship found for mentee "
-                    + menteeId + " and mentor " + mentorId);
-        }
-        mentorshipRepository.save(mentee);
+    @Transactional
+    public SuccessResponseDto deleteMentor(Long mentorId, Long menteeId) {
+        return deleteMentorship(mentorId, menteeId,
+                "Mentor with ID %d successfully deleted from mentee with ID %d"::formatted);
     }
 
-    public void deleteMentorShipByDeactivatedUser(Long mentorID) {
-        mentorshipRepository.deactivateMentor(mentorID);
+    private SuccessResponseDto deleteMentorship(Long mentorId, Long menteeId,
+                                                BiFunction<Long, Long, String> messageGenerator) {
+        long mentorshipId = findMentorshipConnectionId(mentorId, menteeId);
+        mentorshipRepository.deleteById(mentorshipId);
+        String message = messageGenerator.apply(mentorId, menteeId);
+        return new SuccessResponseDto(message);
     }
 
-    public void deleteMenteeByDeactivatedUser(Long menteeId) {
-        mentorshipRepository.deleteDeactivatedMentee(menteeId);
-    }
+//    TODO: метод не соответствует условию в задаче BJS2-66001: После деактивации профиля: если пользователь был
+//     ментором других пользователей — необходимо остановить менторство. Для этого нужно написать соответствующий метод
+//     в MentorshipService. Ментор должен пропасть из списка менторов своих менти. При этом все цели, которые ментор
+//     поставил менти сохраняются, но больше не хранят mentorId — теперь они выглядят так,
+//     как будто менти поставил их себе сам. Про ЦЕЛИ речь в условии, а не про связи в mentorship. Метод ниже
+//     устанавливает менти самого себе ментором.
+//    public void deleteMentorShipByDeactivatedUser(Long mentorID) {
+//        mentorshipRepository.deactivateMentor(mentorID);
+//    }
+
+    // TODO: удаление в задаче BJS2-66001 делать не просили
+//    public void deleteMenteeByDeactivatedUser(Long menteeId) {
+//        mentorshipRepository.deleteDeactivatedMentee(menteeId);
+//    }
 }

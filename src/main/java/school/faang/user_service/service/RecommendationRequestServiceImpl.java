@@ -111,10 +111,10 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
 
         var requesterId = recommendationRequest.getRequesterId();
         // Метод findById уже кидает исключение, если пользователь не найден
-        result.setRequester(userService.getUserById(requesterId));
+        result.setRequester(userService.findUserById(requesterId));
 
         var receiverId = recommendationRequest.getReceiverId();
-        result.setReceiver(userService.getUserById(receiverId));
+        result.setReceiver(userService.findUserById(receiverId));
 
         var latestRequest = recommendationRequestRepository.findLatestRequest(requesterId, receiverId);
         if (latestRequest.isPresent()

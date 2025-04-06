@@ -3,7 +3,7 @@ package school.faang.user_service.controller.career;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.CareerDto;
-import school.faang.user_service.service.career.CareerService;
+import school.faang.user_service.service.CareerService;
 
 @Component
 @RequiredArgsConstructor

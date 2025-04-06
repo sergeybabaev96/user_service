@@ -1,5 +1,6 @@
 package school.faang.user_service.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -24,15 +25,22 @@ class EventServiceTest {
     @Mock
     private EventRepository eventRepository;
 
-    @Captor
-    private ArgumentCaptor<List<Event>> captor;
-
     @InjectMocks
     private EventServiceImpl eventService;
 
+    private AutoCloseable closeable;
+
+    @Captor
+    private ArgumentCaptor<List<Event>> eventsCaptor;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        closeable.close();
     }
 
     @Test
@@ -61,8 +69,8 @@ class EventServiceTest {
 
         eventService.deleteParticipationFromEvent(userId);
 
-        verify(eventRepository).saveAll(captor.capture());
-        List<Event> savedEvents = captor.getValue();
+        verify(eventRepository).saveAll(eventsCaptor.capture());
+        List<Event> savedEvents = eventsCaptor.getValue();
         assertEquals(1, savedEvents.get(0).getAttendees().size());
         assertEquals(2L, savedEvents.get(0).getAttendees().get(0).getId());
         assertTrue(savedEvents.get(1).getAttendees().isEmpty());
