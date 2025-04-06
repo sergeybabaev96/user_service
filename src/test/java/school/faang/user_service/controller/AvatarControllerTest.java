@@ -50,7 +50,7 @@ public class AvatarControllerTest {
 
         doNothing().when(avatarService).addUserAvatar(eq(VALID_USER_ID), any(MultipartFile.class));
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/users/{userId}/avatar/add", VALID_USER_ID)
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/users/{userId}/avatar", VALID_USER_ID)
                         .file(file)
                         .contentType("multipart/form-data"))
                 .andExpect(status().isNoContent());
@@ -63,7 +63,7 @@ public class AvatarControllerTest {
 
         when(avatarService.getUserAvatar(VALID_USER_ID)).thenReturn(resource);
 
-        mockMvc.perform(get("/users/{userId}/avatar/get", VALID_USER_ID))
+        mockMvc.perform(get("/users/{userId}/avatar", VALID_USER_ID))
                 .andExpect(status().isOk());
     }
 
@@ -72,7 +72,7 @@ public class AvatarControllerTest {
     public void givenValidUserId_WhenDeleteUserAvatar_ThenSuccessRequest() throws Exception {
         doNothing().when(avatarService).deleteUserAvatar(VALID_USER_ID);
 
-        mockMvc.perform(delete("/users/{userId}/avatar/delete", VALID_USER_ID))
+        mockMvc.perform(delete("/users/{userId}/avatar", VALID_USER_ID))
                 .andExpect(status().isNoContent());
     }
 }
