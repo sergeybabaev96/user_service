@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.SubscriptionRepository;
 
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -17,7 +16,7 @@ public class SubscriptionServiceTest {
     @Mock
     private SubscriptionRepository repository;
     @InjectMocks
-    private SubscriptionService service;
+    private SubscriptionServiceImpl service;
 
     @Test
     public void testFollowUser() {
@@ -33,9 +32,7 @@ public class SubscriptionServiceTest {
     public void testThrowExceptionFollowUserThemselves() {
         long id = 1L;
 
-        assertThrows(DataValidationException.class, () -> {
-            service.followUser(id, id);
-        });
+        assertThrows(DataValidationException.class, () -> service.followUser(id, id));
     }
 
     @Test
@@ -44,9 +41,7 @@ public class SubscriptionServiceTest {
         long followeeId = 2L;
         when(repository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).thenReturn(true);
 
-        assertThrows(DataValidationException.class, () -> {
-            service.followUser(followerId, followeeId);
-        });
+        assertThrows(DataValidationException.class, () -> service.followUser(followerId, followeeId));
     }
 
     @Test
@@ -63,9 +58,7 @@ public class SubscriptionServiceTest {
     public void testThrowExceptionUnfollowUserThemselves() {
         long id = 1L;
 
-        assertThrows(DataValidationException.class, () -> {
-            service.followUser(id, id);
-        });
+        assertThrows(DataValidationException.class, () -> service.followUser(id, id));
     }
 
     @Test
@@ -74,9 +67,7 @@ public class SubscriptionServiceTest {
         long followeeId = 2L;
         when(repository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).thenReturn(false);
 
-        assertThrows(DataValidationException.class, () -> {
-            service.unfollowUser(followerId, followeeId);
-        });
+        assertThrows(DataValidationException.class, () -> service.unfollowUser(followerId, followeeId));
     }
 
     @Test

@@ -5,13 +5,16 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
+import school.faang.user_service.config.AmazonS3Config;
+import school.faang.user_service.config.DicebearConfig;
 
 @SpringBootApplication
 @EnableFeignClients("school.faang.user_service.client")
+@EnableConfigurationProperties({DicebearConfig.class, AmazonS3Config.class})
 public class UserServiceApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(UserServiceApplication.class, args);
     }

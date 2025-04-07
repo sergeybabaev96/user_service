@@ -77,7 +77,7 @@ public class RecommendationRequestServiceTest {
 
     @BeforeEach
     void setUp() {
-        recommendationRequestService = new RecommendationRequestService(
+        recommendationRequestService = new RecommendationRequestServiceImpl(
                 userService,
                 recommendationRequestRepository,
                 skillRequestService,
