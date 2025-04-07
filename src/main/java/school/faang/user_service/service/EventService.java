@@ -22,4 +22,5 @@ public interface EventService {
 
     void deleteParticipationFromEvent(Long userId);
 
+    void cleanPastEvents();
 }

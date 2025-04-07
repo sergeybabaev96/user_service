@@ -51,3 +51,4 @@ user_service:
 events:
   cleanup:
     cron: "0 0 0 * * ?" # Every day at midnight
+    batch: 200 # Number of events in one list to delete

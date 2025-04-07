@@ -1,6 +1,9 @@
 package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.event.EventFilterDto;
@@ -13,6 +16,7 @@ import school.faang.user_service.repository.event.EventRepository;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
 
@@ -24,6 +28,13 @@ public class EventServiceImpl implements EventService {
     private final EventSkillImpl eventSkill;
     private final EventOwnerImpl eventOwner;
     private final List<EventFilter> eventFilters;
+
+
+    @Qualifier("threadPoolOfScheduling")
+    private final Executor executor;
+
+    @Value("${events.cleanup.batch}")
+    private int cleanupBatch;
 
     @Override
     public EventDto create(EventDto eventDto) {
@@ -88,5 +99,13 @@ public class EventServiceImpl implements EventService {
             event.setAttendees(participationWithoutDeactivatedUser);
         }
         eventRepository.saveAll(eventsWhereUserParticipation);
+    }
+
+    @Override
+    public void cleanPastEvents() {
+        int pageSize = cleanupBatch;
+        int currentPage = 0;
+        Page<Event> eventPage;
+
     }
 }
