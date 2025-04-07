@@ -27,6 +27,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByUsernameLike(String username);
 
+    boolean existsByUsername(String username);
+
+    boolean existsByEmail(String email);
+
     @Query(nativeQuery = true, value = """
             SELECT id FROM users
             WHERE username = ?1

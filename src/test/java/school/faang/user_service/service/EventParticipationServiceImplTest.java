@@ -22,7 +22,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 @ExtendWith(MockitoExtension.class)
 class EventParticipationServiceImplTest {
     private static final long EVENT_ID = 1L;
@@ -116,7 +115,7 @@ class EventParticipationServiceImplTest {
                                 .email(USER_EMAIL)
                                 .build()
                 ));
-        List<UserDto> userDtos = List.of(new UserDto(USER_ID, USER_NAME, USER_EMAIL));
+        List<UserDto> userDtos = List.of(new UserDto(USER_ID, USER_NAME, USER_EMAIL, null));
         assertEquals(userDtos, participationService.getParticipants(EVENT_ID));
     }
 

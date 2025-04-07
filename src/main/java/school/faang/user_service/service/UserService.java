@@ -1,5 +1,6 @@
 package school.faang.user_service.service;
 
+import school.faang.user_service.dto.CreateUserDto;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 
@@ -21,4 +22,6 @@ public interface UserService {
     UserDto getUser(long userId);
 
     List<UserDto> getUsersByIds(List<Long> ids);
+
+    UserDto createUser(CreateUserDto createUserDto);
 }

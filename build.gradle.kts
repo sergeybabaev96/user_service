@@ -30,6 +30,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
+    implementation("org.springframework.boot:spring-boot-starter-webflux:3.4.3")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
@@ -75,6 +76,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("javax.servlet:javax.servlet-api:4.0.1")
+    testImplementation("org.wiremock:wiremock-standalone:3.9.2")
 }
 
 jsonSchema2Pojo {
@@ -152,13 +155,16 @@ tasks.jacocoTestCoverageVerification {
         rule {
             element = "CLASS"
             includes = listOf(
-                "school.faang.user_service.service.*ServiceImpl*"
-//                "school.faang.user_service.service.MentorshipService",
-//                "school.faang.user_service.service.EventParticipationService",
-//                "school.faang.user_service.service.EducationService",
-//                "school.faang.user_service.service.RecommendationRequestService",
-//                "school.faang.user_service.service.SkillRequestService",
-//                "school.faang.user_service.service.SkillService",
+                "school.faang.user_service.externalStorage.S3ServiceImpl",
+                "school.faang.user_service.avatarGenerator.DicebearAvatarGenerator",
+                "school.faang.user_service.validators.CreateUserValidator",
+                "school.faang.user_service.controller.UserController",
+                "school.faang.user_service.service.event.EventParticipationService",
+                "school.faang.user_service.service.MentorshipService",
+                "school.faang.user_service.service.education.EducationService",
+                "school.faang.user_service.service.RecommendationRequestService",
+                "school.faang.user_service.service.SkillRequestService",
+                "school.faang.user_service.service.SkillService",
             )
 
             limit {
