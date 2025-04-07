@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -89,11 +88,6 @@ public class UserService {
         log.info("User with id: {} registered", user.getId());
 
         return userMapper.toDto(user);
-    }
-
-    public User getUserById(long id) {
-        return userRepository.findById(id).orElseThrow(()
-                -> new RuntimeException("User with id " + id + " not found"));
     }
 
     public Optional<User> findById(Long id) {
