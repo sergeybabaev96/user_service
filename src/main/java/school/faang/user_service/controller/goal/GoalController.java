@@ -1,5 +1,8 @@
 package school.faang.user_service.controller.goal;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +37,7 @@ import java.util.List;
  *     <li>{@link #getGoalsByUser(Long, GoalFilterDto) Получение списка всех целей с применением фильтра}, для заданного пользователя.</li>
  * </ul>
  * </p>
+ *
  * @author juzu400
  * @see GoalViewDto
  * @see GoalCreateDto
@@ -43,64 +47,66 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/goals")
+@Tag(name = "Goal Management", description = "Provides methods for working with goals")
 public class GoalController {
     private final GoalService goalService;
 
-    /**
-     * Создание цели для заданного пользователя
-     *
-     * @param userId Идентификатор пользователя
-     * @param goal DTO для создания цели
-     * @return созданная цель
-     */
+    @Operation(
+            summary = "Create a new goal",
+            description = "Creates a new goal for the specified user"
+    )
     @PostMapping("/{userId}")
-    public GoalViewDto createGoal(@PathVariable Long userId, @RequestBody GoalCreateDto goal) {
+    public GoalViewDto createGoal(
+            @Parameter(description = "ID of the user who owns the goal", required = true, example = "123")
+            @PathVariable Long userId,
+            @RequestBody GoalCreateDto goal) {
         return goalService.createGoal(userId, goal);
     }
 
-    /**
-     * Обновление цели по её идентификатору
-     *
-     * @param goalId Идентификатор цели
-     * @param goal DTO с новыми значениями цели
-     * @return обновленная цель
-     */
+    @Operation(
+            summary = "Update an existing goal",
+            description = "Updates the goal with the specified ID"
+    )
     @PutMapping("/{goalId}")
-    public GoalViewDto updateGoal(@PathVariable Long goalId, @RequestBody GoalCreateDto goal) {
+    public GoalViewDto updateGoal(
+            @Parameter(description = "ID of the goal to update", required = true, example = "1")
+            @PathVariable Long goalId,
+            @RequestBody GoalCreateDto goal) {
         return goalService.updateGoal(goalId, goal);
     }
 
-    /**
-     * Удаление цели по её идентификатору
-     *
-     * @param goalId Идентификатор цели
-     */
+    @Operation(
+            summary = "Delete a goal",
+            description = "Deletes the goal with the specified ID"
+    )
     @DeleteMapping("/{goalId}")
-    public void deleteGoal(@PathVariable Long goalId) {
+    public void deleteGoal(
+            @Parameter(description = "ID of the goal to delete", required = true, example = "1")
+            @PathVariable Long goalId) {
         goalService.deleteGoal(goalId);
     }
 
-    /**
-     * Получение списка подцелей для цели с применением фильтра
-     *
-     * @param goalId Идентификатор цели-родителя
-     * @param filter Фильтр для поиска
-     * @return Список подцелей цели по фильтру
-     */
+    @Operation(
+            summary = "Get subgoals by goal ID",
+            description = "Returns a list of subgoals for the specified goal ID with optional filtering"
+    )
     @GetMapping("/{goalId}/subGoals")
-    public List<GoalViewDto> findSubtasksByGoalId(@PathVariable Long goalId, @ModelAttribute GoalFilterDto filter) {
+    public List<GoalViewDto> findSubtasksByGoalId(
+            @Parameter(description = "ID of the parent goal", required = true, example = "1")
+            @PathVariable Long goalId,
+            @ModelAttribute GoalFilterDto filter) {
         return goalService.findSubtasksByGoalId(goalId, filter);
     }
 
-    /**
-     * Получение списка целей пользователя с применением фильтра
-     *
-     * @param userId Идентификатор пользователя
-     * @param filter Фильтр для поиска
-     * @return Список целей пользователя по фильтру
-     */
+    @Operation(
+            summary = "Get goals by user ID",
+            description = "Returns a list of goals for the specified user ID with optional filtering"
+    )
     @GetMapping("/{userId}")
-    public List<GoalViewDto> getGoalsByUser(@PathVariable Long userId, @ModelAttribute GoalFilterDto filter) {
+    public List<GoalViewDto> getGoalsByUser(
+            @Parameter(description = "ID of the user to filter goals", required = true, example = "123")
+            @PathVariable Long userId,
+            @ModelAttribute GoalFilterDto filter) {
         return goalService.getGoalsByUser(userId, filter);
     }
 }
