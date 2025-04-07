@@ -15,6 +15,7 @@ import java.util.Optional;
 public class SkillOfferServiceImpl implements SkillOfferService {
     @Value("${user_service.skill.minSkillOffers}")
     private int minSkillOffers;
+    
     private final SkillOfferRepository skillOfferRepository;
 
     @Override

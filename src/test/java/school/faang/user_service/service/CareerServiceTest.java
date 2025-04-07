@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class CareerServiceTest {
     @InjectMocks
-    private CareerService careerService;
+    private CareerServiceImpl careerService;
 
     @Mock
     private UserRepository userRepository;

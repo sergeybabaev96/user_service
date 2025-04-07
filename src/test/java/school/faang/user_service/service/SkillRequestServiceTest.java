@@ -22,7 +22,7 @@ public class SkillRequestServiceTest {
     private SkillRequestRepository skillRequestRepository;
 
     @InjectMocks
-    private SkillRequestService skillRequestService;
+    private SkillRequestServiceImpl skillRequestService;
 
     @Test
     public void testCreateSkillRequest_PassDataToRepository_Success() {

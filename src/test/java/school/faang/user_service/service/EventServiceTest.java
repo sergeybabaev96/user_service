@@ -45,7 +45,6 @@ class EventServiceTest {
 
     @Test
     void testDeleteEventByUserId() {
-
         long userId = 1L;
         List<Event> events = List.of(new Event(), new Event());
 
