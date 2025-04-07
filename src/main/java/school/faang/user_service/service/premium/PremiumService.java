@@ -30,8 +30,7 @@ public class PremiumService {
         try {
             List<Premium> expiredPremiums = premiumRepository.findAllByEndDateBefore(now);
             if (!expiredPremiums.isEmpty()) {
-                List<Long> expiredIds = getPremiumIds(expiredPremiums);
-                List<List<Long>> idBatches = ListUtils.partition(expiredIds, partitionSize);
+                List<List<Long>> idBatches = ListUtils.partition(getPremiumIds(expiredPremiums), partitionSize);
                 for (List<Long> batch : idBatches) {
                     premiumRepository.deleteByIdIn(batch);
                     log.info("Expired premium accesses before date: {} - was deleted in thread - {}",
