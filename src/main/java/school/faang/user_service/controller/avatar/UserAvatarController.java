@@ -13,7 +13,7 @@ import school.faang.user_service.service.avatar.AvatarService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/avatar")
-public class UserController {
+public class UserAvatarController {
     private static final String JSON_RESPONSE_TEMPLATE = "{\"userId\":\"%s\", \"avatarUrl\":\"%s\"}";
     private static final String RECEIVED_REQUEST_LOG = "Received registration request%s";
     private static final String GENERATED_USERID_LOG = "Generated user ID: {}";
@@ -25,7 +25,7 @@ public class UserController {
     public ResponseEntity<?> registerUser(@PathVariable Long userId) {
         log.info(GENERATED_USERID_LOG, userId);
 
-        String avatarUrl = avatarService.generateAndUploadAvatar(userId);
+        String avatarUrl = avatarService.generateAndUploadAvatar(String.valueOf(userId));
         log.info(GENERATED_AVATAR_LOG, userId, avatarUrl);
 
         String jsonResponse = String.format(JSON_RESPONSE_TEMPLATE, userId, avatarUrl);

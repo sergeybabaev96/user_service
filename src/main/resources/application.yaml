@@ -14,6 +14,7 @@ app:
       secret-key: qjGfUbiitoZyWPNYS24G4EQKDsxCba9rK28DoqEj
     bucket:
       name: "corpbucket"
+
 payment:
   api:
     url: http://localhost:9081/api/payment
@@ -55,4 +56,3 @@ project-service:
 payment-service:
   host: localhost
   port: 9080
-
