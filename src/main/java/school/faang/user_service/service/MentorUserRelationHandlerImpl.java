@@ -6,7 +6,7 @@ import school.faang.user_service.repository.MentorshipRepository;
 
 @Service
 @RequiredArgsConstructor
-public class MentorshipForUserServiceImpl implements MentorshipForUserService {
+public class MentorUserRelationHandlerImpl implements MentorUserRelationHandler {
 
     private final MentorshipRepository mentorshipRepository;
 

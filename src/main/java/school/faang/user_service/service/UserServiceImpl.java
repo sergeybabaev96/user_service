@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final EventService eventService;
     private final GoalService goalService;
-    private final MentorshipForUserServiceImpl mentorshipService;
+    private final MentorUserRelationHandlerImpl mentorshipService;
 
     private final AvatarGeneratorService avatarGeneratorService;
     private final S3Service s3Service;

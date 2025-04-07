@@ -1,6 +1,6 @@
 package school.faang.user_service.service;
 
-public interface MentorshipForUserService {
+public interface MentorUserRelationHandler {
 
     void deleteFromMentorShipDeactivatedUser(Long userId);
 }

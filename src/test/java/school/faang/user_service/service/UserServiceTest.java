@@ -83,7 +83,7 @@ public class UserServiceTest {
     private GoalServiceImpl goalService;
 
     @Mock
-    private MentorshipForUserServiceImpl mentorshipService;
+    private MentorUserRelationHandlerImpl mentorshipService;
 
     @InjectMocks
     private UserServiceImpl userService;
