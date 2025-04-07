@@ -75,10 +75,6 @@ public class MentorshipServiceImpl implements MentorshipService {
                 "Mentor with ID %d successfully deleted from mentee with ID %d"::formatted);
     }
 
-    @Override
-    public void deleteFromMentorShipDeactivatedUser(Long userId) {
-        mentorshipRepository.deleteDeactivateUser(userId);
-    }
 
     private SuccessResponseDto deleteMentorship(Long mentorId, Long menteeId,
                                                 BiFunction<Long, Long, String> messageGenerator) {

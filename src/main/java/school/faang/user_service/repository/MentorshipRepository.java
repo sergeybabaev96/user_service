@@ -27,5 +27,5 @@ public interface MentorshipRepository extends CrudRepository<Mentorship, Long> {
     @Modifying
     @Query(value = "DELETE mentorship m WHERE m.mentor_id = :userId OR m.mentee_id = :userId",
             nativeQuery = true)
-    void deleteDeactivateUser(@Param("mentorId") Long mentorId);
+    void deleteDeactivateUser(@Param("userId") Long userId);
 }

@@ -20,6 +20,4 @@ public interface MentorshipService {
 
     SuccessResponseDto deleteMentor(Long menteeId, Long mentorId);
 
-
-    void deleteFromMentorShipDeactivatedUser(Long mentorID);
 }

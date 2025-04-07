@@ -20,7 +20,6 @@ import school.faang.user_service.dto.externalStorage.ExternalResourceDto;
 import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
-import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
@@ -40,7 +39,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -74,9 +72,18 @@ public class UserServiceTest {
 
     @Captor
     ArgumentCaptor<User> userCaptor;
-    private UserMapperImpl userMapper;
+
     @Mock
     private UserContext userContext;
+
+    @Mock
+    private EventServiceImpl eventService;
+
+    @Mock
+    private GoalServiceImpl goalService;
+
+    @Mock
+    private MentorshipForUserServiceImpl mentorshipService;
 
     @InjectMocks
     private UserServiceImpl userService;

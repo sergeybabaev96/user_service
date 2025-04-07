@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import jakarta.transaction.Transactional;
 import school.faang.user_service.config.context.UserContext;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.CreateUserDto;
@@ -32,7 +31,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final EventService eventService;
     private final GoalService goalService;
-    private final MentorshipService mentorshipService;
+    private final MentorshipForUserServiceImpl mentorshipService;
 
     private final AvatarGeneratorService avatarGeneratorService;
     private final S3Service s3Service;
