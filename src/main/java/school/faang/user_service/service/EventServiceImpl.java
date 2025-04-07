@@ -1,26 +1,34 @@
 package school.faang.user_service.service;
 
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.event.EventFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.event.Event;
+import school.faang.user_service.entity.event.EventStatus;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.event.EventFilter;
 import school.faang.user_service.mapper.EventMapper;
 import school.faang.user_service.repository.event.EventRepository;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
@@ -28,10 +36,8 @@ public class EventServiceImpl implements EventService {
     private final EventSkillImpl eventSkill;
     private final EventOwnerImpl eventOwner;
     private final List<EventFilter> eventFilters;
-
-
-    @Qualifier("threadPoolOfScheduling")
-    private final Executor executor;
+    @Resource(name = "threadPoolOfScheduling")
+    private Executor executor;
 
     @Value("${events.cleanup.batch}")
     private int cleanupBatch;
@@ -103,9 +109,35 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void cleanPastEvents() {
-        int pageSize = cleanupBatch;
         int currentPage = 0;
         Page<Event> eventPage;
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        do{
+            Pageable pageable = PageRequest.of(currentPage, cleanupBatch);
+            eventPage = eventRepository.findPastEventsWithPagination(pageable,
+                    Arrays.asList(EventStatus.CANCELED, EventStatus.COMPLETED));
+            if(!eventPage.isEmpty()) {
+                List<Event> currentBatch  = eventPage.getContent();
+                futures.add(runAsyncDelete(currentBatch));
+            }
+            currentPage++;
+        }while (eventPage.hasNext());
+        waitForAll(futures);
+    }
 
+    private CompletableFuture<Void> runAsyncDelete(List<Event> eventsBatch) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                eventRepository.deleteAll(eventsBatch);
+            }catch (Exception e) {
+                log.error("Error deleting event batch", e);
+            }
+        }, executor);
+    }
+
+    private void waitForAll(List<CompletableFuture<Void>> futures) {
+        CompletableFuture
+                .allOf(futures.toArray(new CompletableFuture[0]))
+                .join();
     }
 }
