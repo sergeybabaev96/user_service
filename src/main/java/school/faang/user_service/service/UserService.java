@@ -11,7 +11,7 @@ import school.faang.user_service.dto.FileData;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
-import school.faang.user_service.exception.FileTooLargeException;
+import school.faang.user_service.exception.FileSizeException;
 import school.faang.user_service.exception.InvalidImageFormatException;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.UserMapper;
@@ -71,7 +71,8 @@ public class UserService {
             throw new InvalidImageFormatException("Invalid type file with name: %s", file.getOriginalFilename());
         }
         if (file.getSize() > MAX_AVATAR_FILE_SIZE) {
-            throw new FileTooLargeException("Max avatar size - %d", MAX_AVATAR_FILE_SIZE);
+            throw new FileSizeException("Size - %d is greater than max avatar size - %d",
+                    file.getSize(), MAX_AVATAR_FILE_SIZE);
         }
         User user = getUserById(userContext.getUserId());
 

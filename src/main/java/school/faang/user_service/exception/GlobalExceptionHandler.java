@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({
-            FileTooLargeException.class,
+            FileSizeException.class,
             InvalidImageFormatException.class,
             MultipartException.class,
     })

@@ -18,34 +18,38 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(MockitoExtension.class)
 public class ImageCompressorServiceTest {
 
+    private final int firstFileWidth = 1080;
+    private final int firstFileHeight = 1000;
     private final ImageCompressorService compressorService = new ImageCompressorService();
 
     @Test
     void testNegativeCompressWhenImageInvalid() {
         MockMultipartFile file = createMockFile("not-an-image".getBytes());
 
-        assertThrows(RuntimeException.class, () -> compressorService.compressImage(file, 1000));
+        assertThrows(RuntimeException.class, () -> compressorService.compressImage(file, firstFileHeight));
     }
 
     @Test
     void testPositiveWhenNotNeededResize() throws IOException {
-        byte[] imageData = createImage(1080, 1000);
+        byte[] imageData = createImage(firstFileWidth, firstFileHeight);
         MockMultipartFile file = createMockFile(imageData);
 
-        MultipartFile result = compressorService.compressImage(file, 1080);
+        MultipartFile result = compressorService.compressImage(file, firstFileWidth);
 
         assertEquals(file, result);
     }
 
     @Test
     void testPositiveWhenResizeNeeded() throws IOException {
-        byte[] imageData = createImage(2000, 1500);
+        int fileWidth = 2000;
+        int fileHeight = 1500;
+        byte[] imageData = createImage(fileWidth, fileHeight);
         MockMultipartFile file = createMockFile(imageData);
 
-        MultipartFile result = compressorService.compressImage(file, 1080);
+        MultipartFile result = compressorService.compressImage(file, firstFileWidth);
 
         BufferedImage resizedImage = ImageIO.read(new ByteArrayInputStream(result.getBytes()));
-        assertTrue(resizedImage.getWidth() <= 1080);
+        assertTrue(resizedImage.getWidth() <= firstFileWidth);
         assertEquals(file.getName(), result.getOriginalFilename());
     }
 

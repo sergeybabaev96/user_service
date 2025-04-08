@@ -15,7 +15,7 @@ import school.faang.user_service.dto.FileData;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
-import school.faang.user_service.exception.FileTooLargeException;
+import school.faang.user_service.exception.FileSizeException;
 import school.faang.user_service.exception.InvalidImageFormatException;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.UserMapper;
@@ -42,6 +42,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
+    private final Long id = 1L;
+    private final byte[] imageData = new byte[]{0x1, 0x2, 0x3};
+    private final List<Long> ids = List.of(1L, 2L, 3L);
+
     @Mock
     private UserRepository userRepository;
 
@@ -63,22 +67,21 @@ public class UserServiceTest {
     @Test
     @DisplayName("Negative: error when user not found")
     void testFindUserNegativeNoUser() {
-        long idForSearch = 1L;
-        when(userRepository.findById(idForSearch)).thenReturn(Optional.empty());
+        when(userRepository.findById(id)).thenReturn(Optional.empty());
 
         var exception = assertThrows(
                 UserNotFoundException.class,
-                () -> userService.findUserById(idForSearch)
+                () -> userService.findUserById(id)
         );
 
-        assertEquals(exception.getMessage(), String.format("User with id = %d doesn't exist", idForSearch));
+        assertEquals(exception.getMessage(), String.format("User with id = %d doesn't exist", id));
     }
 
     @Test
     @DisplayName("Positive: successful find user by id")
     void testFindUserSuccess() {
-        User user = createUser(1L);
-        UserDto userDto = createUserDto(1L);
+        User user = createUser(id);
+        UserDto userDto = createUserDto(id);
 
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(userMapper.toDto(user)).thenReturn(userDto);
@@ -91,8 +94,6 @@ public class UserServiceTest {
     @Test
     @DisplayName("Negative: no users found by ids")
     void testGetUsersByIdsNegativeNoUsers() {
-        List<Long> ids = List.of(1L, 2L, 3L);
-
         when(userRepository.findAllById(ids)).thenReturn(Collections.emptyList());
         List<UserDto> users = userService.getUsersByIds(ids);
 
@@ -102,7 +103,6 @@ public class UserServiceTest {
     @Test
     @DisplayName("Positive: successful find users by ids")
     void testGetUsersByIdsSuccess() {
-        List<Long> ids = List.of(1L, 2L, 3L);
         List<User> users = createUsers(ids);
         List<UserDto> userDtos = createUserDtos(users);
 
@@ -118,7 +118,7 @@ public class UserServiceTest {
 
     @Test
     void testNegativeCreateAvatarWhenFileTypeIncorrect() {
-        MockMultipartFile imageFile = createImageFile("image/pdf", new byte[]{0x1, 0x2, 0x3});
+        MockMultipartFile imageFile = createImageFile("image/pdf", imageData);
 
         assertThrows(InvalidImageFormatException.class, () -> userService.createUserAvatar(imageFile));
     }
@@ -129,20 +129,19 @@ public class UserServiceTest {
         Arrays.fill(bytes, (byte) 0x1);
         MockMultipartFile imageFile = createImageFile("image/jpeg", bytes);
 
-        assertThrows(FileTooLargeException.class, () -> userService.createUserAvatar(imageFile));
+        assertThrows(FileSizeException.class, () -> userService.createUserAvatar(imageFile));
     }
 
     @Test
     void testNegativeCreateAvatarWhenUserNotFound() {
-        MockMultipartFile imageFile = createImageFile("image/jpeg", new byte[]{0x1, 0x2, 0x3});
+        MockMultipartFile imageFile = createImageFile("image/jpeg", imageData);
 
         assertThrows(UserNotFoundException.class, () -> userService.createUserAvatar(imageFile));
     }
 
     @Test
     void testPositiveCreateAvatar() {
-        Long id = 1L;
-        MockMultipartFile imageFile = createImageFile("image/jpeg", new byte[]{0x1, 0x2, 0x3});
+        MockMultipartFile imageFile = createImageFile("image/jpeg", imageData);
         when(userContext.getUserId()).thenReturn(id);
         when(userRepository.findById(id)).thenReturn(Optional.of(createUser(id)));
 
@@ -159,13 +158,11 @@ public class UserServiceTest {
 
     @Test
     void testNegativeGetAvatarWhenAvatarNotFound() {
-        assertThrows(EntityNotFoundException.class, () -> userService.getUserAvatar(1L));
+        assertThrows(EntityNotFoundException.class, () -> userService.getUserAvatar(id));
     }
 
     @Test
     void testPositiveGetAvatar() throws IOException {
-        Long id = 1L;
-        byte[] imageData = new byte[]{0x1, 0x2, 0x3};
         String expectedFileName = "file";
         InputStream fixedInputStream = new ByteArrayInputStream(imageData);
         User user = createUserWithAvatar(id);
@@ -182,7 +179,6 @@ public class UserServiceTest {
 
     @Test
     void testPositiveRemoveAvatar() {
-        Long id = 1L;
         User user = createUserWithAvatar(id);
         when(userContext.getUserId()).thenReturn(id);
         when(userRepository.findById(id)).thenReturn(Optional.of(user));
