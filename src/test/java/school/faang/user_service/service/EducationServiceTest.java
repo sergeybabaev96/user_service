@@ -1,6 +1,6 @@
 package school.faang.user_service.service;
 
-import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,10 +36,6 @@ class EducationServiceTest {
     @InjectMocks
     private EducationService educationService;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     @DisplayName("The test checks whether the formation has been added correctly")
@@ -158,5 +154,30 @@ class EducationServiceTest {
         when(educationRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(DataValidationException.class, () -> educationService.getEducationById(99L));
+    }
+
+    @Test
+    @DisplayName("Should throw DataValidationException when user not found")
+    void addEducationShouldThrowExceptionWhenUserNotFound() {
+        long userId = 1L;
+        EducationDto inputDto = new EducationDto();
+        inputDto.setYearFrom(Year.now().getValue() - 1);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(DataValidationException.class, () -> educationService.addEducation(userId, inputDto));
+        verify(userRepository).findById(userId);
+        verifyNoMoreInteractions(userRepository, educationMapper, educationRepository);
+    }
+
+    @Test
+    @DisplayName("Should throw DataValidationException when yearFrom is in the future")
+    void addEducationShouldThrowExceptionWhenYearFromInFuture() {
+        long userId = 1L;
+        EducationDto inputDto = new EducationDto();
+        inputDto.setYearFrom(Year.now().getValue() + 1); // будущий год
+
+        assertThrows(DataValidationException.class, () -> educationService.addEducation(userId, inputDto));
+        verifyNoInteractions(userRepository, educationMapper, educationRepository);
     }
 }
