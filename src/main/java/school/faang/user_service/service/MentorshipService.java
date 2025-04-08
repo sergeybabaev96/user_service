@@ -45,8 +45,8 @@ public class MentorshipService {
     public void deleteMentee(long menteeId, long mentorId) {
         List<User> mentee = mentorshipRepository.findAllMenteesByMentorId(mentorId);
         if (mentee == null || mentee.isEmpty()) {
-            log.warn("Попытка удалить менти у ментора с ID {}, но у него нет подопечных", mentorId);
-            throw new IllegalArgumentException("У этого ментора нет менторов");
+            log.error("mentorshipRepository.findAllMenteesByMentorId вернул null для mentorId={}", mentorId);
+            throw new IllegalArgumentException("У ментора с ID %d нет ни одного менти".formatted(mentorId));
         }
         boolean isMentee = mentee.stream()
                 .filter(Objects::nonNull)
@@ -57,15 +57,15 @@ public class MentorshipService {
             log.info("Удалён менти с ID {} у ментора с ID {}", menteeId, mentorId);
         } else {
             log.warn("Ментор с ID {} не менторит менти с ID {}, удаление невозможно", mentorId, menteeId);
-            throw new IllegalArgumentException("Ментор не ментерит данного менти");
+            throw new IllegalArgumentException("Ментор с ID %d не ментерит менти с ID %d".formatted(mentorId, menteeId));
         }
     }
 
     public void deleteMentor(Long menteeId, Long mentorId) {
         List<MentorshipDto> mentors = getMentors(menteeId);
         if (mentors == null || mentors.isEmpty()) {
-            log.warn("Попытка удалить ментора у менти с ID {}, но у него нет менторов", menteeId);
-            throw new IllegalArgumentException("У данного менти нет менторов.");
+            log.error("getMentors вернул null для menteeId={}", menteeId);
+            throw new IllegalArgumentException("У менти с ID %d нет менторов".formatted(menteeId));
         }
         boolean isMentor = mentors.stream()
                 .filter(Objects::nonNull)
@@ -76,7 +76,7 @@ public class MentorshipService {
             log.info("Удалён ментор с ID {} у менти с ID {}", mentorId, menteeId);
         } else {
             log.warn("Ментор с ID {} не является наставником менти с ID {}, удаление невозможно", mentorId, menteeId);
-            throw new IllegalArgumentException("Ментор не ментерит данного менти");
+            throw new IllegalArgumentException("Ментор с ID %d не ментерит менти с ID %d".formatted(mentorId, menteeId));
         }
     }
 }
