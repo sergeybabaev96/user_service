@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.EducationDto;
 import school.faang.user_service.entity.Education;
-import school.faang.user_service.service.education.EducationService;
+import school.faang.user_service.service.education.EducationOperation;
 
 
 @RequiredArgsConstructor
@@ -18,7 +18,7 @@ import school.faang.user_service.service.education.EducationService;
 @RequestMapping("/educations")
 public class EducationController {
 
-    private final EducationService educationService;
+    private final EducationOperation educationService;
 
     @PostMapping("/{userId}")
     public EducationDto addEducation(@PathVariable long userId, @RequestBody EducationDto educationDto) {

@@ -13,7 +13,7 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.EducationMapper;
 import school.faang.user_service.repository.EducationRepository;
 import school.faang.user_service.repository.UserRepository;
-import school.faang.user_service.service.education.EducationService;
+import school.faang.user_service.service.education.EducationOperation;
 
 import java.time.Year;
 import java.util.Optional;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class EducationServiceTest {
+class EducationOperationTest {
 
     @Mock
     private UserRepository userRepository;
@@ -34,7 +34,7 @@ class EducationServiceTest {
     private EducationMapper educationMapper;
 
     @InjectMocks
-    private EducationService educationService;
+    private EducationOperation educationService;
 
 
     @Test
