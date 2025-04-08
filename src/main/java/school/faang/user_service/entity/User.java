@@ -158,6 +158,9 @@ public class User {
     @OneToOne(mappedBy = "user")
     private Premium premium;
 
+    @Column(name = "premium_active")
+    private boolean premiumActive;
+
     @OneToMany(mappedBy = "user")
     private List<Education> education;
 

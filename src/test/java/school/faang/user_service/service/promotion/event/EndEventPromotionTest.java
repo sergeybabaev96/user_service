@@ -13,8 +13,8 @@ import school.faang.user_service.dto.promotion.event.EventDto;
 import school.faang.user_service.dto.promotion.event.EventPromotionDto;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.entity.promotion.event.EventPromotion;
-import school.faang.user_service.model.promotion.PromotionPriority;
-import school.faang.user_service.model.promotion.event.EventPromotionType;
+import school.faang.user_service.enums.promotion.PromotionPriority;
+import school.faang.user_service.enums.promotion.event.EventPromotionType;
 import school.faang.user_service.repository.promotion.EventPromotionRepository;
 import school.faang.user_service.service.EventPromotionService;
 

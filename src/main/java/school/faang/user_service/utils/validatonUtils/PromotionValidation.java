@@ -1,9 +1,9 @@
 package school.faang.user_service.utils.validatonUtils;
 
 import lombok.extern.slf4j.Slf4j;
-import school.faang.user_service.model.promotion.PromotionPriority;
-import school.faang.user_service.model.promotion.event.EventPromotionType;
-import school.faang.user_service.model.promotion.user.UserPromotionType;
+import school.faang.user_service.enums.promotion.PromotionPriority;
+import school.faang.user_service.enums.promotion.event.EventPromotionType;
+import school.faang.user_service.enums.promotion.user.UserPromotionType;
 
 import java.time.LocalDateTime;
 

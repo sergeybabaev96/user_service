@@ -1,4 +1,4 @@
-package school.faang.user_service.model.promotion.user;
+package school.faang.user_service.enums.promotion.user;
 
 import lombok.Getter;
 

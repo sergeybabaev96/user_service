@@ -1,19 +1,18 @@
-package school.faang.user_service.dto.premium;
+package school.faang.user_service.dto.exchange;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import school.faang.user_service.dto.payment.CurrencyDto;
-import school.faang.user_service.enums.premium.PremiumType;
+
+import java.math.BigDecimal;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PremiumRequestDto {
-    private PremiumType premiumType;
-    private Long userId;
+public class ExchangeResponseDto {
     private CurrencyDto currency;
-    private boolean autoRenew;
+    private BigDecimal amount;
 }

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import school.faang.user_service.enums.PremiumType;
+import school.faang.user_service.enums.premium.PremiumType;
 
 import java.time.LocalDateTime;
 

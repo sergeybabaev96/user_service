@@ -15,8 +15,8 @@ import school.faang.user_service.dto.promotion.user.UserDto;
 import school.faang.user_service.dto.promotion.user.UserPromotionDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.promotion.user.UserPromotion;
-import school.faang.user_service.model.promotion.PromotionPriority;
-import school.faang.user_service.model.promotion.user.UserPromotionType;
+import school.faang.user_service.enums.promotion.PromotionPriority;
+import school.faang.user_service.enums.promotion.user.UserPromotionType;
 import school.faang.user_service.repository.promotion.UserPromotionRepository;
 import school.faang.user_service.service.UserPromotionService;
 

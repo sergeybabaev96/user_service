@@ -1,12 +1,12 @@
-package school.faang.user_service.model.promotion.event;
+package school.faang.user_service.enums.promotion.user;
 
-import school.faang.user_service.model.promotion.PromotionPriority;
+import school.faang.user_service.enums.promotion.PromotionPriority;
 
 import java.math.BigDecimal;
 
-public class EventPromotionPricing {
+public class UserPromotionPricing {
     public static BigDecimal getPrice(int userPercentage, int feedRank) {
-        EventPromotionType promotionType = EventPromotionType.fromUserPercentage(userPercentage);
+        UserPromotionType promotionType = UserPromotionType.fromUserPercentage(userPercentage);
         PromotionPriority priority = PromotionPriority.fromFeedRank(feedRank);
         return promotionType.getBasePrice().multiply(priority.getMultiplier());
     }
