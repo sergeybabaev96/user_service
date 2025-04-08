@@ -23,11 +23,11 @@ public class UserServiceTest {
 
     @Test
     @DisplayName("Получение несуществующего пользователя вызывает исключение")
-    public void testGetUserInvalid() {
+    public void testGetUserEntityInvalid() {
         Mockito.when(userRepository.findById(Mockito.anyLong()))
                 .thenReturn(Optional.empty());
         Exception exception = Assertions.assertThrows(DataValidationException.class,
-                () -> userService.getUser(Mockito.anyLong()));
+                () -> userService.getUserEntity(Mockito.anyLong()));
         Assertions.assertEquals("Пользователь не найден", exception.getMessage());
     }
 }
