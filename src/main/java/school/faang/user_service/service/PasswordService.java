@@ -15,7 +15,7 @@ public class PasswordService {
     private static final String SPECIAL = "!@#$%^&*()_+-=[]{}|;:,.<>?";
     private static final String ALL_CHARS = CHAR_LOWER + CHAR_UPPER + DIGITS + SPECIAL;
 
-    @Value("$.{app.security.password-length}")
+    @Value("${springdoc.app.security.password-length}")
     private int passwordLength;
 
     private final SecureRandom random = new SecureRandom();

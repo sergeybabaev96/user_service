@@ -3,8 +3,10 @@ plugins {
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
     id("org.jsonschema2pojo") version "1.2.1"
- titan-stream9-BJS2-65044-become-a-mentor
-    //kotlin("jvm")
+    kotlin("jvm")
+    checkstyle
+    id("checkstyle")
+    jacoco
 
 }
 
@@ -31,7 +33,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
-titan-stream9-BJS2-65044-become-a-mentor
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
