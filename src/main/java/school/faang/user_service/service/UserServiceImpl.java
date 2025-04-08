@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.config.context.UserContext;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.CreateUserDto;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.entity.UserProfilePic;
 import school.faang.user_service.exception.ExternalServiceError;
 import school.faang.user_service.exception.UserNotFoundException;
@@ -27,6 +29,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final EventService eventService;
+    private final GoalService goalService;
+    private final MentorUserRelationHandlerImpl mentorshipService;
 
     private final AvatarGeneratorService avatarGeneratorService;
     private final S3Service s3Service;
@@ -34,6 +39,7 @@ public class UserServiceImpl implements UserService {
     private final CreateUserValidator createUserValidator;
 
     private final UserMapper userMapper;
+    private final UserContext userContext;
 
     @Value("user-avatars-aws-folder")
     private String userAvatarsAwsFolder;
@@ -77,6 +83,23 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsById(userId);
     }
 
+    // TODO: задача BJS2-66001 сделана неверно
+
+    @Override
+    @Transactional
+    public UserDto deactivateUser() {
+        long userId = getUserFromUserContext();
+        eventService.deleteEventByUserId(userId);
+        eventService.deleteParticipationFromEvent(userId);
+        goalService.deleteUserFromGoals(userId);
+        goalService.deleteMentorFromGoals(userId);
+        mentorshipService.deleteFromMentorShipDeactivatedUser(userId);
+        User user = findUserById(userId);
+        user.setActive(false);
+        User deactivatedUser = userRepository.save(user);
+        return userMapper.toDto(deactivatedUser);
+    }
+
     @Override
     public UserDto getUser(long userId) {
         var user = findUserById(userId);
@@ -89,6 +112,14 @@ public class UserServiceImpl implements UserService {
         var users = userRepository.findAllById(ids);
 
         return userMapper.toDtoList(users);
+    }
+
+    private long getUserFromUserContext() {
+        try {
+            return userContext.getUserId();
+        } catch (Exception e) {
+            throw new DataValidationException("User id cannot be null");
+        }
     }
 
     @Override

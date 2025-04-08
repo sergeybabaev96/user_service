@@ -122,7 +122,7 @@ public class UserControllerTest {
     }
 
     private static MockHttpServletRequestBuilder callCreateUserEndpoint(String requestJson) {
-        return post("/users")
+        return post("/api/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson);
     }
