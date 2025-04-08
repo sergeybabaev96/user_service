@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -30,6 +32,16 @@ public class MentorshipService {
         return getUserRelatedList(userId, User::getMentors);
     }
 
+    @Transactional
+    public void deleteMenteeAndMentor(long menteeId, long mentorId) {
+        User mentor = getUserById(mentorId, "Mentor");
+        User mentee = getUserById(menteeId, "Mentee");
+        mentor.getMentees().remove(mentee);
+        mentee.getMentors().remove(mentor);
+        mentorshipRepository.save(mentor);
+        mentorshipRepository.save(mentee);
+    }
+
     public void deleteMentee(long menteeId, long mentorId) {
         deleteUserFromRelation(mentorId, menteeId, true);
     }
@@ -37,7 +49,6 @@ public class MentorshipService {
     public void deleteMentor(long mentorId, long menteeId) {
         deleteUserFromRelation(menteeId, mentorId, false);
     }
-
 
     private List<UserDto> getUserRelatedList(long userId, Function<User, List<User>> relationGetter) {
         User user = userService.findById(userId)
@@ -63,5 +74,10 @@ public class MentorshipService {
             throw new EntityNotFoundException(isMentee ? "Mentee not found for given mentor" : "Mentor not found for given mentee");
         }
         userService.save(owner);
+        }
+    private User getUserById(long userId, String user){
+        return mentorshipRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(user + " with id: " + userId + " is not in the database"));
     }
+
 }

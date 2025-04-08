@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 
@@ -51,11 +52,13 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
             """)
     List<User> findUsersByGoalId(long goalId);
 
-    @Query(nativeQuery = true, value = "INSERT INTO goal_skill (skill_id, goal_id) VALUES (:skillId, :goalId)")
+    @Transactional
     @Modifying
+    @Query(nativeQuery = true, value = "INSERT INTO goal_skill (skill_id, goal_id) VALUES (:skillId, :goalId)")
     void addSkillToGoal(long skillId, long goalId);
 
-    @Query(nativeQuery = true, value = "DELETE FROM goal_skill WHERE goal_id = :goalId")
+    @Transactional
     @Modifying
+    @Query(nativeQuery = true, value = "DELETE FROM goal_skill WHERE goal_id = :goalId")
     void removeSkillsFromGoal(long goalId);
 }

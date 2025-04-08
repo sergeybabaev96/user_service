@@ -19,10 +19,13 @@ import school.faang.user_service.mapper.skill.SkillMapperImpl;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.service.user.UserSkillGuaranteeService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,7 +35,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 
 
 @ExtendWith(MockitoExtension.class)
@@ -111,6 +113,33 @@ public class SkillServiceTest {
     }
 
     @Test
+    public void testAllSkillsExist() {
+        List<Long> skillIds = mockResultSkillExistById();
+
+        assertTrue(getResult(skillIds));
+    }
+
+    @Test
+    public void testNotAllSkillsExist() {
+        long notExistSkillId = 5;
+        List<Long> skillIds = mockResultSkillExistById();
+        skillIds.add(notExistSkillId);
+        when(skillRepository.existsById(notExistSkillId)).thenReturn(false);
+
+        assertFalse(getResult(skillIds));
+    }
+
+    @Test
+    public void testAssignSkillToUser() {
+        long skillId = 1;
+        long userId = 1 ;
+
+        skillService.assignSkillToUser(skillId, userId);
+
+        verify(skillRepository, times(1)).assignSkillToUser(skillId, userId);
+    }
+
+    @Test
     void testGetOfferedSkills() {
         List<SkillCandidateDto> expectedDtos = skillCandidateMapper.toSkillCandidateDtoList(skills);
         when(skillRepository.findSkillsOfferedToUser(userId)).thenReturn(skills);
@@ -181,6 +210,19 @@ public class SkillServiceTest {
         assertEquals("Error adding a skill to a user", exception.getMessage());
     }
 
+    private List<Long> mockResultSkillExistById() {
+        List<Long> skillIds = new ArrayList<>(List.of(0L, 1L, 2L, 3L, 4L));
+        skillIds.forEach(skillId ->
+                when(skillRepository.existsById(skillId)).thenReturn(true));
+        return skillIds;
+    }
+
+    private boolean getResult(List<Long> skillIds) {
+        boolean result = skillService.isAllSkillsExist(skillIds);
+
+        verify(skillRepository, times(skillIds.size())).existsById(anyLong());
+        return result;
+    }
 
     private List<SkillOffer> generateSkillOffers(int count) {
         return IntStream.range(0, count).mapToObj(num -> SkillOffer.builder()
