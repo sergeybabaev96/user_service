@@ -4,10 +4,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,7 +63,7 @@ public class UserController {
     @GetMapping("/{userId}/avatar")
     @Operation(summary = "Найти аватар", description = "Находит аватар пользователя с данным идентификатором")
     public ResponseEntity<Resource> getUserAvatar(@Parameter(description = "Идентификатор пользователя")
-                                       @PathVariable Long userId) {
+                                                  @PathVariable Long userId) {
         FileData file = userService.getUserAvatar(userId);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(file.contentType()))
