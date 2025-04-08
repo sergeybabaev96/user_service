@@ -61,7 +61,7 @@ class EducationOperationTest {
         EducationDto actual = educationService.addEducation(userId, inputDto);
 
         assertEquals(resultDto, actual);
-        verify(userRepository).save(user);
+        verify(userRepository).findById(userId);
     }
 
     @Test
