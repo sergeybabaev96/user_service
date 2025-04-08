@@ -1,5 +1,6 @@
 package school.faang.user_service.config.context;
 
+import jakarta.annotation.PreDestroy;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,10 +14,12 @@ import java.util.concurrent.Executor;
 @Configuration
 public class AsyncConfig implements AsyncConfigurer {
 
+    private ThreadPoolTaskExecutor executor;
+
     @Override
     @Bean(name = "threadPoolOfScheduling")
     public Executor getAsyncExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(5);
         executor.setMaxPoolSize(10);
         executor.setQueueCapacity(100);
@@ -26,7 +29,14 @@ public class AsyncConfig implements AsyncConfigurer {
     }
 
     @Override
-   public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-       return new AsyncExceptionHandler();
+    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+        return new AsyncExceptionHandler();
+    }
+
+    @PreDestroy
+    public void shutdownExecutor() {
+        if (executor != null) {
+            executor.shutdown();
+        }
     }
 }
