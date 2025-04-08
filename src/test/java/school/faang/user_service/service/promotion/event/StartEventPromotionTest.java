@@ -40,11 +40,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static school.faang.user_service.service.EventPromotionService.EVENT_DTO_CANNOT_BE_NULL;
-import static school.faang.user_service.utils.validatonUtils.PromotionValidation.DATE_CANNOT_BE_NULL;
-import static school.faang.user_service.utils.validatonUtils.PromotionValidation.EVENT_ID_CANNOT_BE_NULL;
-import static school.faang.user_service.utils.validatonUtils.PromotionValidation.EVENT_PROMOTION_TYPE_CANNOT_BE_NULL;
-import static school.faang.user_service.utils.validatonUtils.PromotionValidation.PROMOTION_PRIORITY_CANNOT_BE_NULL;
-import static school.faang.user_service.utils.validatonUtils.PromotionValidation.START_DATE_CANNOT_BE_AFTER_END_DATE;
+import static school.faang.user_service.utils.validationUtils.PromotionValidation.DATE_CANNOT_BE_NULL;
+import static school.faang.user_service.utils.validationUtils.PromotionValidation.EVENT_ID_CANNOT_BE_NULL;
+import static school.faang.user_service.utils.validationUtils.PromotionValidation.EVENT_PROMOTION_TYPE_CANNOT_BE_NULL;
+import static school.faang.user_service.utils.validationUtils.PromotionValidation.PROMOTION_PRIORITY_CANNOT_BE_NULL;
+import static school.faang.user_service.utils.validationUtils.PromotionValidation.START_DATE_CANNOT_BE_AFTER_END_DATE;
 
 @TestPropertySource(properties = "payment.api.url=http://localhost:9081/api/payment")
 @ExtendWith(MockitoExtension.class)

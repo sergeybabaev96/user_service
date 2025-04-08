@@ -23,7 +23,7 @@ import school.faang.user_service.enums.promotion.event.EventPromotionType;
 import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.repository.promotion.EventPromotionCountRepository;
 import school.faang.user_service.repository.promotion.EventPromotionRepository;
-import school.faang.user_service.utils.validatonUtils.PromotionValidation;
+import school.faang.user_service.utils.validationUtils.PromotionValidation;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

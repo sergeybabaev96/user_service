@@ -1,4 +1,4 @@
-package school.faang.user_service.utils.validatonUtils;
+package school.faang.user_service.utils.validationUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import school.faang.user_service.enums.promotion.PromotionPriority;

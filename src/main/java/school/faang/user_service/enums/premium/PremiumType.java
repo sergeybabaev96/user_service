@@ -2,6 +2,7 @@ package school.faang.user_service.enums.premium;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import school.faang.user_service.exception.PremiumTypeNotFoundException;
 
 import java.math.BigDecimal;
 
@@ -14,4 +15,13 @@ public enum PremiumType {
 
     private BigDecimal priceInDollars;
     private int months;
+
+    public static PremiumType getByDuration(int months) {
+        for (PremiumType type : PremiumType.values()) {
+            if (type.getMonths() == months) {
+                return type;
+            }
+        }
+        throw new PremiumTypeNotFoundException("No PremiumType found for the given duration: " + months);
+    }
 }

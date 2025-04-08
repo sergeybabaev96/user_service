@@ -1,12 +1,14 @@
 app:
   leaderboard:
     max-cached-size: 1000
+
   avatar:
     apiUrl: "https://api.dicebear.com/5.x/avataaars"
     dicebearPngEndpoint: "/png?seed="
     localhostUrlPrefix: "http://localhost:9000"
     fileExtension: ".png"
     contentType: "image/png"
+
   minio:
     avatars:
       endpoint: http://localhost:9000
@@ -14,6 +16,13 @@ app:
       secret-key: qjGfUbiitoZyWPNYS24G4EQKDsxCba9rK28DoqEj
     bucket:
       name: "corpbucket"
+
+  premium:
+    cron: "0 * * * * *"
+    renew-batch-size: 25000
+    thread-pool-size: 16
+    timeout-hours: 2
+    expiry-notification-days: 2
 
 payment:
   api:
@@ -25,6 +34,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: user
     password: password
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -42,6 +52,28 @@ spring:
       port: 6379
       host: localhost
 
+  kafka:
+    producer:
+      bootstrap-servers: "localhost:9092"
+      acks: all
+      enable.idempotence: true
+      isolation.level: "read_committed"
+      auto.offset.reset: "latest"
+      transactional-id: "transactional-producer"
+      retries: 10
+      delivery.timeout.ms: 120000
+
+    topics:
+      premium:
+        notification:
+          bought-topic: "premium-bought-topic"
+          expired-topic: "premium-expired-topic"
+          expire-soon-topic: "premium-expire-soon-topic"
+          auto-renew-failed-topic: "premium-auto-renew-failed-topic"
+          updated-topic: "premium-updated-topic"
+
+        analytics:
+          premium-analytics-topic: "premium-analytics-topic"
 server:
   port: 8080
 

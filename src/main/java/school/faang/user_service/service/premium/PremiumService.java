@@ -11,4 +11,6 @@ public interface PremiumService {
     ExchangeResponseDto getPremiumPrice(PremiumRequestDto premiumRequestDto);
 
     void updateAutoRenew(boolean autoRenew, Long userId);
+
+    void premiumRenewal();
 }
