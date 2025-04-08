@@ -7,12 +7,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.util.Optional;
+
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.repository.UserRepository;
 
-import java.util.Optional;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -69,28 +70,26 @@ class UserServiceTest {
         assertThrows(EntityNotFoundException.class, () -> getResult(Optional.empty()));
     }
 
+    @Test
+    public void save_shouldSave() {
+        userService.save(user);
+
+        Mockito.verify(userRepository, Mockito.times(1)).save(user);
+    }
+
+    @Test
+    public void findById_shouldFind() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        Optional<User> result = userService.findById(userId);
+
+        Mockito.verify(userRepository, Mockito.times(1)).findById(userId);
+        assertTrue(result.isPresent());
+        assertEquals(user, result.get());
+    }
 
     private boolean getResult(Optional<User> foundUser) {
         when(userRepository.findById(userId)).thenReturn(foundUser);
         return userService.isWithinGoalLimit(userId);
     }
-
-@Test
-public void save_shouldSave() {
-    userService.save(user);
-
-    Mockito.verify(userRepository, Mockito.times(1)).save(user);
-}
-
-@Test
-public void findById_shouldFind() {
-    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-    Optional<User> result = userService.findById(userId);
-
-    Mockito.verify(userRepository, Mockito.times(1)).findById(userId);
-    assertTrue(result.isPresent());
-    assertEquals(user, result.get());
-}
-
 }
