@@ -7,6 +7,7 @@ plugins {
     checkstyle
     id("checkstyle")
     jacoco
+
 }
 
 group = "faang.school"
@@ -33,6 +34,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
@@ -94,6 +97,7 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 tasks.bootJar {
     archiveFileName.set("service.jar")
 }
+
 kotlin {
     jvmToolchain(17)
 }
@@ -159,3 +163,4 @@ tasks.test {
 tasks.check {
     dependsOn(tasks.jacocoTestCoverageVerification)
 }
+
