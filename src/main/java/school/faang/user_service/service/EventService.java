@@ -4,6 +4,7 @@ import school.faang.user_service.dto.event.EventDto;
 import school.faang.user_service.dto.event.EventFilterDto;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface EventService {
     EventDto create(EventDto eventDto);
@@ -22,5 +23,5 @@ public interface EventService {
 
     void deleteParticipationFromEvent(Long userId);
 
-    void cleanPastEvents();
+    List<CompletableFuture<Void>> cleanPastEvents();
 }

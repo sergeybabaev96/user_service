@@ -101,35 +101,36 @@ public class EventServiceImpl implements EventService {
                 .findParticipatedEventsByUserId(userId);
         for (Event event : eventsWhereUserParticipation) {
             List<User> participationWithoutDeactivatedUser = event.getAttendees().stream()
-                    .filter(user-> !Objects.equals(user.getId(), userId)).toList();
+                    .filter(user -> !Objects.equals(user.getId(), userId)).toList();
             event.setAttendees(participationWithoutDeactivatedUser);
         }
         eventRepository.saveAll(eventsWhereUserParticipation);
     }
 
     @Override
-    public void cleanPastEvents() {
-        int currentPage = 0;
-        Page<Event> eventPage;
+    public  List<CompletableFuture<Void>> cleanPastEvents() {
+        long totalElements = eventRepository
+                .countByStatusIn(List.of(EventStatus.CANCELED, EventStatus.COMPLETED));
+        int totalPages = (int) Math.ceil((double) totalElements / cleanupBatch);
         List<CompletableFuture<Void>> futures = new ArrayList<>();
-        do{
-            Pageable pageable = PageRequest.of(currentPage, cleanupBatch);
-            eventPage = eventRepository.findPastEventsWithPagination(pageable,
-                    Arrays.asList(EventStatus.CANCELED, EventStatus.COMPLETED));
-            if(!eventPage.isEmpty()) {
-                List<Event> currentBatch  = eventPage.getContent();
-                futures.add(runAsyncDelete(currentBatch));
-            }
-            currentPage++;
-        }while (eventPage.hasNext());
+        for (int page = 0; page < totalPages; page++) {
+            futures.add(runAsyncDelete(page));
+        }
         waitForAll(futures);
+        return futures;
     }
 
-    private CompletableFuture<Void> runAsyncDelete(List<Event> eventsBatch) {
+    private CompletableFuture<Void> runAsyncDelete(int currentPage) {
         return CompletableFuture.runAsync(() -> {
             try {
-                eventRepository.deleteAll(eventsBatch);
-            }catch (Exception e) {
+                Pageable pageable = PageRequest.of(currentPage, cleanupBatch);
+                Page<Event> eventPage = eventRepository.findPastEventsWithPagination(pageable,
+                        Arrays.asList(EventStatus.CANCELED, EventStatus.COMPLETED));
+                if (!eventPage.isEmpty()) {
+                    List<Event> currentBatch = eventPage.getContent();
+                    eventRepository.deleteAll(currentBatch);
+                }
+            } catch (Exception e) {
                 log.error("Error deleting event batch", e);
             }
         }, executor);
@@ -138,6 +139,10 @@ public class EventServiceImpl implements EventService {
     private void waitForAll(List<CompletableFuture<Void>> futures) {
         CompletableFuture
                 .allOf(futures.toArray(new CompletableFuture[0]))
+                .exceptionally(e -> {
+                    log.error("Error during batch cleanup", e);
+                    return null;
+                })
                 .join();
     }
 }

@@ -29,4 +29,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e FROM Event e WHERE e.status IN :statuses")
     Page<Event> findPastEventsWithPagination(
             Pageable pageable, @Param("statuses") Collection<EventStatus> statuses);
+
+    @Query("SELECT COUNT(*) FROM Event e WHERE e.status IN :statuses")
+    long countByStatusIn(@Param("statuses") Collection<EventStatus> statuses);
 }
