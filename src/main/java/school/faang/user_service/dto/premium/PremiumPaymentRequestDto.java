@@ -1,0 +1,18 @@
+package school.faang.user_service.dto.premium;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import school.faang.user_service.dto.payment.PaymentRequestDto;
+import school.faang.user_service.dto.payment.PaymentResponseDto;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class PremiumPaymentRequestDto {
+    private PremiumRequestDto premiumRequestDto;
+    private PaymentRequestDto paymentRequestDto;
+    private boolean byUser;
+}

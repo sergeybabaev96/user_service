@@ -18,7 +18,7 @@ app:
       name: "corpbucket"
 
   premium:
-    cron: "0 * * * * *"
+    cron: "0/5 * * * * *"
     renew-batch-size: 25000
     thread-pool-size: 16
     timeout-hours: 2
@@ -59,21 +59,42 @@ spring:
       enable.idempotence: true
       isolation.level: "read_committed"
       auto.offset.reset: "latest"
-      transactional-id: "transactional-producer"
-      retries: 10
-      delivery.timeout.ms: 120000
+      max-in-flight-per-connection: 1
+      transaction-id-prefix: "payment-request-"
 
-    topics:
-      premium:
-        notification:
-          bought-topic: "premium-bought-topic"
-          expired-topic: "premium-expired-topic"
-          expire-soon-topic: "premium-expire-soon-topic"
-          auto-renew-failed-topic: "premium-auto-renew-failed-topic"
-          updated-topic: "premium-updated-topic"
+      topics:
+        premium:
+          notifications:
+            bought-topic: "premium-bought-topic"
+            expired-topic: "premium-expired-topic"
+            expire-soon-topic: "premium-expire-soon-topic"
+            auto-renew-failed-topic: "premium-auto-renew-failed-topic"
+            updated-topic: "premium-updated-topic"
+            payment-failed-topic: "premium-payment-failed-topic"
 
-        analytics:
-          premium-analytics-topic: "premium-analytics-topic"
+          analytics:
+            premium-analytics-topic: "premium-analytics-topic"
+
+          payment:
+            payment-request-topic: "premium-payment-request-topic"
+
+    consumer:
+      enable-auto-commit: false
+      isolation-level: "read-committed"
+
+      topics:
+        payment:
+          premium:
+            payment-response-topic: "premium-payment-response-topic"
+
+      groups:
+        premium:
+          payment:
+            payment-group: "premium-payment-response-group"
+
+    listener:
+      ack-mode: "manual"
+
 server:
   port: 8080
 

@@ -1,5 +1,6 @@
 package school.faang.user_service.service.premium;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -7,16 +8,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.client.PaymentServiceClient;
 import school.faang.user_service.dto.exchange.ExchangeRequestDto;
 import school.faang.user_service.dto.exchange.ExchangeResponseDto;
 import school.faang.user_service.dto.payment.CurrencyDto;
 import school.faang.user_service.dto.payment.PaymentRequestDto;
 import school.faang.user_service.dto.payment.PaymentResponseDto;
 import school.faang.user_service.dto.payment.PaymentStatus;
+import school.faang.user_service.dto.premium.PremiumPaymentRequestDto;
+import school.faang.user_service.dto.premium.PremiumPaymentResponseDto;
 import school.faang.user_service.dto.premium.PremiumRequestDto;
 import school.faang.user_service.dto.premium.PremiumResponseDto;
 import school.faang.user_service.entity.User;
@@ -33,7 +36,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -48,11 +50,10 @@ import static school.faang.user_service.messages.ErrorMessages.NO_ACTIVE_PREMIUM
 @Service
 @RequiredArgsConstructor
 public class PremiumServiceImpl implements PremiumService {
-    private final PaymentServiceClient paymentServiceClient;
     private final UserRepository userRepository;
     private final PremiumRepository premiumRepository;
     private final PremiumMapper premiumMapper;
-    private final KafkaTemplate kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
     @Value("${app.premium.renew-batch-size}")
@@ -67,57 +68,51 @@ public class PremiumServiceImpl implements PremiumService {
     @Value("${app.premium.expiry-notification-days}")
     private int premiumExpiryNotificationDays;
 
-    @Value("${spring.kafka.topics.premium.notification.bought-topic}")
+    @Value("${spring.kafka.producer.topics.premium.notifications.bought-topic}")
     private String premiumBoughtTopic;
 
-    @Value("${spring.kafka.topics.premium.notification.expired-topic}")
+    @Value("${spring.kafka.producer.topics.premium.notifications.expired-topic}")
     private String premiumExpiredTopic;
 
-    @Value("${spring.kafka.topics.premium.notification.expire-soon-topic}")
+    @Value("${spring.kafka.producer.topics.premium.notifications.expire-soon-topic}")
     private String premiumExpireSoonTopic;
 
-    @Value("${spring.kafka.topics.premium.notification.auto-renew-failed-topic}")
+    @Value("${spring.kafka.producer.topics.premium.notifications.auto-renew-failed-topic}")
     private String premiumAutoRenewFailedTopic;
 
-    @Value("${spring.kafka.topics.premium.notification.updated-topic}")
+    @Value("${spring.kafka.producer.topics.premium.notifications.updated-topic}")
     private String premiumUpdatedTopic;
 
-    @Value("${spring.kafka.topics.premium.notification.updated-topic}")
+    @Value("${spring.kafka.producer.topics.premium.analytics.premium-analytics-topic}")
     private String premiumAnalyticsTopic;
 
+    @Value("${spring.kafka.producer.topics.premium.notifications.payment-failed-topic}")
+    private String premiumPaymentFailedTopic;
+
+    @Value("${spring.kafka.producer.topics.premium.payment.payment-request-topic}")
+    private String premiumPaymentRequestTopic;
+
+    @Value("${spring.kafka.consumer.topics.payment.premium.payment-response-topic}")
+    private String premiumPaymentResponseTopic;
+
     @Override
-    @Transactional
-    public ResponseEntity<PremiumResponseDto> buyPremium(PremiumRequestDto premiumRequestDto) {
+    public void buyPremium(PremiumRequestDto premiumRequestDto, boolean byUser) {
         BigDecimal amount = getPremiumPrice(premiumRequestDto).getAmount();
         log.info("Calculated amount for premium type {} is {} {}",
                 premiumRequestDto.getPremiumType(), amount, premiumRequestDto.getCurrency());
         PaymentRequestDto paymentRequestDto = new PaymentRequestDto(premiumRequestDto.getUserId(),
                 amount, premiumRequestDto.getCurrency());
 
-        ResponseEntity<PaymentResponseDto> response = paymentServiceClient.sendPayment(paymentRequestDto);
-        if (response.getStatusCode().isError() || Objects.requireNonNull(
-                response.getBody()).status() != PaymentStatus.SUCCESS) {
-            log.error("Payment failed with status: {}", response.getStatusCode());
-            return ResponseEntity.status(response.getStatusCode())
-                    .body(PremiumResponseDto.builder().userId(premiumRequestDto.getUserId()).build());
-        }
-        User user = getUserById(premiumRequestDto.getUserId());
-
-        LocalDateTime startDate = LocalDateTime.now();
-        LocalDateTime endDate = startDate.plusMonths(premiumRequestDto.getPremiumType().getMonths());
-        Premium premium = Premium.builder()
-                .user(user)
-                .startDate(startDate)
-                .endDate(endDate)
-                .autoRenew(premiumRequestDto.isAutoRenew())
-                .currency(premiumRequestDto.getCurrency())
-                .build();
-
-        //premium-bought-topic
-        premiumRepository.save(premium);
-        PremiumResponseDto premiumResponse = premiumMapper.toPremiumResponseDto(premium);
-        premiumResponse.setPremiumType(premiumRequestDto.getPremiumType());
-        return ResponseEntity.ok(premiumResponse);
+        PremiumPaymentRequestDto request = new PremiumPaymentRequestDto(premiumRequestDto, paymentRequestDto, byUser);
+        kafkaTemplate.executeInTransaction(kafkaTemplate -> {
+            try {
+                kafkaTemplate.send(premiumPaymentRequestTopic, objectMapper.writeValueAsString(request));
+                log.info("{} sent to payment_service", request);
+            } catch (JsonProcessingException e) {
+                log.error("Error while serializing PremiumPaymentRequestDto", e);
+            }
+            return true;
+        });
     }
 
     @Override
@@ -144,15 +139,16 @@ public class PremiumServiceImpl implements PremiumService {
         log.info("Premium renew process started");
         ExecutorService executor = Executors.newFixedThreadPool(renewThreadPoolSize);
         List<CompletableFuture<Void>> futures = new ArrayList<>();
-        int userCount = (int) userRepository.count();
-        int batches = (userCount + renewBatchSize - 1) / renewBatchSize;
+        long userCount =  userRepository.count();
+
+        /*int batches = (userCount + renewBatchSize - 1) / renewBatchSize;
 
         IntStream.range(0, batches).forEach(batchNumber -> {
             Pageable pageable = PageRequest.of(batchNumber, renewBatchSize);
             futures.add(CompletableFuture.runAsync(() -> {
                 processPremiumRenewal(userRepository.findPremiumActiveUsers(pageable).getContent());
             }, executor));
-        });
+        });*/
 
         try {
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
@@ -194,23 +190,7 @@ public class PremiumServiceImpl implements PremiumService {
                         .autoRenew(premium.isAutoRenew())
                         .build();
 
-                BigDecimal amount = getPremiumPrice(premiumRequestDto).getAmount();
-                PaymentRequestDto paymentRequestDto = new PaymentRequestDto(premiumRequestDto.getUserId(),
-                        amount, premiumRequestDto.getCurrency());
-                ResponseEntity<PaymentResponseDto> response = paymentServiceClient.sendPayment(paymentRequestDto);
-
-                if (response.getStatusCode().isError() || Objects.requireNonNull(
-                        response.getBody()).status() != PaymentStatus.SUCCESS) {
-                    log.info("Payment failed for premium for user with ID {}", user.getId());
-                    //premium-auto-renew-failed-topic
-                } else {
-                    LocalDateTime endDate = now.plusMonths(premiumRequestDto.getPremiumType().getMonths());
-                    premium.setStartDate(now);
-                    premium.setEndDate(endDate);
-                    log.info("Premium for user with ID {} updated and lasts from {} to {}",
-                            user.getId(), now, endDate);
-                    //premium-updated-topic
-                }
+                buyPremium(premiumRequestDto, false);
             }
         }
     }
@@ -218,5 +198,51 @@ public class PremiumServiceImpl implements PremiumService {
     private User getUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("No user with ID " + userId));
+    }
+
+    @KafkaListener(
+            topics = "${spring.kafka.consumer.topics.payment.premium.payment-response-topic}",
+            groupId = "${spring.kafka.consumer.groups.premium.payment.payment-group}"
+    )
+    @Transactional
+    private void updatePremium(String message, Acknowledgment ack) {
+        PremiumPaymentResponseDto response = new PremiumPaymentResponseDto();
+        try {
+            response = objectMapper.readValue(message, PremiumPaymentResponseDto.class);
+        } catch (JsonProcessingException e) {
+            log.error("Error while deserializing PremiumPaymentResponseDto", e);
+        }
+
+        PaymentResponseDto paymentResponse = response.getPaymentResponseDto();
+        PremiumRequestDto premiumRequest = response.getPremiumRequestDto();
+
+        if (paymentResponse.status() != PaymentStatus.SUCCESS) {
+            //byUser = false: premiumAutoRenewFailedTopic
+            //else: premiumPaymentFailedTopic
+            log.error("Payment failed for user with ID: {}", premiumRequest.getUserId());
+            return;
+        }
+        User user = getUserById(premiumRequest.getUserId());
+
+        LocalDateTime startDate = LocalDateTime.now();
+        LocalDateTime endDate = startDate.plusMonths(premiumRequest.getPremiumType().getMonths());
+        Premium premium = Premium.builder()
+                .user(user)
+                .startDate(startDate)
+                .endDate(endDate)
+                .autoRenew(premiumRequest.isAutoRenew())
+                .currency(premiumRequest.getCurrency())
+                .build();
+
+        //byUser = true: premium-bought-topic, else - premiumUpdatedTopic
+        premiumRepository.save(premium);
+        PremiumResponseDto premiumResponse = premiumMapper.toPremiumResponseDto(premium);
+        premiumResponse.setPremiumType(premiumRequest.getPremiumType());
+
+        try {
+            ack.acknowledge();
+        } catch (Exception e) {
+            log.error("Error while getting message from kafka", e);
+        }
     }
 }

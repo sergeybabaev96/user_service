@@ -1,5 +1,6 @@
 package school.faang.user_service.dto.premium;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,8 +13,13 @@ import school.faang.user_service.enums.premium.PremiumType;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PremiumRequestDto {
+    @NotNull
     private PremiumType premiumType;
+
+    @NotNull
     private Long userId;
+
+    @NotNull
     private CurrencyDto currency;
     private boolean autoRenew;
 }
