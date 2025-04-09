@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import school.faang.user_service.dto.ErrorResponse;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 @Slf4j
@@ -15,17 +17,16 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
    /* @ExceptionHandler(DataRetrievalFailureException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public  Map<String, String> handleUserNotFound(DataRetrievalFailureException e) {
-         Map<String, String> response = new HashMap<>();
-        response.put("message", e.getMessage());
-        return response;
-    }*/
-
-
-    @ExceptionHandler(DataRetrievalFailureException.class)
-    public ResponseEntity<String> handleUserNotFound(DataRetrievalFailureException e) {
+    public ResponseEntity<String> (DataRetrievalFailureException e) {
         log.error("User not found", e);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }*/
+
+    @ExceptionHandler(DataRetrievalFailureException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(DataRetrievalFailureException e) {
+        log.error("User not found", e);
+        ErrorResponse errorResponse = new ErrorResponse(
+                e.getMessage(), HttpStatus.NOT_FOUND.value(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 }
