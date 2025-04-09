@@ -54,8 +54,8 @@ public class UserControllerTest {
                 csvContent.getBytes(StandardCharsets.UTF_8)
         );
 
-        UserDto firstUser = new UserDto(1L, "John Doe", "john@example.com");
-        UserDto secondUser = new UserDto(2L, "Jane Smith", "jane@example.com");
+        UserDto firstUser = new UserDto(1L, "John Doe", "john@example.com", true);
+        UserDto secondUser = new UserDto(2L, "Jane Smith", "jane@example.com", true);
         when(userService.registerUserFromFile(any(MultipartFile.class)))
                 .thenReturn(List.of(firstUser, secondUser));
 

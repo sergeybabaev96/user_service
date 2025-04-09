@@ -23,6 +23,7 @@ import school.faang.user_service.repository.goal.GoalRepository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -153,5 +154,18 @@ public class GoalService {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
+    }
+
+    public void deleteAllByIds(List<Long> ids) {
+        goalRepository.deleteAllById(ids);
+    }
+
+    public void removeUserFromGoals(List<Long> goalIds, Long userId) {
+        List<Goal> goals = goalRepository.findAllById(goalIds);
+
+        goals.forEach(goal -> {
+            List<User> currentUsers = goal.getUsers();
+            goal.setUsers(currentUsers.stream().filter(user -> !Objects.equals(user.getId(), userId)).toList());
+        });
     }
 }

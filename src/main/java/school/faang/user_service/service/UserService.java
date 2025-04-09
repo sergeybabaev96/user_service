@@ -10,6 +10,8 @@ import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.constants.goal.ImageConstants;
 import school.faang.user_service.dto.FileData;
 import school.faang.user_service.dto.UserDto;
+import school.faang.user_service.dto.event.EventDTO;
+import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.preson.PersonAboutDto;
 import school.faang.user_service.dto.preson.PersonContactDto;
 import school.faang.user_service.dto.preson.PersonDto;
@@ -23,6 +25,9 @@ import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.CsvMapper;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.CountryRepository;
+import school.faang.user_service.mapper.goal.GoalMapper;
+import school.faang.user_service.service.event.EventService;
+import school.faang.user_service.service.goal.GoalService;
 import school.faang.user_service.repository.UserRepository;
 
 import java.io.BufferedReader;
@@ -30,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -48,11 +54,17 @@ public class UserService {
     private final UserRepository userRepository;
     private final CsvMapper csvMapper;
     private final UserMapper userMapper;
+    private final GoalMapper goalMapper;
+    private final GoalService goalService;
+    private final EventService eventService;
+    private final MentorshipService mentorshipService;
     private final CountryRepository countryRepository;
     private final PasswordService passwordService;
     private final UserContext userContext;
     private final S3StorageService s3Service;
     private final ImageCompressorService compressorService;
+
+    private static final int MONTHS = 3;
 
     @Value("${springdoc.app.security.password-length}")
     private int passwordLength;
@@ -252,5 +264,88 @@ public class UserService {
                 .major(fields[14])
                 .employer(fields[23])
                 .build();
+    }
+
+    public UserDto activateUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new UserNotFoundException(id)
+        );
+
+        if (user.getUpdatedAt().isAfter(LocalDateTime.now().minusMonths(MONTHS))) {
+            user.setActive(true);
+        }
+
+        return userMapper.toDto(userRepository.save(user));
+    }
+
+    public UserDto deactivateUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new UserNotFoundException(id)
+        );
+
+        stopUserGoals(id);
+        stopUserEvents(id);
+
+        user.setActive(false);
+
+        deleteMentorship(id);
+
+        return userMapper.toDto(userRepository.save(user));
+    }
+
+    private void stopUserGoals(Long userId) {
+        List<Long> userGoalsForDeleting = new ArrayList<>();
+        List<Long> userGoalsForUpdating = new ArrayList<>();
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+
+        List<GoalDto> allGoals = user.getGoals().stream().map(goalMapper::goalToGoalDto).toList();
+
+        for (GoalDto goal : allGoals) {
+            if (shouldGoalBeDeleted(goal, userId)) {
+                userGoalsForDeleting.add(goal.id());
+            } else {
+                userGoalsForUpdating.add(goal.id());
+            }
+        }
+
+        goalService.deleteAllByIds(userGoalsForDeleting);
+        goalService.removeUserFromGoals(userGoalsForUpdating, userId);
+    }
+
+    private void stopUserEvents(Long userId) {
+        List<Long> userEventsForDeleting = new ArrayList<>();
+        List<Long> userEventsForUpdating = new ArrayList<>();
+
+        List<EventDTO> allEvents = eventService.getParticipatedEvents(userId);
+
+        for (EventDTO event : allEvents) {
+            if (shouldEventBeDeleted(event, userId)) {
+                userEventsForDeleting.add(event.getId());
+            } else {
+                userEventsForUpdating.add(event.getId());
+            }
+        }
+
+        eventService.deleteAllByIds(userEventsForDeleting);
+        eventService.removeUserFromEvents(userEventsForUpdating, userId);
+    }
+
+    private void deleteMentorship(Long userId) {
+        mentorshipService.deleteMentorship(userId);
+    }
+
+    private boolean shouldGoalBeDeleted(GoalDto goal, Long userId) {
+        List<Long> userIds = goal.userIds();
+        return userIds.size() == 1 && Objects.equals(userIds.get(0), userId);
+    }
+
+    private boolean shouldEventBeDeleted(EventDTO event, Long userId) {
+        if (!Objects.equals(event.getOwnerId(), userId)) {
+            return false;
+        }
+
+        List<Long> userIds = event.getAttendeesIds();
+        return userIds.size() == 1 && Objects.equals(userIds.get(0), userId);
     }
 }
