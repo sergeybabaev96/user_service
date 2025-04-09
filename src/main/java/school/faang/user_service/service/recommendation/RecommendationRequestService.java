@@ -66,6 +66,7 @@ public class RecommendationRequestService {
         request.setReceiver(receiver);
         request.setMessage(dto.getMessage());
         request.setSkills(skillRequestService.findByIds(dto.getSkillsId()));
+        request.setStatus(RequestStatus.ACCEPTED);
 
         // Сохранение нового запроса
         recommendationRequestRepository.save(request);
