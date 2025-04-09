@@ -10,6 +10,6 @@ import school.faang.user_service.entity.User;
 public interface UserMapper {
     @Mapping(target = "menteesIds", ignore = true)
     @Mapping(target = "mentorsIds", ignore = true)
+    @Mapping(source = "contactPreference.preference", target = "preference")
     UserViewDto toViewDto(User user);
 }
-
