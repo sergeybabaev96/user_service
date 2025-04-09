@@ -3,6 +3,7 @@ package school.faang.user_service.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -23,9 +24,8 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(DataRetrievalFailureException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public  String handleUserNotFound(DataRetrievalFailureException e) {
-        log.error("++handler UserService");
-        return e.getMessage();
+    public ResponseEntity<String> handleUserNotFound(DataRetrievalFailureException e) {
+        log.error("User not found", e);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 }
