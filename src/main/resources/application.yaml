@@ -18,7 +18,7 @@ app:
       name: "corpbucket"
 
   premium:
-    cron: "0/5 * * * * *"
+    cron: "0 9 * * * *"
     renew-batch-size: 25000
     thread-pool-size: 16
     timeout-hours: 2
@@ -58,7 +58,6 @@ spring:
       acks: all
       enable.idempotence: true
       isolation.level: "read_committed"
-      auto.offset.reset: "latest"
       max-in-flight-per-connection: 1
       transaction-id-prefix: "payment-request-"
 
@@ -81,6 +80,7 @@ spring:
     consumer:
       enable-auto-commit: false
       isolation-level: "read-committed"
+      auto.offset.reset: "latest"
 
       topics:
         payment:

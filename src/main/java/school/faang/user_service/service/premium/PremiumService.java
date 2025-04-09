@@ -1,6 +1,7 @@
 package school.faang.user_service.service.premium;
 
 import school.faang.user_service.dto.exchange.ExchangeResponseDto;
+import school.faang.user_service.dto.premium.PremiumPaymentResponseDto;
 import school.faang.user_service.dto.premium.PremiumRequestDto;
 
 public interface PremiumService {
@@ -11,4 +12,6 @@ public interface PremiumService {
     void updateAutoRenew(boolean autoRenew, Long userId);
 
     void premiumRenewal();
+
+    void updatePremium(PremiumPaymentResponseDto premiumPaymentResponse);
 }

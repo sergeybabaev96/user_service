@@ -34,7 +34,7 @@ public class PremiumController {
 
     @GetMapping("/price")
     public ExchangeResponseDto getPremiumPrice(@RequestBody @Valid PremiumRequestDto premiumRequestDto) {
-        log.info("Received request to get premium price in {}", premiumRequestDto.getCurrency());
+        log.info("Received request to get premium price in {}", premiumRequestDto.getSelectedCurrency());
         return premiumService.getPremiumPrice(premiumRequestDto);
     }
 

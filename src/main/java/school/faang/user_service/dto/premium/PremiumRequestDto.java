@@ -20,6 +20,6 @@ public class PremiumRequestDto {
     private Long userId;
 
     @NotNull
-    private CurrencyDto currency;
+    private CurrencyDto selectedCurrency;
     private boolean autoRenew;
 }

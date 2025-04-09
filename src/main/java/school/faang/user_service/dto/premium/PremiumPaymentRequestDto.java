@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import school.faang.user_service.dto.payment.CurrencyDto;
 import school.faang.user_service.dto.payment.PaymentRequestDto;
 import school.faang.user_service.dto.payment.PaymentResponseDto;
 
@@ -14,5 +15,6 @@ import school.faang.user_service.dto.payment.PaymentResponseDto;
 public class PremiumPaymentRequestDto {
     private PremiumRequestDto premiumRequestDto;
     private PaymentRequestDto paymentRequestDto;
+    private CurrencyDto selectedCurrency;
     private boolean byUser;
 }
