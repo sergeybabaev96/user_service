@@ -37,11 +37,11 @@ public class UserService {
     private final CountryRepository countryRepository;
     private final PasswordService passwordService;
 
-    @Value("$.{app.security.password-length}")
-    private final int passwordLength;
+    @Value("${springdoc.app.security.password-length}")
+    private int passwordLength;
 
-    @Value("$.{app.security.password-length}")
-    private final int minDataLength;
+    @Value("${springdoc.app.security.password-length}")
+    private int minDataLength;
 
     public List<UserDto> registerUserFromFile(MultipartFile file) {
         List<String> validatedFile = validateAndReadFile(file);
