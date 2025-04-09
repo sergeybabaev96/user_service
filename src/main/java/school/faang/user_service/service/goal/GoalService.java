@@ -70,22 +70,14 @@ public class GoalService {
         log.info("{} goal updated", goalId);
 
         if (existingGoal.getStatus() == GoalStatus.COMPLETED) {
-            List<User> users = goalRepository.findUsersByGoalId(goalId);
-            achieveSkillsByUsers(users, existingGoal);
+            List<Long> usersIds = goalRepository.findUserIdsByGoalId(goalId);
+            List<Skill> skills = existingGoal.getSkillsToAchieve();
+            List<User> users = userRepository.findAllById(usersIds);
+            skills.forEach(skill -> {
+                skill.setUsers(users);
+                skillRepository.save(skill);
+            });
         }
-    }
-
-    private void achieveSkillsByUsers(List<User> users, Goal goal) {
-        users.forEach(user -> {
-            if (user.getSkills() == null) {
-                user.setSkills(new ArrayList<>());
-            }
-            List<Skill> skills = user.getSkills();
-            skills.addAll(goal.getSkillsToAchieve());
-            user.setSkills(skills);
-            userRepository.save(user);
-            log.info("User {} achieved new skills", user.getId());
-        });
     }
 
     @Transactional

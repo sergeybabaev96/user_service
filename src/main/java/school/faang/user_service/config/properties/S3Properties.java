@@ -7,6 +7,7 @@ public record S3Properties(
         String endpoint,
         String accessKey,
         String secretKey,
+        String region,
         boolean isMocked,
         String bucketName
         ) {
