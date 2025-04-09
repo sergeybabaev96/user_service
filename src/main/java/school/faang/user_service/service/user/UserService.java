@@ -1,6 +1,8 @@
 package school.faang.user_service.service.user;
 
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
@@ -13,10 +15,10 @@ import school.faang.user_service.dto.csv.CsvUserDto;
 import school.faang.user_service.entity.*;
 import school.faang.user_service.mapper.csv.CsvUserMapper;
 import school.faang.user_service.repository.*;
-import school.faang.user_service.service.csv.CsvParsingService;
 
 import java.io.IOException;
 
+import java.io.InputStream;
 import java.util.*;
 
 @Slf4j
@@ -31,7 +33,7 @@ public class UserService {
     private final EducationRepository educationRepository;
     private final CountryRepository countryRepository;
     private final Validator validator;
-    private final CsvParsingService csvParsingService;
+
 
     public boolean isWithinGoalLimit(long userId) {
         User user = userRepository.findById(userId)
@@ -50,45 +52,12 @@ public class UserService {
     @Transactional
     public void processCsv(MultipartFile file) throws IOException {
 
-        List<CsvUserDto> users = csvParsingService.parseUsers(file);
-
+        List<CsvUserDto> users = parseUsers(file);
         log.info("📄 Total rows parsed from CSV: {}", users.size());
 
-        List<CsvUserDto> validUsers = new ArrayList<>();
-
-        for (CsvUserDto dto : users) {
-            Set<ConstraintViolation<CsvUserDto>> violations = validator.validate(dto);
-            if (!violations.isEmpty()) {
-                log.warn("❌ Validation failed for user: {}", dto.getEmail());
-                violations.forEach(v -> log.warn("  {} - {}", v.getPropertyPath(), v.getMessage()));
-                continue;
-            }
-
-            if (isDuplicate(dto)) {
-                log.warn("⛔ Duplicate found for user: {}", dto.getEmail());
-                continue;
-            }
-
-            validUsers.add(dto);
-        }
-
+        List<CsvUserDto> validUsers = getValidUsers(users);
         log.info("✅ Valid users to save: {}", validUsers.size());
-
-        for (CsvUserDto dto : validUsers) {
-            User user = csvUserMapper.toUser(dto);
-            user.setPassword(generatePassword());
-            user.setCountry(getOrCreateCountry(dto.getCountry()));
-            user.setActive(true);
-
-            log.info("💾 Saving user: {} ({})", user.getUsername(), user.getEmail());
-            userRepository.save(user);
-
-            Education education = csvUserMapper.toEducation(dto);
-            education.setUser(user);
-            educationRepository.save(education);
-
-            log.info("📚 Education and previous education saved for: {}", user.getUsername());
-        }
+        validUsers.forEach(this::saveUserWithEducation);
     }
 
     private String generatePassword() {
@@ -121,4 +90,52 @@ public class UserService {
 
         return emailExists || phoneExists;
     }
+
+    private List<CsvUserDto> parseUsers(MultipartFile file) throws IOException {
+        try (InputStream inputStream = file.getInputStream()) {
+            CsvSchema schema = CsvSchema.emptySchema().withHeader();
+            MappingIterator<CsvUserDto> it = csvMapper
+                    .readerFor(CsvUserDto.class)
+                    .with(schema)
+                    .readValues(inputStream);
+            return it.readAll();
+
+        }
+    }
+
+    private List<CsvUserDto> getValidUsers(List<CsvUserDto> users) {
+        List<CsvUserDto> validUsers = new ArrayList<>();
+        for (CsvUserDto dto : users) {
+            Set<ConstraintViolation<CsvUserDto>> violations = validator.validate(dto);
+            if (!violations.isEmpty()) {
+                log.warn("x Validation failed for user: {}", dto.getEmail());
+                violations.forEach(v -> log.warn("  {} - {}", v.getPropertyPath(), v.getMessage()));
+                continue;
+            }
+
+            if (isDuplicate(dto)) {
+                log.warn("⛔ Duplicate found for user: {}", dto.getEmail());
+                continue;
+            }
+
+            validUsers.add(dto);
+        }
+        return validUsers;
+    }
+
+    private void saveUserWithEducation(CsvUserDto dto){
+        User user = csvUserMapper.toUser(dto);
+        user.setPassword(generatePassword());
+        user.setCountry(getOrCreateCountry(dto.getCountry()));
+        user.setActive(true);
+
+        log.info("💾 Saving user: {} ({})", user.getUsername(), user.getEmail());
+        userRepository.save(user);
+
+        Education education = csvUserMapper.toEducation(dto);
+        education.setUser(user);
+        educationRepository.save(education);
+        log.info("📚 Education and previous education saved for: {}", user.getUsername());
+    }
+
 }

@@ -5,7 +5,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import school.faang.user_service.dto.csv.CsvUserDto;
 import school.faang.user_service.entity.Education;
-import school.faang.user_service.entity.PreviousEducation;
 import school.faang.user_service.entity.User;
 
 @Mapper(componentModel = "spring")
@@ -21,8 +20,6 @@ public interface CsvUserMapper {
     @Mapping(target = "yearFrom", source = "admissionDate", qualifiedByName = "extractYear")
     @Mapping(target = "yearTo", source = "graduationDate", qualifiedByName = "extractYear")
     Education toEducation(CsvUserDto dto);
-
-    PreviousEducation toPreviousEducation(CsvUserDto dto);
 
     @Named("extractYear")
     static Integer extractYear(java.time.LocalDate date) {

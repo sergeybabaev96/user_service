@@ -168,7 +168,4 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<WorkSchedule> workSchedule;
 
-    @OneToMany(mappedBy = "user")
-    private List<PreviousEducation> previousEducation;
-
 }

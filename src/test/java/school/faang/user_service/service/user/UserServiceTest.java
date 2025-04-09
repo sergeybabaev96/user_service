@@ -1,5 +1,6 @@
 package school.faang.user_service.service.user;
 
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -7,18 +8,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.dto.csv.CsvUserDto;
 import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.Education;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.mapper.csv.CsvUserMapper;
+import school.faang.user_service.mapper.csv.CsvUserMapperImpl;
 import school.faang.user_service.repository.CountryRepository;
 import school.faang.user_service.repository.EducationRepository;
 import school.faang.user_service.repository.UserRepository;
-import school.faang.user_service.service.csv.CsvParsingService;
+
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -34,14 +38,15 @@ class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    @Mock
-    private CsvUserMapper csvUserMapper;
+    @Spy
+    private CsvUserMapperImpl csvUserMapper;
+
+    @Spy
+    private CsvMapper csvMapper = new CsvMapper();
+
 
     @Mock
     private EducationRepository educationRepository;
-
-    @Mock
-    private CsvParsingService csvParsingService;
 
     @Mock
     private Validator validator;
@@ -119,36 +124,38 @@ class UserServiceTest {
         Country country = new Country();
         country.setTitle("USA");
 
-        when(csvParsingService.parseUsers(mockFile)).thenReturn(List.of(dto));
-        when(validator.validate(dto)).thenReturn(Collections.emptySet());
+        when(validator.validate(any())).thenReturn(Collections.emptySet());
         when(userRepository.existsByEmail(dto.getEmail())).thenReturn(false);
         when(userRepository.existsByPhone(dto.getPhone())).thenReturn(false);
-        when(csvUserMapper.toUser(dto)).thenReturn(user);
-        when(csvUserMapper.toEducation(dto)).thenReturn(education);
+        when(csvUserMapper.toUser(any())).thenReturn(user);
+        when(csvUserMapper.toEducation(any())).thenReturn(education);
         when(countryRepository.findByTitleIgnoreCase("USA")).thenReturn(Optional.of(country));
 
         userService.processCsv(mockFile);
 
         verify(userRepository, times(1)).save(user);
         verify(educationRepository, times(1)).save(education);
-        verify(csvUserMapper, times(1)).toUser(dto);
-        verify(csvUserMapper, times(1)).toEducation(dto);
-        verify(csvParsingService, times(1)).parseUsers(mockFile);
-        verify(validator, times(1)).validate(dto);
+        verify(csvUserMapper, times(1)).toUser(any());
+        verify(csvUserMapper, times(1)).toEducation(any());
+        verify(validator, times(1)).validate(any());
     }
+
 
     @Test
     public void shouldSkipInvalidUsersWhenValidationFails() throws Exception {
-        MockMultipartFile mockFile = new MockMultipartFile("file", "users.csv", "text/csv", "invalid,data".getBytes());
+        String csvContent = "email,phone,country,firstName,lastName\n" +
+                "invalid@example.com,1234567890,USA,Invalid,User";
 
-        CsvUserDto invalidDto = new CsvUserDto();
-        invalidDto.setEmail("invalid@example.com");
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file",
+                "users.csv",
+                "text/csv",
+                csvContent.getBytes(StandardCharsets.UTF_8)
+        );
 
-        when(csvParsingService.parseUsers(mockFile)).thenReturn(List.of(invalidDto));
-
-        @SuppressWarnings("unchecked")
         Set<ConstraintViolation<CsvUserDto>> violations = Set.of(mock(ConstraintViolation.class));
-        when(validator.validate(invalidDto)).thenReturn(violations);
+        when(validator.validate(any(CsvUserDto.class))).thenReturn(violations);
+
 
         userService.processCsv(mockFile);
 
@@ -158,14 +165,17 @@ class UserServiceTest {
 
     @Test
     public void shouldSkipDuplicateUsersWhenEmailOrPhoneExists() throws Exception {
-        MockMultipartFile mockFile = new MockMultipartFile("file", "users.csv", "text/csv", "email,phone,country\nx@y.com,123,USA".getBytes());
+        String csvContent = "email,phone,country,firstName,lastName\n" +
+                "x@y.com,123,USA,X,Y";
 
-        CsvUserDto dto = new CsvUserDto();
-        dto.setEmail("x@y.com");
-        dto.setPhone("123");
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file",
+                "users.csv",
+                "text/csv",
+                csvContent.getBytes(StandardCharsets.UTF_8)
+        );
 
-        when(csvParsingService.parseUsers(mockFile)).thenReturn(List.of(dto));
-        when(validator.validate(dto)).thenReturn(Collections.emptySet());
+        when(validator.validate(any())).thenReturn(Collections.emptySet());
         when(userRepository.existsByEmail("x@y.com")).thenReturn(true);
         when(userRepository.existsByPhone("123")).thenReturn(false);
 
@@ -175,15 +185,16 @@ class UserServiceTest {
         verify(educationRepository, never()).save(any());
     }
 
+
     @Test
-    public void shouldThrowIOExceptionWhenCsvParsingFails() throws Exception {
-        MockMultipartFile mockFile = new MockMultipartFile("file", "users.csv", "text/csv", new byte[0]);
+    public void shouldThrowIOExceptionWhenFileReadingFails() throws Exception {
+        MultipartFile brokenFile = mock(MultipartFile.class);
+        when(brokenFile.getInputStream()).thenThrow(new IOException("File read error"));
 
-        when(csvParsingService.parseUsers(mockFile)).thenThrow(new IOException("Parse failed"));
-
-        assertThrows(IOException.class, () -> userService.processCsv(mockFile));
+        assertThrows(IOException.class, () -> userService.processCsv(brokenFile));
 
         verify(userRepository, never()).save(any());
         verify(educationRepository, never()).save(any());
     }
+
 }
