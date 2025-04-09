@@ -77,7 +77,7 @@ public class MentorshipServiceTest {
     @Test
     @DisplayName("Получение менти пользователя (позитивный сценарий)")
     public void testGetMenteesPositive() {
-        Mockito.when(userService.getUser(userId))
+        Mockito.when(userService.getUserEntity(userId))
                 .thenReturn(user);
         doReturn(new UserViewDto())
                 .when(userMapper)
@@ -91,7 +91,7 @@ public class MentorshipServiceTest {
     @DisplayName("Проверка получения пустого списка менти")
     public void testGetMenteesEmptyList() {
         user.setMentees(new ArrayList<>());
-        Mockito.when(userService.getUser(userId))
+        Mockito.when(userService.getUserEntity(userId))
                 .thenReturn(user);
 
         List<UserViewDto> result = mentorshipService.getMentees(user.getId());
@@ -101,7 +101,7 @@ public class MentorshipServiceTest {
     @Test
     @DisplayName("Получение менторов пользователя (позитивный сценарий)")
     public void testGetMentorsPositive() {
-        Mockito.when(userService.getUser(userId))
+        Mockito.when(userService.getUserEntity(userId))
                 .thenReturn(user);
         doReturn(new UserViewDto())
                 .when(userMapper)
@@ -115,7 +115,7 @@ public class MentorshipServiceTest {
     @DisplayName("Проверка получения пустого списка менторов")
     public void testGetMentorsEmptyList() {
         user.setMentors(new ArrayList<>());
-        Mockito.when(userService.getUser(userId))
+        Mockito.when(userService.getUserEntity(userId))
                 .thenReturn(user);
 
         List<UserViewDto> result = mentorshipService.getMentors(user.getId());
@@ -125,7 +125,7 @@ public class MentorshipServiceTest {
     @Test
     @DisplayName("Успешное удаление менти у ментора")
     public void testDeleteMenteeSuccess() {
-        Mockito.when(userService.getUser(mentorId))
+        Mockito.when(userService.getUserEntity(mentorId))
                 .thenReturn(mentor);
 
         mentorshipService.deleteMentee(menteeId, mentorId);
@@ -136,7 +136,7 @@ public class MentorshipServiceTest {
     @Test
     @DisplayName("Удаление несуществующего менти вызывает исключение")
     public void testDeleteMenteeInvalidMentee() {
-        Mockito.when(userService.getUser(mentorId))
+        Mockito.when(userService.getUserEntity(mentorId))
                 .thenReturn(mentor);
 
         Exception exception = Assert.assertThrows(DataValidationException.class,
@@ -147,7 +147,7 @@ public class MentorshipServiceTest {
     @Test
     @DisplayName("Успешное удаление ментора у менти")
     public void testDeleteMentorSuccess() {
-        Mockito.when(userService.getUser(menteeId))
+        Mockito.when(userService.getUserEntity(menteeId))
                 .thenReturn(mentee);
 
         mentorshipService.deleteMentor(menteeId, mentorId);
@@ -158,7 +158,7 @@ public class MentorshipServiceTest {
     @Test
     @DisplayName("Удаление несуществующего ментора вызывает исключение")
     public void testDeleteMentorInvalidMentor() {
-        Mockito.when(userService.getUser(menteeId))
+        Mockito.when(userService.getUserEntity(menteeId))
                 .thenReturn(mentee);
 
         Exception exception = Assert.assertThrows(DataValidationException.class,

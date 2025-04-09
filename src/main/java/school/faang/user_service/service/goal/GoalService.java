@@ -138,7 +138,7 @@ public class GoalService {
      * @throws EntityAlreadyExistException Если у пользователя уже есть данная цель
      */
     private void userAddGoal(Long userId, Goal goal) {
-        User user = userService.getUser(userId);
+        User user = userService.getUserEntity(userId);
         if (!user.getGoals().contains(goal)) {
             user.getGoals().add(goal);
             userRepository.save(user);

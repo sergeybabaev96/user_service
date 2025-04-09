@@ -53,7 +53,7 @@ public class AvatarService {
      */
     @Transactional
     public void addUserAvatar(long userId, @NotNull MultipartFile avatar) {
-        User user = userService.getUser(userId);
+        User user = userService.getUserEntity(userId);
         avatarValidator.checkAvatarSize(avatar);
         avatarValidator.checkFileType(avatar);
 
@@ -84,7 +84,7 @@ public class AvatarService {
      */
     @Transactional
     public void deleteUserAvatar(long userId) {
-        User user = userService.getUser(userId);
+        User user = userService.getUserEntity(userId);
         UserProfilePic userProfilePic = user.getUserProfilePic();
         s3Service.deleteFile(userProfilePic.getFileId());
         s3Service.deleteFile(userProfilePic.getSmallFileId());
@@ -98,7 +98,7 @@ public class AvatarService {
      * @return ресурс с аватаром пользователя
      */
     public Resource getUserAvatar(long userId) {
-        User user = userService.getUser(userId);
+        User user = userService.getUserEntity(userId);
         UserProfilePic userProfilePic = user.getUserProfilePic();
 
         return s3Service.downloadFile(userProfilePic.getFileId());

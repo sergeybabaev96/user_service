@@ -70,7 +70,7 @@ public class AvatarServiceTest {
         sizes.put("small", 100);
         sizes.put("large", 200);
 
-        when(userService.getUser(userId)).thenReturn(user);
+        when(userService.getUserEntity(userId)).thenReturn(user);
         when(avatarConfig.getSizes()).thenReturn(sizes);
 
         MultipartFile smallAvatar = mock(MultipartFile.class);
@@ -87,7 +87,7 @@ public class AvatarServiceTest {
         avatarService.addUserAvatar(userId, avatarFile);
 
         verify(avatarValidator).checkAvatarSize(avatarFile);
-        verify(userService).getUser(userId);
+        verify(userService).getUserEntity(userId);
         verify(imageResize).resizeImage(avatarFile, 100);
         verify(imageResize).resizeImage(avatarFile, 200);
         verify(s3Service).uploadFile(smallAvatar, "users/testuser/avatars/small");
@@ -102,7 +102,7 @@ public class AvatarServiceTest {
         profilePic.setSmallFileId(smallFileKey);
         user.setUserProfilePic(profilePic);
 
-        when(userService.getUser(userId)).thenReturn(user);
+        when(userService.getUserEntity(userId)).thenReturn(user);
 
         avatarService.deleteUserAvatar(userId);
 
@@ -118,13 +118,13 @@ public class AvatarServiceTest {
         profilePic.setFileId(largeFileKey);
         user.setUserProfilePic(profilePic);
 
-        when(userService.getUser(userId)).thenReturn(user);
+        when(userService.getUserEntity(userId)).thenReturn(user);
         when(s3Service.downloadFile(largeFileKey)).thenReturn(avatarResource);
 
         Resource result = avatarService.getUserAvatar(userId);
 
         assertEquals(avatarResource, result);
-        verify(userService).getUser(userId);
+        verify(userService).getUserEntity(userId);
         verify(s3Service).downloadFile(largeFileKey);
     }
 }
