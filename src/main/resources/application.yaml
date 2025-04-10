@@ -22,7 +22,8 @@ spring:
       host: localhost
 
       channel:
-        recommendation-event: recommendation_event_channel
+        recommendationReceived: recommendation_event_channel
+        follower: follower_channel
 
 server:
   port: 8080

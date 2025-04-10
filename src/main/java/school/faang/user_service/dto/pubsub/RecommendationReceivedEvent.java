@@ -1,4 +1,4 @@
-package school.faang.user_service.dto.recommendation;
+package school.faang.user_service.dto.pubsub;
 
 import java.time.LocalDateTime;
 
