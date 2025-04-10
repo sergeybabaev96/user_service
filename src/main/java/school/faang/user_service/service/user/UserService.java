@@ -1,21 +1,49 @@
 package school.faang.user_service.service.user;
 
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import school.faang.user_service.dto.avatar.AvatarType;
+import school.faang.user_service.dto.csv.CsvUserDto;
+import school.faang.user_service.dto.user.UserRegistrationDto;
+import school.faang.user_service.entity.Country;
+import school.faang.user_service.entity.Education;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.mapper.csv.CsvUserMapper;
+import school.faang.user_service.mapper.user.UserMapper;
+import school.faang.user_service.repository.CountryRepository;
+import school.faang.user_service.repository.EducationRepository;
 import school.faang.user_service.repository.UserRepository;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
     private static final int GOALS_PER_USER = 3;
 
+    private final CountryRepository countryRepository;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final CountryRepository countryRepository;
+    private final CsvMapper csvMapper;
+    private final Validator validator;
+    private final CsvUserMapper csvUserMapper;
+    private final EducationRepository educationRepository;
     private final UserAvatarService userAvatarService;
 
     public boolean isWithinGoalLimit(long userId) {
@@ -120,9 +148,6 @@ public class UserService {
         educationRepository.save(education);
         log.info("📚 Education and previous education saved for: {}", user.getUsername());
     }
-
-}
-
 
     public User registerUser(UserRegistrationDto dto) {
         Country country = countryRepository.findById(dto.getCountryId())

@@ -17,7 +17,6 @@ import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.Education;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
-import school.faang.user_service.mapper.csv.CsvUserMapper;
 import school.faang.user_service.mapper.csv.CsvUserMapperImpl;
 import school.faang.user_service.repository.CountryRepository;
 import school.faang.user_service.repository.EducationRepository;
