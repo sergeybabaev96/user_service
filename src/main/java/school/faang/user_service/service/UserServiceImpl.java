@@ -1,5 +1,6 @@
 package school.faang.user_service.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,10 +30,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+
     private final EventService eventService;
     private final GoalService goalService;
-    private final MentorUserRelationHandlerImpl mentorshipService;
-
+    private final MentorUserRelationHandler mentorshipService;
     private final AvatarGeneratorService avatarGeneratorService;
     private final S3Service s3Service;
 
@@ -86,8 +87,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsById(userId);
     }
 
-    // TODO: задача BJS2-66001 сделана неверно
-    /*@Override
+    @Override
     @Transactional
     public UserDto deactivateUser() {
         long userId = getUserFromUserContext();
@@ -100,7 +100,7 @@ public class UserServiceImpl implements UserService {
         user.setActive(false);
         User deactivatedUser = userRepository.save(user);
         return userMapper.toDto(deactivatedUser);
-    }*/
+    }
 
     @Override
     public UserDto getUser(long userId) {
@@ -118,7 +118,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void banUserById(long userId) {
-        var userToBan = getUserById(userId);
+        var userToBan = findUserById(userId);
 
         userToBan.setBanned(true);
         userRepository.save(userToBan);

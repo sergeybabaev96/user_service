@@ -13,15 +13,11 @@ public interface UserService {
 
     User findUserById(long userId);
 
-    User getUserById(long userId);
-
-    User findById(long userId);
-
     void checkUserExists(Long userId);
 
-    boolean existsById(long userId);
-
     UserDto deactivateUser();
+
+    boolean existsById(long userId);
 
     UserDto getUser(long userId);
 
