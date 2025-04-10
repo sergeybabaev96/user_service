@@ -21,7 +21,8 @@ public class S3Config {
     @Bean
     public AmazonS3 amazonS3() {
         return AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(s3Properties.endpoint(), "us-east-1"))
+                .withEndpointConfiguration(
+                        new AwsClientBuilder.EndpointConfiguration(s3Properties.endpoint(), s3Properties.region()))
                 .withCredentials(new AWSStaticCredentialsProvider(
                         new BasicAWSCredentials(s3Properties.accessKey(), s3Properties.secretKey())))
                 .withPathStyleAccessEnabled(true)
