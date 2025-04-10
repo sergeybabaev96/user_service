@@ -1,22 +1,41 @@
 package school.faang.user_service.service.user;
 
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Optional;
+
+import org.springframework.mock.web.MockMultipartFile;
+
+import org.springframework.web.multipart.MultipartFile;
+import school.faang.user_service.dto.csv.CsvUserDto;
+import school.faang.user_service.entity.Country;
+import school.faang.user_service.entity.Education;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
+import school.faang.user_service.mapper.csv.CsvUserMapperImpl;
+import school.faang.user_service.repository.CountryRepository;
+import school.faang.user_service.repository.EducationRepository;
 import school.faang.user_service.repository.UserRepository;
 
+import jakarta.validation.Validator; // ← Правильный Validator!
+
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
