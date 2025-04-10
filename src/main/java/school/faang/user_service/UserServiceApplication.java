@@ -9,12 +9,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import school.faang.user_service.config.redis.RedisConfig;
+import school.faang.user_service.config.AmazonS3Config;
+import school.faang.user_service.config.DicebearConfig;
 
 @SpringBootApplication
 @EnableFeignClients("school.faang.user_service.client")
-@EnableConfigurationProperties(RedisConfig.class)
+@EnableConfigurationProperties({DicebearConfig.class, AmazonS3Config.class, RedisConfig.class})
 public class UserServiceApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(UserServiceApplication.class, args);
     }

@@ -77,7 +77,7 @@ public class RecommendationRequestServiceTest {
 
     @BeforeEach
     void setUp() {
-        recommendationRequestService = new RecommendationRequestService(
+        recommendationRequestService = new RecommendationRequestServiceImpl(
                 userService,
                 recommendationRequestRepository,
                 skillRequestService,
@@ -398,7 +398,7 @@ public class RecommendationRequestServiceTest {
                 .id(recommendationRequest.getRequesterId())
                 .username("Requester")
                 .build();
-        when(userService.getUserById(requester.getId())).thenReturn(requester);
+        when(userService.findUserById(requester.getId())).thenReturn(requester);
 
         return requester;
     }
@@ -408,7 +408,7 @@ public class RecommendationRequestServiceTest {
                 .id(recommendationRequest.getReceiverId())
                 .username("Receiver")
                 .build();
-        when(userService.getUserById(receiver.getId())).thenReturn(receiver);
+        when(userService.findUserById(receiver.getId())).thenReturn(receiver);
         return receiver;
     }
 
