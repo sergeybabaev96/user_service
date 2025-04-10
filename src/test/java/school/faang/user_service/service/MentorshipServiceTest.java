@@ -157,7 +157,7 @@ public class MentorshipServiceTest {
         );
 
         verify(mentorshipRepository, never()).deleteById(anyLong());
-        assertEquals("У этого ментора нет менторов", exception.getMessage());
+        assertEquals("У ментора с ID 1 нет ни одного менти", exception.getMessage());
     }
 
     @Test
@@ -185,7 +185,7 @@ public class MentorshipServiceTest {
         );
 
         verify(mentorshipRepository, never()).deleteById(anyLong());
-        assertEquals("У данного менти нет менторов.", exception.getMessage());
+        assertEquals("У менти с ID 2 нет менторов", exception.getMessage());
     }
 
     private UserWithDto createUserAndDto(Long id, String username) {

@@ -160,22 +160,18 @@ public class GoalServiceTest {
         User firstUser = createUser(firstId);
         User secondUser = createUser(secondId);
         List<Skill> skills = createSkills();
-        List<User> users = List.of(firstUser, secondUser);
+        List<Long> usersIds = List.of(firstUser.getId(), secondUser.getId());
         GoalDto goalDto = createGoalDto(null, null, GoalStatus.COMPLETED,
                 List.of(firstId, secondId, thirdId), null);
         when(skillRepository.findAllById(firstGoalDto.skillIds())).thenReturn(skills);
-        when(goalRepository.findUsersByGoalId(firstId)).thenReturn(users);
+        when(goalRepository.findUserIdsByGoalId(firstId)).thenReturn(usersIds);
         when(goalRepository.save(existingGoal)).thenReturn(existingGoal);
 
         goalService.updateGoal(firstId, goalDto);
 
         verify(goalRepository, times(1)).save(existingGoal);
-        verify(userRepository, times(1)).save(firstUser);
-        verify(userRepository, times(1)).save(secondUser);
         assertEquals(GoalStatus.COMPLETED, existingGoal.getStatus());
         assertEquals(existingGoal.getSkillsToAchieve(), skills);
-        assertEquals(firstUser.getSkills(), skills);
-        assertEquals(secondUser.getSkills(), skills);
     }
 
     @Test

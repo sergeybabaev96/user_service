@@ -23,6 +23,7 @@ import school.faang.user_service.repository.goal.GoalRepository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -70,22 +71,14 @@ public class GoalService {
         log.info("{} goal updated", goalId);
 
         if (existingGoal.getStatus() == GoalStatus.COMPLETED) {
-            List<User> users = goalRepository.findUsersByGoalId(goalId);
-            achieveSkillsByUsers(users, existingGoal);
+            List<Long> usersIds = goalRepository.findUserIdsByGoalId(goalId);
+            List<Skill> skills = existingGoal.getSkillsToAchieve();
+            List<User> users = userRepository.findAllById(usersIds);
+            skills.forEach(skill -> {
+                skill.setUsers(users);
+                skillRepository.save(skill);
+            });
         }
-    }
-
-    private void achieveSkillsByUsers(List<User> users, Goal goal) {
-        users.forEach(user -> {
-            if (user.getSkills() == null) {
-                user.setSkills(new ArrayList<>());
-            }
-            List<Skill> skills = user.getSkills();
-            skills.addAll(goal.getSkillsToAchieve());
-            user.setSkills(skills);
-            userRepository.save(user);
-            log.info("User {} achieved new skills", user.getId());
-        });
     }
 
     @Transactional
@@ -161,5 +154,18 @@ public class GoalService {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
+    }
+
+    public void deleteAllByIds(List<Long> ids) {
+        goalRepository.deleteAllById(ids);
+    }
+
+    public void removeUserFromGoals(List<Long> goalIds, Long userId) {
+        List<Goal> goals = goalRepository.findAllById(goalIds);
+
+        goals.forEach(goal -> {
+            List<User> currentUsers = goal.getUsers();
+            goal.setUsers(currentUsers.stream().filter(user -> !Objects.equals(user.getId(), userId)).toList());
+        });
     }
 }
