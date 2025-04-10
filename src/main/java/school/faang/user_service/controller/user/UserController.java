@@ -1,26 +1,20 @@
 package school.faang.user_service.controller.user;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import school.faang.user_service.dto.user.UserRegistrationDto;
-import school.faang.user_service.dto.user.UserResponseDto;
-import school.faang.user_service.entity.User;
-import school.faang.user_service.mapper.user.UserMapper;
-import school.faang.user_service.service.external.S3Service;
 import school.faang.user_service.service.user.UserService;
 
-@RestController
 @RequiredArgsConstructor
+@RestController
 @RequestMapping("/api")
+@Validated
 public class UserController {
+
     private final UserService userService;
     private final UserMapper userMapper;
     private final S3Service s3Service;
@@ -46,5 +40,13 @@ public class UserController {
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .body(data);
+    @PostMapping("/upload-csv")
+    public ResponseEntity<String> uploadCsv(@RequestParam("file") @NotNull MultipartFile file){
+        try{
+            userService.processCsv(file);
+            return ResponseEntity.ok("Users imported successfully");
+        }catch (IOException e){
+            return ResponseEntity.badRequest().body("Error parcessing file " + e.getMessage());
+        }
     }
 }

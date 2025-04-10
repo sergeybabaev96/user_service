@@ -3,12 +3,7 @@ package school.faang.user_service.service.user;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.avatar.AvatarType;
-import school.faang.user_service.dto.user.UserRegistrationDto;
-import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.mapper.user.UserMapper;
-import school.faang.user_service.repository.CountryRepository;
 import school.faang.user_service.repository.UserRepository;
 
 import java.util.Optional;
@@ -36,6 +31,98 @@ public class UserService {
     public Optional<User> findById(long id) {
         return userRepository.findById(id);
     }
+
+    @Transactional
+    public void processCsv(MultipartFile file) throws IOException {
+
+        List<CsvUserDto> users = parseUsers(file);
+        log.info("📄 Total rows parsed from CSV: {}", users.size());
+
+        List<CsvUserDto> validUsers = getValidUsers(users);
+        log.info("✅ Valid users to save: {}", validUsers.size());
+        validUsers.forEach(this::saveUserWithEducation);
+    }
+
+    private String generatePassword() {
+        int length = 12;
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&";
+        StringBuilder password = new StringBuilder();
+        Random random = new Random();
+
+        for (int i = 0; i < length; i++) {
+            password.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return password.toString();
+    }
+
+    private Country getOrCreateCountry(String countryName) {
+        return countryRepository.findByTitleIgnoreCase(countryName).orElseGet(() -> {
+            Country newCountry = new Country();
+            newCountry.setTitle(countryName);
+            return countryRepository.save(newCountry);
+        });
+    }
+
+    private boolean isDuplicate(CsvUserDto dto) {
+        boolean emailExists = userRepository.existsByEmail(dto.getEmail());
+        boolean phoneExists = userRepository.existsByPhone(dto.getPhone());
+
+        if (emailExists || phoneExists) {
+            log.warn("⛔ Duplicate: email = {}, phone = {}", dto.getEmail(), dto.getPhone());
+        }
+
+        return emailExists || phoneExists;
+    }
+
+    private List<CsvUserDto> parseUsers(MultipartFile file) throws IOException {
+        try (InputStream inputStream = file.getInputStream()) {
+            CsvSchema schema = CsvSchema.emptySchema().withHeader();
+            MappingIterator<CsvUserDto> it = csvMapper
+                    .readerFor(CsvUserDto.class)
+                    .with(schema)
+                    .readValues(inputStream);
+            return it.readAll();
+
+        }
+    }
+
+    private List<CsvUserDto> getValidUsers(List<CsvUserDto> users) {
+        List<CsvUserDto> validUsers = new ArrayList<>();
+        for (CsvUserDto dto : users) {
+            Set<ConstraintViolation<CsvUserDto>> violations = validator.validate(dto);
+            if (!violations.isEmpty()) {
+                log.warn("x Validation failed for user: {}", dto.getEmail());
+                violations.forEach(v -> log.warn("  {} - {}", v.getPropertyPath(), v.getMessage()));
+                continue;
+            }
+
+            if (isDuplicate(dto)) {
+                log.warn("⛔ Duplicate found for user: {}", dto.getEmail());
+                continue;
+            }
+
+            validUsers.add(dto);
+        }
+        return validUsers;
+    }
+
+    private void saveUserWithEducation(CsvUserDto dto){
+        User user = csvUserMapper.toUser(dto);
+        user.setPassword(generatePassword());
+        user.setCountry(getOrCreateCountry(dto.getCountry()));
+        user.setActive(true);
+
+        log.info("💾 Saving user: {} ({})", user.getUsername(), user.getEmail());
+        userRepository.save(user);
+
+        Education education = csvUserMapper.toEducation(dto);
+        education.setUser(user);
+        educationRepository.save(education);
+        log.info("📚 Education and previous education saved for: {}", user.getUsername());
+    }
+
+}
+
 
     public User registerUser(UserRegistrationDto dto) {
         Country country = countryRepository.findById(dto.getCountryId())

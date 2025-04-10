@@ -167,4 +167,5 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<WorkSchedule> workSchedule;
+
 }
