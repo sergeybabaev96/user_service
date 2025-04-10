@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.constants.goal.GoalConstants;
+import school.faang.user_service.dto.analytics.GoalCompletedEvent;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.SearchGoalDto;
 import school.faang.user_service.entity.Skill;
@@ -16,10 +17,12 @@ import school.faang.user_service.exception.goal.GoalAlreadyCompletedException;
 import school.faang.user_service.exception.skill.SkillLimitExceededException;
 import school.faang.user_service.filter.goal.GoalFilter;
 import school.faang.user_service.mapper.goal.GoalMapper;
+import school.faang.user_service.publisher.GoalCompletedPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +38,7 @@ public class GoalService {
     private final SkillRepository skillRepository;
     private final GoalMapper goalMapper;
     private final List<GoalFilter> goalFilters;
+    private final GoalCompletedPublisher goalCompletedPublisher;
 
     @Transactional
     public void createGoal(Long userId, GoalDto goal) {
@@ -59,6 +63,7 @@ public class GoalService {
         log.info("Goal with id: {} was deleted", goalId);
     }
 
+    @Transactional
     public void updateGoal(Long goalId, GoalDto goal) {
         Goal existingGoal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new EntityNotFoundException("Goal not found"));
@@ -77,10 +82,11 @@ public class GoalService {
                 skill.setUsers(users);
                 skillRepository.save(skill);
             });
+            LocalDateTime date = LocalDateTime.now();
+            users.forEach(user -> goalCompletedPublisher.publish(createGoalEvent(user.getId(), goalId, date)));
         }
     }
 
-    @Transactional
     public List<GoalDto> findSubtasksByGoalId(Long goalId, SearchGoalDto searchGoalDto) {
         validateByExistsGoalOnId(goalId);
         return goalMapper.goalListToGoalDtoList(applyFiltersOnGoals(
@@ -88,7 +94,6 @@ public class GoalService {
                 .toList());
     }
 
-    @Transactional
     public List<GoalDto> getGoalsByUserId(Long userId, SearchGoalDto searchGoalDto) {
         validateByExistsUserOnId(userId);
         return goalMapper.goalListToGoalDtoList(applyFiltersOnGoals(
@@ -153,5 +158,13 @@ public class GoalService {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
+    }
+
+    private GoalCompletedEvent createGoalEvent(Long userId, Long goalId, LocalDateTime date) {
+        return GoalCompletedEvent.builder()
+                .goalId(goalId)
+                .userId(userId)
+                .completedAt(date)
+                .build();
     }
 }

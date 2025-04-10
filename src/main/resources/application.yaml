@@ -20,6 +20,8 @@ spring:
     redis:
       port: 6379
       host: localhost
+      channel:
+        goal-completing-channel: goal-completing-channel
 
 server:
   port: 8080
