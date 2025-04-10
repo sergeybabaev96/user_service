@@ -23,6 +23,9 @@ spring:
       channel:
         goal-completing-channel: goal-completing-channel
 
+      channel:
+        recommendation-event: recommendation_event_channel
+
 server:
   port: 8080
 
