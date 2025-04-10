@@ -42,6 +42,14 @@ public class MentorshipService {
         mentorshipRepository.save(mentee);
     }
 
+    public void deleteMentee(long menteeId, long mentorId) {
+        deleteUserFromRelation(mentorId, menteeId, true);
+    }
+
+    public void deleteMentor(long mentorId, long menteeId) {
+        deleteUserFromRelation(menteeId, mentorId, false);
+    }
+
     private List<UserDto> getUserRelatedList(long userId, Function<User, List<User>> relationGetter) {
         User user = userService.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User doesn't exists"));
@@ -52,6 +60,21 @@ public class MentorshipService {
                 .toList();
     }
 
+    private void deleteUserFromRelation(long ownerId, long targetId, boolean isMentee) {
+        User owner = mentorshipRepository.findById(ownerId).orElseThrow(() ->
+                new EntityNotFoundException(isMentee ? "Mentor doesn't exist" : "Mentee doesn't exist"));
+
+        boolean removed = (isMentee ? owner.getMentees() : owner.getMentors())
+                .removeIf(user -> user.getId() == targetId);
+
+        if (!removed) {
+            log.error("{} with id {} not found for {} with id {}",
+                    isMentee ? "Mentee" : "Mentor", targetId,
+                    isMentee ? "mentor" : "mentee", ownerId);
+            throw new EntityNotFoundException(isMentee ? "Mentee not found for given mentor" : "Mentor not found for given mentee");
+        }
+        userService.save(owner);
+        }
     private User getUserById(long userId, String user){
         return mentorshipRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(user + " with id: " + userId + " is not in the database"));

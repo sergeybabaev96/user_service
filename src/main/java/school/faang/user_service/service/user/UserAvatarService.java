@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.config.avatar.AvatarProperties;
 import school.faang.user_service.dto.avatar.AvatarType;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
@@ -19,13 +20,12 @@ import java.util.UUID;
 public class UserAvatarService {
     private final DiceBearService diceBearService;
     private final S3Service s3Service;
-
-    @Value("${avatar.bucketName}")
-    private String bucketName;
+    private final AvatarProperties avatarProperties;
 
     public void generateAvatarForNewUser(@NotNull User user, @NotNull AvatarType type){
         String fileId = UUID.randomUUID().toString() + type.getExtension();
         byte[] avatarData = diceBearService.generateAvatar(type);
+        String bucketName = avatarProperties.getBucketName();
         s3Service.uploadToBucket(fileId, avatarData, type.getContentType());
         URL url = s3Service.getPresingnedUrl(fileId);
         UserProfilePic profilePic = new UserProfilePic();

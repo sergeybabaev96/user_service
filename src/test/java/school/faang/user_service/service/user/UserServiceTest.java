@@ -1,34 +1,22 @@
 package school.faang.user_service.service.user;
 
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
-import school.faang.user_service.dto.csv.CsvUserDto;
-import school.faang.user_service.entity.Country;
-import school.faang.user_service.entity.Education;
+import java.util.Optional;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
-import school.faang.user_service.mapper.csv.CsvUserMapperImpl;
-import school.faang.user_service.repository.CountryRepository;
-import school.faang.user_service.repository.EducationRepository;
 import school.faang.user_service.repository.UserRepository;
 
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -55,6 +43,9 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    private final long userId = 1L;
+    private final User user = User.builder().id(userId).build();
 
     @Test
     public void testIsWithinGoalLimit() {
@@ -91,10 +82,32 @@ class UserServiceTest {
         assertThrows(EntityNotFoundException.class, () -> getResult(Optional.empty()));
     }
 
-    private boolean getResult(Optional<User> foundUser) {
-        when(userRepository.findById(id)).thenReturn(foundUser);
-        return userService.isWithinGoalLimit(id);
+    @Test
+    public void save_shouldSave() {
+        userService.save(user);
+
+        Mockito.verify(userRepository, Mockito.times(1)).save(user);
     }
+
+    @Test
+    public void findById_shouldFind() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        Optional<User> result = userService.findById(userId);
+
+        Mockito.verify(userRepository, Mockito.times(1)).findById(userId);
+        assertTrue(result.isPresent());
+        assertEquals(user, result.get());
+    }
+    private boolean getResult(Optional<User> foundUser) {
+        when(userRepository.findById(userId)).thenReturn(foundUser);
+        return userService.isWithinGoalLimit(userId);
+    }
+
+
+
+
+
 
     @Test
     public void shouldParseAllUsersFromCsvFileWhenFileIsValid() throws IOException {

@@ -1,4 +1,4 @@
-package school.faang.user_service.config.dicebear;
+package school.faang.user_service.util;
 
 import lombok.RequiredArgsConstructor;
 import school.faang.user_service.dto.avatar.DicebearStyle;
