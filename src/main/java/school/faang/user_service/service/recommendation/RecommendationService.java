@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.recommendation;
 
 import lombok.Data;
 import lombok.NonNull;
@@ -26,7 +26,8 @@ import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
-import school.faang.user_service.validation.RecommendationValidator;
+import school.faang.user_service.service.skilloffer.SkillOfferService;
+import school.faang.user_service.validation.recommendation.RecommendationValidator;
 
 import java.util.List;
 import java.util.stream.StreamSupport;

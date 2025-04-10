@@ -25,6 +25,7 @@ import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.goal.GoalService;
+import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.validation.goal.GoalValidator;
 
 import java.util.ArrayList;
@@ -95,14 +96,14 @@ public class GoalServiceTest {
                 List.of(titleFilter, statusFilter),
                 userService,
                 userRepository
-                );
+        );
     }
 
     @Test
     @DisplayName("Успешное создание цели")
     void createGoalPositive() {
         Mockito.when(goalMapper.toEntity(goalCreateDto)).thenReturn(goal);
-        Mockito.when(userService.getUser(user.getId())).thenReturn(user);
+        Mockito.when(userService.getUserEntity(user.getId())).thenReturn(user);
         Mockito.when(goalMapper.toDto(goal)).thenReturn(goalViewDto);
         Mockito.when(goalRepository.save(goal)).thenReturn(goal);
 
@@ -116,7 +117,7 @@ public class GoalServiceTest {
     @DisplayName("Создание уже существующей цели")
     void createGoalAlreadyExist() {
         Mockito.when(goalMapper.toEntity(goalCreateDto)).thenReturn(goal);
-        Mockito.when(userService.getUser(user.getId())).thenReturn(user);
+        Mockito.when(userService.getUserEntity(user.getId())).thenReturn(user);
         user.setGoals(List.of(goal));
 
         Exception exception = assertThrows(EntityAlreadyExistException.class,
@@ -128,7 +129,7 @@ public class GoalServiceTest {
     @Test
     @DisplayName("Создание цели для несуществующего пользователя")
     void createGoalNonExistentUser() {
-        Mockito.when(userService.getUser(user.getId())).thenThrow(new DataValidationException("Пользователь не найден"));
+        Mockito.when(userService.getUserEntity(user.getId())).thenThrow(new DataValidationException("Пользователь не найден"));
 
         Exception exception = assertThrows(DataValidationException.class,
                 () -> goalService.createGoal(user.getId(), goalCreateDto));
