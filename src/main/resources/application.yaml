@@ -41,3 +41,18 @@ springdoc:
   api-docs:
     path: /v1/api-docs      # Путь к JSON-документации
   default-produces-media-type: application/json
+  
+minio:
+  s3:
+    endpoint: http://localhost:9000
+    region: us-east-1
+    accessKey: user
+    secretKey: password
+
+dicebear:
+  apiUrl: https://api.dicebear.com/9.x
+  connectionTimeoutSeconds: 10
+  readTimeoutSeconds: 10
+
+avatar:
+  bucketName: user-avatars
