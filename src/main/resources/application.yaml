@@ -24,6 +24,9 @@ spring:
         profile-view: profile_view_channel
         mentorship-request: MentorShipRequestTopic
 
+      channel:
+        recommendation-event: recommendation_event_channel
+
 server:
   port: 8080
 

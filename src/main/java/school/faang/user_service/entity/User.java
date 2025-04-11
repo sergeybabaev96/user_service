@@ -153,6 +153,12 @@ public class User {
     })
     private UserProfilePic userProfilePic;
 
+    @Column(name = "telegram_login")
+    private String telegramLogin;
+
+    @Column(name = "telegram_chat_id")
+    private String telegramId;
+
     @OneToOne(mappedBy = "user")
     private ContactPreference contactPreference;
 

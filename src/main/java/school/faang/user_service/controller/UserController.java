@@ -76,4 +76,14 @@ public class UserController {
         userService.removeUserAvatar();
         return ResponseEntity.ok("Avatar removed successfully.");
     }
+
+    @PutMapping("/deactivate/{id}")
+    public UserDto deactivateUser(@PathVariable Long id) {
+        return userService.deactivateUser(id);
+    }
+
+    @PutMapping("/activate/{id}")
+    public UserDto activateUser(@PathVariable Long id) {
+        return userService.activateUser(id);
+    }
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
+import school.faang.user_service.dto.recommendation.RecommendationReceivedEvent;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.dto.recommendation.RejectionDto;
 import school.faang.user_service.dto.recommendation.RequestFilterDto;
@@ -12,6 +13,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.filter.recommendation.RecommendationRequestFilter;
 import school.faang.user_service.mapper.RecommendationRequestMapper;
+import school.faang.user_service.publisher.RecommendationReceivedEventPublisher;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 import school.faang.user_service.service.UserService;
 
@@ -32,6 +34,7 @@ public class RecommendationRequestService {
     private final List<RecommendationRequestFilter> filters;
     private final UserService userService;
     private final SkillRequestService skillRequestService;
+    private final RecommendationReceivedEventPublisher recommendationReceivedEventPublisher;
 
     public RecommendationRequestDto create(RecommendationRequestDto dto) {
         // Проверка на null для dto
@@ -63,9 +66,17 @@ public class RecommendationRequestService {
         request.setReceiver(receiver);
         request.setMessage(dto.getMessage());
         request.setSkills(skillRequestService.findByIds(dto.getSkillsId()));
+        request.setStatus(RequestStatus.ACCEPTED);
 
         // Сохранение нового запроса
         recommendationRequestRepository.save(request);
+
+        recommendationReceivedEventPublisher.publish(new RecommendationReceivedEvent(
+                requester.getId(),
+                receiver.getId(),
+                dto.getMessage(),
+                LocalDateTime.now()
+        ));
 
         return recommendationRequestMapper.toRecommendationRequestDto(request);
     }
