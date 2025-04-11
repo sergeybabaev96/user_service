@@ -12,7 +12,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import school.faang.user_service.client.AvatarClient;
 import school.faang.user_service.exception.MinioUploadException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -33,7 +34,7 @@ class AvatarServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(avatarService, "avatarApiUrl", "http://avatar-api");
-        ReflectionTestUtils.setField(avatarService, "dicebearPngEndpoint", "/png/");
+        ReflectionTestUtils.setField(avatarService, "pngEndpoint", "/png/");
         ReflectionTestUtils.setField(avatarService, "bucketName", "avatars");
         ReflectionTestUtils.setField(avatarService, "localhostUrlPrefix", "http://localhost/");
         ReflectionTestUtils.setField(avatarService, "fileExtension", ".png");

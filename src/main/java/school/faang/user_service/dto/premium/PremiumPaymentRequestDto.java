@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import school.faang.user_service.dto.payment.CurrencyDto;
 import school.faang.user_service.dto.payment.PaymentRequestDto;
-import school.faang.user_service.dto.payment.PaymentResponseDto;
 
 @Data
 @Builder

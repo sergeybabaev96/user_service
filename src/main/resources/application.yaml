@@ -59,7 +59,7 @@ spring:
       enable.idempotence: true
       isolation.level: "read_committed"
       max-in-flight-per-connection: 1
-      transaction-id-prefix: "payment-request-"
+      transaction-id-prefix: "user-service-"
 
       topics:
         premium:
@@ -76,6 +76,7 @@ spring:
 
           payment:
             payment-request-topic: "premium-payment-request-topic"
+            price-request-topic: "premium-price-request-topic"
 
     consumer:
       enable-auto-commit: false
@@ -83,14 +84,16 @@ spring:
       auto.offset.reset: "latest"
 
       topics:
-        payment:
-          premium:
+        premium:
+          payment:
             payment-response-topic: "premium-payment-response-topic"
+            price-response-topic: "premium-price-response-topic"
 
       groups:
         premium:
           payment:
             payment-group: "premium-payment-response-group"
+            price-group: "premium-price-response-group"
 
     listener:
       ack-mode: "manual"

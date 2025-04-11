@@ -16,4 +16,5 @@ public class ExchangeRequestDto {
     private CurrencyDto fromCurrency;
     private CurrencyDto toCurrency;
     private BigDecimal amount;
+    private Long userId;
 }

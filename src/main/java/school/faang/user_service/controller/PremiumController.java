@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.exchange.ExchangeResponseDto;
 import school.faang.user_service.dto.premium.PremiumRequestDto;
+import school.faang.user_service.dto.premium.PremiumResponseDto;
 import school.faang.user_service.service.premium.PremiumService;
 
 @Slf4j
@@ -27,15 +28,15 @@ public class PremiumController {
     private final PremiumService premiumService;
 
     @PostMapping
-    public void buyPremium(@RequestBody @Valid PremiumRequestDto premiumRequestDto) {
+    public PremiumResponseDto buyPremium(@RequestBody @Valid PremiumRequestDto premiumRequestDto) {
         log.info("Received request to purchase premium for user with ID {}", premiumRequestDto.getUserId());
-        premiumService.buyPremium(premiumRequestDto, true);
+        return premiumService.buyPremium(premiumRequestDto, true).join();
     }
 
     @GetMapping("/price")
     public ExchangeResponseDto getPremiumPrice(@RequestBody @Valid PremiumRequestDto premiumRequestDto) {
         log.info("Received request to get premium price in {}", premiumRequestDto.getSelectedCurrency());
-        return premiumService.getPremiumPrice(premiumRequestDto);
+        return premiumService.getPremiumPrice(premiumRequestDto).join();
     }
 
     @PutMapping("/user/{userId}")

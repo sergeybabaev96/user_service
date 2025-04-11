@@ -1,4 +1,4 @@
-package school.faang.user_service.config;
+package school.faang.user_service.config.minio;
 
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;

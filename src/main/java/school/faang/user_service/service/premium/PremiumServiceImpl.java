@@ -1,27 +1,29 @@
 package school.faang.user_service.service.premium;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.exchange.ExchangeRequestDto;
 import school.faang.user_service.dto.exchange.ExchangeResponseDto;
 import school.faang.user_service.dto.payment.CurrencyDto;
 import school.faang.user_service.dto.payment.PaymentRequestDto;
 import school.faang.user_service.dto.payment.PaymentResponseDto;
 import school.faang.user_service.dto.payment.PaymentStatus;
+import school.faang.user_service.dto.premium.PremiumAnalyticsDto;
+import school.faang.user_service.dto.premium.PremiumNotificationDto;
 import school.faang.user_service.dto.premium.PremiumPaymentRequestDto;
 import school.faang.user_service.dto.premium.PremiumPaymentResponseDto;
 import school.faang.user_service.dto.premium.PremiumRequestDto;
 import school.faang.user_service.dto.premium.PremiumResponseDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.premium.Premium;
+import school.faang.user_service.enums.premium.PremiumStatus;
 import school.faang.user_service.enums.premium.PremiumType;
+import school.faang.user_service.exception.AsyncDataNotFoundException;
 import school.faang.user_service.exception.PremiumNotActiveException;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.PremiumMapper;
@@ -34,6 +36,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,6 +45,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
 
 import static school.faang.user_service.messages.ErrorMessages.NO_ACTIVE_PREMIUM;
+import static school.faang.user_service.messages.ErrorMessages.PREMIUM_PAYMENT_RESPONSE_NOT_FOUND;
+import static school.faang.user_service.messages.ErrorMessages.PREMIUM_PRICE_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -50,9 +55,11 @@ public class PremiumServiceImpl implements PremiumService {
     private final UserRepository userRepository;
     private final PremiumRepository premiumRepository;
     private final PremiumMapper premiumMapper;
-    private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper;
     private final KafkaPublisher kafkaPublisher;
+    private final ConcurrentHashMap<Long, CompletableFuture<PremiumResponseDto>>
+            pendingPremiumRequests = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, CompletableFuture<ExchangeResponseDto>>
+            pendingPremiumPriceRequests = new ConcurrentHashMap<>();
 
     @Value("${app.premium.renew-batch-size}")
     private int renewBatchSize;
@@ -90,25 +97,47 @@ public class PremiumServiceImpl implements PremiumService {
     @Value("${spring.kafka.producer.topics.premium.payment.payment-request-topic}")
     private String premiumPaymentRequestTopic;
 
-    @Value("${spring.kafka.consumer.topics.payment.premium.payment-response-topic}")
-    private String premiumPaymentResponseTopic;
+    @Value("${spring.kafka.producer.topics.premium.payment.price-request-topic}")
+    private String premiumPriceRequestTopic;
 
     @Override
-    public void buyPremium(PremiumRequestDto premiumRequestDto, boolean byUser) {
+    public CompletableFuture<PremiumResponseDto> buyPremium(PremiumRequestDto premiumRequestDto, boolean byUser) {
         PaymentRequestDto paymentRequestDto = new PaymentRequestDto(premiumRequestDto.getUserId(),
                 premiumRequestDto.getPremiumType().getPriceInDollars(), premiumRequestDto.getSelectedCurrency());
 
         PremiumPaymentRequestDto request = new PremiumPaymentRequestDto(premiumRequestDto, paymentRequestDto,
                 CurrencyDto.USD, byUser);
 
+        CompletableFuture<PremiumResponseDto> premiumResponseFuture = new CompletableFuture<>();
+        pendingPremiumRequests.put(premiumRequestDto.getUserId(), premiumResponseFuture);
         kafkaPublisher.sendInTransaction(request, premiumPaymentRequestTopic);
+        return premiumResponseFuture;
     }
 
     @Override
-    public ExchangeResponseDto getPremiumPrice(PremiumRequestDto premiumRequestDto) {
-        //ExchangeRequestDto exchangeRequest = new ExchangeRequestDto(CurrencyDto.USD,
-        //         premiumRequestDto.getCurrency(), premiumRequestDto.getPremiumType().getPriceInDollars());
-        return null;/////////сделать потом
+    public CompletableFuture<ExchangeResponseDto> getPremiumPrice(PremiumRequestDto premiumRequestDto) {
+        ExchangeRequestDto exchangeRequest = ExchangeRequestDto.builder()
+                .fromCurrency(CurrencyDto.USD)
+                .toCurrency(premiumRequestDto.getSelectedCurrency())
+                .amount(premiumRequestDto.getPremiumType().getPriceInDollars())
+                .userId(premiumRequestDto.getUserId())
+                .build();
+
+        CompletableFuture<ExchangeResponseDto> exchangeResponseFuture = new CompletableFuture<>();
+        pendingPremiumPriceRequests.put(premiumRequestDto.getUserId(), exchangeResponseFuture);
+        kafkaPublisher.sendInTransaction(exchangeRequest, premiumPriceRequestTopic);
+        return exchangeResponseFuture;
+    }
+
+    public void fetchPremiumPrice(ExchangeResponseDto exchangeResponse) {
+        if (pendingPremiumPriceRequests.containsKey(exchangeResponse.getUserId())) {
+            CompletableFuture<ExchangeResponseDto> futurePrice = pendingPremiumPriceRequests.get(exchangeResponse.getUserId());
+            futurePrice.complete(exchangeResponse);
+        } else {
+            String message = PREMIUM_PRICE_NOT_FOUND.formatted(exchangeResponse.getUserId());
+            log.error(message);
+            throw new AsyncDataNotFoundException(message);
+        }
     }
 
     @Override
@@ -131,7 +160,6 @@ public class PremiumServiceImpl implements PremiumService {
         int userCount = (int) userRepository.count();
 
         int batches = (userCount + renewBatchSize - 1) / renewBatchSize;
-
         IntStream.range(0, batches).forEach(batchNumber -> {
             Pageable pageable = PageRequest.of(batchNumber, renewBatchSize);
             futures.add(CompletableFuture.runAsync(() -> {
@@ -163,12 +191,15 @@ public class PremiumServiceImpl implements PremiumService {
             Premium premium = user.getPremium();
             LocalDateTime now = LocalDateTime.now();
             if (!premium.isAutoRenew()) {
+                PremiumNotificationDto premiumNotificationDto = PremiumNotificationDto.builder()
+                        .userId(user.getId())
+                        .build();
                 if (premium.getEndDate().isAfter(now)) {
                     log.info("Premium for user with ID {} expired", user.getId());
                     user.setPremium(null);
-                    //premium-expired-topic
+                    kafkaPublisher.sendInTransaction(premiumNotificationDto, premiumExpiredTopic);
                 } else if (premium.getEndDate().plusDays(premiumExpiryNotificationDays).isAfter(now)) {
-                    //premium-expire-soon-topic
+                    kafkaPublisher.sendInTransaction(premiumNotificationDto, premiumExpireSoonTopic);
                 }
             } else {
                 int monthDuration = (int) ChronoUnit.MONTHS.between(premium.getStartDate(), premium.getEndDate());
@@ -184,25 +215,37 @@ public class PremiumServiceImpl implements PremiumService {
         }
     }
 
-    private User getUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("No user with ID " + userId));
-    }
-
     public void updatePremium(PremiumPaymentResponseDto premiumPaymentResponse) {
         PaymentResponseDto paymentResponse = premiumPaymentResponse.getPaymentResponseDto();
         PremiumRequestDto premiumRequest = premiumPaymentResponse.getPremiumRequestDto();
 
+        LocalDateTime startDate = LocalDateTime.now();
+        LocalDateTime endDate = startDate.plusMonths(premiumRequest.getPremiumType().getMonths());
+        PremiumNotificationDto premiumNotification = createPremiumNotificationDto(premiumRequest, startDate, endDate);
+        User user = getUserById(premiumRequest.getUserId());
+
+        PremiumAnalyticsDto premiumAnalytics = PremiumAnalyticsDto.builder()
+                .amount(premiumRequest.getPremiumType().getPriceInDollars())
+                .currency(CurrencyDto.USD.toString())
+                .country(user.getCountry().getTitle())
+                .startDate(startDate)
+                .endDate(endDate)
+                .premiumType(premiumRequest.getPremiumType())
+                .userId(user.getId())
+                .build();
+
         if (paymentResponse.status() != PaymentStatus.SUCCESS) {
-            //byUser = false: premiumAutoRenewFailedTopic
-            //else: premiumPaymentFailedTopic
+            premiumAnalytics.setPremiumStatus(PremiumStatus.FAILED);
+            sendPremiumAnalytics(premiumAnalytics);
+            sendPremiumNotification(premiumNotification, premiumRequest.isAutoRenew() ?
+                    premiumAutoRenewFailedTopic : premiumPaymentFailedTopic);
             log.error("Payment failed for user with ID: {}", premiumRequest.getUserId());
             return;
         }
-        User user = getUserById(premiumRequest.getUserId());
+        premiumAnalytics.setPremiumStatus(premiumPaymentResponse.isByUser() ?
+                PremiumStatus.PURCHASED : PremiumStatus.REFUNDED);
 
-        LocalDateTime startDate = LocalDateTime.now();
-        LocalDateTime endDate = startDate.plusMonths(premiumRequest.getPremiumType().getMonths());
+        sendPremiumAnalytics(premiumAnalytics);
         Premium premium = Premium.builder()
                 .user(user)
                 .startDate(startDate)
@@ -211,9 +254,44 @@ public class PremiumServiceImpl implements PremiumService {
                 .currency(premiumRequest.getSelectedCurrency())
                 .build();
 
-        //byUser = true: premium-bought-topic, else - premiumUpdatedTopic
+        sendPremiumNotification(premiumNotification, premiumPaymentResponse.isByUser() ?
+                premiumBoughtTopic : premiumUpdatedTopic);
+
         premiumRepository.save(premium);
         PremiumResponseDto premiumResponse = premiumMapper.toPremiumResponseDto(premium);
         premiumResponse.setPremiumType(premiumRequest.getPremiumType());
+
+        if (pendingPremiumRequests.containsKey(premiumRequest.getUserId())) {
+            CompletableFuture<PremiumResponseDto> premiumFuture = pendingPremiumRequests.remove(premiumRequest.getUserId());
+            premiumFuture.complete(premiumResponse);
+            log.info("Successfully updated premium for user with ID {}", premiumRequest.getUserId());
+        } else {
+            String message = PREMIUM_PAYMENT_RESPONSE_NOT_FOUND.formatted(premiumRequest.getUserId());
+            log.error(message);
+            throw new AsyncDataNotFoundException(message);
+        }
+    }
+
+    private void sendPremiumNotification(PremiumNotificationDto premiumNotification, String topic) {
+        kafkaPublisher.sendInTransaction(premiumNotification, topic);
+    }
+
+    private void sendPremiumAnalytics(PremiumAnalyticsDto premiumAnalyticsDto) {
+        kafkaPublisher.sendInTransaction(premiumAnalyticsDto, premiumAnalyticsTopic);
+    }
+
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("No user with ID " + userId));
+    }
+
+    private PremiumNotificationDto createPremiumNotificationDto(PremiumRequestDto premiumRequest,
+                                                                LocalDateTime startDate, LocalDateTime endDate) {
+        return PremiumNotificationDto.builder()
+                .userId(premiumRequest.getUserId())
+                .premiumType(premiumRequest.getPremiumType())
+                .startDate(startDate)
+                .endDate(endDate)
+                .build();
     }
 }

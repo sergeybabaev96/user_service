@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Component;
 
+@Component
 @Slf4j
 @RequiredArgsConstructor
 public class KafkaPublisher {
@@ -16,12 +18,12 @@ public class KafkaPublisher {
         kafkaTemplate.executeInTransaction(kafkaOperations -> {
             try {
                 kafkaOperations.send(topic, objectMapper.writeValueAsString(object));
-                log.info("{} sent to payment_service", object);
+                log.info("Published to kafka: {}", object);
             } catch (JsonProcessingException e) {
-                log.error("Error while serializing PremiumPaymentRequestDto", e);
+                log.error("Serialization error", e);
+                throw new RuntimeException(e);
             }
             return true;
         });
-        log.info("Published to kafka: {}", object);
     }
 }

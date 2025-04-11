@@ -15,4 +15,5 @@ import java.math.BigDecimal;
 public class ExchangeResponseDto {
     private CurrencyDto currency;
     private BigDecimal amount;
+    private Long userId;
 }
