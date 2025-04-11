@@ -1,21 +1,23 @@
 package school.faang.user_service.service.subscription;
 
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.FollowerEvent;
+import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.config.redis.RedisProperties;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
+import school.faang.user_service.dto.event.SubscriptionEventDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.ErrorMessage;
 import school.faang.user_service.filter.subscriber.SubscriberFilter;
 import school.faang.user_service.mapper.UserMapper;
-import school.faang.user_service.publisher.FollowerEventPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -29,7 +31,8 @@ public class SubscriptionService {
     private final UserRepository userRepository;
     private final List<SubscriberFilter> subscriberFilters;
     private final UserMapper userMapper;
-    private  final FollowerEventPublisher followerEventPublisher;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisProperties redisProperties;
 
     @Transactional
     public void followUser(long followerId, long followeeId) {
@@ -38,7 +41,12 @@ public class SubscriptionService {
         validateSubscriptionOnYourself(followerId, followeeId, true);
         validateSubscription(followerId, followeeId, true);
         subscriptionRepository.followUser(followerId, followeeId);
-        followerEventPublisher.publish(new FollowerEvent(followerId, followeeId));
+        SubscriptionEventDto event = SubscriptionEventDto.builder()
+                .followerId(followerId)
+                .followeeId(followeeId)
+                .eventTime(LocalDateTime.now())
+                .build();
+        redisTemplate.convertAndSend(redisProperties.getChannel().getFollower(), event);
     }
 
     @Transactional
@@ -48,6 +56,12 @@ public class SubscriptionService {
         validateSubscriptionOnYourself(followerId, followeeId, false);
         validateSubscription(followerId, followeeId, false);
         subscriptionRepository.unfollowUser(followerId, followeeId);
+        SubscriptionEventDto event = SubscriptionEventDto.builder()
+                .followerId(followerId)
+                .followeeId(followeeId)
+                .eventTime(LocalDateTime.now())
+                .build();
+        redisTemplate.convertAndSend(redisProperties.getChannel().getUnfollower(), event);
     }
 
     @Transactional(readOnly = true)
