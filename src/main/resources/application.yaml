@@ -39,5 +39,5 @@ springdoc:
     operations-sorter: alpha
     doc-expansion: none     # Сворачивание всех разделов по умолчанию
   api-docs:
-    path: /v3/api-docs      # Путь к JSON-документации
+    path: /v1/api-docs      # Путь к JSON-документации
   default-produces-media-type: application/json
