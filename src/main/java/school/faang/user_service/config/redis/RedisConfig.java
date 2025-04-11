@@ -25,13 +25,13 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, Object> redisTemplate() {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(jedisConnectionFactory());
+    public RedisTemplate<String, Object> redisJsonTemplate() {
+        RedisTemplate<String, Object> jsonTemplate = new RedisTemplate<>();
+        jsonTemplate.setConnectionFactory(jedisConnectionFactory());
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer(mapper));
-        return template;
+        jsonTemplate.setKeySerializer(new StringRedisSerializer());
+        jsonTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer(mapper));
+        return jsonTemplate;
     }
 }
