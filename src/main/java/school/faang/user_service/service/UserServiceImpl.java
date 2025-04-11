@@ -15,6 +15,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
+    @Override
     public Optional<User> findUserById(long userId) {
         return userRepository.findById(userId);
     }
@@ -26,7 +27,9 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
             log.info("User: {} was banned", user.getUsername());
         }, () -> {
-            throw new UserNotFoundException("User with id " + userId + " not found");
+            String msg = "User with id " + userId + " not found";
+            log.error(msg);
+            throw new UserNotFoundException(msg);
         });
     }
 }
