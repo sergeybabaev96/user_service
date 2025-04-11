@@ -20,6 +20,8 @@ spring:
     redis:
       port: 6379
       host: localhost
+      connect-timeout: 5000  # Таймаут подключения в миллисекундах
+      read-timeout: 3000     # Таймаут чтения в миллисекундах
 
 server:
   port: 8080

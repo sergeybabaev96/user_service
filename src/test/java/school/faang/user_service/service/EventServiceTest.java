@@ -1,4 +1,4 @@
-package school.faang.user_service.service.service.event;
+package school.faang.user_service.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,9 +44,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-/**
- * Тесты для проверки функциональности сервиса {@link EventService}.
- */
 @DisplayName("Проверка функциональности сервиса событий")
 @ExtendWith(MockitoExtension.class)
 public class EventServiceTest {

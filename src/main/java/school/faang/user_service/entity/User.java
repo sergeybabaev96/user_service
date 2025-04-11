@@ -5,6 +5,8 @@ import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,6 +33,7 @@ import school.faang.user_service.entity.goal.GoalInvitation;
 import school.faang.user_service.entity.event.Rating;
 import school.faang.user_service.entity.premium.Premium;
 import school.faang.user_service.entity.recommendation.Recommendation;
+import school.faang.user_service.model.PreferredContact;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -167,4 +170,11 @@ public class User {
 
     @OneToOne(mappedBy = "user")
     private WorkSchedule workSchedule;
+
+    @Column(name = "preference", length = 20)
+    @Enumerated(EnumType.STRING)
+    private PreferredContact preference = PreferredContact.EMAIL;
+
+    @Column(name = "locale", length = 10)
+    private String locale = "en_US";
 }

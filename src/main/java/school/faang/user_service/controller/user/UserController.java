@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import school.faang.user_service.dto.UserViewDto;
+import school.faang.user_service.dto.user.UserDto;
+import school.faang.user_service.dto.user.UserViewDto;
 import school.faang.user_service.service.user.UserService;
 
 import java.util.List;
@@ -30,10 +31,7 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @Operation(
-            summary = "Search for a user",
-            description = "Allows you to find a user by his id"
-    )
+    @Operation(summary = "Search for a user", description = "Allows you to find a user by his id")
     @GetMapping("/{userId}")
     public ResponseEntity<UserViewDto> getUser(@PathVariable @NotNull
                                                @Parameter(description = "User ID",
@@ -47,10 +45,7 @@ public class UserController {
                 .body(user);
     }
 
-    @Operation(
-            summary = "Search for users",
-            description = "Allows you to find users by their id"
-    )
+    @Operation(summary = "Search for users", description = "Allows you to find users by their id")
     @PostMapping
     public ResponseEntity<List<UserViewDto>> getUsersByIds(@RequestBody @NonNull List<Long> ids) {
         List<UserViewDto> users = userService.getUsersByIds(ids);
@@ -58,5 +53,13 @@ public class UserController {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(users);
+    }
+
+    @Operation(summary = "Get basic user info", description = "Returns basic user information for inter-service communication")
+    @GetMapping("/basic/{userId}")
+    public ResponseEntity<UserDto> getUserBasicInfo(@PathVariable long userId) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(userService.getUserBasicInfo(userId));
     }
 }
