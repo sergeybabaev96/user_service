@@ -12,7 +12,6 @@ public class MentorshipRequestedEventPublisher {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-
     @Value("${spring.data.redis.channel.mentorship-request}")
     private String mentorshipRequestChannel;
 
