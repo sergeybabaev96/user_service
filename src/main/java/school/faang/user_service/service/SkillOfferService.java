@@ -16,9 +16,7 @@ public interface SkillOfferService {
 
     void createSkillOffer(long skillId, long recommendationId);
 
-
     void isEnoughAmountOffersToSkill(Long skillOfferId, Long userId);
-
 
     List<SkillOffer> getSkillOfferToUser(Long skillOfferId, Long userId);
 }

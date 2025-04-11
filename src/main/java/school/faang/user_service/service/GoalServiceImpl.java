@@ -44,8 +44,20 @@ public class GoalServiceImpl implements GoalService {
         goalRepository.saveAll(goalsWithFollower);
     }
 
+    @Override
+    public void deleteMentorFromGoals(Long userId) {
+        List<Goal> goalsToMentor = getActiveGoalsToMentor(userId);
+        goalsToMentor.forEach(goal -> goal.setMentor(null));
+        goalRepository.saveAll(goalsToMentor);
+    }
+
     private List<Goal> getActiveGoalsToUser(Long userId) {
         return goalRepository.findGoalsByUserId(userId)
+                .filter(goal -> goal.getStatus() == GoalStatus.ACTIVE).toList();
+    }
+
+    private List<Goal> getActiveGoalsToMentor(Long userId) {
+        return goalRepository.findAllByMentorId(userId).stream()
                 .filter(goal -> goal.getStatus() == GoalStatus.ACTIVE).toList();
     }
 }

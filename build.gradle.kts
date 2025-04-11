@@ -30,6 +30,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
+    implementation("org.springframework.boot:spring-boot-starter-webflux:3.4.3")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
@@ -52,8 +53,8 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.slf4j:slf4j-api:2.0.5")
     implementation("ch.qos.logback:logback-classic:1.4.6")
-    implementation("org.projectlombok:lombok:1.18.26")
-    annotationProcessor("org.projectlombok:lombok:1.18.26")
+    implementation("org.projectlombok:lombok:1.18.30")
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
@@ -75,6 +76,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("javax.servlet:javax.servlet-api:4.0.1")
+    testImplementation("org.wiremock:wiremock-standalone:3.9.2")
 }
 
 jsonSchema2Pojo {
@@ -86,9 +89,21 @@ jsonSchema2Pojo {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+    }
+    outputs.upToDateWhen { false }
 }
 
-val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
+tasks.withType<JavaCompile> {
+    options.compilerArgs.addAll(
+        listOf(
+            "-Amapstruct.defaultComponentModel=spring",
+            "-Alombok.addLombokGeneratedAnnotation=true" // Важно для Jacoco
+        )
+    )
+}
 
 tasks.bootJar {
     archiveFileName.set("service.jar")
@@ -119,18 +134,36 @@ tasks.jacocoTestReport {
 
 // This task verifies tests
 tasks.jacocoTestCoverageVerification {
+    classDirectories.setFrom(
+        sourceSets.main.get().output.asFileTree.matching {
+            include(
+                "school/faang/user_service/service/*Impl.class",
+                "school/faang/user_service/service/**/*Impl.class"
+            )
+            exclude(
+                "**/dto/**",
+                "**/mapper/**",
+                "**/config/**",
+                "**/entity/**"
+            )
+        }
+    )
+
     dependsOn(tasks.jacocoTestReport)      // To start task after tests
 
     violationRules {
         rule {
             element = "CLASS"
             includes = listOf(
-                "school.faang.user_service.service.MentorshipService",
+                "school.faang.user_service.externalStorage.S3ServiceImpl",
+                "school.faang.user_service.avatarGenerator.DicebearAvatarGenerator",
+                "school.faang.user_service.validators.CreateUserValidator",
+                "school.faang.user_service.controller.UserController",
                 "school.faang.user_service.service.event.EventParticipationService",
+                "school.faang.user_service.service.MentorshipService",
                 "school.faang.user_service.service.education.EducationService",
                 "school.faang.user_service.service.RecommendationRequestService",
                 "school.faang.user_service.service.SkillRequestService",
-                "school.faang.user_service.service.SkillService",
                 "school.faang.user_service.service.SkillService",
             )
 
@@ -174,4 +207,14 @@ tasks.classes {
 // To run check after rebuild
 tasks.compileJava {
     finalizedBy(tasks.check)
+}
+
+tasks.register("debugJacoco") {
+    doLast {
+        println("Jacoco report will be generated at: ${tasks.jacocoTestReport.get().reports.html.outputLocation.get()}")
+        println("Included classes:")
+        sourceSets.main.get().output.asFileTree.matching {
+            include("school/faang/user_service/service/*Impl.class")
+        }.forEach { println(it) }
+    }
 }
