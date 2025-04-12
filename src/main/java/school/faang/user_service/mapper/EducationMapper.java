@@ -18,4 +18,3 @@ public interface EducationMapper {
 
     EducationDto toEducationDto(Education education);
 }
-

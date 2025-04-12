@@ -13,7 +13,7 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.EducationMapper;
 import school.faang.user_service.repository.EducationRepository;
 import school.faang.user_service.repository.UserRepository;
-import school.faang.user_service.service.education.EducationOperation;
+import school.faang.user_service.service.education.EducationServiceImpl;
 
 import java.time.Year;
 import java.util.Optional;
@@ -34,19 +34,19 @@ class EducationOperationTest {
     private EducationMapper educationMapper;
 
     @InjectMocks
-    private EducationOperation educationService;
-
+    private EducationServiceImpl educationService;
 
     @Test
-    @DisplayName("The test checks whether the formation has been added correctly")
+    @DisplayName("Should add education when input is valid")
     void addEducationShouldAddEducationWhenValidInput() {
         long userId = 1L;
         EducationDto inputDto = new EducationDto();
         inputDto.setYearFrom(Year.now().getValue() - 1);
+        inputDto.setYearTo(Year.now().getValue());
+        inputDto.setInstitution("Test University");
 
         User user = new User();
         user.setId(userId);
-        user.setEducation(new java.util.ArrayList<>());
 
         Education education = new Education();
         education.setUser(user);
@@ -65,29 +65,54 @@ class EducationOperationTest {
     }
 
     @Test
-    @DisplayName("Throws an exception when the year is invalid")
+    @DisplayName("Should throw exception when yearFrom is current year")
     void addEducationShouldThrowExceptionWhenYearFromInvalid() {
         EducationDto dto = new EducationDto();
         dto.setYearFrom(Year.now().getValue());
+        dto.setInstitution("Test University");
 
         DataValidationException exception = assertThrows(
                 DataValidationException.class,
                 () -> educationService.addEducation(1L, dto)
         );
 
-        assertEquals("YearFrom must be less than the current year", exception.getMessage());
+        assertEquals("YearFrom must be earlier than the current year", exception.getMessage());
         verify(userRepository, never()).findById(anyLong());
     }
 
     @Test
-    @DisplayName("The test will check that the education is up to date")
+    @DisplayName("Should throw exception when yearTo is before yearFrom")
+    void addEducationShouldThrowExceptionWhenYearToBeforeYearFrom() {
+        EducationDto dto = new EducationDto();
+        dto.setYearFrom(2020);
+        dto.setYearTo(2019);
+        dto.setInstitution("Test University");
+
+        assertThrows(DataValidationException.class, () -> educationService.addEducation(1L, dto));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when yearTo is in future")
+    void addEducationShouldThrowExceptionWhenYearToInFuture() {
+        EducationDto dto = new EducationDto();
+        dto.setYearFrom(2020);
+        dto.setYearTo(Year.now().getValue() + 1);
+        dto.setInstitution("Test University");
+
+        assertThrows(DataValidationException.class, () -> educationService.addEducation(1L, dto));
+    }
+
+    @Test
+    @DisplayName("Should update education when input is valid")
     void updateEducationShouldUpdateWhenValid() {
         long userId = 1L;
         long educationId = 10L;
 
         EducationDto dto = new EducationDto();
         dto.setId(educationId);
-        dto.setYearFrom(Year.now().getValue() - 2);
+        dto.setYearFrom(2010);
+        dto.setYearTo(2014);
+        dto.setInstitution("University");
 
         User user = new User();
         user.setId(userId);
@@ -107,21 +132,25 @@ class EducationOperationTest {
     }
 
     @Test
-    @DisplayName("Throws an exception when the year is invalid")
-    void updateEducationShouldThrowWhenYearFromInvalid() {
+    @DisplayName("Should throw exception when education not found")
+    void updateEducationShouldThrowWhenEducationNotFound() {
         EducationDto dto = new EducationDto();
-        dto.setYearFrom(Year.now().getValue());
+        dto.setId(999L);
+        dto.setYearFrom(2010);
+        dto.setInstitution("University");
+
+        when(educationRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(DataValidationException.class, () -> educationService.updateEducation(1L, dto));
-        verify(educationRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("Throws an exception when the user is invalid")
+    @DisplayName("Should throw exception when user does not own education")
     void updateEducationShouldThrowWhenWrongUser() {
         EducationDto dto = new EducationDto();
         dto.setId(100L);
-        dto.setYearFrom(Year.now().getValue() - 1);
+        dto.setYearFrom(2010);
+        dto.setInstitution("University");
 
         User anotherUser = new User();
         anotherUser.setId(99L);
@@ -136,20 +165,23 @@ class EducationOperationTest {
     }
 
     @Test
-    @DisplayName("The test checks education by identifier")
+    @DisplayName("Should get education by ID if exists")
     void getEducationByIdShouldReturnEducationWhenExists() {
         Education education = new Education();
         education.setId(5L);
 
+        EducationDto dto = new EducationDto();
+
         when(educationRepository.findById(5L)).thenReturn(Optional.of(education));
+        when(educationMapper.toEducationDto(education)).thenReturn(dto);
 
-        Education found = educationService.getEducationById(5L);
+        EducationDto found = educationService.getEducationById(5L);
 
-        assertEquals(education, found);
+        assertEquals(dto, found);
     }
 
     @Test
-    @DisplayName("The test checks that an exception is thrown if the formation by the identifier is not found")
+    @DisplayName("Should throw exception if education by ID not found")
     void getEducationByIdShouldThrowWhenNotFound() {
         when(educationRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -162,6 +194,7 @@ class EducationOperationTest {
         long userId = 1L;
         EducationDto inputDto = new EducationDto();
         inputDto.setYearFrom(Year.now().getValue() - 1);
+        inputDto.setInstitution("University");
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
@@ -171,11 +204,12 @@ class EducationOperationTest {
     }
 
     @Test
-    @DisplayName("Should throw DataValidationException when yearFrom is in the future")
+    @DisplayName("Should throw DataValidationException when yearFrom is in future")
     void addEducationShouldThrowExceptionWhenYearFromInFuture() {
         long userId = 1L;
         EducationDto inputDto = new EducationDto();
-        inputDto.setYearFrom(Year.now().getValue() + 1); // будущий год
+        inputDto.setYearFrom(Year.now().getValue() + 1);
+        inputDto.setInstitution("University");
 
         assertThrows(DataValidationException.class, () -> educationService.addEducation(userId, inputDto));
         verifyNoInteractions(userRepository, educationMapper, educationRepository);

@@ -18,7 +18,7 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class EducationOperation implements EducationService {
+public class EducationServiceImpl implements EducationService {
     private final UserRepository userRepository;
     private final EducationRepository educationRepository;
     private final EducationMapper educationMapper;
@@ -27,7 +27,7 @@ public class EducationOperation implements EducationService {
     public EducationDto addEducation(long userId, EducationDto educationDto) {
         log.info("Adding education for userId={} with data={}", userId, educationDto);
 
-        validateYearFrom(educationDto.getYearFrom());
+        validateYears(educationDto.getYearFrom(), educationDto.getYearTo());
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> {
@@ -49,9 +49,10 @@ public class EducationOperation implements EducationService {
     public EducationDto updateEducation(long userId, EducationDto educationDto) {
         log.info("Updating education for userId={} with data={}", userId, educationDto);
 
-        validateYearFrom(educationDto.getYearFrom());
+        validateYears(educationDto.getYearFrom(), educationDto.getYearTo());
 
-        Education education = getEducationById(educationDto.getId());
+        Education education = educationRepository.findById(educationDto.getId())
+                .orElseThrow(() -> new DataValidationException("Education not found"));
 
         if (!Objects.equals(education.getUser().getId(), userId)) {
             log.warn("Unauthorized update attempt by userId={} for educationId={}", userId, educationDto.getId());
@@ -67,19 +68,30 @@ public class EducationOperation implements EducationService {
         return educationMapper.toEducationDto(updatedEducation);
     }
 
-    public Education getEducationById(long educationId) {
+    public EducationDto getEducationById(long educationId) {
         log.debug("Fetching education by id={}", educationId);
-        return educationRepository.findById(educationId)
+        Education education = educationRepository.findById(educationId)
                 .orElseThrow(() -> {
                     log.warn("Education record not found for id={}", educationId);
                     return new DataValidationException("Education record not found");
                 });
+        return educationMapper.toEducationDto(education);
     }
 
-    private void validateYearFrom(int yearFrom) {
-        if (yearFrom >= Year.now().getValue()) {
-            log.warn("Validation failed: yearFrom={} is not less than current year", yearFrom);
-            throw new DataValidationException("YearFrom must be less than the current year");
+    private void validateYears(Integer yearFrom, Integer yearTo) {
+        int currentYear = Year.now().getValue();
+
+        if (yearFrom == null || yearFrom >= currentYear) {
+            log.warn("Validation failed: yearFrom={} is not before the current year", yearFrom);
+            throw new DataValidationException("YearFrom must be earlier than the current year");
+        }
+        if (yearTo != null && yearTo < yearFrom) {
+            log.warn("Validation failed: yearTo={} is before yearFrom={}", yearTo, yearFrom);
+            throw new DataValidationException("YearTo must be equal or after YearFrom");
+        }
+        if (yearTo != null && yearTo > currentYear) {
+            log.warn("Validation failed: yearTo={} is in the future", yearTo);
+            throw new DataValidationException("YearTo must not be in the future");
         }
     }
 }
