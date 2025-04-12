@@ -23,6 +23,7 @@ spring:
       channel:
         goal-completing-channel: goal-completing-channel
         recommendation-event: recommendation_event_channel
+        user-ban: user-ban
 
 server:
   port: 8080

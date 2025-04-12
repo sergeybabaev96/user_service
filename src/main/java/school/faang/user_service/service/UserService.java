@@ -170,6 +170,40 @@ public class UserService {
         log.info("Avatar removed for user with id: {}", user.getId());
     }
 
+    public UserDto activateUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new UserNotFoundException(id)
+        );
+
+        if (user.getUpdatedAt().isAfter(LocalDateTime.now().minusMonths(MONTHS))) {
+            user.setActive(true);
+        }
+
+        return userMapper.toDto(userRepository.save(user));
+    }
+
+    public UserDto deactivateUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new UserNotFoundException(id)
+        );
+
+        stopUserGoals(id);
+        stopUserEvents(id);
+
+        user.setActive(false);
+
+        deleteMentorship(id);
+
+        return userMapper.toDto(userRepository.save(user));
+    }
+
+    public void banUser(Long id) {
+        User user = getUserById(id);
+        user.setBanned(true);
+        userRepository.save(user);
+        log.info("User [Name: {} id: {}] is successful banned", user.getUsername(), id);
+    }
+
     private UserProfilePic createUserProfilePic(String smallId, String id) {
         return UserProfilePic.builder()
                 .smallFileId(smallId)
@@ -264,33 +298,6 @@ public class UserService {
                 .major(fields[14])
                 .employer(fields[23])
                 .build();
-    }
-
-    public UserDto activateUser(Long id) {
-        User user = userRepository.findById(id).orElseThrow(
-                () -> new UserNotFoundException(id)
-        );
-
-        if (user.getUpdatedAt().isAfter(LocalDateTime.now().minusMonths(MONTHS))) {
-            user.setActive(true);
-        }
-
-        return userMapper.toDto(userRepository.save(user));
-    }
-
-    public UserDto deactivateUser(Long id) {
-        User user = userRepository.findById(id).orElseThrow(
-                () -> new UserNotFoundException(id)
-        );
-
-        stopUserGoals(id);
-        stopUserEvents(id);
-
-        user.setActive(false);
-
-        deleteMentorship(id);
-
-        return userMapper.toDto(userRepository.save(user));
     }
 
     private void stopUserGoals(Long userId) {

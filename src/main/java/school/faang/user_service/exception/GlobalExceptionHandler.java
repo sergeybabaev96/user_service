@@ -31,6 +31,7 @@ public class GlobalExceptionHandler {
             FileSizeException.class,
             InvalidImageFormatException.class,
             MultipartException.class,
+            ConvertingDataException.class
     })
     @ResponseStatus(BAD_REQUEST)
     public ErrorResponse handleExceptionsWithStatusBadRequest(Exception ex) {
