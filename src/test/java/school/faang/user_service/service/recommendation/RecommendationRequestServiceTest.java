@@ -15,6 +15,7 @@ import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.filter.recommendation.RecommendationRequestFilter;
 import school.faang.user_service.filter.recommendation.TestRecommendationRequestAcceptedFilterStutus;
 import school.faang.user_service.mapper.RecommendationRequestMapperImpl;
+import school.faang.user_service.publisher.RecommendationReceivedEventPublisher;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 import school.faang.user_service.service.UserService;
 
@@ -41,21 +42,32 @@ class RecommendationRequestServiceTest {
 
     @Mock
     private RecommendationRequestRepository recommendationRequestRepository;
+
     @Spy
     private RecommendationRequestMapperImpl recommendationRequestMapper;
+
     private RecommendationRequestFilter filter = new TestRecommendationRequestAcceptedFilterStutus();
+
     @Mock
     private UserService userService;
+
     @Mock
     private SkillRequestService skillRequestService;
+
+    @Mock
     private RecommendationRequestService recommendationRequestService;
+
     private RecommendationRequest firstRecommendationRequest;
     private RecommendationRequest secondRecommendationRequest;
+
+    @Mock
+    private RecommendationReceivedEventPublisher recommendationReceivedEventPublisher;
 
     @BeforeEach
     public void setUp() {
         recommendationRequestService = new RecommendationRequestService(recommendationRequestRepository,
-                recommendationRequestMapper, List.of(filter), userService, skillRequestService);
+                recommendationRequestMapper, List.of(filter), userService, skillRequestService,
+                recommendationReceivedEventPublisher);
     }
 
     @Test

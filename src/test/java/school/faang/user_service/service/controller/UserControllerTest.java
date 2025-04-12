@@ -54,8 +54,8 @@ public class UserControllerTest {
                 csvContent.getBytes(StandardCharsets.UTF_8)
         );
 
-        UserDto firstUser = new UserDto(1L, "John Doe", "john@example.com", true);
-        UserDto secondUser = new UserDto(2L, "Jane Smith", "jane@example.com", true);
+        UserDto firstUser = createUserDto(1L, "John Doe", "john@example.com");
+        UserDto secondUser = createUserDto(2L, "Jane Smith", "jane@example.com");
         when(userService.registerUserFromFile(any(MultipartFile.class)))
                 .thenReturn(List.of(firstUser, secondUser));
 
@@ -67,6 +67,15 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$[1].email").value("jane@example.com"));
 
         verify(userService, times(1)).registerUserFromFile(any(MultipartFile.class));
+    }
+
+    private UserDto createUserDto(Long id, String username, String email) {
+        return UserDto.builder()
+                .id(id)
+                .username(username)
+                .email(email)
+                .active(true)
+                .build();
     }
 
 }

@@ -19,6 +19,7 @@ import school.faang.user_service.exception.goal.GoalAlreadyCompletedException;
 import school.faang.user_service.exception.skill.SkillLimitExceededException;
 import school.faang.user_service.filter.goal.GoalFilter;
 import school.faang.user_service.mapper.goal.GoalMapperImpl;
+import school.faang.user_service.publisher.GoalCompletedPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
@@ -71,10 +72,13 @@ public class GoalServiceTest {
     @Mock
     private Stream<Goal> goalStream;
 
+    @Mock
+    private GoalCompletedPublisher goalCompletedPublisher;
+
     @BeforeEach
     public void setUp() {
         goalService = new GoalService(goalRepository, userRepository, skillRepository,
-                goalMapper, List.of(goalFilterTitle, goalFilterStatus));
+                goalMapper, List.of(goalFilterTitle, goalFilterStatus), goalCompletedPublisher);
     }
 
     @Test

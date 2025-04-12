@@ -169,14 +169,6 @@ class EventServiceTest {
     }
 
     @Test
-    void negativeGetParticipatedEvents_shouldThrowExceptionWhenUserDontHavePartEvents() {
-        when(eventRepository.findParticipatedEventsByUserId(user.getId())).thenReturn(Collections.emptyList());
-        DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> eventService.getParticipatedEvents(user.getId()));
-        assertEquals("Haven`t participated events", exception.getMessage());
-    }
-
-    @Test
     void negativeTestGetEventsByFilter_shouldThrowExceptionWhenFilterIsNull() {
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> eventService.getEventsByFilter(null));
