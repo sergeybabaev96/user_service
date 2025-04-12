@@ -12,12 +12,13 @@ import org.springframework.data.redis.core.RedisTemplate;
 import school.faang.user_service.config.redis.RedisProperties;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
+import school.faang.user_service.dto.event.SubscriptionEventDto;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.subscriber.MockUsers;
 import school.faang.user_service.filter.subscriber.SubscriberFilter;
 import school.faang.user_service.filter.subscriber.SubscriberNameFilter;
 import school.faang.user_service.mapper.UserMapper;
-import school.faang.user_service.publisher.FollowerEventPublisher;
+import school.faang.user_service.publisher.subscription.SubscriptionPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.subscription.SubscriptionService;
@@ -70,7 +71,7 @@ public class SubscriptionServiceTest {
 
     @BeforeEach
     void setUp() {
-        redisProperties = new RedisProperties();
+        RedisProperties redisProperties = new RedisProperties();
         RedisProperties.Channel channel = new RedisProperties.Channel();
         channel.setFollower("someFollowerChannel");
         channel.setUnfollower("someUnfollowerChannel");

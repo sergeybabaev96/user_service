@@ -1,5 +1,6 @@
 package school.faang.user_service.service.subscription;
 
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -14,6 +15,7 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.ErrorMessage;
 import school.faang.user_service.filter.subscriber.SubscriberFilter;
 import school.faang.user_service.mapper.UserMapper;
+import school.faang.user_service.publisher.subscription.SubscriptionPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
 
@@ -117,6 +119,14 @@ public class SubscriptionService {
             log.error(ErrorMessage.USER_DOES_NOT_EXIST_BY_ID_ERROR_MSG.getMessage(), userId);
             throw new DataValidationException(ErrorMessage.USER_DOES_NOT_EXIST.getMessage());
         }
+    }
+
+    private SubscriptionEventDto createEvent(long followerId, long followeeId, LocalDateTime eventTime) {
+        return SubscriptionEventDto.builder()
+                .followerId(followerId)
+                .followeeId(followeeId)
+                .eventTime(eventTime)
+                .build();
     }
 
     private List<UserDto> filterUsers(UserFilterDto filters, Stream<User> users) {
