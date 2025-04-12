@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.FollowerEvent;
+import org.springframework.data.redis.core.RedisTemplate;
+import school.faang.user_service.config.redis.RedisProperties;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.exception.DataValidationException;
@@ -49,8 +51,12 @@ public class SubscriptionServiceTest {
     @Mock
     private FollowerEventPublisher followerEventPublisher;
 
-    private final Long followerId = 1L;
-    private final Long followeeId = 2L;
+    @Mock
+    private RedisTemplate<String, Object> redisTemplate;
+
+    private Long followerId = 1L;
+    private Long followeeId = 2L;
+    private RedisProperties redisProperties;
     private UserFilterDto filters;
     private MockUsers mockUsers = new MockUsers();
 
@@ -64,7 +70,16 @@ public class SubscriptionServiceTest {
 
     @BeforeEach
     void setUp() {
+        redisProperties = new RedisProperties();
+        RedisProperties.Channel channel = new RedisProperties.Channel();
+        channel.setFollower("someFollowerChannel");
+        channel.setUnfollower("someUnfollowerChannel");
+        redisProperties.setChannel(channel);
+
         filters = new UserFilterDto();
+
+        subscriptionService = new SubscriptionService(subscriptionRepository, userRepository,
+                subscriberFilters, userMapper, redisTemplate, redisProperties);
     }
 
     @Nested
@@ -113,7 +128,9 @@ public class SubscriptionServiceTest {
             when(subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).thenReturn(false);
 
             subscriptionService.followUser(followerId, followeeId);
+
             verify(subscriptionRepository, times(1)).followUser(followerId, followeeId);
+            verify(redisTemplate, times(1)).convertAndSend(eq(redisProperties.getChannel().getFollower()), any());
             verify(followerEventPublisher, times(1)).publish(any(FollowerEvent.class));
         }
     }
@@ -165,7 +182,9 @@ public class SubscriptionServiceTest {
             when(subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).thenReturn(true);
 
             subscriptionService.unfollowUser(followerId, followeeId);
+
             verify(subscriptionRepository, times(1)).unfollowUser(followerId, followeeId);
+            verify(redisTemplate, times(1)).convertAndSend(eq(redisProperties.getChannel().getUnfollower()), any());
         }
     }
 
