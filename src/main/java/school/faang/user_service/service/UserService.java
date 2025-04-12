@@ -199,9 +199,11 @@ public class UserService {
 
     public void banUser(Long id) {
         User user = getUserById(id);
-        user.setBanned(true);
-        userRepository.save(user);
-        log.info("User [Name: {} id: {}] is successful banned", user.getUsername(), id);
+        if (!user.isBanned()) {
+            user.setBanned(true);
+            userRepository.save(user);
+            log.info("User [Name: {} id: {}] is successful banned", user.getUsername(), id);
+        }
     }
 
     private UserProfilePic createUserProfilePic(String smallId, String id) {

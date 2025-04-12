@@ -398,7 +398,20 @@ public class UserServiceTest {
         verify(goalService).removeUserFromGoals(List.of(102L, 102L), userId);
     }
 
+    @Test
+    void testNegativeBanUserWhenUserNotFound() {
+        assertThrows(UserNotFoundException.class, () -> userService.banUser(id));
+    }
 
+    @Test
+    void testPositiveBanUser() {
+        User user = createUser(id);
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
+        userService.banUser(id);
+
+        verify(userRepository, times(1)).save(user);
+    }
 
     private User createUser(Long id) {
         User user = new User();
