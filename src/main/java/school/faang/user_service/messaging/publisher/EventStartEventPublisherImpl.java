@@ -1,22 +1,21 @@
 package school.faang.user_service.messaging.publisher;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import school.faang.user_service.messaging.event.EventStartEvent;
 
-@Component
+@Service
+@RequiredArgsConstructor
 public class EventStartEventPublisherImpl implements EventStartEventPublisher {
 
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
-
-    @Autowired
-    private ChannelTopic topic;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ChannelTopic topic;
 
     @Override
     public void publish(EventStartEvent event) {
         redisTemplate.convertAndSend(topic.getTopic(), event);
     }
 }
+

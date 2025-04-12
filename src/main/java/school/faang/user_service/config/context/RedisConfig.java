@@ -1,4 +1,4 @@
-package faang.school.userservice.config.context;
+package school.faang.user_service.config.context;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
