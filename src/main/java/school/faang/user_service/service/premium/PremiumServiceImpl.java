@@ -3,10 +3,8 @@ package school.faang.user_service.service.premium;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.entity.premium.Premium;
 import school.faang.user_service.repository.premium.PremiumRepository;
 import java.time.LocalDateTime;
@@ -14,24 +12,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-
 public class PremiumServiceImpl implements PremiumService {
+    public static final int DEFAULT_BATCH_SIZE = 100;
 
     private final PremiumRepository premiumRepository;
     private final ExecutorService executorService;
+    private final BatchDeletionService batchDeletionService;
 
     @Value("${premium.expired.delete-batch:100}")
     private Integer batchSize;
 
+    @Override
     public void removeExpiredPremiums() {
         if (batchSize == null || batchSize <= 0) {
             log.warn("Invalid batch size: {}. Using default value: 100", batchSize);
-            batchSize = 100;
+            batchSize = DEFAULT_BATCH_SIZE;
         }
 
         log.info("Starting removal of expired premiums...");
@@ -48,11 +47,9 @@ public class PremiumServiceImpl implements PremiumService {
         log.info("Processing {} expired premiums in {} batches...", expiredPremiums.size(), batches.size());
 
         for (List<Premium> batch : batches) {
-            CompletableFuture<Void> future = CompletableFuture
-                    //долго не мог тут поченить, помог GPT, не знаю точно правильно или нет
-                    // AopContext.currentProxy() используется для вызова метода deleteBatch через прокси Spring,
-                    // чтобы гарантировать корректную работу транзакций (если они используются).
-                    .runAsync(() -> ((PremiumService) AopContext.currentProxy()).deleteBatch(batch), executorService)
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                        batchDeletionService.deleteBatch(batch);
+                    }, executorService)
                     .exceptionally(ex -> {
                         log.error("Failed to delete batch: {}", ex.getMessage(), ex);
                         return null;
@@ -69,13 +66,7 @@ public class PremiumServiceImpl implements PremiumService {
         }
     }
 
-    @Transactional
     @Override
     public void deleteBatch(List<Premium> batch) {
-        List<Long> ids = batch.stream()
-                .map(Premium::getId)
-                .collect(Collectors.toList());
-        premiumRepository.deleteAllById(ids);
-        log.debug("Deleted batch of {} premiums", batch.size());
     }
 }
