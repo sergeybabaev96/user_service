@@ -43,7 +43,7 @@ public class PremiumAsyncRemover {
                 premiumRepository.deleteAll(expiredPremiums);
                 log.info("Successfully deleted {} expired premiums", expiredPremiums.size());
             });
-        }
+    }
 
     /**
      * Recovery method for handling failures after retries.
