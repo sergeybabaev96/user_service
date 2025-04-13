@@ -30,13 +30,13 @@ public class PremiumController {
     @PostMapping
     public PremiumResponseDto buyPremium(@RequestBody @Valid PremiumRequestDto premiumRequestDto) {
         log.info("Received request to purchase premium for user with ID {}", premiumRequestDto.getUserId());
-        return premiumService.buyPremium(premiumRequestDto, true).join();
+        return premiumService.buyPremium(premiumRequestDto, true);
     }
 
     @GetMapping("/price")
     public ExchangeResponseDto getPremiumPrice(@RequestBody @Valid PremiumRequestDto premiumRequestDto) {
         log.info("Received request to get premium price in {}", premiumRequestDto.getSelectedCurrency());
-        return premiumService.getPremiumPrice(premiumRequestDto).join();
+        return premiumService.getPremiumPrice(premiumRequestDto);
     }
 
     @PutMapping("/user/{userId}")

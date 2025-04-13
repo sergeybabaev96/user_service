@@ -82,7 +82,7 @@ spring:
       enable-auto-commit: false
       isolation-level: "read-committed"
       auto.offset.reset: "latest"
-
+      timeout-seconds: 10
       topics:
         premium:
           payment:
@@ -94,6 +94,10 @@ spring:
           payment:
             payment-group: "premium-payment-response-group"
             price-group: "premium-price-response-group"
+
+      correlation:
+        premium-price: "premium-price-correlation-id"
+        premium-payment: "premium-payment-correlation-id"
 
     listener:
       ack-mode: "manual"

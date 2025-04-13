@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import school.faang.user_service.dto.payment.CurrencyDto;
 import school.faang.user_service.enums.premium.PremiumStatus;
 import school.faang.user_service.enums.premium.PremiumType;
 
