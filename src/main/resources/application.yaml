@@ -23,6 +23,7 @@ spring:
 
       channel:
         recommendation-event: recommendation_event_channel
+        mentorship-accepted-event: mentorship-accepted-channel
 
 server:
   port: 8080
