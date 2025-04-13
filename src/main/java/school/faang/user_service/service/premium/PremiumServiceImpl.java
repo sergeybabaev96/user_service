@@ -1,7 +1,6 @@
 package school.faang.user_service.service.premium;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -29,12 +28,15 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.premium.Premium;
 import school.faang.user_service.enums.premium.PremiumStatus;
 import school.faang.user_service.enums.premium.PremiumType;
+import school.faang.user_service.exception.PaymentFailedException;
+import school.faang.user_service.exception.PremiumAlreadyPurchasedException;
 import school.faang.user_service.exception.PremiumNotActiveException;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.PremiumMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.premium.PremiumRepository;
 import school.faang.user_service.service.kafka.publisher.KafkaPublisher;
+import school.faang.user_service.utils.JsonUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -51,6 +53,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
 
 import static school.faang.user_service.messages.ErrorMessages.NO_ACTIVE_PREMIUM;
+import static school.faang.user_service.messages.ErrorMessages.PREMIUM_HAS_ALREADY_BEEN_PURCHASED;
+import static school.faang.user_service.messages.ErrorMessages.UNABLE_TO_PAY_PREMIUM;
 
 @Slf4j
 @Service
@@ -60,10 +64,10 @@ public class PremiumServiceImpl implements PremiumService {
     private final PremiumRepository premiumRepository;
     private final PremiumMapper premiumMapper;
     private final KafkaPublisher kafkaPublisher;
-    private final ObjectMapper objectMapper;
-
     private final ReplyingKafkaTemplate<String, String, String> premiumPriceReplyingKafkaTemplate;
     private final ReplyingKafkaTemplate<String, String, String> premiumPaymentReplyingKafkaTemplate;
+    private final JsonUtils jsonUtils;
+    private ExecutorService executor;
 
     @Value("${app.premium.renew-batch-size}")
     private int renewBatchSize;
@@ -110,38 +114,37 @@ public class PremiumServiceImpl implements PremiumService {
     @Value("${spring.kafka.consumer.correlation.premium-payment}")
     private String premiumPaymentCorrelationId;
 
+    @PostConstruct
+    public void setUp() {
+        executor = Executors.newFixedThreadPool(renewThreadPoolSize);
+    }
+
     @Override
     @Transactional(transactionManager = "kafkaTransactionManager")
     public PremiumResponseDto buyPremium(PremiumRequestDto premiumRequestDto, boolean byUser) {
+        User user = getUserById(premiumRequestDto.getUserId());
+        if (user.getPremium() != null && user.getPremium().getEndDate().isBefore(LocalDateTime.now())) {
+            log.error(PREMIUM_HAS_ALREADY_BEEN_PURCHASED.formatted(user.getId()));
+            throw new PremiumAlreadyPurchasedException(PREMIUM_HAS_ALREADY_BEEN_PURCHASED.formatted(user.getId()));
+        }
         PaymentRequestDto paymentRequestDto = new PaymentRequestDto(premiumRequestDto.getUserId(),
                 premiumRequestDto.getPremiumType().getPriceInDollars(), premiumRequestDto.getSelectedCurrency());
 
-        PremiumPaymentRequestDto premiumPaymentRequest = new PremiumPaymentRequestDto(premiumRequestDto, paymentRequestDto,
-                CurrencyDto.USD, byUser);
+        PremiumPaymentRequestDto premiumPaymentRequest = new PremiumPaymentRequestDto(
+                premiumRequestDto, paymentRequestDto, CurrencyDto.USD, byUser);
 
         String correlationId = UUID.randomUUID().toString();
-        ProducerRecord<String, String> producerRecord;
-        try {
-            String jsonRequest = objectMapper.writeValueAsString(premiumPaymentRequest);
-            producerRecord = new ProducerRecord<>(premiumPaymentRequestTopic, jsonRequest);
-        } catch (JsonProcessingException e) {
-            log.error("Error serializing PremiumPaymentRequestDto", e);
-            throw new RuntimeException(e);
-        }
+        String jsonRequest = jsonUtils.serialize(premiumPaymentRequest);
+        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(premiumPaymentRequestTopic, jsonRequest);
+
         producerRecord.headers().add(new RecordHeader(premiumPaymentCorrelationId,
                 correlationId.getBytes(StandardCharsets.UTF_8)));
 
         var replyFuture = premiumPaymentReplyingKafkaTemplate.sendAndReceive(producerRecord);
         PremiumPaymentResponseDto premiumPaymentResponse =
-                replyFuture.thenApply((ConsumerRecord<String, String> responseRecord) -> {
-                    String jsonResponse = responseRecord.value();
-                    try {
-                        return objectMapper.readValue(jsonResponse, PremiumPaymentResponseDto.class);
-                    } catch (JsonProcessingException e) {
-                        log.error("Error deserializing PremiumResponseDto", e);
-                        throw new RuntimeException(e);
-                    }
-                }).join();
+                replyFuture.thenApply((ConsumerRecord<String, String> responseRecord) ->
+                                jsonUtils.deserialize(responseRecord.value(), PremiumPaymentResponseDto.class))
+                        .join();
         return updatePremium(premiumPaymentResponse);
     }
 
@@ -156,27 +159,16 @@ public class PremiumServiceImpl implements PremiumService {
                 .build();
 
         String correlationId = UUID.randomUUID().toString();
-        ProducerRecord<String, String> producerRecord;
-        try {
-            String jsonRequest = objectMapper.writeValueAsString(exchangeRequest);
-            producerRecord = new ProducerRecord<>(premiumPriceRequestTopic, jsonRequest);
-        } catch (JsonProcessingException e) {
-            log.error("Error serializing ExchangeRequestDto", e);
-            throw new RuntimeException(e);
-        }
+        String jsonRequest = jsonUtils.serialize(exchangeRequest);
+        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(premiumPriceRequestTopic, jsonRequest);
+
         producerRecord.headers().add(new RecordHeader(premiumPriceCorrelationId,
                 correlationId.getBytes(StandardCharsets.UTF_8)));
 
         var replyFuture = premiumPriceReplyingKafkaTemplate.sendAndReceive(producerRecord);
-        return replyFuture.thenApply((ConsumerRecord<String, String> responseRecord) -> {
-            String jsonResponse = responseRecord.value();
-            try {
-                return objectMapper.readValue(jsonResponse, ExchangeResponseDto.class);
-            } catch (JsonProcessingException e) {
-                log.error("Error deserializing ExchangeResponseDto", e);
-                throw new RuntimeException(e);
-            }
-        }).join();
+        return replyFuture.thenApply((ConsumerRecord<String, String> responseRecord) ->
+                        jsonUtils.deserialize(responseRecord.value(), ExchangeResponseDto.class))
+                .join();
     }
 
     @Override
@@ -194,7 +186,6 @@ public class PremiumServiceImpl implements PremiumService {
     @Override
     public void premiumRenewal() {
         log.info("Premium renew process started");
-        ExecutorService executor = Executors.newFixedThreadPool(renewThreadPoolSize);
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         int userCount = (int) userRepository.count();
 
@@ -278,8 +269,9 @@ public class PremiumServiceImpl implements PremiumService {
             sendPremiumAnalytics(premiumAnalytics);
             sendPremiumNotification(premiumNotification, premiumRequest.isAutoRenew() ?
                     premiumAutoRenewFailedTopic : premiumPaymentFailedTopic);
-            log.error("Payment failed for user with ID: {}", premiumRequest.getUserId());
-            throw new IllegalArgumentException("asdf");/////////////////////////////////
+
+            log.error(UNABLE_TO_PAY_PREMIUM.formatted(premiumRequest.getUserId()));
+            throw new PaymentFailedException(UNABLE_TO_PAY_PREMIUM.formatted(premiumRequest.getUserId()));
         }
         premiumAnalytics.setPremiumStatus(premiumPaymentResponse.isByUser() ?
                 PremiumStatus.PURCHASED : PremiumStatus.REFUNDED);
@@ -315,8 +307,9 @@ public class PremiumServiceImpl implements PremiumService {
                 .orElseThrow(() -> new UserNotFoundException("No user with ID " + userId));
     }
 
-    private PremiumNotificationDto createPremiumNotificationDto(PremiumRequestDto premiumRequest,
-                                                                LocalDateTime startDate, LocalDateTime endDate) {
+    private PremiumNotificationDto createPremiumNotificationDto(
+            PremiumRequestDto premiumRequest, LocalDateTime startDate, LocalDateTime endDate) {
+
         return PremiumNotificationDto.builder()
                 .userId(premiumRequest.getUserId())
                 .premiumType(premiumRequest.getPremiumType())

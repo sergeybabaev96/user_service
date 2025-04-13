@@ -1,4 +1,4 @@
-package school.faang.user_service.service.avatar;
+package school.faang.user_service.service.service;
 
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import school.faang.user_service.client.AvatarClient;
 import school.faang.user_service.exception.MinioUploadException;
+import school.faang.user_service.service.avatar.AvatarService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

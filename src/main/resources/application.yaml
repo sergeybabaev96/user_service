@@ -83,6 +83,7 @@ spring:
       isolation-level: "read-committed"
       auto.offset.reset: "latest"
       timeout-seconds: 10
+
       topics:
         premium:
           payment:
@@ -98,9 +99,6 @@ spring:
       correlation:
         premium-price: "premium-price-correlation-id"
         premium-payment: "premium-payment-correlation-id"
-
-    listener:
-      ack-mode: "manual"
 
 server:
   port: 8080

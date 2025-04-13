@@ -13,13 +13,13 @@ import school.faang.user_service.enums.premium.PremiumType;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PremiumRequestDto {
-    @NotNull
+    @NotNull(message = "Premium type can't be null")
     private PremiumType premiumType;
 
-    @NotNull
+    @NotNull(message = "user id can't be null")
     private Long userId;
 
-    @NotNull
+    @NotNull(message = "selected currency can't be null")
     private CurrencyDto selectedCurrency;
     private boolean autoRenew;
 }
