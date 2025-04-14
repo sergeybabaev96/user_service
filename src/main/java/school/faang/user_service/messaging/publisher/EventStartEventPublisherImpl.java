@@ -18,4 +18,3 @@ public class EventStartEventPublisherImpl implements EventStartEventPublisher {
         redisTemplate.convertAndSend(topic.getTopic(), event);
     }
 }
-
