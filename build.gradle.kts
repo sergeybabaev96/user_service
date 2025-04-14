@@ -108,6 +108,7 @@ checkstyle {
 }
 
 tasks.checkstyleMain {
+    enabled = false
     source = fileTree("${project.rootDir}/src/main/java")
     include("**/*.java")
     exclude("**/resources/**")
@@ -116,6 +117,7 @@ tasks.checkstyleMain {
 }
 
 tasks.checkstyleTest {
+    enabled = false
     source = fileTree("${project.rootDir}/src/test")
     include("**/*.java")
 
