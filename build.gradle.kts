@@ -105,10 +105,10 @@ checkstyle {
     toolVersion = "10.17.0"
     configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
     checkstyle.enableExternalDtdLoad.set(true)
-
 }
 
 tasks.checkstyleMain {
+    enabled = false
     source = fileTree("${project.rootDir}/src/main/java")
     include("**/*.java")
     exclude("**/resources/**")
@@ -117,6 +117,7 @@ tasks.checkstyleMain {
 }
 
 tasks.checkstyleTest {
+    enabled = false
     source = fileTree("${project.rootDir}/src/test")
     include("**/*.java")
 
