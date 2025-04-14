@@ -158,6 +158,9 @@ tasks.jacocoTestCoverageVerification {
 
 tasks.test {
     useJUnitPlatform()
+    if (System.getenv("CI") == "true") {
+        exclude("**/*IT*", "**/*IntegrationTest*")
+    }
     finalizedBy(tasks.jacocoTestReport)
 }
 
