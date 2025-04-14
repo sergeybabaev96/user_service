@@ -32,6 +32,16 @@ payment-service:
   host: localhost
   port: 9080
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html  # Кастомный путь к Swagger UI
+    tags-sorter: alpha      # Сортировка тегов по алфавиту
+    operations-sorter: alpha
+    doc-expansion: none     # Сворачивание всех разделов по умолчанию
+  api-docs:
+    path: /v1/api-docs      # Путь к JSON-документации
+  default-produces-media-type: application/json
+  
 minio:
   s3:
     endpoint: http://localhost:9000
