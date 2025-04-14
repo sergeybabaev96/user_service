@@ -2,66 +2,56 @@ package school.faang.user_service.service.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.entity.event.Event;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.repository.event.EventRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventService {
     private final EventRepository eventRepository;
+    private final ExecutorService executor = Executors.newFixedThreadPool(5); // или настраиваемый бин
 
     public void deletePastEvents(int batchSize) {
-        List<Event> allEvents = eventRepository.findAll();
-
-        List<Long> idsToDelete = allEvents.stream()
-                .filter(event -> event.getEndDate() != null && event.getEndDate().isBefore(LocalDateTime.now()))
-                .map(Event::getId)
-                .toList();
+        List<Long> idsToDelete = eventRepository.findIdsByEndDateBefore(LocalDateTime.now());
 
         if (idsToDelete.isEmpty()) {
-            log.info("Нет завершённых событий для удаления");
+            log.warn("Нет завершённых событий для удаления");
             return;
         }
 
-        List<List<Long>> partitions = partitionList(idsToDelete, batchSize);
-        List<Thread> threads = new ArrayList<>();
+        List<List<Long>> partitions = ListUtils.partition(idsToDelete, batchSize);
 
-        for (List<Long> batch : partitions) {
-            Thread thread = new Thread(() -> {
-                try {
-                    eventRepository.deleteByIds(batch);
-                    log.info("Удалена пачка событий: {}", batch);
-                } catch (Exception e) {
-                    log.error("Ошибка при удалении событий: {}", batch, e);
-                }
-            });
-            thread.start();
-            threads.add(thread);
-        }
+        List<CompletableFuture<Void>> futures = partitions.stream()
+                .map(batch -> CompletableFuture.runAsync(() -> deleteBatch(batch), executor))
+                .toList();
 
-        for (Thread thread : threads) {
+        futures.forEach(f -> {
             try {
-                thread.join();
-            } catch (InterruptedException e) {
-                log.warn("Удаляющий поток был прерван", e);
-                Thread.currentThread().interrupt();
+                f.join();
+            } catch (Exception e) {
+                log.error("Ошибка при ожидании завершения задачи", e);
             }
-        }
+        });
 
         log.info("Удаление завершённых событий завершено. Удалено: {}", idsToDelete.size());
     }
 
-    private List<List<Long>> partitionList(List<Long> ids, int size) {
-        List<List<Long>> partitions = new ArrayList<>();
-        for (int i = 0; i < ids.size(); i += size) {
-            partitions.add(ids.subList(i, Math.min(i + size, ids.size())));
+    @Transactional
+    public void deleteBatch(List<Long> batch) {
+        try {
+            eventRepository.deleteByIds(batch);
+            log.info("Удалена пачка событий: {}", batch);
+        } catch (Exception e) {
+            log.error("Ошибка при удалении событий: {}", batch, e);
         }
-        return partitions;
     }
 }

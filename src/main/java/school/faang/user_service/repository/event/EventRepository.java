@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.entity.event.Event;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
@@ -28,4 +29,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Transactional
     @Query(value = "DELETE FROM event WHERE id IN (:ids)", nativeQuery = true)
     void deleteByIds(@Param("ids") List<Long> batch);
+
+    @Query(value = "SELECT id FROM event WHERE end_date IS NOT NULL AND end_date < :now", nativeQuery = true)
+    List<Long> findIdsByEndDateBefore(@Param("now") LocalDateTime now);
 }
