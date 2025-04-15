@@ -17,7 +17,7 @@ import school.faang.user_service.dto.promotion.event.EventDto;
 import school.faang.user_service.dto.promotion.event.EventPromotionDto;
 import school.faang.user_service.enums.promotion.PromotionPriority;
 import school.faang.user_service.enums.promotion.event.EventPromotionType;
-import school.faang.user_service.exception.PromotionNotFoundException;
+import school.faang.user_service.exception.promotion.PromotionNotFoundException;
 import school.faang.user_service.repository.promotion.EventPromotionCountRepository;
 import school.faang.user_service.repository.promotion.EventPromotionRepository;
 import school.faang.user_service.service.EventPromotionService;

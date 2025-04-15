@@ -6,10 +6,10 @@ import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import school.faang.user_service.exception.PaymentFailedException;
-import school.faang.user_service.exception.PremiumAlreadyPurchasedException;
-import school.faang.user_service.exception.PremiumNotActiveException;
-import school.faang.user_service.exception.PremiumPaymentReplyNotReceivedException;
-import school.faang.user_service.exception.PremiumPriceReplyNotReceivedException;
+import school.faang.user_service.exception.premium.PremiumAlreadyPurchasedException;
+import school.faang.user_service.exception.premium.PremiumNotActiveException;
+import school.faang.user_service.exception.premium.PremiumPaymentReplyNotReceivedException;
+import school.faang.user_service.exception.premium.PremiumPriceReplyNotReceivedException;
 
 import static school.faang.user_service.messages.ErrorMessages.NO_PREMIUM_PAYMENT_RESPONSE_RECEIVED_FROM_PAYMENT_SERVICE;
 import static school.faang.user_service.messages.ErrorMessages.NO_PREMIUM_PRICE_RESPONSE_RECEIVED_FROM_PAYMENT_SERVICE;

@@ -1,0 +1,41 @@
+spring:
+  kafka:
+    bootstrap-servers: ${spring.embedded.kafka.brokers}
+
+    producer:
+      acks: all
+      enable.idempotence: true
+      isolation.level: "read_committed"
+      max-in-flight-per-connection: 1
+      transaction-id-prefix: "user-service-"
+
+      topics:
+        premium:
+          payment:
+            payment-request-topic: "premium-payment-request-topic"
+            price-request-topic: "premium-price-request-topic"
+
+    consumer:
+      enable-auto-commit: false
+      isolation-level: "read_committed"
+      auto.offset.reset: "latest"
+      timeout-seconds: 10
+
+      topics:
+        premium:
+          payment-request-topic: "premium-payment-request-topic"
+          price-request-topic: "premium-price-request-topic"
+
+      groups:
+        premium:
+          payment-request-group: "premium-payment-request-group"
+          price-request-group: "premium-price-request-group"
+
+      correlation:
+        premium-price: "premium-price-correlation-id"
+        premium-payment: "premium-payment-correlation-id"
+
+
+logging:
+  level:
+    root: info

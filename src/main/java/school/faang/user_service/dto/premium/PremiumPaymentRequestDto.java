@@ -12,8 +12,8 @@ import school.faang.user_service.dto.payment.PaymentRequestDto;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PremiumPaymentRequestDto {
-    private PremiumRequestDto premiumRequestDto;
-    private PaymentRequestDto paymentRequestDto;
+    private PremiumRequestDto premiumRequest;
+    private PaymentRequestDto paymentRequest;
     private CurrencyDto selectedCurrency;
     private boolean byUser;
 }

@@ -2,7 +2,7 @@ package school.faang.user_service.enums.premium;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import school.faang.user_service.exception.PremiumTypeNotFoundException;
+import school.faang.user_service.exception.premium.PremiumTypeNotFoundException;
 
 import java.math.BigDecimal;
 

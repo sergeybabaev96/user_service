@@ -29,10 +29,10 @@ import school.faang.user_service.entity.premium.Premium;
 import school.faang.user_service.enums.premium.PremiumStatus;
 import school.faang.user_service.enums.premium.PremiumType;
 import school.faang.user_service.exception.PaymentFailedException;
-import school.faang.user_service.exception.PremiumAlreadyPurchasedException;
-import school.faang.user_service.exception.PremiumNotActiveException;
-import school.faang.user_service.exception.PremiumPaymentReplyNotReceivedException;
-import school.faang.user_service.exception.PremiumPriceReplyNotReceivedException;
+import school.faang.user_service.exception.premium.PremiumAlreadyPurchasedException;
+import school.faang.user_service.exception.premium.PremiumNotActiveException;
+import school.faang.user_service.exception.premium.PremiumPaymentReplyNotReceivedException;
+import school.faang.user_service.exception.premium.PremiumPriceReplyNotReceivedException;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.PremiumMapper;
 import school.faang.user_service.repository.UserRepository;
@@ -261,8 +261,8 @@ public class PremiumServiceImpl implements PremiumService {
     }
 
     private PremiumResponseDto updatePremium(PremiumPaymentResponseDto premiumPaymentResponse) {
-        PaymentResponseDto paymentResponse = premiumPaymentResponse.getPaymentResponseDto();
-        PremiumRequestDto premiumRequest = premiumPaymentResponse.getPremiumRequestDto();
+        PaymentResponseDto paymentResponse = premiumPaymentResponse.getPaymentResponse();
+        PremiumRequestDto premiumRequest = premiumPaymentResponse.getPremiumRequest();
 
         LocalDateTime startDate = LocalDateTime.now();
         LocalDateTime endDate = startDate.plusMonths(premiumRequest.getPremiumType().getMonths());
