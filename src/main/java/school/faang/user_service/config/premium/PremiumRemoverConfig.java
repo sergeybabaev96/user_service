@@ -13,7 +13,7 @@ import java.util.concurrent.Executor;
  * This class configures a ThreadPoolTaskExecutor for handling premium removal tasks asynchronously.
  */
 @Configuration
-@ConfigurationProperties(prefix = "premium-remover")
+@ConfigurationProperties(prefix = "premium-remover.executor")
 @Data
 public class PremiumRemoverConfig {
     private int coreSize;

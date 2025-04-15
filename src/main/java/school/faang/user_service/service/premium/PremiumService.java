@@ -33,6 +33,6 @@ public class PremiumService {
         }
         log.info("Found {} expired premiums", expiredPremiums.size());
         ListUtils.partition(expiredPremiums, batchSize)
-                .forEach(premiumAsyncRemover::removeExpiredPremiumAsync);
+                .forEach(premiumAsyncRemover::removeBatchAsync);
     }
 }

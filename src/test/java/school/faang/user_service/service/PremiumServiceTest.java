@@ -38,7 +38,7 @@ public class PremiumServiceTest {
 
         premiumService.removeExpiredPremium(batchSize);
 
-        verify(premiumAsyncRemover, times(2)).removeExpiredPremiumAsync(any());
+        verify(premiumAsyncRemover, times(2)).removeBatchAsync(any());
     }
 
     @Test
@@ -49,7 +49,7 @@ public class PremiumServiceTest {
 
         premiumService.removeExpiredPremium(batchSize);
 
-        verify(premiumAsyncRemover, never()).removeExpiredPremiumAsync(any());
+        verify(premiumAsyncRemover, never()).removeBatchAsync(any());
         verify(premiumRepository, times(1)).findAllByEndDateBefore(any());
     }
 }

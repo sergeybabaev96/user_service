@@ -16,14 +16,14 @@ import school.faang.user_service.service.premium.PremiumService;
 public class ScheduledPremiumRemover {
     private final PremiumService premiumService;
 
-    @Value("${premium-remover.batch-size}")
+    @Value("${premium-remover.scheduled.batch-size}")
     private int batchSize;
 
     /**
      * Scheduled method to remove expired premium subscriptions.
      * This method is executed at a fixed rate defined in the application properties.
      */
-    @Scheduled(cron = "${premium-remover.cron}")
+    @Scheduled(cron = "${premium-remover.scheduled.cron}")
     public void removeExpiredPremium() {
         premiumService.removeExpiredPremium(batchSize);
     }

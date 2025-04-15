@@ -31,14 +31,14 @@ public class PremiumAsyncRemoverTest {
 
     @Test
     @DisplayName("Удаление премиумов вызывается через TransactionTemplate")
-    public void testRemoveExpiredPremiumAsync() {
+    public void testRemoveBatchAsync() {
         doAnswer(invocation -> {
             Consumer<TransactionStatus> consumer = invocation.getArgument(0);
             consumer.accept(null);
             return null;
         }).when(transactionTemplate).executeWithoutResult(ArgumentMatchers.any());
 
-        premiumAsyncRemover.removeExpiredPremiumAsync(anyList());
+        premiumAsyncRemover.removeBatchAsync(anyList());
 
         verify(premiumRepository, times(1)).deleteAll(anyList());
         verify(transactionTemplate, times(1)).executeWithoutResult(ArgumentMatchers.any());

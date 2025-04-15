@@ -38,7 +38,7 @@ public class PremiumAsyncRemover {
             maxAttempts = 3,
             backoff = @Backoff(delay = 1000, multiplier = 2)
     )
-    public void removeExpiredPremiumAsync(List<Premium> expiredPremiums) {
+    public void removeBatchAsync(List<Premium> expiredPremiums) {
             transactionTemplate.executeWithoutResult(status -> {
                 premiumRepository.deleteAll(expiredPremiums);
                 log.info("Successfully deleted {} expired premiums", expiredPremiums.size());
