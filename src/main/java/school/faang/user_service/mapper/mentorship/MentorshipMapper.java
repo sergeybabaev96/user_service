@@ -1,4 +1,9 @@
 package school.faang.user_service.mapper.mentorship;
 
-public class MentorshipMapper {
+import school.faang.user_service.entity.User;
+
+public interface MentorshipMapper {
+
+    User toEntity()
+
 }
