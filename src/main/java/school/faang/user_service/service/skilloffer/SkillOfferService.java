@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.skilloffer;
 
 import jakarta.transaction.Transactional;
 import lombok.NonNull;

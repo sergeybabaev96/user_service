@@ -3,12 +3,12 @@ package school.faang.user_service.service.mentorship;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.UserViewDto;
+import school.faang.user_service.dto.user.UserViewDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.mentorship.MentorshipRepository;
-import school.faang.user_service.service.UserService;
+import school.faang.user_service.service.user.UserService;
 
 import java.util.List;
 

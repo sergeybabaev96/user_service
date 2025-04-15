@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.recommendation;
 
 import lombok.Data;
 import lombok.NonNull;
@@ -26,7 +26,8 @@ import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
-import school.faang.user_service.validation.RecommendationValidator;
+import school.faang.user_service.service.skilloffer.SkillOfferService;
+import school.faang.user_service.validation.recommendation.RecommendationValidator;
 
 import java.util.List;
 import java.util.stream.StreamSupport;
@@ -36,27 +37,6 @@ import java.util.stream.StreamSupport;
  * <p>
  * Этот сервис предоставляет методы для создания, обновления, удаления и получения рекомендаций,
  * а также для управления навыками, предлагаемыми в рекомендациях.
- * </p>
- * <p>
- * Основные функции:
- * <ul>
- *     <li>{@link #create(RecommendationCreateDto, long) Создание новой рекомендации} с проверкой валидности данных.</li>
- *     <li>{@link #update(RecommendationCreateDto, long) Обновление существующей рекомендации}.</li>
- *     <li>{@link #delete(long) Удаление рекомендации} по её идентификатору.</li>
- *     <li>{@link #getAllUserRecommendations(long,Pageable) Получение списка всех рекомендаций}, полученных пользователем.</li>
- *     <li>{@link #getAllCreatedRecommendation(long, Pageable) Получение списка всех рекомендаций}, созданных пользователем.</li>
- * </ul>
- * </p>
- * @author marsel_mkh
- * @see RecommendationViewDto
- * @see RecommendationCreateDto
- * @see SkillOfferViewDto
- * @see Recommendation
- * @see SkillOffer
- * @see User
- * @see Skill
- * @see UserSkillGuarantee
- * @see RecommendationValidator
  */
 @Slf4j
 @Data
@@ -73,12 +53,6 @@ public class RecommendationService {
     private final SkillRepository skillRepository;
     private final SkillOfferService skillOfferService;
 
-    /**
-     * Создает новую рекомендацию
-     * @param recommendation  объект DTO с данными о рекомендации
-     * @param recommendationId айди рекомендации
-     * @return RecommendationDto - созданная рекомендация
-     */
     public RecommendationViewDto create(@NonNull RecommendationCreateDto recommendation,
                                         long recommendationId) {
         recommendationValidator.validate(recommendation);
@@ -90,12 +64,6 @@ public class RecommendationService {
         return recommendationMapper.toViewDto(recommendationEntity);
     }
 
-    /**
-     * Обновляет существующую рекомендацию
-     * @param recommendation - объект DTO с обновленными данными
-     * @param recommendationId айди рекомендации
-     * @return RecommendationDto - обновленная рекомендация
-     */
     public RecommendationViewDto update(@NonNull RecommendationCreateDto recommendation,
                                         long recommendationId) {
         recommendationValidator.validate(recommendation);
@@ -117,11 +85,6 @@ public class RecommendationService {
         return recommendationMapper.toViewDto(recommendationEntity);
     }
 
-    /**
-     * Удаляет рекомендацию по ее идентификатору
-     * @param recommendationId - идентификатор рекомендации
-     * @throws DataValidationException если рекомендация не найдена
-     */
     public void delete(long recommendationId) {
         if (!recommendationRepository.existsById(recommendationId)) {
             log.error("Рекомендация с ID {} не найдена", recommendationId);
@@ -152,12 +115,6 @@ public class RecommendationService {
         return recommendationPage.map(recommendationMapper::toViewDto);
     }
 
-    /**
-     * Получает пользователя по его идентификатору
-     * @param userId - идентификатор пользователя
-     * @return User - найденный пользователь
-     * @throws DataValidationException если пользователь не найден
-     */
     private User getUser(long userId) {
         return userRepository.findById(userId).orElseThrow(() -> {
             log.error("Ошибка: пользователь с ID {} не найден", userId);
@@ -168,7 +125,7 @@ public class RecommendationService {
     /**
      * Маппит те поля ДТО рекомендации, которые были проигнорированы
      * @param recommendation ДТО рекомендации
-     * @return Сущьность рекомендации
+     * @return Сущность рекомендации
      */
     private Recommendation getRecommendationEntity(@NotNull RecommendationCreateDto recommendation) {
         long receiverId = recommendation.getReceiverId();
