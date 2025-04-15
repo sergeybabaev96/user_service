@@ -22,7 +22,8 @@ spring:
       host: localhost
 
       channel:
-        recommendation-event: recommendation_event_channel
+        recommendationReceived: recommendation_event_channel
+        follower: follower_channel
         mentorship-accepted-event: mentorship-accepted-channel
 
 server:
