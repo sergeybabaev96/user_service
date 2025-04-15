@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.recommendation;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +24,6 @@ import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
-import school.faang.user_service.service.recommendation.RecommendationService;
 import school.faang.user_service.service.skilloffer.SkillOfferService;
 import school.faang.user_service.validation.recommendation.RecommendationValidator;
 
