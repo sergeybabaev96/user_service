@@ -3,30 +3,29 @@ package school.faang.user_service.service.recommendation;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.events.RecommendationEvent;
 import school.faang.user_service.dto.recommendation.RecommendationCreateDto;
 import school.faang.user_service.dto.recommendation.RecommendationViewDto;
 import school.faang.user_service.dto.skilloffer.SkillOfferCreateDto;
-import school.faang.user_service.dto.skilloffer.SkillOfferViewDto;
-import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.EntityNotFoundException;
 import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.mapper.SkillOfferMapper;
+import school.faang.user_service.publisher.RedisEventPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import school.faang.user_service.service.skilloffer.SkillOfferService;
+import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.validation.recommendation.RecommendationValidator;
 
 import java.util.List;
@@ -52,6 +51,8 @@ public class RecommendationService {
     private final SkillOfferMapper skillOfferMapper;
     private final SkillRepository skillRepository;
     private final SkillOfferService skillOfferService;
+    private final RedisEventPublisher redisEventPublisher;
+    private final UserService userService;
 
     public RecommendationViewDto create(@NonNull RecommendationCreateDto recommendation,
                                         long recommendationId) {
@@ -60,6 +61,9 @@ public class RecommendationService {
         Recommendation recommendationEntity = getRecommendationEntity(recommendation);
         recommendationRepository.save(recommendationEntity);
         skillOfferService.saveSkillsOffer(recommendation, recommendationId);
+
+        RecommendationEvent event = toEvent(recommendationEntity);
+        redisEventPublisher.publish(event);
 
         return recommendationMapper.toViewDto(recommendationEntity);
     }
@@ -98,7 +102,7 @@ public class RecommendationService {
      * @param receiverId - идентификатор пользователя
      * @return List<RecommendationDto> - список полученных рекомендаций
      */
-    public Page<RecommendationViewDto> getAllUserRecommendations(long receiverId,@NonNull Pageable pageable) {
+    public Page<RecommendationViewDto> getAllUserRecommendations(long receiverId, @NonNull Pageable pageable) {
         Page<Recommendation> recommendationPage =
                 recommendationRepository.findAllByReceiverId(receiverId, pageable);
         return recommendationPage.map(recommendationMapper::toViewDto);
@@ -115,13 +119,6 @@ public class RecommendationService {
         return recommendationPage.map(recommendationMapper::toViewDto);
     }
 
-    private User getUser(long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> {
-            log.error("Ошибка: пользователь с ID {} не найден", userId);
-            return new EntityNotFoundException("User is not found");
-        });
-    }
-
     /**
      * Маппит те поля ДТО рекомендации, которые были проигнорированы
      * @param recommendation ДТО рекомендации
@@ -129,10 +126,10 @@ public class RecommendationService {
      */
     private Recommendation getRecommendationEntity(@NotNull RecommendationCreateDto recommendation) {
         long receiverId = recommendation.getReceiverId();
-        User receiver = getUser(receiverId);
+        User receiver = userService.getUser(receiverId);
 
         long authorId = recommendation.getAuthorId();
-        User author = getUser(authorId);
+        User author = userService.getUser(authorId);
 
         Recommendation recommendationEntity = recommendationMapper.createDtoToEntity(recommendation);
         recommendationEntity.setReceiver(receiver);
@@ -154,5 +151,16 @@ public class RecommendationService {
                 .toList();
         Iterable<SkillOffer> allSkillOffers = skillOfferRepository.findAllById(skillOfferIds);
         return StreamSupport.stream(allSkillOffers.spliterator(), false).toList();
+    }
+
+    private RecommendationEvent toEvent(Recommendation recommendation) {
+        RecommendationEvent recommendationEvent = new RecommendationEvent();
+        Long authorId = recommendation.getAuthor().getId();
+        recommendationEvent.setAuthorId(authorId);
+
+        Long receiverId = recommendation.getReceiver().getId();
+        recommendationEvent.setReceiverId(receiverId);
+
+        return recommendationEvent;
     }
 }
