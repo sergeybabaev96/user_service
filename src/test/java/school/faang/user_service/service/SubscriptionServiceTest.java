@@ -12,6 +12,7 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.exceptions.DataValidationException;
 import school.faang.user_service.filter.user.UserFilter;
 import school.faang.user_service.mapper.UserMapperImpl;
+import school.faang.user_service.publisher.FollowerEventPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 
 import java.util.List;
@@ -42,6 +43,9 @@ public class SubscriptionServiceTest {
 
     @Spy
     private UserMapperImpl userMapper;
+
+    @Mock
+    private FollowerEventPublisher followerEventPublisher;
 
     @InjectMocks
     SubscriptionService subscriptionService;

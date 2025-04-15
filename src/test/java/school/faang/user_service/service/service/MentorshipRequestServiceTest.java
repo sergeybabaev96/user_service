@@ -14,6 +14,7 @@ import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.filter.MentorshipRequestFilter;
 import school.faang.user_service.mapper.MentorshipRequestMapperImpl;
+import school.faang.user_service.publisher.MentorshipAcceptedRequestEventPublisher;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 import school.faang.user_service.service.MentorshipRequestService;
@@ -49,6 +50,9 @@ public class MentorshipRequestServiceTest {
     private final MentorshipRequestFilter mentorshipRequestRequesterIdFilter = new TestMentorshipRequestRequesterIdFilter();
     private final MentorshipRequestFilter mentorshipRequestStatusFilter = new TestMentorshipRequestStatusFilter();
 
+    @Mock
+    private MentorshipAcceptedRequestEventPublisher mentorshipPublisher;
+
     private MentorshipRequestService service;
 
     private RequestFilterDto requestFilterDto;
@@ -76,7 +80,8 @@ public class MentorshipRequestServiceTest {
         mentorshipRequest.setStatus(RequestStatus.PENDING);
 
         service = new MentorshipRequestService(mentorshipRequestRepository, userRepository, mentorshipRequestMapper,
-                List.of(mentorshipRequestDescriptionFilter, mentorshipRequestReceiverIdFilter, mentorshipRequestRequesterIdFilter, mentorshipRequestStatusFilter));
+                List.of(mentorshipRequestDescriptionFilter, mentorshipRequestReceiverIdFilter,
+                        mentorshipRequestRequesterIdFilter, mentorshipRequestStatusFilter), mentorshipPublisher);
     }
 
     @Test
