@@ -21,14 +21,24 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.exception.EntityNotFoundException;
 import school.faang.user_service.mapper.RecommendationMapper;
+import school.faang.user_service.publisher.RedisEventPublisher;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import school.faang.user_service.service.skilloffer.SkillOfferService;
+import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.validation.recommendation.RecommendationValidator;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class RecommendationServiceTest {
@@ -44,6 +54,11 @@ public class RecommendationServiceTest {
     private SkillOfferService skillOfferService;
     @Mock
     private RecommendationValidator recommendationValidator;
+    @Mock
+    private RedisEventPublisher redisEventPublisher;
+    @Mock
+    private UserService userService;
+
 
     @InjectMocks
     private RecommendationService recommendationService;
@@ -82,107 +97,118 @@ public class RecommendationServiceTest {
     @DisplayName("Проверка успешного создания рекомендации")
     @Test
     void createRecommendationWithValidInputsTest() {
-        Mockito.when(userRepository.findById(author.getId()))
-                .thenReturn(Optional.of(author));
-        Mockito.when(userRepository.findById(receiver.getId()))
-                .thenReturn(Optional.of(receiver));
-        Mockito.doReturn(recommendationEntity)
-                .when(recommendationMapper).createDtoToEntity(recommendationCreateDto);
-        Mockito.doReturn(recommendationViewDto)
-                .when(recommendationMapper).toViewDto(recommendationEntity);
+        when(userService.getUserEntity(author.getId())).thenReturn(author);
+        when(userService.getUserEntity(receiver.getId())).thenReturn(receiver);
+        when(recommendationMapper.createDtoToEntity(recommendationCreateDto))
+                .thenReturn(recommendationEntity);
+        when(recommendationRepository.save(recommendationEntity))
+                .thenReturn(recommendationEntity);
+        when(recommendationMapper.toViewDto(recommendationEntity))
+                .thenReturn(recommendationViewDto);
 
         RecommendationViewDto result = recommendationService
                 .create(recommendationCreateDto, recommendationCreateDtoId);
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
+        assertEquals(recommendationViewDto, result);
 
-        Mockito.verify(recommendationRepository, Mockito.times(1))
+        verify(recommendationRepository, times(1))
                 .save(recommendationEntity);
     }
 
     @DisplayName("Проверка получения ошибки при отсутствии получателя")
     @Test
     void createRecommendationWithInvalidReceiver() {
-        Mockito.when(userRepository.findById(receiver.getId())).thenReturn(Optional.empty());
+        when(userService.getUserEntity(receiver.getId())).thenReturn(receiver);
+        when(userService.getUserEntity(author.getId()))
+                .thenThrow(new EntityNotFoundException("User is not found"));
 
         Exception exception = Assertions.assertThrows(EntityNotFoundException.class, () ->
              recommendationService.create(recommendationCreateDto, recommendationCreateDtoId));
 
-        Assertions.assertTrue(exception.getMessage().contains("User is not found"));
+        assertTrue(exception.getMessage().contains("User is not found"));
+
+        verify(recommendationValidator).validate(recommendationCreateDto);
+        verify(userService).getUserEntity(receiver.getId());
+        verify(userService).getUserEntity(author.getId());
     }
 
     @DisplayName("Проверка получения ошибки при отсутствии автора")
     @Test
     void createRecommendationWithInvalidAuthor() {
-        Mockito.when(userRepository.findById(receiver.getId()))
-                .thenReturn(Optional.of(receiver));
-        Mockito.when(userRepository.findById(author.getId())).thenReturn(Optional.empty());
+        when(userService.getUserEntity(receiver.getId())).thenReturn(receiver);
+        when(userService.getUserEntity(author.getId()))
+                .thenThrow(new EntityNotFoundException("User is not found"));
 
         Exception exception = Assertions.assertThrows(EntityNotFoundException.class, () ->
             recommendationService.create(recommendationCreateDto, recommendationCreateDtoId));
 
-        Assertions.assertTrue(exception.getMessage().contains("User is not found"));
+        assertTrue(exception.getMessage().contains("User is not found"));
+
+        verify(recommendationValidator).validate(recommendationCreateDto);
+        verify(userService).getUserEntity(receiver.getId());
+        verify(userService).getUserEntity(author.getId());
     }
 
     @DisplayName("Проверка успешного обновления рекомендации")
     @Test
     void updateRecommendationWithValidInputsTest() {
-        Mockito.when(recommendationRepository.findById(recommendationCreateDtoId))
+        when(recommendationRepository.findById(recommendationCreateDtoId))
                 .thenReturn(Optional.of(recommendationEntity));
-        Mockito.when(recommendationMapper.toViewDto(recommendationEntity))
+        when(recommendationMapper.toViewDto(recommendationEntity))
                 .thenReturn(recommendationViewDto);
 
         RecommendationViewDto result = recommendationService
                 .update(recommendationCreateDto, recommendationCreateDtoId);
 
-        Mockito.verify(recommendationRepository, Mockito.times(1))
+        verify(recommendationRepository, times(1))
                 .update(recommendationCreateDtoId
                         ,recommendationCreateDto.getReceiverId()
                         ,recommendationCreateDto.getContent());
-        Mockito.verify(skillOfferRepository, Mockito.times(1))
+        verify(skillOfferRepository, times(1))
                         .deleteAllByRecommendationId(recommendationCreateDtoId);
-        Mockito.verify(recommendationRepository, Mockito.times(1))
+        verify(recommendationRepository, times(1))
                         .findById(recommendationCreateDtoId);
-        Mockito.verify(recommendationMapper, Mockito.times(1))
+        verify(recommendationMapper, times(1))
                         .toViewDto(recommendationEntity);
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
     }
 
     @DisplayName("Проверка получения ошибки при обновлении несуществующей рекомендации")
     @Test
     void updateRecommendationWithInvalidIdTest() {
-        Mockito.when(recommendationRepository.findById(recommendationCreateDtoId))
+        when(recommendationRepository.findById(recommendationCreateDtoId))
                 .thenReturn(Optional.empty());
 
         Exception exception = Assertions.assertThrows(EntityNotFoundException.class, () ->
             recommendationService.update(recommendationCreateDto, recommendationCreateDtoId));
 
-        Assertions.assertTrue(exception.getMessage().contains("Recommendation not found"));
+        assertTrue(exception.getMessage().contains("Recommendation not found"));
     }
 
     @DisplayName("Проверка успешного удаления рекомендации")
     @Test
     void deleteRecommendationWithValidInputsTest() {
-        Mockito.when(recommendationRepository.existsById(recommendationCreateDtoId))
+        when(recommendationRepository.existsById(recommendationCreateDtoId))
                 .thenReturn(true);
 
         recommendationService.delete(recommendationCreateDtoId);
 
-        Mockito.verify(recommendationRepository, Mockito.times(1))
+        verify(recommendationRepository, times(1))
                 .deleteById(recommendationCreateDtoId);
     }
 
     @DisplayName("Проверка получения ошибки при удалении несуществующей рекомендации")
     @Test
     void deleteRecommendationWithInvalidInputsTest() {
-        Mockito.when(recommendationRepository.existsById(recommendationCreateDtoId))
+        when(recommendationRepository.existsById(recommendationCreateDtoId))
                 .thenReturn(false);
 
         Exception exception = Assertions.assertThrows(EntityNotFoundException.class, () ->
             recommendationService.delete(recommendationCreateDtoId));
 
-        Assertions.assertTrue(exception.getMessage()
+        assertTrue(exception.getMessage()
                 .contains(String.format("Recommendation id %d not found", recommendationCreateDtoId)));
     }
 
@@ -193,19 +219,19 @@ public class RecommendationServiceTest {
         List<Recommendation> recommendations = List.of(recommendationEntity);
         Page<Recommendation> recommendationPage = new PageImpl<>(recommendations);
 
-        Mockito.when(recommendationRepository.findAllByReceiverId(receiver.getId(),pageable))
+        when(recommendationRepository.findAllByReceiverId(receiver.getId(),pageable))
                 .thenReturn(recommendationPage);
-        Mockito.when(recommendationMapper.toViewDto(recommendationEntity))
+        when(recommendationMapper.toViewDto(recommendationEntity))
                 .thenReturn(recommendationViewDto);
 
         Page<RecommendationViewDto> result = recommendationService.getAllUserRecommendations(receiver.getId(),pageable);
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
         Assertions.assertEquals(1, result.getTotalElements());
 
-        Mockito.verify(recommendationRepository, Mockito.times(1))
+        verify(recommendationRepository, times(1))
                 .findAllByReceiverId(receiver.getId(),pageable);
-        Mockito.verify(recommendationMapper, Mockito.times(1))
+        verify(recommendationMapper, times(1))
                 .toViewDto(recommendationEntity);
     }
 
@@ -216,18 +242,18 @@ public class RecommendationServiceTest {
         List<Recommendation> recommendations = List.of(recommendationEntity);
         Page<Recommendation> recommendationPage = new PageImpl<>(recommendations);
 
-        Mockito.when(recommendationRepository.findAllByAuthorId(author.getId(),pageable))
+        when(recommendationRepository.findAllByAuthorId(author.getId(),pageable))
                 .thenReturn(recommendationPage);
-        Mockito.when(recommendationMapper.toViewDto(recommendationEntity))
+        when(recommendationMapper.toViewDto(recommendationEntity))
                 .thenReturn(recommendationViewDto);
 
         Page<RecommendationViewDto> result = recommendationService.getAllCreatedRecommendation(author.getId(), pageable);
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
         Assertions.assertEquals(1, result.getTotalElements());
 
-        Mockito.verify(recommendationRepository, Mockito.times(1))
+        verify(recommendationRepository, times(1))
                 .findAllByAuthorId(author.getId(),pageable);
-        Mockito.verify(recommendationMapper, Mockito.times(1))
+        verify(recommendationMapper, times(1))
                 .toViewDto(recommendationEntity);
     }
 }
