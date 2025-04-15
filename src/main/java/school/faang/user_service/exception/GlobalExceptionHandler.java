@@ -3,9 +3,8 @@ package school.faang.user_service.exception;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MultipartException;
 import school.faang.user_service.dto.error.ErrorResponse;
@@ -22,9 +21,8 @@ public class GlobalExceptionHandler {
             AmazonS3Exception.class,
             EntityNotFoundException.class,
     })
-    @ResponseStatus(NOT_FOUND)
-    public ErrorResponse handleExceptionsWithStatusNotFound(Exception ex) {
-        return getErrorResponse(ex, NOT_FOUND);
+    public ResponseEntity<ErrorResponse> handleExceptionsWithStatusNotFound(Exception ex) {
+        return ResponseEntity.status(NOT_FOUND).body(getErrorResponse(ex));
     }
 
     @ExceptionHandler({
@@ -33,17 +31,14 @@ public class GlobalExceptionHandler {
             MultipartException.class,
             ConvertingDataException.class
     })
-    @ResponseStatus(BAD_REQUEST)
-    public ErrorResponse handleExceptionsWithStatusBadRequest(Exception ex) {
-        return getErrorResponse(ex, BAD_REQUEST);
+    public ResponseEntity<ErrorResponse> handleExceptionsWithStatusBadRequest(Exception ex) {
+        return ResponseEntity.status(BAD_REQUEST).body(getErrorResponse(ex));
     }
 
-    private ErrorResponse getErrorResponse(Exception ex, HttpStatus status) {
+    private ErrorResponse getErrorResponse(Exception ex) {
         log.error("{}", ex.toString());
         return ErrorResponse.builder()
                 .message(ex.getMessage())
-                .statusCode(status.value())
-                .statusName(status.name())
                 .build();
     }
 }

@@ -22,14 +22,13 @@ spring:
       host: localhost
       channel:
         goal-completing-channel: goal-completing-channel
-        recommendation-event: recommendation_event_channel
         user-ban: user-ban
-
-  profiles:
-    active: local
         recommendationReceived: recommendation_event_channel
         follower: follower_channel
         mentorship-accepted-event: mentorship-accepted-channel
+
+  profiles:
+    active: local
 
 server:
   port: 8080
