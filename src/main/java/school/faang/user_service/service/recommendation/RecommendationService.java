@@ -126,10 +126,10 @@ public class RecommendationService {
      */
     private Recommendation getRecommendationEntity(@NotNull RecommendationCreateDto recommendation) {
         long receiverId = recommendation.getReceiverId();
-        User receiver = userService.getUser(receiverId);
+        User receiver = userService.getUserEntity(receiverId);
 
         long authorId = recommendation.getAuthorId();
-        User author = userService.getUser(authorId);
+        User author = userService.getUserEntity(authorId);
 
         Recommendation recommendationEntity = recommendationMapper.createDtoToEntity(recommendation);
         recommendationEntity.setReceiver(receiver);

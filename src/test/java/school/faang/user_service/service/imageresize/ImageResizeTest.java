@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.imageresize;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
