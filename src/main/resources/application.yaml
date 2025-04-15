@@ -21,6 +21,8 @@ spring:
       port: 6379
       host: localhost
       channel:
+        profile-view: profile_view_channel
+        mentorship-request: MentorShipRequestTopic
         goal-completing-channel: goal-completing-channel
         recommendationReceived: recommendation_event_channel
         follower: follower_channel

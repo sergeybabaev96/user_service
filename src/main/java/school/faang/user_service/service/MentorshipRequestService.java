@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.MentorshipRequestDto;
+import school.faang.user_service.dto.MentorshipRequestedEvent;
 import school.faang.user_service.dto.RejectionDto;
 import school.faang.user_service.dto.RequestFilterDto;
 import school.faang.user_service.dto.mentorship.MentorshipAcceptedEvent;
@@ -15,6 +16,7 @@ import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.publisher.MentorshipAcceptedRequestEventPublisher;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.publisher.MentorshipRequestedEventPublisher;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +32,9 @@ public class MentorshipRequestService {
     private final UserRepository userRepository;
     private final MentorshipRequestMapper mentorshipRequestMapper;
     private final List<MentorshipRequestFilter> mentorshipRequestFilters;
+
+    private final MentorshipRequestedEventPublisher mentorshipRequestedEventPublisher;
+
     private final MentorshipAcceptedRequestEventPublisher mentorshipAcceptedRequestEventPublisher;
 
     private static final int MONTHS_BETWEEN_REQUESTS = 3;
@@ -72,6 +77,14 @@ public class MentorshipRequestService {
         long receiverId = requestDto.receiverId();
         String description = requestDto.description();
         MentorshipRequest request = mentorshipRequestRepository.create(requesterId, receiverId, description);
+
+        MentorshipRequestedEvent mentorshipRequestedEvent = MentorshipRequestedEvent.builder()
+                .requesterUserId(requesterId)
+                .receiverUserId(receiverId)
+                .requestedTime(LocalDateTime.now())
+                .build();
+        mentorshipRequestedEventPublisher.publish(mentorshipRequestedEvent);
+        log.info("Request Event was send {}", mentorshipRequestedEvent);
 
         return mentorshipRequestMapper.toDto(request);
     }
