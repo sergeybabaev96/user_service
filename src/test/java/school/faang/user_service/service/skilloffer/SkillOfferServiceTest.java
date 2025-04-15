@@ -19,6 +19,7 @@ import school.faang.user_service.exception.EntityNotFoundException;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
+import school.faang.user_service.service.skilloffer.SkillOfferService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -110,7 +111,7 @@ public class SkillOfferServiceTest {
         recommendationCreateDto.setSkillOffers(Collections.emptyList());
 
         Exception exception = Assertions.assertThrows(DataValidationException.class, () ->
-            skillOfferService.saveSkillsOffer(recommendationCreateDto, recommendationCreateDtoId));
+                skillOfferService.saveSkillsOffer(recommendationCreateDto, recommendationCreateDtoId));
 
         Assertions.assertEquals("skillOffers is Empty", exception.getMessage());
     }
@@ -121,7 +122,7 @@ public class SkillOfferServiceTest {
         Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 
         Assertions.assertThrows(EntityNotFoundException.class, () ->
-            skillOfferService.saveSkillsOffer(recommendationCreateDto, recommendationCreateDtoId));
+                skillOfferService.saveSkillsOffer(recommendationCreateDto, recommendationCreateDtoId));
     }
 
     @DisplayName("Проверка получения ошибки при отсутствии Skill")
@@ -135,7 +136,7 @@ public class SkillOfferServiceTest {
                 .thenReturn(Optional.empty());
 
         Exception exception = Assertions.assertThrows(DataValidationException.class, () ->
-            skillOfferService.saveSkillsOffer(recommendationCreateDto, recommendationCreateDtoId));
+                skillOfferService.saveSkillsOffer(recommendationCreateDto, recommendationCreateDtoId));
 
         Assertions.assertEquals("Skill not found", exception.getMessage());
     }

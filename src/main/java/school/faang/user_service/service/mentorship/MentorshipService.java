@@ -49,7 +49,7 @@ public class MentorshipService {
      * @return Список объектов {@link UserViewDto}, представляющих менти указанного пользователя
      */
     public List<UserViewDto> getMentees(long userId) {
-        User user = userService.getUser(userId);
+        User user = userService.getUserEntity(userId);
         List<User> mentees = user.getMentees();
         return mentees.stream()
                 .map(this::mapUserToUserDto)
@@ -63,7 +63,7 @@ public class MentorshipService {
      * @return Список объектов {@link UserViewDto}, представляющих менторов указанного пользователя
      */
     public List<UserViewDto> getMentors(long userId) {
-        User user = userService.getUser(userId);
+        User user = userService.getUserEntity(userId);
         List<User> mentors = user.getMentors();
         return mentors.stream()
                 .map(this::mapUserToUserDto)
@@ -78,7 +78,7 @@ public class MentorshipService {
      * @throws DataValidationException Если менти с указанным id не найден среди менти ментора.
      */
     public void deleteMentee(long menteeId, long mentorId) {
-        User mentor = userService.getUser(mentorId);
+        User mentor = userService.getUserEntity(mentorId);
         List<User> mentees = mentor.getMentees();
 
         boolean isRemoved = removeUserFromList(mentees, menteeId);
@@ -99,7 +99,7 @@ public class MentorshipService {
      * @throws DataValidationException Если ментор с указанным id не найден среди менторов менти.
      */
     public void deleteMentor(long menteeId, long mentorId) {
-        User mentee = userService.getUser(menteeId);
+        User mentee = userService.getUserEntity(menteeId);
         List<User> mentors = mentee.getMentors();
 
         boolean isRemoved = removeUserFromList(mentors, mentorId);
