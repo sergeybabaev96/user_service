@@ -20,6 +20,8 @@ spring:
     redis:
       port: 6379
       host: localhost
+      topics:
+        mentorshipAccepted: mentorship_accepted_topic
 
 server:
   port: 8080
@@ -46,3 +48,4 @@ dicebear:
 
 avatar:
   bucketName: user-avatars
+

@@ -2,9 +2,8 @@ package school.faang.user_service.service.user;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.config.avatar.AvatarProperties;
+import school.faang.user_service.properties.AvatarProperties;
 import school.faang.user_service.dto.avatar.AvatarType;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;

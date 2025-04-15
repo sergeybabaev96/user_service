@@ -7,7 +7,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import school.faang.user_service.config.dicebear.DicebearProperties;
+import school.faang.user_service.properties.DicebearProperties;
 import school.faang.user_service.util.DicebearStyleGenerator;
 import school.faang.user_service.dto.avatar.AvatarType;
 import school.faang.user_service.exception.DiceBearException;

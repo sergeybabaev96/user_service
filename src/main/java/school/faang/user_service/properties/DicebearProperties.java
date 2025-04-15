@@ -1,12 +1,14 @@
-package school.faang.user_service.config.dicebear;
+package school.faang.user_service.properties;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "dicebear")
+@Component
 public class DicebearProperties {
     private String apiUrl;
     private long connectionTimeoutSeconds;

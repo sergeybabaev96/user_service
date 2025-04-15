@@ -1,4 +1,4 @@
-package school.faang.user_service.config.avatar;
+package school.faang.user_service.properties;
 
 import lombok.Getter;
 import lombok.Setter;
