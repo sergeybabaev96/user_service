@@ -4,18 +4,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-import school.faang.user_service.dto.pubsub.RecommendationReceivedEvent;
+import school.faang.user_service.dto.pubsub.FollowerEvent;
 
 @Component
 @RequiredArgsConstructor
-public class RecommendationReceivedEventPublisher implements EventPublisher<RecommendationReceivedEvent> {
+public class FollowerEventPublisher implements EventPublisher<FollowerEvent> {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    @Value("${spring.data.redis.channel.recommendationReceived}")
+    @Value("${spring.data.redis.channel.follower}")
     private String topic;
 
-    public void publish(RecommendationReceivedEvent event) {
+    @Override
+    public void publish(FollowerEvent event) {
         redisTemplate.convertAndSend(topic, event);
     }
 }

@@ -6,11 +6,13 @@ import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.MentorshipRequestDto;
 import school.faang.user_service.dto.RejectionDto;
 import school.faang.user_service.dto.RequestFilterDto;
+import school.faang.user_service.dto.mentorship.MentorshipAcceptedEvent;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.filter.MentorshipRequestFilter;
 import school.faang.user_service.mapper.MentorshipRequestMapper;
+import school.faang.user_service.publisher.MentorshipAcceptedRequestEventPublisher;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 import school.faang.user_service.repository.UserRepository;
 
@@ -28,6 +30,7 @@ public class MentorshipRequestService {
     private final UserRepository userRepository;
     private final MentorshipRequestMapper mentorshipRequestMapper;
     private final List<MentorshipRequestFilter> mentorshipRequestFilters;
+    private final MentorshipAcceptedRequestEventPublisher mentorshipAcceptedRequestEventPublisher;
 
     private static final int MONTHS_BETWEEN_REQUESTS = 3;
 
@@ -113,6 +116,8 @@ public class MentorshipRequestService {
         receiver.getMentors().add(requester);
         request.setStatus(RequestStatus.ACCEPTED);
         mentorshipRequestRepository.save(request);
+        mentorshipAcceptedRequestEventPublisher.publish(
+                new MentorshipAcceptedEvent(requestId, requester.getId(), receiver.getId(), request.getCreatedAt()));
 
         return mentorshipRequestMapper.toDto(request);
     }

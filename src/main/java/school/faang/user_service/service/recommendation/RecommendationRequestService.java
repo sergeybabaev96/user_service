@@ -4,7 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
-import school.faang.user_service.dto.recommendation.RecommendationReceivedEvent;
+import school.faang.user_service.dto.pubsub.RecommendationReceivedEvent;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.dto.recommendation.RejectionDto;
 import school.faang.user_service.dto.recommendation.RequestFilterDto;
@@ -18,7 +18,6 @@ import school.faang.user_service.repository.recommendation.RecommendationRequest
 import school.faang.user_service.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;

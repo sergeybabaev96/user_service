@@ -25,7 +25,7 @@ public class MentorshipService {
 
     public void deleteMentorship(Long userId) {
         User mentor = userRepository.findById(userId)
-                .orElseThrow(()-> {
+                .orElseThrow(() -> {
                     log.error("User with id {} not found", userId);
                     return new EntityNotFoundException("Invalid user Id");
                 });

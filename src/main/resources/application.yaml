@@ -27,6 +27,9 @@ spring:
 
   profiles:
     active: local
+        recommendationReceived: recommendation_event_channel
+        follower: follower_channel
+        mentorship-accepted-event: mentorship-accepted-channel
 
 server:
   port: 8080
