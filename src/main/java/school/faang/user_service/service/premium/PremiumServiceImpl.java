@@ -31,6 +31,8 @@ import school.faang.user_service.enums.premium.PremiumType;
 import school.faang.user_service.exception.PaymentFailedException;
 import school.faang.user_service.exception.PremiumAlreadyPurchasedException;
 import school.faang.user_service.exception.PremiumNotActiveException;
+import school.faang.user_service.exception.PremiumPaymentReplyNotReceivedException;
+import school.faang.user_service.exception.PremiumPriceReplyNotReceivedException;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.PremiumMapper;
 import school.faang.user_service.repository.UserRepository;
@@ -45,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,6 +56,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
 
 import static school.faang.user_service.messages.ErrorMessages.NO_ACTIVE_PREMIUM;
+import static school.faang.user_service.messages.ErrorMessages.NO_PREMIUM_PAYMENT_RESPONSE_RECEIVED_FROM_PAYMENT_SERVICE;
+import static school.faang.user_service.messages.ErrorMessages.NO_PREMIUM_PRICE_RESPONSE_RECEIVED_FROM_PAYMENT_SERVICE;
 import static school.faang.user_service.messages.ErrorMessages.PREMIUM_HAS_ALREADY_BEEN_PURCHASED;
 import static school.faang.user_service.messages.ErrorMessages.UNABLE_TO_PAY_PREMIUM;
 
@@ -140,12 +145,17 @@ public class PremiumServiceImpl implements PremiumService {
         producerRecord.headers().add(new RecordHeader(premiumPaymentCorrelationId,
                 correlationId.getBytes(StandardCharsets.UTF_8)));
 
-        var replyFuture = premiumPaymentReplyingKafkaTemplate.sendAndReceive(producerRecord);
-        PremiumPaymentResponseDto premiumPaymentResponse =
-                replyFuture.thenApply((ConsumerRecord<String, String> responseRecord) ->
-                                jsonUtils.deserialize(responseRecord.value(), PremiumPaymentResponseDto.class))
-                        .join();
-        return updatePremium(premiumPaymentResponse);
+        try {
+            var replyFuture = premiumPaymentReplyingKafkaTemplate.sendAndReceive(producerRecord);
+            PremiumPaymentResponseDto premiumPaymentResponse =
+                    replyFuture.thenApply((ConsumerRecord<String, String> responseRecord) ->
+                                    jsonUtils.deserialize(responseRecord.value(), PremiumPaymentResponseDto.class))
+                            .join();
+            return updatePremium(premiumPaymentResponse);
+        } catch (CompletionException e) {
+            log.error(NO_PREMIUM_PAYMENT_RESPONSE_RECEIVED_FROM_PAYMENT_SERVICE, e);
+            throw new PremiumPaymentReplyNotReceivedException(NO_PREMIUM_PAYMENT_RESPONSE_RECEIVED_FROM_PAYMENT_SERVICE);
+        }
     }
 
     @Override
@@ -165,10 +175,15 @@ public class PremiumServiceImpl implements PremiumService {
         producerRecord.headers().add(new RecordHeader(premiumPriceCorrelationId,
                 correlationId.getBytes(StandardCharsets.UTF_8)));
 
-        var replyFuture = premiumPriceReplyingKafkaTemplate.sendAndReceive(producerRecord);
-        return replyFuture.thenApply((ConsumerRecord<String, String> responseRecord) ->
-                        jsonUtils.deserialize(responseRecord.value(), ExchangeResponseDto.class))
-                .join();
+        try {
+            var replyFuture = premiumPriceReplyingKafkaTemplate.sendAndReceive(producerRecord);
+            return replyFuture.thenApply((ConsumerRecord<String, String> responseRecord) ->
+                            jsonUtils.deserialize(responseRecord.value(), ExchangeResponseDto.class))
+                    .join();
+        } catch (CompletionException e) {
+            log.error(NO_PREMIUM_PRICE_RESPONSE_RECEIVED_FROM_PAYMENT_SERVICE, e);
+            throw new PremiumPriceReplyNotReceivedException(NO_PREMIUM_PRICE_RESPONSE_RECEIVED_FROM_PAYMENT_SERVICE);
+        }
     }
 
     @Override
