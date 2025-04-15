@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -35,7 +34,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -124,7 +122,7 @@ public class RecommendationServiceTest {
                 .thenThrow(new EntityNotFoundException("User is not found"));
 
         Exception exception = Assertions.assertThrows(EntityNotFoundException.class, () ->
-             recommendationService.create(recommendationCreateDto, recommendationCreateDtoId));
+                recommendationService.create(recommendationCreateDto, recommendationCreateDtoId));
 
         assertTrue(exception.getMessage().contains("User is not found"));
 
@@ -141,7 +139,7 @@ public class RecommendationServiceTest {
                 .thenThrow(new EntityNotFoundException("User is not found"));
 
         Exception exception = Assertions.assertThrows(EntityNotFoundException.class, () ->
-            recommendationService.create(recommendationCreateDto, recommendationCreateDtoId));
+                recommendationService.create(recommendationCreateDto, recommendationCreateDtoId));
 
         assertTrue(exception.getMessage().contains("User is not found"));
 
@@ -163,14 +161,14 @@ public class RecommendationServiceTest {
 
         verify(recommendationRepository, times(1))
                 .update(recommendationCreateDtoId
-                        ,recommendationCreateDto.getReceiverId()
-                        ,recommendationCreateDto.getContent());
+                        , recommendationCreateDto.getReceiverId()
+                        , recommendationCreateDto.getContent());
         verify(skillOfferRepository, times(1))
-                        .deleteAllByRecommendationId(recommendationCreateDtoId);
+                .deleteAllByRecommendationId(recommendationCreateDtoId);
         verify(recommendationRepository, times(1))
-                        .findById(recommendationCreateDtoId);
+                .findById(recommendationCreateDtoId);
         verify(recommendationMapper, times(1))
-                        .toViewDto(recommendationEntity);
+                .toViewDto(recommendationEntity);
 
         assertNotNull(result);
     }
@@ -182,7 +180,7 @@ public class RecommendationServiceTest {
                 .thenReturn(Optional.empty());
 
         Exception exception = Assertions.assertThrows(EntityNotFoundException.class, () ->
-            recommendationService.update(recommendationCreateDto, recommendationCreateDtoId));
+                recommendationService.update(recommendationCreateDto, recommendationCreateDtoId));
 
         assertTrue(exception.getMessage().contains("Recommendation not found"));
     }
@@ -206,7 +204,7 @@ public class RecommendationServiceTest {
                 .thenReturn(false);
 
         Exception exception = Assertions.assertThrows(EntityNotFoundException.class, () ->
-            recommendationService.delete(recommendationCreateDtoId));
+                recommendationService.delete(recommendationCreateDtoId));
 
         assertTrue(exception.getMessage()
                 .contains(String.format("Recommendation id %d not found", recommendationCreateDtoId)));
@@ -219,18 +217,18 @@ public class RecommendationServiceTest {
         List<Recommendation> recommendations = List.of(recommendationEntity);
         Page<Recommendation> recommendationPage = new PageImpl<>(recommendations);
 
-        when(recommendationRepository.findAllByReceiverId(receiver.getId(),pageable))
+        when(recommendationRepository.findAllByReceiverId(receiver.getId(), pageable))
                 .thenReturn(recommendationPage);
         when(recommendationMapper.toViewDto(recommendationEntity))
                 .thenReturn(recommendationViewDto);
 
-        Page<RecommendationViewDto> result = recommendationService.getAllUserRecommendations(receiver.getId(),pageable);
+        Page<RecommendationViewDto> result = recommendationService.getAllUserRecommendations(receiver.getId(), pageable);
 
         assertNotNull(result);
         Assertions.assertEquals(1, result.getTotalElements());
 
         verify(recommendationRepository, times(1))
-                .findAllByReceiverId(receiver.getId(),pageable);
+                .findAllByReceiverId(receiver.getId(), pageable);
         verify(recommendationMapper, times(1))
                 .toViewDto(recommendationEntity);
     }
@@ -242,7 +240,7 @@ public class RecommendationServiceTest {
         List<Recommendation> recommendations = List.of(recommendationEntity);
         Page<Recommendation> recommendationPage = new PageImpl<>(recommendations);
 
-        when(recommendationRepository.findAllByAuthorId(author.getId(),pageable))
+        when(recommendationRepository.findAllByAuthorId(author.getId(), pageable))
                 .thenReturn(recommendationPage);
         when(recommendationMapper.toViewDto(recommendationEntity))
                 .thenReturn(recommendationViewDto);
@@ -252,7 +250,7 @@ public class RecommendationServiceTest {
         Assertions.assertEquals(1, result.getTotalElements());
 
         verify(recommendationRepository, times(1))
-                .findAllByAuthorId(author.getId(),pageable);
+                .findAllByAuthorId(author.getId(), pageable);
         verify(recommendationMapper, times(1))
                 .toViewDto(recommendationEntity);
     }
