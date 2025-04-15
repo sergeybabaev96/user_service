@@ -23,18 +23,21 @@ spring:
       channel:
         profile-view: profile_view_channel
         mentorship-request: MentorShipRequestTopic
-
-      channel:
+        goal-completing-channel: goal-completing-channel
+        user-ban: user-ban
         recommendationReceived: recommendation_event_channel
         follower: follower_channel
         mentorship-accepted-event: mentorship-accepted-channel
+
+  profiles:
+    active: local
 
 server:
   port: 8080
 
 logging:
   level:
-    root: info
+    root: debug
 
 project-service:
   host: localhost

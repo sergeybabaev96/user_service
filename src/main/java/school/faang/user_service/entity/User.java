@@ -173,4 +173,7 @@ public class User {
 
     @OneToOne(mappedBy = "user")
     private WorkSchedule workSchedule;
+
+    @Column(name = "banned", columnDefinition = "boolean default false")
+    private boolean banned;
 }

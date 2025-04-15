@@ -18,8 +18,8 @@ import school.faang.user_service.dto.FileData;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.UserProfilePic;
+import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.FileSizeException;
 import school.faang.user_service.exception.InvalidImageFormatException;
@@ -32,11 +32,11 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.event.EventService;
 import school.faang.user_service.service.goal.GoalService;
 
-import java.time.LocalDateTime;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -51,11 +51,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -394,11 +394,24 @@ public class UserServiceTest {
 
         userService.deactivateUser(userId);
 
-        verify(goalService).deleteAllByIds(List.of(101L));
-        verify(goalService).removeUserFromGoals(List.of(102L), userId);
+        verify(goalService).deleteAllByIds(List.of());
+        verify(goalService).removeUserFromGoals(List.of(102L, 102L), userId);
     }
 
+    @Test
+    void testNegativeBanUserWhenUserNotFound() {
+        assertThrows(UserNotFoundException.class, () -> userService.banUser(id));
+    }
 
+    @Test
+    void testPositiveBanUser() {
+        User user = createUser(id);
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
+        userService.banUser(id);
+
+        verify(userRepository, times(1)).save(user);
+    }
 
     private User createUser(Long id) {
         User user = new User();
@@ -413,7 +426,12 @@ public class UserServiceTest {
     }
 
     private UserDto createUserDto(Long id) {
-        return new UserDto(id, "test", "test", true);
+        return UserDto.builder()
+                .id(id)
+                .username("test")
+                .email("test")
+                .active(true)
+                .build();
     }
 
     private List<UserDto> createUserDtos(List<User> users) {

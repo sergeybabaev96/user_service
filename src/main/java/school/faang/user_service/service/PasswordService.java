@@ -2,7 +2,6 @@ package school.faang.user_service.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import school.faang.user_service.exception.DataValidationException;
 
 import java.security.SecureRandom;
