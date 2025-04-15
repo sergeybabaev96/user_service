@@ -116,7 +116,7 @@ class UserControllerTest {
 
             when(userService.getUserBasicInfo(userId)).thenReturn(expectedUser);
 
-            ResponseEntity<UserDto> response = userController.getUserBasicInfo(userId);
+            ResponseEntity<UserDto> response = userController.getUserForService(userId);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertEquals(expectedUser, response.getBody());
@@ -132,7 +132,7 @@ class UserControllerTest {
                     .thenThrow(new DataValidationException("User not found"));
 
             assertThrows(DataValidationException.class, () -> {
-                userController.getUserBasicInfo(userId);
+                userController.getUserForService(userId);
             });
 
             verify(userService).getUserBasicInfo(userId);

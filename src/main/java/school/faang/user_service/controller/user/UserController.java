@@ -56,8 +56,8 @@ public class UserController {
     }
 
     @Operation(summary = "Get basic user info", description = "Returns basic user information for inter-service communication")
-    @GetMapping("/basic/{userId}")
-    public ResponseEntity<UserDto> getUserBasicInfo(@PathVariable long userId) {
+    @GetMapping("/internal/{userId}")
+    public ResponseEntity<UserDto> getUserForService(@PathVariable long userId) {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(userService.getUserBasicInfo(userId));
