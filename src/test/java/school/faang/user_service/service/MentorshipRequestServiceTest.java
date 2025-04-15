@@ -1,4 +1,4 @@
-package school.faang.user_service.service.service;
+package school.faang.user_service.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,13 +15,13 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.filter.MentorshipRequestFilter;
 import school.faang.user_service.mapper.MentorshipRequestMapperImpl;
 import school.faang.user_service.publisher.MentorshipAcceptedRequestEventPublisher;
+import school.faang.user_service.publisher.MentorshipRequestedEventPublisher;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
-import school.faang.user_service.service.MentorshipRequestService;
-import school.faang.user_service.service.filter.TestMentorshipRequestDescriptionFilter;
-import school.faang.user_service.service.filter.TestMentorshipRequestReceiverIdFilter;
-import school.faang.user_service.service.filter.TestMentorshipRequestRequesterIdFilter;
-import school.faang.user_service.service.filter.TestMentorshipRequestStatusFilter;
+import school.faang.user_service.filter.mentorship.TestMentorshipRequestDescriptionFilter;
+import school.faang.user_service.filter.mentorship.TestMentorshipRequestReceiverIdFilter;
+import school.faang.user_service.filter.mentorship.TestMentorshipRequestRequesterIdFilter;
+import school.faang.user_service.filter.mentorship.TestMentorshipRequestStatusFilter;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +53,9 @@ public class MentorshipRequestServiceTest {
     @Mock
     private MentorshipAcceptedRequestEventPublisher mentorshipPublisher;
 
+    @Mock
+    private MentorshipRequestedEventPublisher mentorshipRequestedEventPublisher;
+
     private MentorshipRequestService service;
 
     private RequestFilterDto requestFilterDto;
@@ -81,7 +84,8 @@ public class MentorshipRequestServiceTest {
 
         service = new MentorshipRequestService(mentorshipRequestRepository, userRepository, mentorshipRequestMapper,
                 List.of(mentorshipRequestDescriptionFilter, mentorshipRequestReceiverIdFilter,
-                        mentorshipRequestRequesterIdFilter, mentorshipRequestStatusFilter), mentorshipPublisher);
+                        mentorshipRequestRequesterIdFilter, mentorshipRequestStatusFilter),
+                mentorshipRequestedEventPublisher, mentorshipPublisher);
     }
 
     @Test

@@ -1,4 +1,4 @@
-package school.faang.user_service.service.goal;
+package school.faang.user_service.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,14 +15,15 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
-import school.faang.user_service.exception.goal.GoalAlreadyCompletedException;
-import school.faang.user_service.exception.skill.SkillLimitExceededException;
+import school.faang.user_service.exception.GoalAlreadyCompletedException;
+import school.faang.user_service.exception.SkillLimitExceededException;
 import school.faang.user_service.filter.goal.GoalFilter;
 import school.faang.user_service.mapper.goal.GoalMapperImpl;
 import school.faang.user_service.publisher.GoalCompletedPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
+import school.faang.user_service.service.goal.GoalService;
 
 import java.util.Collections;
 import java.util.List;

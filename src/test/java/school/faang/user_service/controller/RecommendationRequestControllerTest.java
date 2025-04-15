@@ -1,10 +1,11 @@
-package school.faang.user_service.controller.recommendation;
+package school.faang.user_service.controller;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import school.faang.user_service.controller.recommendation.RecommendationRequestController;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.dto.recommendation.RejectionDto;
 import school.faang.user_service.dto.recommendation.RequestFilterDto;

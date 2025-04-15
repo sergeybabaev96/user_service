@@ -16,7 +16,7 @@ import school.faang.user_service.mapper.MentorshipRequestMapper;
 import school.faang.user_service.publisher.MentorshipAcceptedRequestEventPublisher;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 import school.faang.user_service.repository.UserRepository;
-import school.faang.user_service.service.publisher.MentorshipRequestedEventPublisher;
+import school.faang.user_service.publisher.MentorshipRequestedEventPublisher;
 
 import java.time.LocalDateTime;
 import java.util.List;

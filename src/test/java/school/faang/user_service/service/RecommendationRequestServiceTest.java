@@ -1,4 +1,4 @@
-package school.faang.user_service.service.recommendation;
+package school.faang.user_service.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,14 +17,14 @@ import school.faang.user_service.filter.recommendation.TestRecommendationRequest
 import school.faang.user_service.mapper.RecommendationRequestMapperImpl;
 import school.faang.user_service.publisher.RecommendationReceivedEventPublisher;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
-import school.faang.user_service.service.UserService;
+import school.faang.user_service.service.recommendation.RecommendationRequestService;
+import school.faang.user_service.service.recommendation.SkillRequestService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -46,7 +46,7 @@ class RecommendationRequestServiceTest {
     @Spy
     private RecommendationRequestMapperImpl recommendationRequestMapper;
 
-    private RecommendationRequestFilter filter = new TestRecommendationRequestAcceptedFilterStutus();
+    private final RecommendationRequestFilter filter = new TestRecommendationRequestAcceptedFilterStutus();
 
     @Mock
     private UserService userService;

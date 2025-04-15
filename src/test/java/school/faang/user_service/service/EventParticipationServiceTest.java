@@ -1,4 +1,4 @@
-package school.faang.user_service.service.event;
+package school.faang.user_service.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +11,7 @@ import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.event.EventParticipationRepository;
+import school.faang.user_service.service.event.EventParticipationService;
 
 import java.util.List;
 

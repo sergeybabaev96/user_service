@@ -1,4 +1,4 @@
-package school.faang.user_service.UserFilterTest;
+package school.faang.user_service.filter.UserFilterTest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -6,7 +6,6 @@ import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.filter.user.UserExperienceFilter;
 import school.faang.user_service.filter.user.UserFilter;
-import school.faang.user_service.filter.user.UserPhoneFilter;
 
 import java.util.stream.Stream;
 
