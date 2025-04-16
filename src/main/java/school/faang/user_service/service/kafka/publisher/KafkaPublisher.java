@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import static school.faang.user_service.messages.ErrorMessages.SERIALIZATION_ERROR;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -20,7 +22,7 @@ public class KafkaPublisher {
                 kafkaOperations.send(topic, objectMapper.writeValueAsString(object));
                 log.info("Published to kafka: {}", object);
             } catch (JsonProcessingException e) {
-                log.error("Serialization error", e);
+                log.error(SERIALIZATION_ERROR, e);
                 throw new RuntimeException(e);
             }
             return true;

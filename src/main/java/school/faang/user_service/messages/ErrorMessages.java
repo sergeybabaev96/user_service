@@ -12,4 +12,5 @@ public class ErrorMessages {
     public static final String THE_USER_DOES_NOT_HAVE_AN_ACTIVE_PREMIUM_SUBSCRIPTION = "The user does not have an active premium subscription.";
     public static final String THE_PAYMENT_ATTEMPT_WAS_UNSUCCESSFUL = "The payment attempt was unsuccessful. Please try again later";
 
+    public static final String SERIALIZATION_ERROR = "Serialization error";
 }

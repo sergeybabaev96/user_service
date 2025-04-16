@@ -12,8 +12,8 @@ spring:
       topics:
         premium:
           payment:
-            payment-request-topic: "premium-payment-request-topic"
-            price-request-topic: "premium-price-request-topic"
+            payment-response-topic: "premium-payment-response-topic"
+            price-response-topic: "premium-price-response-topic"
 
     consumer:
       enable-auto-commit: false

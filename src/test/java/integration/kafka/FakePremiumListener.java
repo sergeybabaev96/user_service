@@ -10,16 +10,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.kafka.test.EmbeddedKafkaBroker;
-import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
-import school.faang.user_service.UserServiceApplication;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import school.faang.user_service.dto.payment.CurrencyDto;
 import school.faang.user_service.dto.payment.PaymentResponseDto;
 import school.faang.user_service.dto.payment.PaymentStatus;
@@ -33,12 +28,8 @@ import java.nio.charset.StandardCharsets;
 @Component
 @Slf4j
 @ActiveProfiles("test")
-@EmbeddedKafka(partitions = 1,
-        brokerProperties = {
-                "transaction.state.log.replication.factor=1",
-                "transaction.state.log.min.isr=1"
-        }
-)
+@SpringBootTest
+@Testcontainers
 public class FakePremiumListener {
     private static final String RECEIVED_MESSAGE_FROM_KAFKA = "Received message from kafka: {}";
     public static final String FAILED_TO_ACKNOWLEDGE_KAFKA_MESSAGE = "Failed to acknowledge Kafka message";
@@ -46,15 +37,10 @@ public class FakePremiumListener {
     @Value("${spring.kafka.consumer.topics.premium.price-request-topic}")
     String aaa;
 
-    private Consumer<String, String> consumer;
-
-    @Value("${spring.kafka.producer.topics.premium.payment.payment-request-topic}")
-    private String paymentRequestTopic;
-
     @Value("${spring.kafka.consumer.correlation.premium-price}")
     private String premiumPaymentCorrelationId;
 
-    @Value("${spring.kafka.consumer.topics.premium.payment.payment-response-topic}")
+    @Value("${spring.kafka.producer.topics.premium.payment.payment-response-topic}")
     private String paymentResponseTopic;
 
     @Autowired
@@ -63,19 +49,9 @@ public class FakePremiumListener {
     @Autowired
     private TestKafkaPublisher testKafkaPublisher;
 
-    @Autowired
-    private ConsumerFactory<String, String> consumerFactory;
-
     @PostConstruct
     public void init() {
         log.info("FakePremiumListener started with topic {}", aaa);
-    }
-
-    @DynamicPropertySource
-    static void setKafkaProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.kafka.bootstrap-servers", () -> System.getProperty("spring.embedded.kafka.brokers"));
-        registry.add("spring.kafka.consumer.topics.premium.payment-request-topic", () -> "premium-price-request-topic");
-        registry.add("spring.kafka.producer.topics.premium.payment.payment-request-topic", () -> "premium-payment-request-topic");
     }
 
     @KafkaListener(

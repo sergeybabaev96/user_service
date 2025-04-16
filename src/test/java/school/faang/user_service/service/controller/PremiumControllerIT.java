@@ -40,10 +40,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 UserServiceApplication.class,
                 TestKafkaPublisher.class
         }
+        //properties = "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}"
 )
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@EmbeddedKafka(partitions = 1,
+        brokerProperties = {
+                "transaction.state.log.replication.factor=1",
+                "transaction.state.log.min.isr=1",
+                "listeners=PLAINTEXT://localhost:9092",
+                "port=9092"
+        }
+)
 public class PremiumControllerIT {
 
     @Autowired
