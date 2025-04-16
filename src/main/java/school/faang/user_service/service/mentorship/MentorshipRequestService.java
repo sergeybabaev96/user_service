@@ -4,10 +4,13 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.event.MentorshipAcceptedEventDto;
 import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.exception.DataValidationException;
+import school.faang.user_service.properties.EventType;
+import school.faang.user_service.publisher.MentorshipAcceptedEventPublisher;
 import school.faang.user_service.repository.mentorship.MentorshipRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 
@@ -19,6 +22,7 @@ public class MentorshipRequestService {
     private final MentorshipService mentorshipService;
     private final MentorshipRepository mentorshipRepository;
     private final MentorshipRequestRepository mentorshipRequestRepository;
+    private final MentorshipAcceptedEventPublisher mentorshipAcceptedEventPublisher;
 
     public void requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
         existsById(mentorshipRequestDto.getMentorId(), "Mentor");
@@ -30,6 +34,7 @@ public class MentorshipRequestService {
                         createMentorshipRequest(mentorshipRequestDto, mentorshipRequest));
         validateMenteeIsNotMentor(mentorshipRequestDto);
     }
+
     @Transactional
     public void acceptMentorshipRequest(long id) {
         MentorshipRequest mentorshipRequest = mentorshipRequestRepository.findById(id)
@@ -37,6 +42,11 @@ public class MentorshipRequestService {
         validateMentorHasNotMentee(mentorshipRequest.getReceiver().getId(), mentorshipRequest.getRequester().getId());
         mentorshipRequest.getRequester().getMentors().add(mentorshipRequest.getReceiver());
         mentorshipRequest.setStatus(RequestStatus.ACCEPTED);
+
+        mentorshipAcceptedEventPublisher.publish(MentorshipAcceptedEventDto.builder()
+                .requestId(id).requesterId(mentorshipRequest.getRequester().getId())
+                .receiverId(mentorshipRequest.getReceiver().getId())
+                .eventType(EventType.MENTORSHIP_ACCEPTED).build());
     }
 
     private void existsById(long id, String owner) {
