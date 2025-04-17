@@ -167,4 +167,7 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<WorkSchedule> workSchedule;
+
+    @Column(name = "banned", nullable = false)
+    private boolean banned;
 }

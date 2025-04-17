@@ -77,13 +77,13 @@ public class UserServiceTest {
     private UserContext userContext;
 
     @Mock
-    private EventServiceImpl eventService;
+    private EventService eventService;
 
     @Mock
-    private GoalServiceImpl goalService;
+    private GoalService goalService;
 
     @Mock
-    private MentorUserRelationHandlerImpl mentorshipService;
+    private MentorUserRelationHandler mentorshipService;
 
     @InjectMocks
     private UserServiceImpl userService;

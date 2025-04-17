@@ -105,6 +105,8 @@ tasks.withType<JavaCompile> {
     )
 }
 
+val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
+
 tasks.bootJar {
     archiveFileName.set("service.jar")
 }
@@ -165,6 +167,7 @@ tasks.jacocoTestCoverageVerification {
                 "school.faang.user_service.service.RecommendationRequestService",
                 "school.faang.user_service.service.SkillRequestService",
                 "school.faang.user_service.service.SkillService",
+                "school.faang.user_service.listener.RedisUserBanTopicListener",
             )
 
             limit {

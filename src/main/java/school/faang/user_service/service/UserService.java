@@ -7,21 +7,23 @@ import school.faang.user_service.entity.User;
 import java.util.List;
 
 public interface UserService {
-    User getReferenceById(long userId);
-
     long findUniqueIdByUsername(String username);
+
+    User getReferenceById(long userId);
 
     User findUserById(long userId);
 
     void checkUserExists(Long userId);
 
-    boolean existsById(long userId);
-
     UserDto deactivateUser();
+
+    boolean existsById(long userId);
 
     UserDto getUser(long userId);
 
     List<UserDto> getUsersByIds(List<Long> ids);
+
+    void banUserById(long userId);
 
     UserDto createUser(CreateUserDto createUserDto);
 }
