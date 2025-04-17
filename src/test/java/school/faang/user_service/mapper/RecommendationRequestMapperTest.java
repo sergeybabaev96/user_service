@@ -7,6 +7,7 @@ import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
+import school.faang.user_service.mapper.recommendation.RecommendationRequestMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;

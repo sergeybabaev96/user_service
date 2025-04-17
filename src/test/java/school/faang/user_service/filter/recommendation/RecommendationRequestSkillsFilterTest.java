@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import school.faang.user_service.dto.recommendation.RequestFilterDto;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.entity.recommendation.SkillRequest;
+import school.faang.user_service.filter.recommendationrequest.RecommendationRequestSkillsFilter;
 
 import java.util.Arrays;
 import java.util.Collections;

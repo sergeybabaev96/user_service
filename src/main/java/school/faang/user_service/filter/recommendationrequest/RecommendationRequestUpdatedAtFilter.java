@@ -1,4 +1,4 @@
-package school.faang.user_service.filter.recommendation;
+package school.faang.user_service.filter.recommendationrequest;
 
 import school.faang.user_service.dto.recommendation.RequestFilterDto;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
@@ -6,22 +6,22 @@ import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
-public class RecommendationRequestCreatedAtFilter implements RecommendationRequestFilter {
+public class RecommendationRequestUpdatedAtFilter implements RecommendationRequestFilter {
 
     @Override
     public boolean isApplicable(RequestFilterDto filterDto) {
-        return filterDto.getCreatedAt() != null;
+        return filterDto.getUpdatedAt() != null;
     }
 
     @Override
     public Stream<RecommendationRequest> apply(Stream<RecommendationRequest> requests, RequestFilterDto filterDto) {
-        LocalDateTime threshold = filterDto.getCreatedAt();
+        LocalDateTime threshold = filterDto.getUpdatedAt();
         return requests.filter(request -> {
-            LocalDateTime createdAt = request.getCreatedAt();
-            if (createdAt == null) {
+            LocalDateTime updatedAt = request.getUpdatedAt();
+            if (updatedAt == null) {
                 return false;
             }
-            return !createdAt.isBefore(threshold);
+            return !updatedAt.isBefore(threshold);
         });
     }
 }
