@@ -3,7 +3,7 @@ package school.faang.user_service.mapper;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import school.faang.user_service.dto.SkillRequestDto;
+import school.faang.user_service.dto.recommendation.SkillRequestDto;
 import school.faang.user_service.entity.recommendation.SkillRequest;
 
 @Mapper(componentModel = "spring")

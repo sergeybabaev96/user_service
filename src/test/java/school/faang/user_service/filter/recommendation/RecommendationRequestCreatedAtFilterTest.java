@@ -1,7 +1,7 @@
 package school.faang.user_service.filter.recommendation;
 
 import org.junit.jupiter.api.Test;
-import school.faang.user_service.dto.RequestFilterDto;
+import school.faang.user_service.dto.recommendation.RequestFilterDto;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 
 import java.time.LocalDateTime;
