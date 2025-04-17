@@ -60,25 +60,21 @@ class RecommendationRequestServiceTest {
 
     @Test
     public void testCanRequestRecommendation_NoPreviousRequest() {
-        // arrange
         User requester = new User();
         requester.setId(1L);
         User receiver = new User();
         receiver.setId(2L);
 
-        // act
         when(recommendationRequestRepository.findLatestPendingRequest(
                 requester.getId(), receiver.getId())
         ).thenReturn(Optional.empty());
         boolean result = recommendationRequestService.canRequestRecommendation(requester, receiver);
 
-        //assert
         assertTrue(result);
     }
 
     @Test
     public void testCanRequestRecommendation_EnoughTimePassed() {
-        // arrange
         User requester = new User();
         requester.setId(1L);
         User receiver = new User();
@@ -88,19 +84,16 @@ class RecommendationRequestServiceTest {
         RecommendationRequest request = new RecommendationRequest();
         request.setCreatedAt(pastTime);
 
-        // act
         when(recommendationRequestRepository.findLatestPendingRequest(
                 requester.getId(), receiver.getId())
         ).thenReturn(Optional.of(request));
         boolean result = recommendationRequestService.canRequestRecommendation(requester, receiver);
 
-        //assert
         assertTrue(result);
     }
 
     @Test
     public void testCanRequestRecommendation_TooSoon() {
-        // arrange
         User requester = new User();
         requester.setId(1L);
         User receiver = new User();
@@ -110,49 +103,41 @@ class RecommendationRequestServiceTest {
         RecommendationRequest request = new RecommendationRequest();
         request.setCreatedAt(pastTime);
 
-        // act
         when(recommendationRequestRepository.findLatestPendingRequest(
                 requester.getId(), receiver.getId())
         ).thenReturn(Optional.of(request));
         boolean result = recommendationRequestService.canRequestRecommendation(requester, receiver);
 
-        //assert
         assertFalse(result);
     }
 
     @Test
     public void testAllSkillsExist_AllExist() {
-        // arrange
         SkillRequestDto skill1 = new SkillRequestDto();
         skill1.setId(1L);
         SkillRequestDto skill2 = new SkillRequestDto();
         skill2.setId(2L);
         List<SkillRequestDto> skills = List.of(skill1, skill2);
 
-        // act
         when(skillRepository.existsById(1L)).thenReturn(true);
         when(skillRepository.existsById(2L)).thenReturn(true);
         boolean result = recommendationRequestService.allSkillsExist(skills);
 
-        //assert
         assertTrue(result);
     }
 
     @Test
     public void testAllSkillsExist_OneDoesNotExist() {
-        // arrange
         SkillRequestDto skill1 = new SkillRequestDto();
         skill1.setId(1L);
         SkillRequestDto skill2 = new SkillRequestDto();
         skill2.setId(2L);
         List<SkillRequestDto> skills = List.of(skill1, skill2);
 
-        // act
         when(skillRepository.existsById(1L)).thenReturn(true);
         when(skillRepository.existsById(2L)).thenReturn(false);
         boolean result = recommendationRequestService.allSkillsExist(skills);
 
-        //assert
         assertFalse(result);
     }
 

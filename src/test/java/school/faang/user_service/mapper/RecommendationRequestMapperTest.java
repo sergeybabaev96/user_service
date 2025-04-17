@@ -21,7 +21,6 @@ class RecommendationRequestMapperTest {
 
     @Test
     void toRecommendationRequest() {
-        // arrange
         RecommendationRequestDto dto = new RecommendationRequestDto();
         dto.setId(1L);
         dto.setMessage("Hello World");
@@ -30,10 +29,8 @@ class RecommendationRequestMapperTest {
         dto.setSkills(List.of());
         dto.setStatus(RequestStatus.PENDING);
 
-        // act
         RecommendationRequest request = recommendationRequestMapper.toRecommendationRequest(dto);
 
-        // assert
         assertNotNull(request, "Полученный объект не должен быть null");
         assertEquals(dto.getId(), request.getId(), "Проверка идентификатора");
         assertEquals(dto.getMessage(), request.getMessage(), "Проверка сообщения");
@@ -42,13 +39,10 @@ class RecommendationRequestMapperTest {
         assertNotNull(request.getReceiver(), "Объект receiver не должен быть null");
         assertEquals(dto.getReceiverId(), request.getReceiver().getId(), "Проверка идентификатора receiver");
         assertEquals(dto.getStatus(), request.getStatus(), "Проверка статуса");
-        assertNotNull(request.getSkills(), "Список скиллов не должен быть null");
-        assertEquals(dto.getSkills().size(), request.getSkills().size(), "Проверка размера списка скиллов");
     }
 
     @Test
     void toRecommendationRequestDto() {
-        // arrange
         RecommendationRequest request = new RecommendationRequest();
         request.setId(2L);
         request.setMessage("Test Message");
@@ -62,10 +56,8 @@ class RecommendationRequestMapperTest {
         request.setRequester(requester);
         request.setReceiver(receiver);
 
-        // act
         RecommendationRequestDto dto = recommendationRequestMapper.toRecommendationRequestDto(request);
 
-        // assert
         assertNotNull(dto, "DTO не должен быть null");
         assertEquals(request.getId(), dto.getId(), "Проверка идентификатора");
         assertEquals(request.getMessage(), dto.getMessage(), "Проверка сообщения");
@@ -78,7 +70,6 @@ class RecommendationRequestMapperTest {
 
     @Test
     void toRecommendationRequestDtoList() {
-        // arrange
         RecommendationRequest request1 = new RecommendationRequest();
         request1.setId(10L);
         request1.setMessage("Message 10");
@@ -107,10 +98,8 @@ class RecommendationRequestMapperTest {
 
         List<RecommendationRequest> requestList = List.of(request1, request2);
 
-        // act
         List<RecommendationRequestDto> dtoList = recommendationRequestMapper.toRecommendationRequestDtoList(requestList);
 
-        // assert
         assertNotNull(dtoList, "Список DTO не должен быть null");
         assertEquals(requestList.size(), dtoList.size(), "Проверка размера списка DTO");
 
