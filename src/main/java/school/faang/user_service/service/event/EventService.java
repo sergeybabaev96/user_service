@@ -11,17 +11,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventService {
     private final EventRepository eventRepository;
-    private final ExecutorService executor = Executors.newFixedThreadPool(5); // или настраиваемый бин
+    public final ExecutorService eventDeletionExecutor;
 
     public void deletePastEvents(int batchSize) {
-        List<Long> idsToDelete = eventRepository.findIdsByEndDateBefore(LocalDateTime.now());
+        if (batchSize <= 0) {
+            throw new IllegalArgumentException("batchSize должен быть с положительным числом");
+        }
+            List<Long> idsToDelete = eventRepository.findIdsByEndDateBefore(LocalDateTime.now());
 
         if (idsToDelete.isEmpty()) {
             log.warn("Нет завершённых событий для удаления");
@@ -31,7 +33,7 @@ public class EventService {
         List<List<Long>> partitions = ListUtils.partition(idsToDelete, batchSize);
 
         List<CompletableFuture<Void>> futures = partitions.stream()
-                .map(batch -> CompletableFuture.runAsync(() -> deleteBatch(batch), executor))
+                .map(batch -> CompletableFuture.runAsync(() -> deleteBatch(batch), eventDeletionExecutor))
                 .toList();
 
         futures.forEach(f -> {
