@@ -14,14 +14,14 @@ public interface UserMapper {
     @Mapping(target = "mentorsIds", ignore = true)
     UserViewDto toViewDto(User user);
 
-    default UserDto toBasicInfoDto(User user) {
+    default UserDto toDto(User user) {
         return UserDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .preference(user.getPreference())
-                .locale(Locale.forLanguageTag(user.getLocale()))
+                .locale(Locale.forLanguageTag(String.valueOf(user.getLocale())))
                 .build();
     }
 }

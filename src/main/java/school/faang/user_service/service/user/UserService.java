@@ -105,7 +105,7 @@ public class UserService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .preference(user.getPreference())
-                .locale(Locale.forLanguageTag(user.getLocale()))
+                .locale(Locale.forLanguageTag(String.valueOf(user.getLocale())))
                 .build();
     }
 }

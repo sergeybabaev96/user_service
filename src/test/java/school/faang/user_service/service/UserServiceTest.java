@@ -12,10 +12,12 @@ import school.faang.user_service.dto.user.UserViewDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.UserMapper;
+import school.faang.user_service.model.PreferredContact;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.user.UserService;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,12 +41,22 @@ class UserServiceTest {
 
     private final long validUserId = 1L;
     private final long invalidUserId = 999L;
-    private final User testUser = User.builder().id(validUserId).build();
-    private final UserViewDto userViewDto = new UserViewDto();
-    private final UserDto userBasicDto = UserDto.builder()
+    private final User testUser = User.builder()
             .id(validUserId)
             .username("testUser")
             .email("test@example.com")
+            .phone("1234567890")
+            .preference(PreferredContact.EMAIL)
+            .locale(Locale.ENGLISH)
+            .build();
+    private final UserViewDto userViewDto = new UserViewDto();
+    private final UserDto userDto = UserDto.builder()
+            .id(validUserId)
+            .username("testUser")
+            .email("test@example.com")
+            .phone("1234567890")
+            .preference(PreferredContact.EMAIL)
+            .locale(Locale.ENGLISH)
             .build();
 
     @Nested

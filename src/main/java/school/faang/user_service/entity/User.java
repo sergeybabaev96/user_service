@@ -37,6 +37,7 @@ import school.faang.user_service.model.PreferredContact;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @Data
 @Builder
@@ -176,5 +177,5 @@ public class User {
     private PreferredContact preference = PreferredContact.EMAIL;
 
     @Column(name = "locale", length = 10)
-    private String locale = "en_US";
+    private Locale locale = Locale.ENGLISH;
 }
