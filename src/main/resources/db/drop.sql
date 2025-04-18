@@ -32,3 +32,4 @@ DELETE FROM databasechangelog WHERE filename = 'db/changelog/changeset/user_V005
 DELETE FROM databasechangelog WHERE filename = 'db/changelog/changeset/user_V006__insert_users.sql';
 DELETE FROM databasechangelog WHERE filename = 'db/changelog/changeset/user_V007__user_premium.sql';
 DELETE FROM databasechangelog WHERE filename = 'db/changelog/changeset/user_V008__insert_user_premium.sql';
+--TRUNCATE TABLE databasechangelog;

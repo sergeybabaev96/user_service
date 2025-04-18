@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.skill.SkillCandidateDto;
 import school.faang.user_service.dto.skill.SkillDto;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.SkillService;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class SkillController {
 
     @PostMapping
     public SkillDto create(@RequestBody SkillDto skillDto) {
+        validateSkill(skillDto);
         return service.createSkill(skillDto);
     }
 
@@ -38,5 +40,12 @@ public class SkillController {
     @PutMapping("/acquire")
     public SkillDto acquireSkillFromOffers(@RequestParam long skillId, @RequestParam long userId) {
         return service.acquireSkillFromOffers(skillId, userId);
+    }
+
+    private void validateSkill(SkillDto skillDto) {
+        String title = skillDto.getTitle();
+        if (title == null || title.isEmpty() || title.isBlank()) {
+            throw new DataValidationException("Не валидное значение для skill");
+        }
     }
 }

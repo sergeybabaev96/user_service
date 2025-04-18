@@ -15,3 +15,7 @@ databaseChangeLog:
       file: db/changelog/changeset/user_V007__user_premium.sql
   - include:
       file: db/changelog/changeset/user_V008__insert_user_premium.sql
+  - include:
+      file: db/changelog/changeset/skill_V009__insert_skill.sql
+  - include:
+      file: db/changelog/changeset/user_skill_V010__insert_user_skill.sql

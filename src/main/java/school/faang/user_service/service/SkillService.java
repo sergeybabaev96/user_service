@@ -34,23 +34,21 @@ public class SkillService {
 
     @Transactional
     public SkillDto createSkill(SkillDto skillDto) {
-        validateSkillDto(skillDto);
         if (skillRepository.existsByTitle(skillDto.getTitle())) {
             throw new DataValidationException("Skill " + skillDto.getTitle() + " already exists");
         }
         Skill skill = skillMapper.toEntity(skillDto);
-        List<User> users = userRepository.findAllById(skillDto.getUserIds());
-        skill.setUsers(users);
+
         return skillMapper.toDto(skillRepository.save(skill));
     }
 
     public List<SkillDto> getUserSkills(long userId) {
-        return skillMapper.toDto(skillRepository.findAllByUserId(userId));
+      return getSkillDtoList(skillRepository.findAllByUserId(userId));
     }
 
     public List<SkillCandidateDto> getOfferedSkills(long usedId) {
         List<Skill> offeredSkills = skillRepository.findSkillsOfferedToUser(usedId);
-        List<SkillDto> offeredSkillDtos = skillMapper.toDto(offeredSkills);
+        List<SkillDto> offeredSkillDtos = getSkillDtoList(offeredSkills);
         Map<SkillDto, Long> skills = new HashMap<>();
         List<SkillCandidateDto> skillCandidateDtos = new ArrayList<>();
 
@@ -83,10 +81,10 @@ public class SkillService {
         return skillMapper.toDto(skillRepository.getById(skillId));
     }
 
-    private void validateSkillDto(SkillDto skillDto) {
-        String title = skillDto.getTitle();
-        if (title == null || title.isEmpty() || title.isBlank()) {
-            throw new DataValidationException("Empty skillDto title");
-        }
+    private List<SkillDto> getSkillDtoList(List<Skill> skills) {
+        return skills.stream()
+                .map(skillMapper::toDto)
+                .toList();
     }
+
 }
