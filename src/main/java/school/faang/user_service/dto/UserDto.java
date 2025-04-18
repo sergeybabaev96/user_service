@@ -11,14 +11,14 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
-    private long id;
+    private Long id;
     private String username;
     private String email;
     private String phone;
     private String password;
     private boolean active;
     private String aboutMe;
-    private long countryId;
+    private Long countryId;
     private String city;
     private Integer experience;
     private LocalDateTime createdAt;
