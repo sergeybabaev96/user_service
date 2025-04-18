@@ -22,7 +22,7 @@ import java.util.List;
 public class RecommendationCreateDto {
     @NotNull(message = "authorId не может быть null")
     @Schema(
-            description = "ID автора рекомендации",
+            description = "Recommendation author ID",
             example = "123",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
@@ -30,7 +30,7 @@ public class RecommendationCreateDto {
 
     @NotNull(message = "receiverId не может быть null")
     @Schema(
-            description = "ID получателя рекомендации",
+            description = "Recommendation receiver ID",
             example = "456",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
@@ -38,8 +38,8 @@ public class RecommendationCreateDto {
 
     @NotBlank(message = "content не может быть null")
     @Schema(
-            description = "Текст рекомендации",
-            example = "Отличный специалист с глубокими знаниями в области машинного обучения",
+            description = "Recommendation text",
+            example = "Middle Java developer",
             requiredMode = Schema.RequiredMode.REQUIRED,
             minLength = 1,
             maxLength = 1000
@@ -47,7 +47,7 @@ public class RecommendationCreateDto {
     private String content;
 
     @Schema(
-            description = "Список предлагаемых навыков",
+            description = "List of recommendation skills",
             implementation = SkillOfferCreateDto.class
     )
     private List<SkillOfferCreateDto> skillOffers;

@@ -28,6 +28,7 @@ import school.faang.user_service.service.skilloffer.SkillOfferService;
 import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.validation.recommendation.RecommendationValidator;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
@@ -155,11 +156,18 @@ public class RecommendationService {
 
     private RecommendationEvent toEvent(Recommendation recommendation) {
         RecommendationEvent recommendationEvent = new RecommendationEvent();
+
+        Long id = recommendation.getId();
+        recommendationEvent.setId(id);
+
         Long authorId = recommendation.getAuthor().getId();
         recommendationEvent.setAuthorId(authorId);
 
         Long receiverId = recommendation.getReceiver().getId();
         recommendationEvent.setReceiverId(receiverId);
+
+        LocalDateTime createdAt = recommendation.getCreatedAt();
+        recommendationEvent.setCreatedAt(createdAt);
 
         return recommendationEvent;
     }

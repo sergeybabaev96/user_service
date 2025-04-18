@@ -43,7 +43,7 @@ public class RecommendationController {
     private final RecommendationService recommendationService;
 
     @Operation(
-            summary = "Создает новую рекомендацию"
+            summary = "Created new recommendation"
     )
     @PostMapping("{recommendationId}")
     public ResponseEntity<RecommendationViewDto> createRecommendation(
@@ -60,7 +60,7 @@ public class RecommendationController {
     }
 
     @Operation(
-            summary = "Обновляет уже существующую рекомендацию"
+            summary = "Updated recommendation"
     )
     @PutMapping("{recommendationId}")
     public ResponseEntity<RecommendationViewDto> updateRecommendation(
@@ -76,7 +76,7 @@ public class RecommendationController {
     }
 
     @Operation(
-            summary = "Удаляет рекомендацию по ее айди"
+            summary = "Delete recommendation by ID"
     )
     @DeleteMapping("{recommendationId}")
     public ResponseEntity<Void> deleteRecommendation(@NotNull Long recommendationId) {
@@ -89,7 +89,7 @@ public class RecommendationController {
     }
 
     @Operation(
-            summary = "Получает все рекомендации пользователя"
+            summary = "Get all user recommendations"
     )
     @GetMapping("{receiverId}/{pageable}/get-all-user-recommendation")
     public ResponseEntity<Page<RecommendationViewDto>> getAllUserRecommendations(
@@ -107,7 +107,7 @@ public class RecommendationController {
     }
 
     @Operation(
-            summary = "Получает все рекоменадации созданные пользователем"
+            summary = "Get all created recommendations"
     )
     @GetMapping("{authorId}/{pageable}/get-all-created-recommendation")
     public ResponseEntity<Page<RecommendationViewDto>> getAllCreatedRecommendation(

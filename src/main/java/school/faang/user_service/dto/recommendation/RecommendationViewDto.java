@@ -24,7 +24,7 @@ import java.util.List;
 public class RecommendationViewDto {
     @NotNull(message = "id не может быть null")
     @Schema(
-            description = "Уникальный идентификатор рекомендации",
+            description = "recommendation ID",
             example = "1",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
@@ -32,7 +32,7 @@ public class RecommendationViewDto {
 
     @NotNull(message = "authorId не может быть null")
     @Schema(
-            description = "ID автора рекомендации",
+            description = "Recommendation author ID",
             example = "123",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
@@ -40,7 +40,7 @@ public class RecommendationViewDto {
 
     @NotNull(message = "receiverId не может быть null")
     @Schema(
-            description = "ID получателя рекомендации",
+            description = "Recommendation receiver ID",
             example = "456",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
@@ -48,8 +48,8 @@ public class RecommendationViewDto {
 
     @NotBlank(message = "content не может быть null")
     @Schema(
-            description = "Текст рекомендации",
-            example = "Исключительный специалист с глубокими знаниями Java и Spring",
+            description = "Recommendation text",
+            example = "Middle Java developer",
             requiredMode = Schema.RequiredMode.REQUIRED,
             minLength = 1,
             maxLength = 2000
@@ -57,13 +57,13 @@ public class RecommendationViewDto {
     private String content;
 
     @Schema(
-            description = "Список предлагаемых навыков",
+            description = "List of recommendation skills",
             implementation = SkillOfferViewDto.class
     )
     private List<SkillOfferViewDto> skillOffers;
 
     @Schema(
-            description = "Дата и время создания рекомендации",
+            description = "Date and Time of created recommendation",
             example = "2023-05-15T14:30:00",
             type = "string",
             format = "date-time"
@@ -71,7 +71,7 @@ public class RecommendationViewDto {
     private LocalDateTime createdAt;
 
     @Schema(
-            description = "Дата и время последнего обновления рекомендации",
+            description = "Date and Time of updated recommendation",
             example = "2023-05-16T10:15:00",
             type = "string",
             format = "date-time"
