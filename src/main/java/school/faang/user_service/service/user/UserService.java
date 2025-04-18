@@ -13,6 +13,7 @@ import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Сервис для работы с пользователями.
@@ -104,7 +105,7 @@ public class UserService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .preference(user.getPreference())
-                .locale(user.getLocale())
+                .locale(Locale.forLanguageTag(user.getLocale()))
                 .build();
     }
 }

@@ -6,6 +6,8 @@ import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.dto.user.UserViewDto;
 import school.faang.user_service.entity.User;
 
+import java.util.Locale;
+
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     @Mapping(target = "menteesIds", ignore = true)
@@ -19,7 +21,7 @@ public interface UserMapper {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .preference(user.getPreference())
-                .locale(user.getLocale())
+                .locale(Locale.forLanguageTag(user.getLocale()))
                 .build();
     }
 }

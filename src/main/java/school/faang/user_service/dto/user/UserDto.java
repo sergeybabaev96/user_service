@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import school.faang.user_service.model.PreferredContact;
 
+import java.util.Locale;
+
 /**
  * DTO с базовой информацией о пользователе.
  * <p>
@@ -46,7 +48,7 @@ public class UserDto {
 
     @Schema(
             description = "User's locale",
-            example = "en_US"
+            example = "Locale.ENGLISH"
     )
-    private String locale = "en_US";
+    private Locale locale = Locale.ENGLISH;
 }
