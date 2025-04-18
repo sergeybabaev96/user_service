@@ -139,10 +139,10 @@ class UserServiceTest {
     class GetBasicUserInfoTests {
         @Test
         @DisplayName("Успешное получение базовой информации о пользователе")
-        void givenValidUserId_whenGetBasicUserInfo_thenReturnBasicUserDto() {
+        void givenValidUserId_whenGetUserForService_thenReturnBasicUserDto() {
             when(userRepository.findById(validUserId)).thenReturn(Optional.of(testUser));
 
-            UserDto result = userService.getUserBasicInfo(validUserId);
+            UserDto result = userService.getUserForService(validUserId);
 
             assertEquals(validUserId, result.getId());
             verify(userRepository).findById(validUserId);
@@ -150,11 +150,11 @@ class UserServiceTest {
 
         @Test
         @DisplayName("Получение базовой информации о несуществующем пользователе вызывает исключение")
-        void givenInvalidUserId_whenGetBasicUserInfo_thenThrowException() {
+        void givenInvalidUserId_whenGetUserForService_thenThrowException() {
             when(userRepository.findById(invalidUserId)).thenReturn(Optional.empty());
 
             Exception exception = assertThrows(DataValidationException.class,
-                    () -> userService.getUserBasicInfo(invalidUserId));
+                    () -> userService.getUserForService(invalidUserId));
 
             assertEquals("Пользователь не найден", exception.getMessage());
             verify(userRepository).findById(invalidUserId);

@@ -15,21 +15,38 @@ import school.faang.user_service.model.PreferredContact;
 @Builder
 @Schema(description = "Basic user information for inter-service communication")
 public class UserDto {
-    @Schema(description = "Unique identifier of the user", example = "12789")
+    @Schema(
+            description = "Unique identifier of the user",
+            example = "12789"
+    )
     private Long id;
 
-    @Schema(description = "Username (display name)", example = "john_doe")
+    @Schema(
+            description = "Username (display name)",
+            example = "john_doe"
+    )
     private String username;
 
-    @Schema(description = "User's email address", example = "user@example.com")
+    @Schema(
+            description = "User's email address",
+            example = "user@example.com"
+    )
     private String email;
 
-    @Schema(description = "User's phone number", example = "+1234567890")
+    @Schema(
+            description = "User's phone number",
+            example = "+1234567890"
+    )
     private String phone;
 
-    @Schema(description = "Preferred contact method", example = "EMAIL")
+    @Schema(
+            description = "Preferred contact method",
+            example = "EMAIL")
     private PreferredContact preference = PreferredContact.EMAIL;
 
-    @Schema(description = "User's locale", example = "en_US")
+    @Schema(
+            description = "User's locale",
+            example = "en_US"
+    )
     private String locale = "en_US";
 }

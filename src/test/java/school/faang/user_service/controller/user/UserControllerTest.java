@@ -108,34 +108,34 @@ class UserControllerTest {
     class GetBasicUserInfoTests {
         @Test
         @DisplayName("Успешное получение базовой информации - должен вернуть статус 200 OK")
-        void givenValidUserId_whenGetBasicUserInfo_thenReturnUserDtoAndOkStatus() {
+        void givenValidUserId_whenGetUserForService_thenReturnUserDtoAndOkStatus() {
             long userId = 1L;
             UserDto expectedUser = UserDto.builder()
                     .id(userId)
                     .build();
 
-            when(userService.getUserBasicInfo(userId)).thenReturn(expectedUser);
+            when(userService.getUserForService(userId)).thenReturn(expectedUser);
 
             ResponseEntity<UserDto> response = userController.getUserForService(userId);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertEquals(expectedUser, response.getBody());
-            verify(userService).getUserBasicInfo(userId);
+            verify(userService).getUserForService(userId);
         }
 
         @Test
         @DisplayName("Получение несуществующего пользователя - должен вернуть статус 404 Not Found")
-        void givenInvalidUserId_whenGetBasicUserInfo_thenReturnNotFoundStatus() {
+        void givenInvalidUserId_whenGetUserForService_thenReturnNotFoundStatus() {
             long userId = 999L;
 
-            when(userService.getUserBasicInfo(userId))
+            when(userService.getUserForService(userId))
                     .thenThrow(new DataValidationException("User not found"));
 
             assertThrows(DataValidationException.class, () -> {
                 userController.getUserForService(userId);
             });
 
-            verify(userService).getUserBasicInfo(userId);
+            verify(userService).getUserForService(userId);
         }
     }
 }

@@ -84,7 +84,7 @@ public class UserService {
      * @throws DataValidationException если пользователь не найден
      * @see UserDto
      */
-    public UserDto getUserBasicInfo(long userId) {
+    public UserDto getUserForService(long userId) {
         log.info("Getting basic user info for ID: {}", userId);
         User user = getUserEntity(userId);
         return mapToBasicInfoDto(user);

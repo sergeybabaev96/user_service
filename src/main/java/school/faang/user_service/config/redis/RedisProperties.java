@@ -1,6 +1,7 @@
 package school.faang.user_service.config.redis;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -9,11 +10,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * Свойства настраиваются через application.yml с префиксом spring.data.redis
  * </p>
  */
-@Data
+@Getter
+@AllArgsConstructor
 @ConfigurationProperties(prefix = "spring.data.redis")
 public class RedisProperties {
-    private int port;
-    private String host;
-    private int connectTimeout;
-    private int readTimeout;
+    private final int port;
+    private final String host;
+    private final int connectTimeout;
+    private final int readTimeout;
 }

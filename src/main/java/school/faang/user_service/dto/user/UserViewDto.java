@@ -15,16 +15,32 @@ import java.util.List;
 @Schema(description = "User information view")
 public class UserViewDto {
 
-    @Schema(description = "Unique identifier of the user", example = "12789", accessMode = Schema.AccessMode.READ_ONLY)
+    @Schema(
+            description = "Unique identifier of the user",
+            example = "12789",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
     private Long id;
 
-    @Schema(description = "User's phone number", example = "+1234567890", accessMode = Schema.AccessMode.READ_ONLY)
+    @Schema(
+            description = "User's phone number",
+            example = "+1234567890",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
     private String phone;
 
-    @Schema(description = "Username or display name", example = "john_doe", accessMode = Schema.AccessMode.READ_ONLY)
+    @Schema(
+            description = "Username or display name",
+            example = "john_doe",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
     private String username;
 
-    @Schema(description = "Years of professional experience", example = "5", accessMode = Schema.AccessMode.READ_ONLY)
+    @Schema(
+            description = "Years of professional experience",
+            example = "5",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
     private Integer experience;
 
     @Schema(

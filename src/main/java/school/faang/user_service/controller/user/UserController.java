@@ -27,11 +27,17 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
-@Tag(name = "USERS", description = "Get users")
+@Tag(
+        name = "USERS",
+        description = "Get users"
+)
 public class UserController {
     private final UserService userService;
 
-    @Operation(summary = "Search for a user", description = "Allows you to find a user by his id")
+    @Operation(
+            summary = "Search for a user",
+            description = "Allows you to find a user by his id"
+    )
     @GetMapping("/{userId}")
     public ResponseEntity<UserViewDto> getUser(@PathVariable @NotNull
                                                @Parameter(description = "User ID",
@@ -45,7 +51,10 @@ public class UserController {
                 .body(user);
     }
 
-    @Operation(summary = "Search for users", description = "Allows you to find users by their id")
+    @Operation(
+            summary = "Search for users",
+            description = "Allows you to find users by their id"
+    )
     @PostMapping
     public ResponseEntity<List<UserViewDto>> getUsersByIds(@RequestBody @NonNull List<Long> ids) {
         List<UserViewDto> users = userService.getUsersByIds(ids);
@@ -55,11 +64,14 @@ public class UserController {
                 .body(users);
     }
 
-    @Operation(summary = "Get basic user info", description = "Returns basic user information for inter-service communication")
+    @Operation(
+            summary = "Get basic user info",
+            description = "Returns basic user information for inter-service communication"
+    )
     @GetMapping("/internal/{userId}")
     public ResponseEntity<UserDto> getUserForService(@PathVariable long userId) {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(userService.getUserBasicInfo(userId));
+                .body(userService.getUserForService(userId));
     }
 }

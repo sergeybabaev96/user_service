@@ -53,7 +53,8 @@ public class SubscriptionService {
             throw new DataValidationException("Subscription already exists");
         }
 
-        followerEventPublisher.publish(new FollowerEventDto(followerId, followeeId, LocalDateTime.now()));
+        FollowerEventDto event = new FollowerEventDto(followerId, followeeId, LocalDateTime.now());
+        followerEventPublisher.publish(event);
     }
 
     /**
@@ -111,7 +112,7 @@ public class SubscriptionService {
      * @param followeeId ID пользователя
      * @return количество подписчиков
      */
-    public int getFollowersCount(long followeeId) {
+    public Integer getFollowersCount(long followeeId) {
         return subscriptionRepository.findFollowersAmountByFolloweeId(followeeId);
     }
 
@@ -121,7 +122,7 @@ public class SubscriptionService {
      * @param followerId ID пользователя
      * @return количество подписок
      */
-    public int getFollowingCount(long followerId) {
+    public Integer getFollowingCount(long followerId) {
         return subscriptionRepository.findFolloweesAmountByFollowerId(followerId);
     }
 

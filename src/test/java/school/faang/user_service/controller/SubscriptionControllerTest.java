@@ -73,9 +73,10 @@ class SubscriptionControllerTest {
 
             when(subscriptionService.getFollowers(userId, filter)).thenReturn(expectedUsers);
 
-            List<UserViewDto> result = subscriptionController.getFollowers(userId, filter);
+            ResponseEntity<List<UserViewDto>> response = subscriptionController.getFollowers(userId, filter);
 
-            assertEquals(expectedUsers, result);
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            assertEquals(expectedUsers, response.getBody());
             verify(subscriptionService).getFollowers(userId, filter);
         }
 
@@ -87,9 +88,10 @@ class SubscriptionControllerTest {
 
             when(subscriptionService.getFollowersCount(userId)).thenReturn(expectedCount);
 
-            int result = subscriptionController.getFollowersCount(userId);
+            ResponseEntity<Integer> response = subscriptionController.getFollowersCount(userId);
 
-            assertEquals(expectedCount, result);
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            assertEquals(expectedCount, response.getBody());
             verify(subscriptionService).getFollowersCount(userId);
         }
     }
@@ -106,9 +108,10 @@ class SubscriptionControllerTest {
 
             when(subscriptionService.getFollowing(userId, filter)).thenReturn(expectedUsers);
 
-            List<UserViewDto> result = subscriptionController.getFollowing(userId, filter);
+            ResponseEntity<List<UserViewDto>> response = subscriptionController.getFollowing(userId, filter);
 
-            assertEquals(expectedUsers, result);
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            assertEquals(expectedUsers, response.getBody());
             verify(subscriptionService).getFollowing(userId, filter);
         }
 
@@ -120,9 +123,10 @@ class SubscriptionControllerTest {
 
             when(subscriptionService.getFollowingCount(userId)).thenReturn(expectedCount);
 
-            int result = subscriptionController.getFollowingCount(userId);
+            ResponseEntity<Integer> response = subscriptionController.getFollowingCount(userId);
 
-            assertEquals(expectedCount, result);
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            assertEquals(expectedCount, response.getBody());
             verify(subscriptionService).getFollowingCount(userId);
         }
     }
