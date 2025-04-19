@@ -3,32 +3,32 @@ package school.faang.user_service.service.recommendation;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.events.RecommendationEvent;
 import school.faang.user_service.dto.recommendation.RecommendationCreateDto;
 import school.faang.user_service.dto.recommendation.RecommendationViewDto;
 import school.faang.user_service.dto.skilloffer.SkillOfferCreateDto;
-import school.faang.user_service.dto.skilloffer.SkillOfferViewDto;
-import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.EntityNotFoundException;
 import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.mapper.SkillOfferMapper;
+import school.faang.user_service.publisher.RedisEventPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import school.faang.user_service.service.skilloffer.SkillOfferService;
+import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.validation.recommendation.RecommendationValidator;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
@@ -37,27 +37,6 @@ import java.util.stream.StreamSupport;
  * <p>
  * Этот сервис предоставляет методы для создания, обновления, удаления и получения рекомендаций,
  * а также для управления навыками, предлагаемыми в рекомендациях.
- * </p>
- * <p>
- * Основные функции:
- * <ul>
- *     <li>{@link #create(RecommendationCreateDto, long) Создание новой рекомендации} с проверкой валидности данных.</li>
- *     <li>{@link #update(RecommendationCreateDto, long) Обновление существующей рекомендации}.</li>
- *     <li>{@link #delete(long) Удаление рекомендации} по её идентификатору.</li>
- *     <li>{@link #getAllUserRecommendations(long,Pageable) Получение списка всех рекомендаций}, полученных пользователем.</li>
- *     <li>{@link #getAllCreatedRecommendation(long, Pageable) Получение списка всех рекомендаций}, созданных пользователем.</li>
- * </ul>
- * </p>
- * @author marsel_mkh
- * @see RecommendationViewDto
- * @see RecommendationCreateDto
- * @see SkillOfferViewDto
- * @see Recommendation
- * @see SkillOffer
- * @see User
- * @see Skill
- * @see UserSkillGuarantee
- * @see RecommendationValidator
  */
 @Slf4j
 @Data
@@ -73,13 +52,9 @@ public class RecommendationService {
     private final SkillOfferMapper skillOfferMapper;
     private final SkillRepository skillRepository;
     private final SkillOfferService skillOfferService;
+    private final RedisEventPublisher redisEventPublisher;
+    private final UserService userService;
 
-    /**
-     * Создает новую рекомендацию
-     * @param recommendation  объект DTO с данными о рекомендации
-     * @param recommendationId айди рекомендации
-     * @return RecommendationDto - созданная рекомендация
-     */
     public RecommendationViewDto create(@NonNull RecommendationCreateDto recommendation,
                                         long recommendationId) {
         recommendationValidator.validate(recommendation);
@@ -88,15 +63,12 @@ public class RecommendationService {
         recommendationRepository.save(recommendationEntity);
         skillOfferService.saveSkillsOffer(recommendation, recommendationId);
 
+        RecommendationEvent event = toEvent(recommendationEntity);
+        redisEventPublisher.publish(event);
+
         return recommendationMapper.toViewDto(recommendationEntity);
     }
 
-    /**
-     * Обновляет существующую рекомендацию
-     * @param recommendation - объект DTO с обновленными данными
-     * @param recommendationId айди рекомендации
-     * @return RecommendationDto - обновленная рекомендация
-     */
     public RecommendationViewDto update(@NonNull RecommendationCreateDto recommendation,
                                         long recommendationId) {
         recommendationValidator.validate(recommendation);
@@ -118,11 +90,6 @@ public class RecommendationService {
         return recommendationMapper.toViewDto(recommendationEntity);
     }
 
-    /**
-     * Удаляет рекомендацию по ее идентификатору
-     * @param recommendationId - идентификатор рекомендации
-     * @throws DataValidationException если рекомендация не найдена
-     */
     public void delete(long recommendationId) {
         if (!recommendationRepository.existsById(recommendationId)) {
             log.error("Рекомендация с ID {} не найдена", recommendationId);
@@ -136,7 +103,7 @@ public class RecommendationService {
      * @param receiverId - идентификатор пользователя
      * @return List<RecommendationDto> - список полученных рекомендаций
      */
-    public Page<RecommendationViewDto> getAllUserRecommendations(long receiverId,@NonNull Pageable pageable) {
+    public Page<RecommendationViewDto> getAllUserRecommendations(long receiverId, @NonNull Pageable pageable) {
         Page<Recommendation> recommendationPage =
                 recommendationRepository.findAllByReceiverId(receiverId, pageable);
         return recommendationPage.map(recommendationMapper::toViewDto);
@@ -154,29 +121,16 @@ public class RecommendationService {
     }
 
     /**
-     * Получает пользователя по его идентификатору
-     * @param userId - идентификатор пользователя
-     * @return User - найденный пользователь
-     * @throws DataValidationException если пользователь не найден
-     */
-    private User getUser(long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> {
-            log.error("Ошибка: пользователь с ID {} не найден", userId);
-            return new EntityNotFoundException("User is not found");
-        });
-    }
-
-    /**
      * Маппит те поля ДТО рекомендации, которые были проигнорированы
      * @param recommendation ДТО рекомендации
-     * @return Сущьность рекомендации
+     * @return Сущность рекомендации
      */
     private Recommendation getRecommendationEntity(@NotNull RecommendationCreateDto recommendation) {
         long receiverId = recommendation.getReceiverId();
-        User receiver = getUser(receiverId);
+        User receiver = userService.getUserEntity(receiverId);
 
         long authorId = recommendation.getAuthorId();
-        User author = getUser(authorId);
+        User author = userService.getUserEntity(authorId);
 
         Recommendation recommendationEntity = recommendationMapper.createDtoToEntity(recommendation);
         recommendationEntity.setReceiver(receiver);
@@ -198,5 +152,23 @@ public class RecommendationService {
                 .toList();
         Iterable<SkillOffer> allSkillOffers = skillOfferRepository.findAllById(skillOfferIds);
         return StreamSupport.stream(allSkillOffers.spliterator(), false).toList();
+    }
+
+    private RecommendationEvent toEvent(Recommendation recommendation) {
+        RecommendationEvent recommendationEvent = new RecommendationEvent();
+
+        Long id = recommendation.getId();
+        recommendationEvent.setId(id);
+
+        Long authorId = recommendation.getAuthor().getId();
+        recommendationEvent.setAuthorId(authorId);
+
+        Long receiverId = recommendation.getReceiver().getId();
+        recommendationEvent.setReceiverId(receiverId);
+
+        LocalDateTime createdAt = recommendation.getCreatedAt();
+        recommendationEvent.setCreatedAt(createdAt);
+
+        return recommendationEvent;
     }
 }
