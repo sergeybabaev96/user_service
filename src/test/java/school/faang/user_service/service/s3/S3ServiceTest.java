@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -95,7 +95,7 @@ public class S3ServiceTest {
 
     @DisplayName("Проверка получения ошибки при удалении несуществующего файла")
     @Test
-    public void givenValidData_WhenDeleteFile_ThenFileException() throws IOException {
+    public void givenValidData_WhenDeleteFile_ThenFileException() {
         doThrow(FileException.class).when(s3Client).deleteObject(any());
 
         assertThrows(FileException.class, () -> s3Service.deleteFile(fileId));

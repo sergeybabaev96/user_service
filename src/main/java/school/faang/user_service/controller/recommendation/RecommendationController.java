@@ -1,13 +1,25 @@
 package school.faang.user_service.controller.recommendation;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.NonNull;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.recommendation.RecommendationCreateDto;
 import school.faang.user_service.dto.recommendation.RecommendationViewDto;
 import school.faang.user_service.service.recommendation.RecommendationService;
@@ -17,86 +29,98 @@ import school.faang.user_service.service.recommendation.RecommendationService;
  * <p>
  * Этот класс отвечает за обработку запросов, связанных с рекомендациями, их валидацию
  * и передачу в сервисный слой для выполнения операций с данными.
- * </p>
- *
- * <p><b>Основные функции:</b></p>
- * <ul>
- *     <li>{@link #createRecommendation(RecommendationCreateDto, Long) Создание новой рекомендации} с проверкой валидности данных.</li>
- *     <li>{@link #updateRecommendation(RecommendationCreateDto, Long) Обновление существующей рекомендации}.</li>
- *     <li>{@link #deleteRecommendation(long) Удаление рекомендации} по её идентификатору.</li>
- *     <li>{@link #getAllUserRecommendations(long, Pageable) Получение списка всех рекомендаций}, полученных пользователем.</li>
- *     <li>{@link #getAllCreatedRecommendation(long, Pageable) Получение списка всех рекомендаций}, созданных пользователем.</li>
- * </ul>
- * </p>
- * <p>
- * Валидация включает в себя проверки на совпадение автора и получателя,
- * а также на наличие и содержимое текста рекомендации.
- * </p>
- *
- * @author marsel_mkh
- * @see RecommendationViewDto
- * @see RecommendationCreateDto
- * @see RecommendationService
  */
+@Tag(
+        name = "Recommendation controller",
+        description = "Контроллер для управления рекомендациями"
+)
 @Slf4j
-@Controller
+@RestController
+@RequestMapping("/recommendation/")
 @Validated
 @RequiredArgsConstructor
 public class RecommendationController {
     private final RecommendationService recommendationService;
 
-    /**
-     * Создаёт новую рекомендацию после проверки валидности данных.
-     *
-     * @param recommendation DTO для создания рекомендации
-     * @param recommendationId айди рекомендации
-     * @return созданная рекомендация
-     */
-    public RecommendationViewDto createRecommendation(@Valid RecommendationCreateDto recommendation,
-                                                      @NonNull Long recommendationId) {
-        return recommendationService.create(recommendation, recommendationId);
+    @Operation(
+            summary = "Created new recommendation"
+    )
+    @PostMapping("{recommendationId}")
+    public ResponseEntity<RecommendationViewDto> createRecommendation(
+            @RequestBody @Valid RecommendationCreateDto recommendation,
+            @PathVariable @NotNull Long recommendationId) {
+        log.info("Creating new recommendation from author {} to receiver {}",
+                recommendation.getAuthorId(), recommendation.getReceiverId());
+
+        RecommendationViewDto created =
+                recommendationService.create(recommendation, recommendationId);
+
+        log.debug("Successfully created recommendation with id: {}", created.getId());
+        return ResponseEntity.ok(created);
     }
 
-    /**
-     * Обновляет существующую рекомендацию после проверки валидности данных.
-     *
-     * @param updated DTO обновленной рекомендации
-     * @param recommendationId айди рекомендации
-     * @return обновленная рекомендация
-     */
-    public RecommendationViewDto updateRecommendation(@Valid RecommendationCreateDto updated,
-                                                      @NonNull Long recommendationId) {
-        return recommendationService.update(updated, recommendationId);
+    @Operation(
+            summary = "Updated recommendation"
+    )
+    @PutMapping("{recommendationId}")
+    public ResponseEntity<RecommendationViewDto> updateRecommendation(
+            @Valid RecommendationCreateDto updated,
+            @NotNull Long recommendationId) {
+        log.info("Updating recommendation with id: {}", recommendationId);
+
+        RecommendationViewDto recommendationViewDto =
+                recommendationService.update(updated, recommendationId);
+
+        log.debug("Successfully updated recommendation with id: {}", recommendationId);
+        return ResponseEntity.ok(recommendationViewDto);
     }
 
-    /**
-     * Удаляет рекомендацию по её идентификатору.
-     *
-     * @param recommendationId идентификатор рекомендации
-     */
-    public void deleteRecommendation(long recommendationId) {
+    @Operation(
+            summary = "Delete recommendation by ID"
+    )
+    @DeleteMapping("{recommendationId}")
+    public ResponseEntity<Void> deleteRecommendation(@NotNull Long recommendationId) {
+        log.info("Deleting recommendation with id: {}", recommendationId);
+
         recommendationService.delete(recommendationId);
+
+        log.debug("Successfully deleted recommendation with id: {}", recommendationId);
+        return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Получает все рекомендации, полученные пользователем.
-     *
-     * @param receiverId идентификатор пользователя
-     * @return Page рекомендаций
-     */
-    public Page<RecommendationViewDto> getAllUserRecommendations(long receiverId,
-                                                                 @NonNull Pageable pageable) {
-        return recommendationService.getAllUserRecommendations(receiverId, pageable);
+    @Operation(
+            summary = "Get all user recommendations"
+    )
+    @GetMapping("{receiverId}/{pageable}/get-all-user-recommendation")
+    public ResponseEntity<Page<RecommendationViewDto>> getAllUserRecommendations(
+            @PathVariable @NotNull Long receiverId,
+            @RequestParam @NotNull Integer page,
+            @RequestParam @NotNull Integer size) {
+        log.info("Getting recommendations for user {}", receiverId);
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<RecommendationViewDto> result =
+                recommendationService.getAllUserRecommendations(receiverId, pageable);
+
+        log.debug("Found {} recommendations for user {}", result.getTotalElements(), receiverId);
+        return ResponseEntity.ok(result);
     }
 
-    /**
-     * Получает все рекомендации, созданные пользователем.
-     *
-     * @param authorId идентификатор пользователя
-     * @return Page рекомендаций
-     */
-    public Page<RecommendationViewDto> getAllCreatedRecommendation(long authorId,
-                                                                   @NonNull Pageable pageable) {
-        return recommendationService.getAllCreatedRecommendation(authorId, pageable);
+    @Operation(
+            summary = "Get all created recommendations"
+    )
+    @GetMapping("{authorId}/{pageable}/get-all-created-recommendation")
+    public ResponseEntity<Page<RecommendationViewDto>> getAllCreatedRecommendation(
+            @PathVariable @NotNull Long authorId,
+            @RequestParam @NotNull Integer page,
+            @RequestParam @NotNull Integer size) {
+        log.info("Getting recommendations created by user {}", authorId);
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<RecommendationViewDto> result =
+                recommendationService.getAllCreatedRecommendation(authorId, pageable);
+
+        log.debug("Found {} recommendations created by user {}", result.getTotalElements(), authorId);
+        return ResponseEntity.ok(result);
     }
 }

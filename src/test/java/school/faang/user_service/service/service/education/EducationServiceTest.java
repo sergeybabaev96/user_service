@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.service.education;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import school.faang.user_service.dto.EducationViewDto;
+import school.faang.user_service.dto.education.EducationViewDto;
 import school.faang.user_service.entity.Education;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;

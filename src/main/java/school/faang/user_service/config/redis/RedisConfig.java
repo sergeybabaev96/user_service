@@ -2,7 +2,6 @@ package school.faang.user_service.config.redis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +20,6 @@ import java.time.Duration;
  * Настраивает подключение к Redis серверу и сериализацию данных.
  * </p>
  */
-@Slf4j
 @Configuration
 @RequiredArgsConstructor
 @EnableConfigurationProperties(RedisProperties.class)
@@ -31,9 +29,7 @@ public class RedisConfig {
     private final ObjectMapper objectMapper;
 
     /**
-     * Создает фабрику подключений к Redis.
-     *
-     * @return настроенная фабрика подключений
+     * Создает фабрику подключений Jedis к Redis.
      */
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {

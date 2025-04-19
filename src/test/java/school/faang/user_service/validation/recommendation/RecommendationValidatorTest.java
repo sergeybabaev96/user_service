@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.validation.recommendation;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

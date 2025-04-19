@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.avatar;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,8 +13,6 @@ import school.faang.user_service.config.avatar.AvatarConfig;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
 import school.faang.user_service.s3.S3Service;
-import school.faang.user_service.service.avatar.AvatarService;
-import school.faang.user_service.service.avatar.ImageResize;
 import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.validation.avatar.AvatarValidator;
 
