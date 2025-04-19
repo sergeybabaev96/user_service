@@ -24,7 +24,7 @@ public class MentorshipRequestController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/accept")
+    @PutMapping("/accept/{id}")
     public ResponseEntity<Void> acceptMentorshipRequest(@PathVariable long id){
         mentorshipRequestService.acceptMentorshipRequest(id);
         return ResponseEntity.ok().build();

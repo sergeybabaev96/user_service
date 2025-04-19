@@ -1,6 +1,5 @@
 package school.faang.user_service.properties;
 
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

@@ -24,14 +24,20 @@ public class MentorshipRequestService {
     private final MentorshipRequestRepository mentorshipRequestRepository;
     private final MentorshipAcceptedEventPublisher mentorshipAcceptedEventPublisher;
 
+    @Transactional
     public void requestMentorship(MentorshipRequestDto mentorshipRequestDto) {
         existsById(mentorshipRequestDto.getMentorId(), "Mentor");
         existsById(mentorshipRequestDto.getMenteeId(), "Mentee");
         validateMentorHasNotMentee(mentorshipRequestDto.getMentorId(), mentorshipRequestDto.getMenteeId());
         mentorshipRequestRepository
                 .findLatestRequest(mentorshipRequestDto.getMenteeId(), mentorshipRequestDto.getMentorId())
-                .ifPresent(mentorshipRequest ->
-                        createMentorshipRequest(mentorshipRequestDto, mentorshipRequest));
+                .ifPresentOrElse( existing -> createMentorshipRequest(mentorshipRequestDto, existing),
+                        () -> mentorshipRequestRepository.create(
+                                mentorshipRequestDto.getMenteeId(),
+                                mentorshipRequestDto.getMentorId(),
+                                mentorshipRequestDto.getDescription()
+
+                        ));
         validateMenteeIsNotMentor(mentorshipRequestDto);
     }
 
