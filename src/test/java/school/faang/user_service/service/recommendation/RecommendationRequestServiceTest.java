@@ -20,6 +20,7 @@ import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.filter.request.RecommendationRequestFilter;
 import school.faang.user_service.mapper.recommendation.RecommendationRequestMapper;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
+import school.faang.user_service.repository.recommendation.SkillRequestRepository;
 import school.faang.user_service.validator.recommendation.RequestValidation;
 
 import java.time.LocalDateTime;
@@ -45,6 +46,9 @@ class RecommendationRequestServiceTest {
     private RequestValidation requestValidation;
 
     @MockBean
+    private SkillRequestRepository skillRequestRepository;
+
+    @MockBean
     private List<RecommendationRequestFilter> filters;
 
     @Autowired
@@ -68,6 +72,7 @@ class RecommendationRequestServiceTest {
         when(requestRepository.save(requestEntity)).thenReturn(requestEntity);
         when(requestValidation.validateRequest(requestDto)).thenReturn(null)
                 .thenReturn(requestEntity.getReceiver().getSkills());
+        when(skillRequestRepository.create(anyLong(), anyLong())).thenReturn(null);
 
         RecommendationRequestDto result = requestService.requestRecommendation(requestDto);
 
