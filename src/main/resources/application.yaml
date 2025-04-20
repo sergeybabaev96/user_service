@@ -25,6 +25,8 @@ spring:
     redis:
       port: 6379
       host: localhost
+      channel:
+        follower-topic: follower_event_topic
 
 server:
   port: 8080

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import school.faang.user_service.dto.FollowerEvent;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.exception.DataValidationException;
@@ -14,6 +15,7 @@ import school.faang.user_service.filter.subscriber.MockUsers;
 import school.faang.user_service.filter.subscriber.SubscriberFilter;
 import school.faang.user_service.filter.subscriber.SubscriberNameFilter;
 import school.faang.user_service.mapper.UserMapper;
+import school.faang.user_service.publisher.FollowerEventPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.subscription.SubscriptionService;
@@ -44,8 +46,11 @@ public class SubscriptionServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    private Long followerId = 1L;
-    private Long followeeId = 2L;
+    @Mock
+    private FollowerEventPublisher followerEventPublisher;
+
+    private final Long followerId = 1L;
+    private final Long followeeId = 2L;
     private UserFilterDto filters;
     private MockUsers mockUsers = new MockUsers();
 
@@ -109,6 +114,7 @@ public class SubscriptionServiceTest {
 
             subscriptionService.followUser(followerId, followeeId);
             verify(subscriptionRepository, times(1)).followUser(followerId, followeeId);
+            verify(followerEventPublisher, times(1)).publish(any(FollowerEvent.class));
         }
     }
 
