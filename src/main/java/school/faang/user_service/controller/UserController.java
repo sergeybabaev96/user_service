@@ -87,8 +87,8 @@ public class UserController {
         return userService.activateUser(id);
     }
 
-    @PostMapping("/{userId}/addSkill")
-    public UserDto addSkill(@PathVariable Long userId, @RequestBody Long skillId) {
+    @PostMapping("/{userId}/addSkill/{skillId}")
+    public UserDto addSkill(@PathVariable Long userId, @PathVariable Long skillId) {
         return userService.addSkill(userId, skillId);
     }
 }
