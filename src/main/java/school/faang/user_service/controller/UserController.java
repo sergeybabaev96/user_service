@@ -24,10 +24,15 @@ public class UserController {
     private final UserService userService;
     private final AvatarService avatarService;
 
-    @GetMapping("/{userId}")
+    @GetMapping("/api/v1/{userId}")
     UserDto getUser(@PathVariable long userId) {
         log.info("Received request to get user with ID {}", userId);
         return userService.getUser(userId);
+    }
+
+    @GetMapping("/{userId}/exists")
+    public boolean isExists(@PathVariable long userId) {
+        return userService.isExists(userId);
     }
 
 
