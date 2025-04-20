@@ -71,9 +71,8 @@ public class UserController {
 
     @GetMapping("/users/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable long id) {
-        User user = userService.findById(id).orElseThrow(()-> new EntityNotFoundException("User not found")); // добавь метод если нет
+        User user = userService.findById(id).orElseThrow(()-> new EntityNotFoundException("User not found"));
         UserDto dto = userMapper.toDto(user);
         return ResponseEntity.ok(dto);
     }
-
 }

@@ -24,8 +24,8 @@ public interface UserMapper {
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
-                .telegramId(user.getTelegramId()) // ✅ добавлено
-                .preference(user.getContactPreference() != null ? user.getContactPreference().getPreference() : null) // ✅ добавлено
+                .telegramId(user.getTelegramId())
+                .preference(user.getContactPreference() != null ? user.getContactPreference().getPreference() : null)
                 .mentorIds(user.getMentors() == null || user.getMentors().isEmpty()
                         ? null
                         : user.getMentors().stream().map(User::getId).toList())
