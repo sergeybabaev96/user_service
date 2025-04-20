@@ -54,16 +54,16 @@ public class UserService {
     private static final int SIZE_MINIATURE_AVATAR = 170;
     private static final int MONTHS = 3;
 
-    private final UserContext userContext;
     private final UserRepository userRepository;
-    private final CountryRepository countryRepository;
     private final CsvMapper csvMapper;
     private final UserMapper userMapper;
     private final GoalMapper goalMapper;
     private final GoalService goalService;
     private final EventService eventService;
     private final MentorshipService mentorshipService;
+    private final CountryRepository countryRepository;
     private final PasswordService passwordService;
+    private final UserContext userContext;
     private final S3StorageService s3Service;
     private final ImageCompressorService compressorService;
     private final SkillAcquiredEventPublisher skillAcquiredEventPublisher;

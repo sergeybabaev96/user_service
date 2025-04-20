@@ -27,6 +27,7 @@ import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.CsvMapper;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.mapper.goal.GoalMapper;
+import school.faang.user_service.publisher.SkillAcquiredEventPublisher;
 import school.faang.user_service.repository.CountryRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.event.EventService;
@@ -82,6 +83,9 @@ public class UserServiceTest {
     private ImageCompressorService compressorService;
 
     @Mock
+    private SkillAcquiredEventPublisher skillAcquiredEventPublisher;
+
+    @Mock
     private GoalMapper goalMapper;
     @Mock
     private GoalService goalService;
@@ -116,7 +120,8 @@ public class UserServiceTest {
                 passwordService,
                 userContext,
                 s3Service,
-                compressorService
+                compressorService,
+                skillAcquiredEventPublisher
         );
     }
 
