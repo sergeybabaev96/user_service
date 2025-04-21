@@ -13,7 +13,7 @@ import school.faang.user_service.service.avatar.AvatarService;
 import school.faang.user_service.service.user.UserService;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 @Slf4j
 @RequiredArgsConstructor
 public class UserController {
@@ -24,7 +24,7 @@ public class UserController {
     private final UserService userService;
     private final AvatarService avatarService;
 
-    @GetMapping("/api/v1/{userId}")
+    @GetMapping("/{userId}")
     UserDto getUser(@PathVariable long userId) {
         log.info("Received request to get user with ID {}", userId);
         return userService.getUser(userId);
