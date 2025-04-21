@@ -3,6 +3,7 @@ package school.faang.user_service.service.event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.repository.event.EventRepository;
@@ -10,20 +11,22 @@ import school.faang.user_service.repository.event.EventRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventService {
+
+    @Qualifier("taskService")
+    public final Executor eventDeletionExecutor;
     private final EventRepository eventRepository;
-    public final ExecutorService eventDeletionExecutor;
 
     public void deletePastEvents(int batchSize) {
         if (batchSize <= 0) {
             throw new IllegalArgumentException("batchSize должен быть с положительным числом");
         }
-            List<Long> idsToDelete = eventRepository.findIdsByEndDateBefore(LocalDateTime.now());
+        List<Long> idsToDelete = eventRepository.findIdsByEndDateBefore(LocalDateTime.now());
 
         if (idsToDelete.isEmpty()) {
             log.warn("Нет завершённых событий для удаления");
