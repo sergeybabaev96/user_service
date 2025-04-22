@@ -1,4 +1,4 @@
-package school.faang.user_service.config.app;
+package school.faang.user_service.config;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import lombok.RequiredArgsConstructor;
@@ -15,4 +15,5 @@ public class CsvConfig {
         mapper.findAndRegisterModules();
         return mapper;
     }
+
 }

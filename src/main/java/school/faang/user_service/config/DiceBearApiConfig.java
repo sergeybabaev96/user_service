@@ -1,26 +1,30 @@
-package school.faang.user_service.config.dicebear;
+package school.faang.user_service.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
+import school.faang.user_service.properties.DicebearProperties;
 import school.faang.user_service.util.DicebearStyleGenerator;
 
 import java.security.SecureRandom;
 import java.time.Duration;
 
 @Configuration
-@EnableConfigurationProperties(DicebearProperties.class)
+@RequiredArgsConstructor
 public class DiceBearApiConfig {
+
+    private final DicebearProperties dicebearProperties;
+
     @Bean
-    public RestTemplate diceBearRestTemplate(RestTemplateBuilder builder, DicebearProperties properties) {
+    public RestTemplate diceBearRestTemplate(RestTemplateBuilder builder) {
         return builder
-                .setConnectTimeout(Duration.ofSeconds(properties.getConnectionTimeoutSeconds()))
-                .setReadTimeout(Duration.ofSeconds(properties.getReadTimeoutSeconds()))
+                .setConnectTimeout(Duration.ofSeconds(dicebearProperties.getConnectionTimeoutSeconds()))
+                .setReadTimeout(Duration.ofSeconds(dicebearProperties.getReadTimeoutSeconds()))
                 .build();
     }
-
 
     @Bean
     public SecureRandom secureRandom() { return new SecureRandom(); }

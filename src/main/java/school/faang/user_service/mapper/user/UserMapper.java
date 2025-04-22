@@ -9,7 +9,6 @@ import school.faang.user_service.entity.User;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
@@ -25,6 +24,8 @@ public interface UserMapper {
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .telegramId(user.getTelegramId())
+                .preference(user.getContactPreference() != null ? user.getContactPreference().getPreference() : null)
                 .mentorIds(user.getMentors() == null || user.getMentors().isEmpty()
                         ? null
                         : user.getMentors().stream().map(User::getId).toList())
@@ -33,7 +34,6 @@ public interface UserMapper {
                         : user.getMentees().stream().map(User::getId).toList())
                 .build();
     }
-
 
     @Mapping(target = "country", ignore = true)
     User toEntity(UserRegistrationDto dto);

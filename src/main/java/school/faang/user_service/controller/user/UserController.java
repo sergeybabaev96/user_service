@@ -1,5 +1,6 @@
 package school.faang.user_service.controller.user;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.dto.user.UserRegistrationDto;
 import school.faang.user_service.dto.user.UserResponseDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.entity.contact.PreferredContact;
 import school.faang.user_service.mapper.user.UserMapper;
 import school.faang.user_service.service.external.S3Service;
 import school.faang.user_service.service.user.UserService;
@@ -64,5 +67,12 @@ public class UserController {
         }catch (IOException e){
             return ResponseEntity.badRequest().body("Error parcessing file " + e.getMessage());
         }
+    }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<UserDto> getUser(@PathVariable long id) {
+        User user = userService.findById(id).orElseThrow(()-> new EntityNotFoundException("User not found"));
+        UserDto dto = userMapper.toDto(user);
+        return ResponseEntity.ok(dto);
     }
 }
