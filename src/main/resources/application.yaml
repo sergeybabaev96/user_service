@@ -28,6 +28,7 @@ spring:
         recommendationReceived: recommendation_event_channel
         follower: follower_channel
         mentorship-accepted-event: mentorship-accepted-channel
+        skill-acquired: skill_acquired_channel
 
   profiles:
     active: local

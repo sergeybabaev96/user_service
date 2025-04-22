@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.constants.goal.ImageConstants;
 import school.faang.user_service.dto.FileData;
+import school.faang.user_service.dto.SkillAcquiredEvent;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.event.EventDTO;
 import school.faang.user_service.dto.goal.GoalDto;
@@ -24,6 +25,7 @@ import school.faang.user_service.exception.InvalidImageFormatException;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.CsvMapper;
 import school.faang.user_service.mapper.UserMapper;
+import school.faang.user_service.publisher.SkillAcquiredEventPublisher;
 import school.faang.user_service.repository.CountryRepository;
 import school.faang.user_service.mapper.goal.GoalMapper;
 import school.faang.user_service.service.event.EventService;
@@ -50,6 +52,7 @@ public class UserService {
     private static final int MAX_AVATAR_FILE_SIZE = 5 * 1024 * 1024;
     private static final int SIZE_FULL_AVATAR = 1080;
     private static final int SIZE_MINIATURE_AVATAR = 170;
+    private static final int MONTHS = 3;
 
     private final UserRepository userRepository;
     private final CsvMapper csvMapper;
@@ -63,8 +66,7 @@ public class UserService {
     private final UserContext userContext;
     private final S3StorageService s3Service;
     private final ImageCompressorService compressorService;
-
-    private static final int MONTHS = 3;
+    private final SkillAcquiredEventPublisher skillAcquiredEventPublisher;
 
     @Value("${springdoc.app.security.password-length}")
     private int passwordLength;
@@ -195,6 +197,19 @@ public class UserService {
         deleteMentorship(id);
 
         return userMapper.toDto(userRepository.save(user));
+    }
+
+    public UserDto addSkill(Long userId, Long skillId) {
+        UserDto userDto = UserDto.builder().
+                id(userId).
+                skills(List.of(skillId)).
+                build();
+
+        SkillAcquiredEvent skillAcquiredEvent = new SkillAcquiredEvent(userId, skillId);
+        skillAcquiredEventPublisher.publish(skillAcquiredEvent);
+        log.info("User with id: {} acquired skill with id: {}", userId, skillId);
+
+        return userDto;
     }
 
     public void banUser(Long id) {
