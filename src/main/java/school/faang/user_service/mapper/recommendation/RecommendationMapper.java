@@ -9,6 +9,7 @@ import school.faang.user_service.entity.recommendation.Recommendation;
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring",  uses = SkillOfferMapper.class)
 public interface RecommendationMapper {
 
     @Mapping(source = "author.id", target = "authorId")
@@ -17,7 +18,14 @@ public interface RecommendationMapper {
 
     @Mapping(target = "author", ignore = true)
     @Mapping(target = "receiver", ignore = true)
-    @Mapping(target = "skillOffers", ignore = true)
+    @Mapping(target = "request", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(
+            target = "createdAt",
+            expression = "java(recommendationDto.getCreatedAt() != null ?" +
+                    " recommendationDto.getCreatedAt() :" +
+                    " java.time.LocalDateTime.now())"
+    )
     Recommendation toEntity(RecommendationDto recommendationDto);
 
     List<RecommendationDto> toDto(List<Recommendation> recommendations);
