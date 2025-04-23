@@ -174,8 +174,8 @@ public class User {
 
     @Column(name = "preference", length = 20)
     @Enumerated(EnumType.STRING)
-    private PreferredContact preference = PreferredContact.EMAIL;
+    private PreferredContact preference;
 
     @Column(name = "locale", length = 10)
-    private Locale locale = Locale.ENGLISH;
+    private Locale locale;
 }

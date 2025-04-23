@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.dto.user.UserViewDto;
 import school.faang.user_service.dto.publisher.FollowerEventDto;
-import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.publisher.FollowerEventPublisher;
@@ -17,7 +16,6 @@ import school.faang.user_service.repository.SubscriptionRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Сервис для управления подписками пользователей.
@@ -41,8 +39,9 @@ public class SubscriptionService {
      *                                 или если подписка уже существует
      */
     @Transactional
-    public void followUser(long followerId, long followeeId) {
-        if (followerId == followeeId) {
+    public void followUser(Long followerId, Long followeeId) {
+        if (followerId.equals(followeeId)) {
+            log.error("FollowerId and FolloweeId are the same: followerId={}, followeeId={}", followerId, followeeId);
             throw new DataValidationException("Cannot follow yourself");
         }
 
@@ -65,7 +64,7 @@ public class SubscriptionService {
      * @throws DataValidationException если пользователь пытается отписаться от самого себя
      */
     @Transactional
-    public void unfollowUser(long followerId, long followeeId) {
+    public void unfollowUser(Long followerId, Long followeeId) {
         if (followerId == followeeId) {
             throw new DataValidationException("Cannot unfollow yourself");
         }
@@ -80,13 +79,11 @@ public class SubscriptionService {
      * @return список пользователей, подписанных на указанного пользователя
      */
     @Transactional(readOnly = true)
-    public List<UserViewDto> getFollowers(long followeeId, UserFilterDto filter) {
-        try (Stream<User> stream = subscriptionRepository.findByFolloweeId(followeeId)) {
-            return stream
-                    .map(userMapper::toViewDto)
-                    .filter(user -> matchesFilter(user, filter))
-                    .collect(Collectors.toList());
-        }
+    public List<UserViewDto> getFollowers(Long followeeId, UserFilterDto filter) {
+        return subscriptionRepository.findByFolloweeId(followeeId)
+                .map(userMapper::toViewDto)
+                .filter(user -> matchesFilter(user, filter))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -97,13 +94,11 @@ public class SubscriptionService {
      * @return список пользователей, на которых подписан указанный пользователь
      */
     @Transactional(readOnly = true)
-    public List<UserViewDto> getFollowing(long followerId, UserFilterDto filter) {
-        try (Stream<User> stream = subscriptionRepository.findByFollowerId(followerId)) {
-            return stream
-                    .map(userMapper::toViewDto)
-                    .filter(user -> matchesFilter(user, filter))
-                    .collect(Collectors.toList());
-        }
+    public List<UserViewDto> getFollowing(Long followerId, UserFilterDto filter) {
+        return subscriptionRepository.findByFollowerId(followerId)
+                .map(userMapper::toViewDto)
+                .filter(user -> matchesFilter(user, filter))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -112,7 +107,7 @@ public class SubscriptionService {
      * @param followeeId ID пользователя
      * @return количество подписчиков
      */
-    public Integer getFollowersCount(long followeeId) {
+    public Integer getFollowersCount(Long followeeId) {
         return subscriptionRepository.findFollowersAmountByFolloweeId(followeeId);
     }
 
@@ -122,7 +117,7 @@ public class SubscriptionService {
      * @param followerId ID пользователя
      * @return количество подписок
      */
-    public Integer getFollowingCount(long followerId) {
+    public Integer getFollowingCount(Long followerId) {
         return subscriptionRepository.findFolloweesAmountByFollowerId(followerId);
     }
 

@@ -42,7 +42,7 @@ public class UserController {
     public ResponseEntity<UserViewDto> getUser(@PathVariable @NotNull
                                                @Parameter(description = "User ID",
                                                        required = true, example = "12789")
-                                               long userId) {
+                                                   Long userId) {
 
         UserViewDto user = userService.getUser(userId);
 
@@ -69,7 +69,7 @@ public class UserController {
             description = "Returns basic user information for inter-service communication"
     )
     @GetMapping("/internal/{userId}")
-    public ResponseEntity<UserDto> getUserForService(@PathVariable long userId) {
+    public ResponseEntity<UserDto> getUserForService(@PathVariable @NotNull Long userId) {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(userService.getUserForService(userId));

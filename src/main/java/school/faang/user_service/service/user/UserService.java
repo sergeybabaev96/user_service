@@ -1,5 +1,6 @@
 package school.faang.user_service.service.user;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class UserService {
      * @throws DataValidationException если пользователь не найден
      * @see UserViewDto
      */
-    public UserViewDto getUser(long userId) {
+    public UserViewDto getUser(Long userId) {
         log.info("Getting user by ID: {}", userId);
         User user = getUserEntity(userId);
         return userMapper.toViewDto(user);
@@ -53,7 +54,7 @@ public class UserService {
      * @throws DataValidationException если пользователь не найден
      * @see User
      */
-    public User getUserEntity(long userId) {
+    public User getUserEntity(Long userId) {
         log.info("Запрос на получение данных по пользователю с ID: {}", userId);
         return userRepository.findById(userId).orElseThrow(() -> {
             log.error("Ошибка: Не удалось найти пользователя с ID {}", userId);
@@ -69,7 +70,7 @@ public class UserService {
      * @return список DTO пользователей (может быть пустым)
      * @see UserViewDto
      */
-    public List<UserViewDto> getUsersByIds(@NonNull List<Long> ids) {
+    public List<UserViewDto> getUsersByIds(List<Long> ids) {
         log.info("Запрос на получение данных по пользователям с ID's: {}", ids);
         List<User> users = userRepository.findAllById(ids);
 
@@ -85,10 +86,10 @@ public class UserService {
      * @throws DataValidationException если пользователь не найден
      * @see UserDto
      */
-    public UserDto getUserForService(long userId) {
+    public UserDto getUserForService(Long userId) {
         log.info("Getting basic user info for ID: {}", userId);
         User user = getUserEntity(userId);
-        return mapToBasicInfoDto(user);
+        return mapToUserDto(user);
     }
 
     /**
@@ -98,7 +99,7 @@ public class UserService {
      * @return DTO с базовой информацией
      * @see UserDto
      */
-    private UserDto mapToBasicInfoDto(User user) {
+    private UserDto mapToUserDto(User user) {
         return UserDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
