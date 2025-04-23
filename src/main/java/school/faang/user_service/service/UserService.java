@@ -71,7 +71,6 @@ public class UserService {
     private final SkillAcquiredEventPublisher skillAcquiredEventPublisher;
     private final ProfileViewEventPublisher profileViewEventPublisher;
 
-    private static final int MONTHS = 3;
 
     @Value("${springdoc.app.security.password-length}")
     private int passwordLength;

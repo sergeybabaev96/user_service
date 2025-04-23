@@ -124,8 +124,7 @@ public class UserServiceTest {
                 userContext,
                 s3Service,
                 compressorService,
-                skillAcquiredEventPublisher
-                compressorService,
+                skillAcquiredEventPublisher,
                 profileViewEventPublisher
         );
     }
