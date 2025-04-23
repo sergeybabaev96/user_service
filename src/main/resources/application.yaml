@@ -4,6 +4,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: user
     password: password
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -18,8 +19,12 @@ spring:
 
   data:
     redis:
-      port: 6379
       host: localhost
+      port: 6379
+      pool:
+        max-total: 10
+        max-idle: 10
+        min-idle: 2
 
 server:
   port: 8080

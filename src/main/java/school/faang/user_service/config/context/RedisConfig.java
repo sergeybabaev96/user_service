@@ -1,39 +1,34 @@
 package school.faang.user_service.config.context;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
+@RequiredArgsConstructor
 public class RedisConfig {
 
     public static final String EVENT_START_TOPIC = "event-start";
 
-    @Value("${spring.data.redis.host}")
-    private String redisHost;
-
-    @Value("${spring.data.redis.port}")
-    private int redisPort;
+    private final RedisProperties redisProperties;
 
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(redisHost, redisPort);
-        return new JedisConnectionFactory(config);
-    }
+        RedisStandaloneConfiguration redisConfig =
+                new RedisStandaloneConfiguration(redisProperties.getHost(), redisProperties.getPort());
+        GenericObjectPoolConfig<?> poolConfig = new GenericObjectPoolConfig<>();
+        poolConfig.setMaxTotal(redisProperties.getPool().getMaxTotal());
+        poolConfig.setMaxIdle(redisProperties.getPool().getMaxIdle());
+        poolConfig.setMinIdle(redisProperties.getPool().getMinIdle());
 
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate(JedisConnectionFactory jedisConnectionFactory) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(jedisConnectionFactory);
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer()); // сериализация в JSON
-        return template;
+        JedisClientConfiguration clientConfig = JedisClientConfiguration.builder()
+                .usePooling().poolConfig(poolConfig).build();
+        return new JedisConnectionFactory(redisConfig, clientConfig);
     }
 
     @Bean
