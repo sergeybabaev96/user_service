@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import school.faang.user_service.entity.event.Event;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
@@ -20,4 +21,10 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             WHERE ue.user_id = :userId
             """)
     List<Event> findParticipatedEventsByUserId(long userId);
+
+    @Query("""
+            SELECT e FROM Event e
+            WHERE e.startDate BETWEEN :start AND :end
+            """)
+    List<Event> findEventsStartingBetween(LocalDateTime start, LocalDateTime end);
 }

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.entity.event.Event;
 import school.faang.user_service.messaging.event.EventStartEvent;
 import school.faang.user_service.messaging.publisher.EventStartEventPublisher;
@@ -20,31 +19,30 @@ import java.util.List;
 public class EventStartScheduler {
 
     private final EventRepository eventRepository;
-    private final UserService userService;
+    private final UserService userService; //?
     private final EventStartEventPublisher eventStartEventPublisher;
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "${scheduler.event-start.cron}")
     public void publishStartEvents() {
-        List<Event> startingNow = eventRepository.findAll().stream()
-                .filter(event -> event.getStartDate() != null &&
-                        event.getStartDate().isBefore(LocalDateTime.now().plusMinutes(1)) &&
-                        event.getStartDate().isAfter(LocalDateTime.now().minusMinutes(1)))
-                .toList();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime from = now.minusMinutes(1);
+        LocalDateTime to = now.plusMinutes(1);
 
-        for (Event event : startingNow) {
-            List<Long> participantIds = event.getAttendees().stream()
-                    .map(user -> user.getId())
-                    .toList();
+        List<Event> startingEvents = eventRepository.findEventsStartingBetween(from, to);
+        for (Event event : startingEvents) {
+            try {
+                List<Long> participantIds = event.getAttendees().stream()
+                        .map(user -> user.getId())
+                        .toList();
 
-            List<UserDto> participants = userService.getUsersByIds(participantIds);
+                EventStartEvent eventStartEvent = new EventStartEvent(String.valueOf(event.getId()), participantIds);
 
-            EventStartEvent eventStartEvent = new EventStartEvent(
-                    String.valueOf(event.getId()),
-                    participants
-            );
-
-            eventStartEventPublisher.publish(eventStartEvent);
-            log.info("Published EventStartEvent for event ID {}", event.getId());
+                eventStartEventPublisher.publish(eventStartEvent);
+                log.info("Опубликовано EventStartEvent для события ID {}", event.getId());
+            } catch (Exception e) {
+                log.error("Не удалось обработать ID события {}: {}", event.getId(), e.getMessage(), e);
+            }
         }
     }
 }
+
