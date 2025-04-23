@@ -16,6 +16,7 @@ import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.preson.PersonAboutDto;
 import school.faang.user_service.dto.preson.PersonContactDto;
 import school.faang.user_service.dto.preson.PersonDto;
+import school.faang.user_service.dto.pubsub.ProfileViewEvent;
 import school.faang.user_service.entity.Country;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
@@ -25,6 +26,7 @@ import school.faang.user_service.exception.InvalidImageFormatException;
 import school.faang.user_service.exception.UserNotFoundException;
 import school.faang.user_service.mapper.CsvMapper;
 import school.faang.user_service.mapper.UserMapper;
+import school.faang.user_service.publisher.ProfileViewEventPublisher;
 import school.faang.user_service.publisher.SkillAcquiredEventPublisher;
 import school.faang.user_service.repository.CountryRepository;
 import school.faang.user_service.mapper.goal.GoalMapper;
@@ -67,6 +69,8 @@ public class UserService {
     private final S3StorageService s3Service;
     private final ImageCompressorService compressorService;
     private final SkillAcquiredEventPublisher skillAcquiredEventPublisher;
+    private final ProfileViewEventPublisher profileViewEventPublisher;
+
 
     @Value("${springdoc.app.security.password-length}")
     private int passwordLength;
@@ -105,6 +109,9 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
 
+        profileViewEventPublisher.publish(new ProfileViewEvent(
+                id, userContext.getUserId(), LocalDateTime.now()));
+
         return userMapper.toDto(user);
     }
 
@@ -115,6 +122,8 @@ public class UserService {
             return Collections.emptyList();
         } else {
             return users.stream()
+                    .peek(user -> profileViewEventPublisher.publish(new ProfileViewEvent(
+                            user.getId(), userContext.getUserId(), LocalDateTime.now())))
                     .map(userMapper::toDto)
                     .toList();
         }
