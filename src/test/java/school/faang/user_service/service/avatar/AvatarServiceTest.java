@@ -92,7 +92,7 @@ public class AvatarServiceTest {
         when(userService.getUserFromDb(userId)).thenReturn(user);
         when(s3Service.downloadFile(fileKey)).thenReturn(inputStreamMock);
 
-        InputStream result = avatarService.getUserAvatar(userId);
+        InputStream result = avatarService.getUserAvatar(userId, false);
 
         assertNotNull(result);
         assertEquals(inputStreamMock, result);

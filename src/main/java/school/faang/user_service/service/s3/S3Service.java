@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
@@ -27,6 +28,7 @@ public class S3Service {
     private final AmazonS3 s3Client;
 
     @Value("${services.s3.bucketName}")
+    @NotNull
     private String bucketName;
 
     public String uploadFile(MultipartFile file, String folder, int maxSize) {

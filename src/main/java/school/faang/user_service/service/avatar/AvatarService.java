@@ -1,5 +1,6 @@
 package school.faang.user_service.service.avatar;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,10 +20,13 @@ import java.io.InputStream;
 public class AvatarService {
 
     @Value("${user-avatar.max-size-bytes}")
+    @NotNull
     private long permittedSize;
     @Value("${user-avatar.sizes.small}")
+    @NotNull
     private int smallerSize;
     @Value("${user-avatar.sizes.large}")
+    @NotNull
     private int largerSize;
 
     private final UserRepository userRepository;
@@ -31,7 +35,7 @@ public class AvatarService {
     private final UserService userService;
 
     @Transactional
-    public void addUserAvatar(Long userId, MultipartFile file) {
+    public void addUserAvatar(@NotNull Long userId, @NotNull MultipartFile file) {
         User user = userService.getUserFromDb(userId);
         avatarValidator.checkMaxFileSize(file, permittedSize);
         String folder = userId + "_user_avatars";
@@ -45,16 +49,22 @@ public class AvatarService {
         userRepository.save(user);
     }
 
-    public InputStream getUserAvatar(Long userId) {
+    public InputStream getUserAvatar(@NotNull Long userId, Boolean isSmall) {
         User user = userService.getUserFromDb(userId);
         UserProfilePic userProfilePic = user.getUserProfilePic();
-        String avatarKey = userProfilePic.getFileId();
+        String avatarKey;
+        if (isSmall) {
+            avatarKey = userProfilePic.getSmallFileId();
+        } else {
+            avatarKey = userProfilePic.getFileId();
+        }
         avatarValidator.checkAvatarKey(avatarKey);
         return s3Service.downloadFile(avatarKey);
+
     }
 
     @Transactional
-    public void removeUserAvatar(Long userId) {
+    public void removeUserAvatar(@NotNull Long userId) {
         User user = userService.getUserFromDb(userId);
         UserProfilePic userProfilePic = user.getUserProfilePic();
         if (userProfilePic != null) {
