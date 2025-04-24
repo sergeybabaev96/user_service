@@ -1,85 +1,141 @@
 package school.faang.user_service.controller.user;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import school.faang.user_service.config.context.UserContext;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.dto.user.UserViewDto;
-import school.faang.user_service.entity.User;
-import school.faang.user_service.mapper.UserMapper;
-import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.user.UserService;
 
 import java.util.List;
-import java.util.Optional;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@WebMvcTest(UserController.class)
+@ExtendWith(MockitoExtension.class)
+@DisplayName("Тесты контроллера пользователей")
 class UserControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
+    @Mock
     private UserService userService;
 
-    @MockBean
-    private UserContext userContext;
+    @InjectMocks
+    private UserController userController;
 
-    @MockBean
-    private UserRepository userRepository;
+    @Nested
+    @DisplayName("Тесты получения пользователя по ID")
+    class GetUserTests {
+        @Test
+        @DisplayName("Успешное получение пользователя - должен вернуть статус 200 OK")
+        void givenValidUserId_whenGetUser_thenReturnUserAndOkStatus() {
+            long userId = 1L;
+            UserViewDto expectedUser = new UserViewDto();
+            expectedUser.setId(userId);
 
-    @MockBean
-    private UserMapper userMapper;
+            when(userService.getUser(userId)).thenReturn(expectedUser);
 
-    private final User user = new User();
-    private final User anotherUser = new User();
-    private final UserViewDto userDto = new UserViewDto();
-    private List<User> users;
-    private List<Long> ids;
+            ResponseEntity<UserViewDto> response = userController.getUser(userId);
 
-    @BeforeEach
-    void setUp() {
-        user.setId(1L);
-        anotherUser.setId(2L);
-        userDto.setId(user.getId());
-        ids = List.of(user.getId(), anotherUser.getId());
-        users = List.of(user);
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            assertEquals(expectedUser, response.getBody());
+            verify(userService).getUser(userId);
+        }
+
+        @Test
+        @DisplayName("Получение несуществующего пользователя - должен вернуть статус 404 Not Found")
+        void givenInvalidUserId_whenGetUser_thenReturnNotFoundStatus() {
+            long userId = 999L;
+
+            when(userService.getUser(userId))
+                    .thenThrow(new DataValidationException("User not found"));
+
+            assertThrows(DataValidationException.class, () -> {
+                userController.getUser(userId);
+            });
+
+            verify(userService).getUser(userId);
+        }
     }
 
-    @Test
-    @DisplayName("Проверка успешного получения ответа на запрос по получению данных о пользователе по его id")
-    void givenUserId_WhenGetUser_ThenReturnUser() throws Exception {
-        Mockito.when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        Mockito.when(userMapper.toViewDto(user)).thenReturn(userDto);
+    @Nested
+    @DisplayName("Тесты получения пользователей по IDs")
+    class GetUsersByIdsTests {
+        @Test
+        @DisplayName("Успешное получение списка пользователей - должен вернуть статус 200 OK")
+        void givenValidUserIds_whenGetUsersByIds_thenReturnUsersListAndOkStatus() {
+            List<Long> userIds = List.of(1L, 2L);
+            List<UserViewDto> expectedUsers = List.of(new UserViewDto(), new UserViewDto());
 
-        mockMvc.perform(get("/users/" + user.getId()))
-                .andExpect(status().isOk());
+            when(userService.getUsersByIds(userIds)).thenReturn(expectedUsers);
+
+            ResponseEntity<List<UserViewDto>> response = userController.getUsersByIds(userIds);
+
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            assertEquals(expectedUsers, response.getBody());
+            verify(userService).getUsersByIds(userIds);
+        }
+
+        @Test
+        @DisplayName("Получение списка с пустым запросом - должен вернуть статус 200 OK")
+        void givenEmptyList_whenGetUsersByIds_thenReturnEmptyListAndOkStatus() {
+            List<Long> userIds = List.of();
+            List<UserViewDto> expectedUsers = List.of();
+
+            when(userService.getUsersByIds(userIds)).thenReturn(expectedUsers);
+
+            ResponseEntity<List<UserViewDto>> response = userController.getUsersByIds(userIds);
+
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            assertTrue(response.getBody().isEmpty());
+            verify(userService).getUsersByIds(userIds);
+        }
     }
 
-    @Test
-    @DisplayName("Проверка успешного получения ответа на запрос по получению данных о пользователях по их id")
-    void givenUsersIdsList_WhenGetUsersByIds_ThenReturnsUsers() throws Exception {
-        Mockito.when(userRepository.findAllById(ids)).thenReturn(users);
-        Mockito.when(userMapper.toViewDto(user)).thenReturn(userDto);
+    @Nested
+    @DisplayName("Тесты получения базовой информации о пользователе")
+    class GetBasicUserInfoTests {
+        @Test
+        @DisplayName("Успешное получение базовой информации - должен вернуть статус 200 OK")
+        void givenValidUserId_whenGetUserForService_thenReturnUserDtoAndOkStatus() {
+            long userId = 1L;
+            UserDto expectedUser = UserDto.builder()
+                    .id(userId)
+                    .build();
 
-        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON).content(
-                        objectMapper.writeValueAsString(ids)))
-                .andExpect(status().isOk());
+            when(userService.getUserForService(userId)).thenReturn(expectedUser);
+
+            ResponseEntity<UserDto> response = userController.getUserForService(userId);
+
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            assertEquals(expectedUser, response.getBody());
+            verify(userService).getUserForService(userId);
+        }
+
+        @Test
+        @DisplayName("Получение несуществующего пользователя - должен вернуть статус 404 Not Found")
+        void givenInvalidUserId_whenGetUserForService_thenReturnNotFoundStatus() {
+            long userId = 999L;
+
+            when(userService.getUserForService(userId))
+                    .thenThrow(new DataValidationException("User not found"));
+
+            assertThrows(DataValidationException.class, () -> {
+                userController.getUserForService(userId);
+            });
+
+            verify(userService).getUserForService(userId);
+        }
     }
 }

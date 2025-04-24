@@ -1,0 +1,3 @@
+ALTER TABLE users
+    ADD COLUMN preference VARCHAR(20) DEFAULT 'EMAIL',
+    ADD COLUMN locale VARCHAR(10) DEFAULT 'en_US';

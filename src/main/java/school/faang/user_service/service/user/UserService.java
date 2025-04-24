@@ -1,10 +1,12 @@
 package school.faang.user_service.service.user;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.dto.user.UserViewDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
@@ -12,7 +14,15 @@ import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
 
 import java.util.List;
+import java.util.Locale;
 
+/**
+ * Сервис для работы с пользователями.
+ * <p>
+ * Предоставляет методы для получения информации о пользователях,
+ * включая базовую информацию и детализированные данные.
+ * </p>
+ */
 @Slf4j
 @Data
 @Service
@@ -22,32 +32,29 @@ public class UserService {
     private final UserMapper userMapper;
 
     /**
-     * Получение пользователя по указанному идентификатору.
+     * Получает DTO пользователя по идентификатору.
      *
-     * @param userId Идентификатор пользователя.
-     * @return Объект пользователя.
-     * @throws DataValidationException Если пользователь с указанным идентификатором не найден.
+     * @param userId идентификатор пользователя (должен быть > 0)
+     * @return DTO с данными пользователя
+     * @throws DataValidationException если пользователь не найден
+     * @see UserViewDto
      */
-    public UserViewDto getUser(long userId) {
-        log.info("Запрос на получение данных по пользователю с ID: {}", userId);
-        User user = userRepository.findById(userId).orElseThrow(() -> {
-            log.error("Ошибка: Не удалось найти пользователя с ID {}", userId);
-            return new DataValidationException("Пользователь не найден");
-        });
-
-        log.info("Найден пользователь с ID: {}", userId);
+    public UserViewDto getUser(Long userId) {
+        log.info("Getting user by ID: {}", userId);
+        User user = getUserEntity(userId);
         return userMapper.toViewDto(user);
     }
 
 
     /**
-     * Получение пользователя по указанному идентификатору.
+     * Получает сущность пользователя по идентификатору.
      *
-     * @param userId Идентификатор пользователя.
-     * @return Объект пользователя.
-     * @throws DataValidationException Если пользователь с указанным идентификатором не найден.
+     * @param userId идентификатор пользователя (должен быть > 0)
+     * @return сущность пользователя
+     * @throws DataValidationException если пользователь не найден
+     * @see User
      */
-    public User getUserEntity(long userId) {
+    public User getUserEntity(Long userId) {
         log.info("Запрос на получение данных по пользователю с ID: {}", userId);
         return userRepository.findById(userId).orElseThrow(() -> {
             log.error("Ошибка: Не удалось найти пользователя с ID {}", userId);
@@ -57,12 +64,13 @@ public class UserService {
     }
 
     /**
-     * Получение пользователей по указанным идентификаторам.
+     * Получает список DTO пользователей по их идентификаторам.
      *
-     * @param ids Список идентификаторов пользователей.
-     * @return Список объектов пользователей.
+     * @param ids список идентификаторов пользователей (не может быть null)
+     * @return список DTO пользователей (может быть пустым)
+     * @see UserViewDto
      */
-    public List<UserViewDto> getUsersByIds(@NonNull List<Long> ids) {
+    public List<UserViewDto> getUsersByIds(List<Long> ids) {
         log.info("Запрос на получение данных по пользователям с ID's: {}", ids);
         List<User> users = userRepository.findAllById(ids);
 
@@ -70,4 +78,35 @@ public class UserService {
         return users.stream().map(userMapper::toViewDto).toList();
     }
 
+    /**
+     * Получает базовую информацию о пользователе.
+     *
+     * @param userId идентификатор пользователя (должен быть > 0)
+     * @return DTO с базовой информацией о пользователе
+     * @throws DataValidationException если пользователь не найден
+     * @see UserDto
+     */
+    public UserDto getUserForService(Long userId) {
+        log.info("Getting basic user info for ID: {}", userId);
+        User user = getUserEntity(userId);
+        return mapToUserDto(user);
+    }
+
+    /**
+     * Преобразует сущность пользователя в DTO с базовой информацией.
+     *
+     * @param user сущность пользователя
+     * @return DTO с базовой информацией
+     * @see UserDto
+     */
+    private UserDto mapToUserDto(User user) {
+        return UserDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .preference(user.getPreference())
+                .locale(Locale.forLanguageTag(String.valueOf(user.getLocale())))
+                .build();
+    }
 }

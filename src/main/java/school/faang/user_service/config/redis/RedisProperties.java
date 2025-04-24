@@ -1,22 +1,21 @@
 package school.faang.user_service.config.redis;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@Configuration
+/**
+ * Класс для хранения настроек подключения к Redis.
+ * <p>
+ * Свойства настраиваются через application.yml с префиксом spring.data.redis
+ * </p>
+ */
 @Getter
+@AllArgsConstructor
+@ConfigurationProperties(prefix = "spring.data.redis")
 public class RedisProperties {
-
-    @Value("${spring.data.redis.host}")
-    private String host;
-
-    @Value("${spring.data.redis.port}")
-    private int port;
-
-    @Value("${spring.data.redis.connect_timeout}")
-    private int connectTimeout;
-
-    @Value("${spring.data.redis.read_timeout}")
-    private int readTimeout;
+    private final int port;
+    private final String host;
+    private final int connectTimeout;
+    private final int readTimeout;
 }

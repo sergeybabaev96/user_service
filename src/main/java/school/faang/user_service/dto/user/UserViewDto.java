@@ -6,36 +6,54 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * DTO-класс для представления информации о существующем пользователе.
+ * DTO для отображения информации о пользователе.
  * <p>
- * Используется для передачи данных о пользователе между слоями приложения.
+ * Используется для API responses.
  * </p>
- * <p>
- * Содержит следующие поля:
- * <ul>
- *     <li>{@link #id Идентификатор пользователя}</li>
- *     <li>{@link #username Имя пользователя}</li>
- *     <li>{@link #menteesIds Идентификаторы менти,
- *     которые прикреплены к пользователю}</li>
- *     <li>{@link #mentorsIds Идентификаторы менторов,
- *     которые прикреплены к пользователю}</li>
- * </ul>
- * </p>
- *
- * @author gulnaz21
  */
-@Schema(description = "Пользователь")
 @Data
+@Schema(description = "User information view")
 public class UserViewDto {
-    @Schema(description = "Идентификатор пользователя", example = "12789", accessMode = Schema.AccessMode.READ_WRITE)
+
+    @Schema(
+            description = "Unique identifier of the user",
+            example = "12789",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
     private Long id;
 
-    @Schema(description = "Фамилия пользователя", example = "Иванов", accessMode = Schema.AccessMode.READ_WRITE)
+    @Schema(
+            description = "User's phone number",
+            example = "+1234567890",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
+    private String phone;
+
+    @Schema(
+            description = "Username or display name",
+            example = "john_doe",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
     private String username;
 
-    @Schema(description = "Список идентификаторов менти", accessMode = Schema.AccessMode.READ_ONLY)
+    @Schema(
+            description = "Years of professional experience",
+            example = "5",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
+    private Integer experience;
+
+    @Schema(
+            description = "List of mentee IDs associated with this user",
+            example = "[56, 78]",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
     private List<Long> menteesIds;
 
-    @Schema(description = "Список идентификаторов менторов", accessMode = Schema.AccessMode.READ_ONLY)
+    @Schema(
+            description = "List of mentor IDs associated with this user",
+            example = "[34, 92]",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
     private List<Long> mentorsIds;
 }
