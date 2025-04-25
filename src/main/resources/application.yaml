@@ -29,6 +29,11 @@ spring:
         follower: follower_channel
         mentorship-accepted-event: mentorship-accepted-channel
         skill-acquired: skill_acquired_channel
+    kafka:
+      bootstrap-servers: localhost:9092
+      group-id: user-service-group
+      topic:
+        userBan: user_ban
 
   profiles:
     active: local
@@ -38,7 +43,7 @@ server:
 
 logging:
   level:
-    root: debug
+    root: info
 
 project-service:
   host: localhost
