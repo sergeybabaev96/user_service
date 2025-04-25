@@ -1,7 +1,9 @@
 package school.faang.user_service.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import school.faang.user_service.entity.User;
 
 import java.util.List;
@@ -25,4 +27,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Stream<User> findPremiumUsers();
 
     List<User> findByUsernameLike(String username);
+
+    @Modifying
+    @Query(nativeQuery = true, value = """
+            UPDATE users SET banned = true WHERE id IN (?1)
+            """)
+    void banUsers(@Param("userIds") List<Long> userIds);
 }
