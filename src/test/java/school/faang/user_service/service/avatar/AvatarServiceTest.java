@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -70,7 +69,7 @@ public class AvatarServiceTest {
         String folder = userId + "_user_avatars";
 
         when(userService.getUserFromDb(userId)).thenReturn(user);
-        doNothing().when(avatarValidator).checkMaxFileSize(any(MultipartFile.class), anyLong());
+        doNothing().when(avatarValidator).checkMaxFileSize(any(MultipartFile.class), any());
         when(s3Service.uploadFile(multipartFile, folder, largerSize)).thenReturn(largeFileId);
         when(s3Service.uploadFile(multipartFile, folder, smallerSize)).thenReturn(smallFileId);
         System.out.println("Uploading with size: " + largerSize);

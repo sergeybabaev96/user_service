@@ -21,13 +21,13 @@ public class AvatarService {
 
     @Value("${user-avatar.max-size-bytes}")
     @NotNull
-    private long permittedSize;
+    private Long permittedSize;
     @Value("${user-avatar.sizes.small}")
     @NotNull
-    private int smallerSize;
+    private Integer smallerSize;
     @Value("${user-avatar.sizes.large}")
     @NotNull
-    private int largerSize;
+    private Integer largerSize;
 
     private final UserRepository userRepository;
     private final S3Service s3Service;
