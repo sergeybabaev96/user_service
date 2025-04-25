@@ -10,12 +10,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import school.faang.user_service.repository.premium.PremiumRepository;
-
 import java.time.LocalDateTime;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -28,7 +27,7 @@ public class PremiumServiceTest {
     private PremiumService premiumService;
 
     @Mock
-    private PremiumRepository premiumRepository;
+    private PremiumBatchService premiumBatchService;
     @Mock
     private PremiumRetryService premiumRetryService;
 
@@ -51,7 +50,6 @@ public class PremiumServiceTest {
 
         premiumService.removeExpiredPremiumAccess();
 
-        verify(premiumRepository, times(2)).deleteByIdIn(anyList());
+        verify(premiumBatchService, times(2)).removeBatch(anyList(), any(LocalDateTime.class));
     }
-
 }

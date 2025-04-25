@@ -15,6 +15,9 @@ public interface PremiumRepository extends CrudRepository<Premium, Long> {
 
     List<Premium> findAllByEndDateBefore(LocalDateTime endDate);
 
+    @Query("SELECT p.id FROM Premium p WHERE p.endDate < :endDate")
+    List<Long> findIdsByEndDateBefore(@Param("endDate") LocalDateTime endDate);
+
     @Modifying
     @Query("DELETE FROM Premium p WHERE p.id IN :ids")
     void deleteByIdIn(@Param("ids") List<Long> ids);

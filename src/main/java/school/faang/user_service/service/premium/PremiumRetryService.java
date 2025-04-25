@@ -6,11 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.entity.premium.Premium;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.repository.premium.PremiumRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -20,21 +20,17 @@ import java.util.List;
 public class PremiumRetryService {
 
     private final PremiumRepository premiumRepository;
-    private LocalDateTime now;
-    private List<Long> premiumIds = new ArrayList<>();
+    private final LocalDateTime now = LocalDateTime.now();
 
     @Retryable(
             value = RuntimeException.class,
             maxAttempts = 3,
             backoff = @Backoff(delay = 2000)
     )
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public List<Long> getExpiredPremiumIds() {
-        now = LocalDateTime.now();
-        List<Premium> expiredPremiums = premiumRepository.findAllByEndDateBefore(now);
-        log.info("Got expired premium ids from DM, time {}", now);
-        premiumIds = expiredPremiums.stream()
-                .map(Premium::getId)
-                .toList();
-        return premiumIds;
+        List<Long> expiredPremiumIds = premiumRepository.findIdsByEndDateBefore(now);
+        log.info("Got expired premium ids from DB, time {}", now);
+        return expiredPremiumIds;
     }
 }
