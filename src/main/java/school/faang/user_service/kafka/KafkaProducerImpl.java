@@ -20,7 +20,7 @@ public class KafkaProducerImpl implements KafkaProducer {
     private final ObjectMapper objectMapper;
 
     @Override
-    public void produceToAchievementService(GoalSetEvent event) {
+    public void produce(GoalSetEvent event) {
         try {
             String eventAsString = objectMapper.writeValueAsString(event);
             kafkaTemplate.send(

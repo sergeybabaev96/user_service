@@ -33,11 +33,11 @@ public class GoalServiceImpl implements GoalService {
     @Override
     @Transactional
     public void saveGoalForUser(long userId, long goalId) {
-        boolean isGoalDistinct = goalRepository
+        boolean isGoalExist = goalRepository
                 .findGoalsByUserId(userId)
                 .anyMatch(goal -> goal.getId() == goalId);
-        if (isGoalDistinct) {
-            throw new GoalFoundForUserException("same goal was found for this user");
+        if (isGoalExist) {
+            throw new GoalFoundForUserException("goal already exists");
         }
         goalRepository.saveGoalForUser(userId, goalId);
         GoalSetEvent goalSetEvent = new GoalSetEvent(userId, goalId);

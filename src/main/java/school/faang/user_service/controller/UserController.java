@@ -1,6 +1,8 @@
 package school.faang.user_service.controller;
 
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +14,7 @@ import school.faang.user_service.dto.user.GetUserRequest;
 import school.faang.user_service.service.GoalService;
 import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.service.DeactivateUserFacade;
+
 import java.util.List;
 
 @RestController
@@ -50,7 +53,10 @@ public class UserController {
     }
 
     @PostMapping("/assign-goal")
-    public void assignGoal(@RequestParam("user_id") long userId, @RequestParam("goal_id") long goalId) {
+    public void assignGoal(
+            @NotNull @NotBlank @RequestParam("user_id") Long userId,
+            @NotNull @NotBlank @RequestParam("goal_id") Long goalId
+    ) {
         goalService.saveGoalForUser(userId, goalId);
     }
 }
