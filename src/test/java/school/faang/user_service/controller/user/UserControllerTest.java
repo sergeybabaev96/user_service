@@ -110,9 +110,8 @@ class UserControllerTest {
         @DisplayName("Успешное получение базовой информации - должен вернуть статус 200 OK")
         void givenValidUserId_whenGetUserForService_thenReturnUserDtoAndOkStatus() {
             long userId = 1L;
-            UserDto expectedUser = UserDto.builder()
-                    .id(userId)
-                    .build();
+            UserDto expectedUser = new UserDto();
+            expectedUser.setId(userId);
 
             when(userService.getUserForService(userId)).thenReturn(expectedUser);
 

@@ -42,11 +42,11 @@ public class UserDto {
     @Schema(
             description = "Preferred contact method",
             example = "EMAIL")
-    private PreferredContact preference = PreferredContact.EMAIL;
+    private PreferredContact preference;
 
     @Schema(
             description = "User's locale",
             example = "Locale.ENGLISH"
     )
-    private Locale locale = Locale.ENGLISH;
+    private Locale locale;
 }
