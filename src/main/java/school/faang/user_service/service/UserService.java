@@ -1,10 +1,9 @@
 package school.faang.user_service.service;
 
+import com.json.student.Person;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.json.student.Person;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -132,7 +131,7 @@ public class UserService {
             String country = person.getContactInfo().getAddress().getCountry();
             Country countryEntity = new Country();
             countryEntity.setTitle(country);
-            if (countryRepository.findByName(country).isEmpty()) {
+            if (countryRepository.findByTitle(country).isEmpty()) {
                 Country savedCountry = countryRepository.save(countryEntity);
                 log.info("Country saved: {}", savedCountry.getTitle());
             }

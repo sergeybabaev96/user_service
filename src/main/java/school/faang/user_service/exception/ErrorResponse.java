@@ -4,18 +4,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.http.HttpStatus;
+import lombok.Data;
 
-@Getter
-@Setter
-@AllArgsConstructor
-public class ApiError {
-
-    private HttpStatus status;
-    private String message;
+@Data
+public class ErrorResponse {
+    private final int status;
+    private final String message;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Map<String, String> errors;
@@ -23,7 +17,12 @@ public class ApiError {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp = LocalDateTime.now();
 
-    public ApiError(HttpStatus status, String message, Map<String, String> errors) {
+    public ErrorResponse(int status, String message) {
+        this.status = status;
+        this.message = message;
+    }
+
+    public ErrorResponse(int status, String message, Map<String, String> errors) {
         this.status = status;
         this.message = message;
         this.errors = errors;

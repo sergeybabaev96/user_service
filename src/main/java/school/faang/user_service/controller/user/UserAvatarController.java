@@ -11,7 +11,7 @@ import school.faang.user_service.service.user.UserAvatarService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/users/avatar")
+@RequestMapping("/api/v1/users/avatars")
 public class UserAvatarController {
 
     private final UserAvatarService avatarService;

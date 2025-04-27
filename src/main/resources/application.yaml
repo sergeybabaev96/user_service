@@ -18,23 +18,34 @@ spring:
 
   data:
     redis:
-      port: 6379
       host: localhost
+      port: 6379
       channel:
         profile-view: profile_view_channel
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id:
+        profile-pic: profile-pic-group
+    topic:
+      profile-pic:
+        name: profile-pic-topic
+        partition-count: 4
 
 profile-pic:
   maxSize: 5242880
   largePhotoSize: 1080
   smallPhotoSize: 170
+  folderName: user_profile_photos
 
 services:
   s3:
-    endpoint: http://localhost:9000
-    accessKey: user
-    secretKey: password
+    endpoint: http://localhost:${S3_PORT:9000}
+    accessKey: ${S3_ACCESS_KEY:user}
+    secretKey: ${S3_SECRET_KEY:password}
     region: bucket_region
-    bucketName: user-avatar
+    bucketName: userbucket
 
 server:
   port: 8080
