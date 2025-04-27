@@ -1,7 +1,6 @@
 package school.faang.user_service.dto.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
 import lombok.Data;
 import school.faang.user_service.model.PreferredContact;
 
@@ -14,7 +13,6 @@ import java.util.Locale;
  * </p>
  */
 @Data
-@Builder
 @Schema(description = "Basic user information for inter-service communication")
 public class UserDto {
     @Schema(
