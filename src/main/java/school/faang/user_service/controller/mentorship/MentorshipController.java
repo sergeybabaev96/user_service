@@ -2,7 +2,7 @@ package school.faang.user_service.controller.mentorship;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import school.faang.user_service.dto.UserViewDto;
+import school.faang.user_service.dto.user.UserViewDto;
 import school.faang.user_service.service.mentorship.MentorshipService;
 
 import java.util.List;
@@ -10,8 +10,8 @@ import java.util.List;
 /**
  * Контроллер для управления запросами, связанными с системой наставничества.
  * <p>
- *     Этот класс отвечает за обработку запросов, связанных с системой наставничества,
- *     для удаления связей между ними, а также передачу в сервисный слой для выполнения операций с данными.
+ * Этот класс отвечает за обработку запросов, связанных с системой наставничества,
+ * для удаления связей между ними, а также передачу в сервисный слой для выполнения операций с данными.
  * </p>
  * <p>
  * Основные функции:
@@ -22,6 +22,7 @@ import java.util.List;
  *     <li>{@link #deleteMentor(long, long) Удаление связи между менти и ментором}.</li>
  * </ul>
  * </p>
+ *
  * @author gulnaz21
  * @see MentorshipService
  * @see UserViewDto

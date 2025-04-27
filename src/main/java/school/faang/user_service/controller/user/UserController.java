@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import school.faang.user_service.dto.UserViewDto;
+import school.faang.user_service.dto.user.UserDto;
+import school.faang.user_service.dto.user.UserViewDto;
 import school.faang.user_service.service.user.UserService;
 
 import java.util.List;
@@ -26,7 +27,10 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
-@Tag(name = "USERS", description = "Get users")
+@Tag(
+        name = "USERS",
+        description = "Get users"
+)
 public class UserController {
     private final UserService userService;
 
@@ -38,7 +42,7 @@ public class UserController {
     public ResponseEntity<UserViewDto> getUser(@PathVariable @NotNull
                                                @Parameter(description = "User ID",
                                                        required = true, example = "12789")
-                                               long userId) {
+                                                   Long userId) {
 
         UserViewDto user = userService.getUser(userId);
 
@@ -58,5 +62,16 @@ public class UserController {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(users);
+    }
+
+    @Operation(
+            summary = "Get basic user info",
+            description = "Returns basic user information for inter-service communication"
+    )
+    @GetMapping("/internal/{userId}")
+    public ResponseEntity<UserDto> getUserForService(@PathVariable @NotNull Long userId) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(userService.getUserForService(userId));
     }
 }

@@ -20,6 +20,8 @@ spring:
     redis:
       port: 6379
       host: localhost
+      connect-timeout: 5000  # Таймаут подключения в миллисекундах
+      read-timeout: 3000     # Таймаут чтения в миллисекундах
 
 server:
   port: 8080
@@ -51,3 +53,14 @@ avatar:
   sizes:
     large: 1080
     small: 170
+
+# Premium remover config
+premium-remover:
+  executor:
+    core-size: 3
+    max-size: 9
+    queue-capacity: 75
+    thread-name-prefix: "premium-remover-"
+  scheduled:
+    cron: "0 0 6 * * ?"
+    batch-size: 100
