@@ -15,6 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableFeignClients("school.faang.user_service.client")
 @EnableScheduling
 @RequiredArgsConstructor
+@EnableScheduling
 @Slf4j
 public class UserServiceApplication {
 

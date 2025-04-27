@@ -44,3 +44,4 @@ payment-service:
 scheduler:
   event-start:
     cron: "0 * * * * *"
+
