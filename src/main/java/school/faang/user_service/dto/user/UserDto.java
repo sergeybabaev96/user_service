@@ -1,7 +1,6 @@
 package school.faang.user_service.dto.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
 import lombok.Data;
 import school.faang.user_service.model.PreferredContact;
 
@@ -14,7 +13,6 @@ import java.util.Locale;
  * </p>
  */
 @Data
-@Builder
 @Schema(description = "Basic user information for inter-service communication")
 public class UserDto {
     @Schema(
@@ -44,11 +42,11 @@ public class UserDto {
     @Schema(
             description = "Preferred contact method",
             example = "EMAIL")
-    private PreferredContact preference = PreferredContact.EMAIL;
+    private PreferredContact preference;
 
     @Schema(
             description = "User's locale",
             example = "Locale.ENGLISH"
     )
-    private Locale locale = Locale.ENGLISH;
+    private Locale locale;
 }

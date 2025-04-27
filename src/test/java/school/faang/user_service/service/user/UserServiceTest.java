@@ -1,5 +1,6 @@
 package school.faang.user_service.service.user;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,14 +51,17 @@ class UserServiceTest {
             .locale(Locale.ENGLISH)
             .build();
     private final UserViewDto userViewDto = new UserViewDto();
-    private final UserDto userDto = UserDto.builder()
-            .id(validUserId)
-            .username("testUser")
-            .email("test@example.com")
-            .phone("1234567890")
-            .preference(PreferredContact.EMAIL)
-            .locale(Locale.ENGLISH)
-            .build();
+    private final UserDto userDto = new UserDto();
+
+    @BeforeEach
+    public void setUp(){
+        userDto.setId(validUserId);
+        userDto.setUsername("testUser");
+        userDto.setEmail("test@example.com");
+        userDto.setPhone("1234567890");
+        userDto.setPreference(PreferredContact.EMAIL);
+        userDto.setLocale(Locale.ENGLISH);
+    }
 
     @Nested
     @DisplayName("Тесты получения пользователя")
@@ -151,8 +155,9 @@ class UserServiceTest {
     class GetBasicUserInfoTests {
         @Test
         @DisplayName("Успешное получение базовой информации о пользователе")
-        void givenValidUserId_whenGetUserForService_thenReturnBasicUserDto() {
+        void givenValidUserId_WhenGetUserForService_ThenReturnBasicUserDto() {
             when(userRepository.findById(validUserId)).thenReturn(Optional.of(testUser));
+            when(userMapper.toUserDto(testUser)).thenReturn(userDto);
 
             UserDto result = userService.getUserForService(validUserId);
 

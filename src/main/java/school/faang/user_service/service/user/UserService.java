@@ -1,8 +1,6 @@
 package school.faang.user_service.service.user;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,7 +12,6 @@ import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.UserRepository;
 
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Сервис для работы с пользователями.
@@ -44,7 +41,6 @@ public class UserService {
         User user = getUserEntity(userId);
         return userMapper.toViewDto(user);
     }
-
 
     /**
      * Получает сущность пользователя по идентификатору.
@@ -89,24 +85,6 @@ public class UserService {
     public UserDto getUserForService(Long userId) {
         log.info("Getting basic user info for ID: {}", userId);
         User user = getUserEntity(userId);
-        return mapToUserDto(user);
-    }
-
-    /**
-     * Преобразует сущность пользователя в DTO с базовой информацией.
-     *
-     * @param user сущность пользователя
-     * @return DTO с базовой информацией
-     * @see UserDto
-     */
-    private UserDto mapToUserDto(User user) {
-        return UserDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .preference(user.getPreference())
-                .locale(Locale.forLanguageTag(String.valueOf(user.getLocale())))
-                .build();
+        return userMapper.toUserDto(user);
     }
 }
