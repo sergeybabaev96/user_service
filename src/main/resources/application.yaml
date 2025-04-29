@@ -27,6 +27,7 @@ spring:
       host: localhost
       channel:
         follower-topic: follower_event_topic
+        skill-channel: skill_channel
 
 server:
   port: 8080

@@ -7,14 +7,14 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FollowerEventPublisher extends AbstractEventPublisher {
+public class SkillAcquiredEventPublisher extends AbstractEventPublisher {
 
-    public FollowerEventPublisher(
+    public SkillAcquiredEventPublisher(
             RedisTemplate<String, Object> redisTemplate,
             ObjectMapper objectMapper,
-            @Qualifier("followerChannel") ChannelTopic followerTopic
+            @Qualifier("skillChannel") ChannelTopic skillTopic
     ) {
         super(redisTemplate, objectMapper);
-        channelTopic = followerTopic;
+        channelTopic = skillTopic;
     }
 }

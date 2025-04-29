@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.dto.SkillAcquiredEvent;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
@@ -13,6 +15,7 @@ import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.recommendation.RecommendationMapper;
+import school.faang.user_service.publisher.SkillAcquiredEventPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserSkillGuaranteeRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
@@ -29,8 +32,10 @@ public class RecommendationService {
     private final SkillRepository skillRepository;
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
     private final RecommendationMapper recommendationMapper;
+    private final SkillAcquiredEventPublisher skillAcquiredEventPublisher;
 
 
+    @Transactional
     public RecommendationDto create(RecommendationDto recommendationDto) {
         Recommendation recommendation = recommendationMapper.toEntity(recommendationDto);
         Recommendation oldRecommendation =
@@ -78,6 +83,13 @@ public class RecommendationService {
             skillOfferRepository.create(skillOffer.getSkill().getId(), recommendation.getId());
             addGuarantee(recommendation);
         }
+        recommendationDto.getSkillOffers().stream()
+                .map(skillOfferDto ->
+                        new SkillAcquiredEvent(recommendationDto.getAuthorId(),
+                                recommendationDto.getReceiverId(),
+                                skillOfferDto.getSkillId()))
+                .forEach(skillAcquiredEventPublisher::publish);
+
         return recommendationRepository.findById(createdRecommendationId)
                 .map(recommendationMapper::toDto)
                 .orElseThrow(EntityNotFoundException::new);
@@ -188,6 +200,7 @@ public class RecommendationService {
                 newSkillOffer.setRecommendation(recommendation);
                 skillOfferRepository.save(newSkillOffer);
             }
+
         }
     }
 }

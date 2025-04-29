@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FollowerEvent {
+public class FollowerEvent implements EventMessage {
 
     @Positive
     @NotNull

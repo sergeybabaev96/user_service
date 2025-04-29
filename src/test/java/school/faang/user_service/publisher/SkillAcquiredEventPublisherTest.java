@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
-import school.faang.user_service.dto.FollowerEvent;
+import school.faang.user_service.dto.SkillAcquiredEvent;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FollowerEventPublisherTest {
+public class SkillAcquiredEventPublisherTest {
 
     @Mock
     private RedisTemplate<String, Object> redisTemplate;
@@ -32,19 +32,19 @@ public class FollowerEventPublisherTest {
     private ChannelTopic channelTopic;
 
     @InjectMocks
-    private FollowerEventPublisher publisher;
+    private SkillAcquiredEventPublisher publisher;
 
-    private static final String TEST_TOPIC = "follower_event_topic";
-    FollowerEvent event;
+    private static final String TEST_TOPIC = "skill_channel";
+    SkillAcquiredEvent event;
 
     @BeforeEach
     void setUp() {
-        event = new FollowerEvent(1L,2L);
+        event = new SkillAcquiredEvent(1L,2L, 1L);
     }
 
     @Test
     void testPublishSuccessful() throws Exception {
-        String json = "{followerId:1,followeeId:2}";
+        String json = "{authorId:1,recipientId:2,skillId:1}";
         when(objectMapper.writeValueAsString(event)).thenReturn(json);
         when(channelTopic.getTopic()).thenReturn(TEST_TOPIC);
 
@@ -55,7 +55,7 @@ public class FollowerEventPublisherTest {
     }
 
     @Test
-    void testPublishFail() throws JsonProcessingException {
+    void testPublishFail() throws Exception {
         when(objectMapper.writeValueAsString(event)).thenThrow(new JsonProcessingException("Test Exception") {});
 
         publisher.publish(event);

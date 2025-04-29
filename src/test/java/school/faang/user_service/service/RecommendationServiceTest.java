@@ -3,18 +3,22 @@ package school.faang.user_service.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import school.faang.user_service.dto.SkillAcquiredEvent;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
+import school.faang.user_service.dto.recommendation.SkillOfferDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.recommendation.RecommendationMapper;
+import school.faang.user_service.publisher.SkillAcquiredEventPublisher;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
@@ -29,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,6 +54,8 @@ public class RecommendationServiceTest {
     private SkillRepository skillRepository;
     @Mock
     private RecommendationMapper recommendationMapper;
+    @Mock
+    private SkillAcquiredEventPublisher skillAcquiredEventPublisher;
 
     @InjectMocks
     private RecommendationService recommendationService;
@@ -103,6 +110,14 @@ public class RecommendationServiceTest {
         when(recommendationMapper.toEntity(any(RecommendationDto.class))).thenReturn(recommendation);
         when(recommendationRepository.findFirstByAuthorIdAndReceiverIdOrderByCreatedAtDesc(AUTHOR_ID, RECEIVER_ID))
                 .thenReturn(Optional.ofNullable(lastRecommendation));
+    }
+
+    private void setRecommendationDto() {
+        SkillOfferDto skillOfferDto = new SkillOfferDto();
+        skillOfferDto.setSkillId(SKILL_ID);
+        recommendationDto.setAuthorId(AUTHOR_ID);
+        recommendationDto.setReceiverId(RECEIVER_ID);
+        recommendationDto.setSkillOffers(List.of(skillOfferDto));
     }
 
     @Test
@@ -186,6 +201,7 @@ public class RecommendationServiceTest {
 
     @Test
     void testCreateSuccess() {
+        setRecommendationDto();
         Recommendation recommendation = createRecommendation(RECOMMENDATION_ID, NOW, CONTENT, List.of(skillOffer));
         Recommendation lastRec = createRecommendation(2L, NOW.minusMonths(7), "Old", List.of());
 
@@ -196,9 +212,17 @@ public class RecommendationServiceTest {
         when(recommendationMapper.toDto(recommendation)).thenReturn(recommendationDto);
 
         RecommendationDto result = recommendationService.create(recommendationDto);
+
         assertNotNull(result);
         verify(recommendationRepository).create(AUTHOR_ID, RECEIVER_ID, CONTENT);
         verify(skillOfferRepository).create(RECOMMENDATION_ID, SKILL_ID);
+        ArgumentCaptor<SkillAcquiredEvent> eventCaptor = ArgumentCaptor.forClass(SkillAcquiredEvent.class);
+        verify(skillAcquiredEventPublisher, times(1)).publish(eventCaptor.capture());
+
+        SkillAcquiredEvent event = eventCaptor.getValue();
+        assertEquals(AUTHOR_ID, event.getAuthorId());
+        assertEquals(RECEIVER_ID, event.getRecipientId());
+        assertEquals(SKILL_ID, event.getSkillId());
     }
 
     @Test
