@@ -23,6 +23,7 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import school.faang.user_service.service.recommendation.RecommendationService;
+import school.faang.user_service.service.redis.RedisService;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -58,6 +59,8 @@ public class RecommendationServiceTest {
     private SkillRepository skillRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private RedisService redisService;
 
     @Spy
     private SkillOfferMapperImpl skillOfferMapper;
@@ -305,6 +308,7 @@ public class RecommendationServiceTest {
         verify(recommendationMapper).toEntity(any(RecommendationDto.class));
         verify(skillOfferMapper).toEntityList(any());
         verify(skillOfferMapper, times(3)).toEntity(any());
+        verify(redisService).publish(any());
     }
 
     @Test

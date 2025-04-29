@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
 import school.faang.user_service.entity.recommendation.Recommendation;
+import school.faang.user_service.model.recommendation.RecommendationEvent;
 
 import java.util.List;
 
@@ -25,4 +26,7 @@ public interface RecommendationMapper {
 
     List<RecommendationDto> toDto(List<Recommendation> recommendations);
     List<Recommendation> toEntity(List<RecommendationDto> recommendationsDto);
+
+    @Mapping(target = "recommendationId", source = "id")
+    RecommendationEvent toEvent(RecommendationDto createdRecommendationDto);
 }

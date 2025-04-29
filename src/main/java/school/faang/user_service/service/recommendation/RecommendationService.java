@@ -19,6 +19,7 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.UserSkillGuaranteeRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
+import school.faang.user_service.service.redis.RedisService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +34,7 @@ public class RecommendationService {
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
     private final RecommendationMapper recommendationMapper;
     private final UserRepository userRepository;
+    private final RedisService redisService;
 
     public RecommendationDto create(RecommendationDto recommendationDto) {
 
@@ -56,6 +58,7 @@ public class RecommendationService {
                 .map(recommendationMapper::toDto)
                 .orElseThrow(EntityNotFoundException::new);
 
+        redisService.publish(recommendationMapper.toEvent(createdRecommendationDto));
 
         return createdRecommendationDto;
     }

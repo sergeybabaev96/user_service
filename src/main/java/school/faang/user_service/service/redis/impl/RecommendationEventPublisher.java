@@ -18,7 +18,8 @@ public class RecommendationEventPublisher implements RedisService {
 
     @Override
     public void publish(RecommendationEvent message) {
-        redisTemplate.convertAndSend(channelTopic.getTopic(), message);
-        log.info("Сообщение {} отправлено", message);
+        String topic = channelTopic.getTopic();
+        redisTemplate.convertAndSend(topic, message);
+        log.info("Сообщение {} отправлено в topic {}", message, topic);
     }
 }
