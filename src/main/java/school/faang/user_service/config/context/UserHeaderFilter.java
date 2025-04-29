@@ -23,8 +23,10 @@ public class UserHeaderFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         String userId = req.getHeader("x-user-id");
         if (userId != null) {
+            userId = userId.replace("Optional[", "").replace("]", "");
             userContext.setUserId(Long.parseLong(userId));
         }
+
         try {
             chain.doFilter(request, response);
         } finally {
