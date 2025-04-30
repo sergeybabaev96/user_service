@@ -1,6 +1,5 @@
 package school.faang.user_service.exception;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -43,6 +42,15 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, "CsvParseException");
     }
 
+    @ExceptionHandler(FileSizeExceedLimitException.class)
+    public ResponseEntity<Object> handleFileSizeExceedLimitException(FileSizeExceedLimitException ex) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, "FileSizeExceedLimitException");
+    }
+
+    @ExceptionHandler(FileModificationException.class)
+    public ResponseEntity<Object> handleFileModificationException(FileModificationException ex) {
+        return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, "FileModificationException");
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneric(Exception ex) {

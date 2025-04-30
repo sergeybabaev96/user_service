@@ -4,7 +4,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import school.faang.user_service.csv.model.person.Person;
@@ -18,19 +17,21 @@ import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.CountryRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.parser.CsvParserService;
-import school.faang.user_service.validator.user.UserValidator;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.lang.String.format;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class UserService {
 
+    private static final String USER_NOT_FOUND_MESSAGE = "User with id: %d not found";
+
     private final UserRepository userRepository;
-    private final UserValidator userValidator;
     private final UserMapper userMapper;
     private final CountryRepository countryRepository;
     private final CsvParserService csvParserService;
@@ -39,7 +40,7 @@ public class UserService {
 
     public UserDto getUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(format(USER_NOT_FOUND_MESSAGE, userId)));
         return userMapper.toUser(user);
     }
 
@@ -76,21 +77,21 @@ public class UserService {
         String phone = personCsvDto.getPhone();
 
         if (userRepository.existsByUsername(userName)) {
-            response.put(userName, String.format("user name %s already exist", userName));
+            response.put(userName, format("user name %s already exist", userName));
             return false;
         }
 
         if (userRepository.existsByEmail(email)) {
-            response.put(userName, String.format("email %s already exist", email));
+            response.put(userName, format("email %s already exist", email));
             return false;
         }
 
         if (userRepository.existsByPhone(phone)) {
-            response.put(userName, String.format("phone %s already exist", phone));
+            response.put(userName, format("phone %s already exist", phone));
             return false;
         }
 
-        response.put(userName, String.format("created success"));
+        response.put(userName, format("created success"));
         return true;
     }
 
@@ -103,5 +104,10 @@ public class UserService {
 
         User user = personMapper.toUser(person, country);
         userRepository.save(user);
+    }
+
+    public User getUserFromDb(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(format(USER_NOT_FOUND_MESSAGE, userId)));
     }
 }

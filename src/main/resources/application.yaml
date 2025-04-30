@@ -40,3 +40,17 @@ project-service:
 payment-service:
   host: localhost
   port: 9080
+
+services:
+  s3:
+    endpoint: http://127.0.0.1:9000
+    accessKey: user
+    secretKey: password
+    bucketName: corpbucket
+    region: us-east-1
+
+user-avatar:
+  max-size-bytes: 5242880    # 5MB (макс. размер файла)
+  sizes:
+    large: 1080
+    small: 170

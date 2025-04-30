@@ -181,4 +181,14 @@ public class UserServiceTest {
         assertEquals("user name JohnDoe already exist", result.get("JohnDoe"));
         verify(userRepository, never()).save(any());
     }
+
+    @Test
+    public void testGetUserFromDbNotFound() {
+        when(userRepository.findById(USER_ID))
+                .thenThrow(new EntityNotFoundException(USER_NOT_FOUND));
+
+        assertThrows(EntityNotFoundException.class,
+                () -> userService.getUser(USER_ID));
+        verify(userRepository, times(1)).findById(USER_ID);
+    }
 }

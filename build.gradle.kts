@@ -75,6 +75,11 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.mockito:mockito-junit-jupiter:5.16.0")
+
+    /**
+     * Image
+     */
+    implementation("net.coobird:thumbnailator:0.4.8")
 }
 
 jsonSchema2Pojo {
