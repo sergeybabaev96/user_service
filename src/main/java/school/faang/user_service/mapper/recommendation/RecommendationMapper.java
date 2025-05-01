@@ -8,18 +8,13 @@ import school.faang.user_service.entity.recommendation.Recommendation;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-@Mapper(componentModel = "spring",  uses = SkillOfferMapper.class)
+@Mapper(componentModel = "spring",  uses = SkillOfferMapper.class, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface RecommendationMapper {
 
     @Mapping(source = "author.id", target = "authorId")
     @Mapping(source = "receiver.id", target = "receiverId")
     RecommendationDto toDto(Recommendation recommendation);
 
-    @Mapping(target = "author", ignore = true)
-    @Mapping(target = "receiver", ignore = true)
-    @Mapping(target = "request", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(
             target = "createdAt",
             expression = "java(recommendationDto.getCreatedAt() != null ?" +

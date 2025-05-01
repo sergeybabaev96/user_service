@@ -8,13 +8,9 @@ import school.faang.user_service.entity.recommendation.SkillOffer;
 
 import java.util.List;
 
-
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-@Mapper(componentModel = "spring")
 public interface SkillOfferMapper {
 
-    @Mapping(target = "skill", ignore = true)
-    @Mapping(target = "recommendation", ignore = true)
     SkillOffer toEntity(SkillOfferDto skillOfferDto);
 
     @Mapping(source = "skill.id", target = "skillId")
