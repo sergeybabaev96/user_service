@@ -3,7 +3,6 @@ package school.faang.user_service.service.premium;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.repository.premium.PremiumRepository;
 
@@ -17,7 +16,7 @@ public class PremiumBatchService {
 
     private final PremiumRepository premiumRepository;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional()
     public void removeBatch(List<Long> batch, LocalDateTime now) {
         premiumRepository.deleteByIdIn(batch);
         log.info("Expired premium accesses before date: {} - was deleted in thread - {}",

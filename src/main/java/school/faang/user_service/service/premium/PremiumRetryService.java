@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.repository.premium.PremiumRepository;
 
@@ -27,7 +26,7 @@ public class PremiumRetryService {
             maxAttempts = 3,
             backoff = @Backoff(delay = 2000)
     )
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(readOnly = true)
     public List<Long> getExpiredPremiumIds() {
         List<Long> expiredPremiumIds = premiumRepository.findIdsByEndDateBefore(now);
         log.info("Got expired premium ids from DB, time {}", now);
