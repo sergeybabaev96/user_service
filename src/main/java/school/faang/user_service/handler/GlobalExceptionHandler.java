@@ -16,12 +16,6 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-   /* @ExceptionHandler(DataRetrievalFailureException.class)
-    public ResponseEntity<String> (DataRetrievalFailureException e) {
-        log.error("User not found", e);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-    }*/
-
     @ExceptionHandler(DataRetrievalFailureException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFoundException(DataRetrievalFailureException e) {
         log.error("User not found", e);
