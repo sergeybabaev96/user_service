@@ -41,6 +41,13 @@ payment-service:
   host: localhost
   port: 9080
 
+user-premium:
+  cron: 0 0 03 * * MON
+  partition-size: 50
+
+thread-pool-config:
+  pool-size: 5
+
 services:
   s3:
     endpoint: http://127.0.0.1:9000

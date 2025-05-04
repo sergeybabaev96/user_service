@@ -32,6 +32,8 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.0.2")
     implementation("commons-fileupload:commons-fileupload:1.4")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+    implementation("org.springframework.retry:spring-retry:1.3.4")
 
     /**
      * Database
@@ -57,8 +59,8 @@ dependencies {
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
-
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.13.0")
+    implementation("org.apache.commons:commons-collections4:4.4")
 
     /**
      * Test containers
