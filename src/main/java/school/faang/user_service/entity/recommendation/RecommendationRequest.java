@@ -25,6 +25,7 @@ import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -37,7 +38,7 @@ public class RecommendationRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "requester_id", nullable = false)
@@ -75,6 +76,9 @@ public class RecommendationRequest {
     private LocalDateTime updatedAt;
 
     public void addSkillRequest(SkillRequest skillRequest) {
+        if (skills == null) {
+            skills = new ArrayList<>();
+        }
         skills.add(skillRequest);
     }
 }

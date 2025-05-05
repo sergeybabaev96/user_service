@@ -16,24 +16,24 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
     int countExisting(List<Long> ids);
 
     @Query(nativeQuery = true, value = """
-            SELECT s.* FROM skill s
-            JOIN user_skill us ON us.skill_id = s.id
-            WHERE us.user_id = ?1
-            """)
+        SELECT s.* FROM skill s
+        JOIN user_skill us ON us.skill_id = s.id
+        WHERE us.user_id = ?1
+        """)
     List<Skill> findAllByUserId(long userId);
 
     @Query(nativeQuery = true, value = """
-            SELECT s.* FROM skill s
-            JOIN skill_offer so ON so.skill_id = s.id
-            JOIN recommendation r ON r.id = so.recommendation_id
-            WHERE r.receiver_id = :userId
-            """)
+        SELECT s.* FROM skill s
+        JOIN skill_offer so ON so.skill_id = s.id
+        JOIN recommendation r ON r.id = so.recommendation_id
+        WHERE r.receiver_id = :userId
+        """)
     List<Skill> findSkillsOfferedToUser(long userId);
 
     @Query(nativeQuery = true, value = """
-            SELECT s.* FROM skill s
-            JOIN user_skill us ON s.id = us.skill_id AND us.skill_id = :skillId AND us.user_id = :userId
-            """)
+        SELECT s.* FROM skill s
+        JOIN user_skill us ON s.id = us.skill_id AND us.skill_id = :skillId AND us.user_id = :userId
+        """)
     Optional<Skill> findUserSkill(long skillId, long userId);
 
     @Query(nativeQuery = true, value = "INSERT INTO user_skill (skill_id, user_id) VALUES (:skillId, :userId)")
@@ -41,9 +41,12 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
     void assignSkillToUser(long skillId, long userId);
 
     @Query(nativeQuery = true, value = """
-            SELECT s.* FROM skill s
-            WHERE s.id IN (SELECT gs.skill_id FROM goal_skill gs
-            WHERE gs.goal_id = ?1)
-            """)
+        SELECT s.* FROM skill s
+        WHERE s.id IN (SELECT gs.skill_id FROM goal_skill gs
+        WHERE gs.goal_id = ?1)
+        """)
     List<Skill> findSkillsByGoalId(long goalId);
+
+    @Query(value = "select s from Skill s where s.id in (:skillIds)")
+    List<Skill> getSkillsByIds(List<Long> skillIds);
 }
