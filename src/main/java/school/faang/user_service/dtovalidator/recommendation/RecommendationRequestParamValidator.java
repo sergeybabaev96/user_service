@@ -52,6 +52,5 @@ public class RecommendationRequestParamValidator extends BaseParamsValidator<Rec
             log.error(SAME_PERSON);
             throw new RecommendationRequestException(SAME_PERSON);
         }
-
     }
 }

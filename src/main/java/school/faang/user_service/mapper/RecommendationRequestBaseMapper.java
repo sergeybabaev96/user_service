@@ -57,8 +57,6 @@ public class RecommendationRequestBaseMapper {
             skillRequest.setSkill(skill);
             entity.addSkillRequest(skillRequest);
         });
-
-
         return entity;
     }
 
