@@ -10,8 +10,8 @@ public class SkillAcquiredEventPublisher extends AbstractEventPublisher {
 
     public SkillAcquiredEventPublisher(
             RedisTemplate<String, Object> redisTemplate,
-            @Qualifier("skillChannel") ChannelTopic skillTopic
+            @Qualifier("skillChannel") ChannelTopic skillChannel
     ) {
-        super(redisTemplate, skillTopic);
+        super(redisTemplate, skillChannel);
     }
 }
