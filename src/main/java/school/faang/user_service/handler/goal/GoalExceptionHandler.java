@@ -1,4 +1,4 @@
-package school.faang.user_service.handler;
+package school.faang.user_service.handler.goal;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,8 +32,6 @@ public class GoalExceptionHandler {
 
     private GoalErrorResponseDto createErrorResponse(Throwable ex, HttpStatus status) {
         log.error("Error in GoalController: {}, response status {}", ex.getMessage(), status);
-        return GoalErrorResponseDto.builder()
-                .errorMsg(ex.getMessage())
-                .build();
+        return new GoalErrorResponseDto(ex.getMessage());
     }
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.goal.GoalRequestDto;
+import school.faang.user_service.dto.goal.GoalResponseDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.exception.goal.CountActiveGoalMoreMaxException;
@@ -16,9 +17,6 @@ import school.faang.user_service.service.user.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-
-import static school.faang.user_service.entity.goal.GoalStatus.ACTIVE;
 
 @Service
 @RequiredArgsConstructor
@@ -57,21 +55,33 @@ public class GoalServiceImpl implements GoalService {
 
     @Override
     public void deleteGoalById(long goalId) {
-        Goal goal = goalRepository.findById(goalId)
+        checkGoalById(goalId);
+
+        goalRepository.deleteById(goalId);
+        log.info("Goal with id {} has been deleted", goalId);
+    }
+
+    @Override
+    public List<GoalResponseDto> findSubtasksByParentGoalId(long goalParentId) {
+        checkGoalById(goalParentId);
+
+        return goalRepository.findByParent(goalParentId)
+                .map(goalMapper::toGoalResponseDto)
+                .toList();
+    }
+
+    private void checkGoalById(long goalId) {
+        goalRepository.findById(goalId)
                 .orElseThrow(() -> {
                     log.error("Goal with id {} not found", goalId);
                     return new GoalNotFoundException(goalId);
                 });
-        goalRepository.delete(goal);
-        log.info("Goal with id {} has been deleted", goalId);
     }
 
     private void checkCountGoalForUser(Long userId) {
-        long countActiveGoalForUser = goalRepository.findGoalsByUserId(userId)
-                .filter(goal -> Objects.equals(goal.getStatus(), ACTIVE))
-                .count();
+        int countActiveGoalForUser = goalRepository.countActiveGoalsPerUser(userId);
 
-        log.debug("count active goal for user with id {} {}", userId, countActiveGoalForUser);
+        log.debug("Count active goal for user with id {} {}", userId, countActiveGoalForUser);
 
         if (countActiveGoalForUser > MAX_NUM_ACTIVE_GOAL_FOR_USER) {
             log.error("Count active goal more max, max goal {}", MAX_NUM_ACTIVE_GOAL_FOR_USER);
