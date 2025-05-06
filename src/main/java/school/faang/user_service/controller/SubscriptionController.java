@@ -1,12 +1,14 @@
 package school.faang.user_service.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
@@ -21,6 +23,7 @@ import java.util.List;
 public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PostMapping("/follow")
     public void followUser(@RequestParam long followerId, @RequestParam long followeeId) {
         if (followerId == followeeId) {
@@ -29,6 +32,7 @@ public class SubscriptionController {
         subscriptionService.followUser(followerId, followeeId);
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/unfollow")
     public void unfollowUser(@RequestParam long followerId, @RequestParam long followeeId) {
         if (followerId == followeeId) {

@@ -26,28 +26,42 @@ class SubscriptionServiceTest {
     @Autowired
     private SubscriptionService subscriptionService;
 
+    private static final long FOLLOWEE_ID = 1L;
+
+    private static final long ALEX_ID = 1L;
+    private static final String ALEX_NAME = "Alex";
+    private static final String ALEX_PHONE = "1234567890";
+    private static final String ALEX_EMAIL = "alex@gmail.com";
+    private static final int ALEX_EXPERIENCE = 2;
+
+    private static final long SAM_ID = 2L;
+    private static final String SAM_NAME = "Sam";
+    private static final String SAM_PHONE = "1234567890";
+    private static final String SAM_EMAIL = "sam@mail.ru";
+    private static final int SAM_EXPERIENCE = 5;
+
     private User user1;
     private User user2;
 
     @BeforeEach
     void setUp() {
         user1 = User.builder()
-                .id(1L)
-                .username("Alex")
-                .phone("1234567890")
-                .email("alex@gmail.com")
-                .experience(2)
+                .id(ALEX_ID)
+                .username(ALEX_NAME)
+                .phone(ALEX_PHONE)
+                .email(ALEX_EMAIL)
+                .experience(ALEX_EXPERIENCE)
                 .build();
 
         user2 = User.builder()
-                .id(2L)
-                .username("Sam")
-                .phone("1234567890")
-                .email("sam@mail.ru")
-                .experience(5)
+                .id(SAM_ID)
+                .username(SAM_NAME)
+                .phone(SAM_PHONE)
+                .email(SAM_EMAIL)
+                .experience(SAM_EXPERIENCE)
                 .build();
 
-        when(subscriptionRepository.findByFolloweeId(1L))
+        when(subscriptionRepository.findByFolloweeId(FOLLOWEE_ID))
                 .thenAnswer(inv -> Stream.of(user1, user2));
     }
 
@@ -57,20 +71,20 @@ class SubscriptionServiceTest {
         UserFilterDto filterDto = new UserFilterDto();
         filterDto.setNamePattern("alex");
 
-        List<UserDto> result = subscriptionService.getFollowers(1L, filterDto);
+        List<UserDto> result = subscriptionService.getFollowers(FOLLOWEE_ID, filterDto);
 
         assertEquals(1, result.size());
-        assertEquals("Alex", result.get(0).getUsername());
-        assertEquals(new UserDto(1L, "Alex", "alex@gmail.com"), result.get(0));
+        assertEquals(ALEX_NAME, result.get(0).getUsername());
+        assertEquals(new UserDto(ALEX_ID, ALEX_NAME, ALEX_EMAIL), result.get(0));
     }
 
     @Test
     @DisplayName("Фильтрация по телефону: оба проходят")
     void getFollowers_filtersByPhone_bothMatch() {
         UserFilterDto filterDto = new UserFilterDto();
-        filterDto.setPhonePattern("1234567890");
+        filterDto.setPhonePattern(ALEX_PHONE);
 
-        List<UserDto> result = subscriptionService.getFollowers(1L, filterDto);
+        List<UserDto> result = subscriptionService.getFollowers(FOLLOWEE_ID, filterDto);
 
         assertEquals(2, result.size());
     }
@@ -81,7 +95,7 @@ class SubscriptionServiceTest {
         UserFilterDto filterDto = new UserFilterDto();
         filterDto.setPhonePattern("234567890");
 
-        List<UserDto> result = subscriptionService.getFollowers(1L, filterDto);
+        List<UserDto> result = subscriptionService.getFollowers(FOLLOWEE_ID, filterDto);
 
         assertEquals(0, result.size());
     }
@@ -90,14 +104,14 @@ class SubscriptionServiceTest {
     @DisplayName("Фильтрация по телефону и опыту: только Sam")
     void getFollowers_filtersByPhoneAndExperience() {
         UserFilterDto filterDto = new UserFilterDto();
-        filterDto.setPhonePattern("1234567890");
-        filterDto.setExperienceMin(3);
-        filterDto.setExperienceMax(5);
+        filterDto.setPhonePattern(SAM_PHONE);
+        filterDto.setExperienceMin(ALEX_EXPERIENCE+1);
+        filterDto.setExperienceMax(SAM_EXPERIENCE);
 
-        List<UserDto> result = subscriptionService.getFollowers(1L, filterDto);
+        List<UserDto> result = subscriptionService.getFollowers(FOLLOWEE_ID, filterDto);
 
         assertEquals(1, result.size());
-        assertEquals("Sam", result.get(0).getUsername());
-        assertEquals(new UserDto(2L, "Sam", "sam@mail.ru"), result.get(0));
+        assertEquals(SAM_NAME, result.get(0).getUsername());
+        assertEquals(new UserDto(SAM_ID, SAM_NAME, SAM_EMAIL), result.get(0));
     }
 }
