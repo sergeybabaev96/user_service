@@ -1,4 +1,4 @@
-package school.faang.user_service.exception;
+package school.faang.user_service.exception.goal;
 
 public class CountActiveGoalMoreMaxException extends RuntimeException {
     public CountActiveGoalMoreMaxException(int maxGoal) {

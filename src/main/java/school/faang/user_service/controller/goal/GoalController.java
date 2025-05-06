@@ -1,4 +1,4 @@
-package school.faang.user_service.controller;
+package school.faang.user_service.controller.goal;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -9,18 +9,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import school.faang.user_service.dto.GoalDto;
-import school.faang.user_service.service.GoatService;
+import school.faang.user_service.dto.goal.GoalDto;
+import school.faang.user_service.service.goal.GoalService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/goal")
-public class GoatController {
-    private final GoatService goatService;
+public class GoalController {
+    private final GoalService goalService;
 
     // TODO: возможно стоит возвращать сущность после создания
     @PostMapping("/{userId}")
     @ResponseStatus(HttpStatus.CREATED)
     public void createGoal(@RequestParam Long userId, @RequestBody @Valid GoalDto goalDto) {
-        goatService.createGoal(userId, goalDto);
+        goalService.createGoal(userId, goalDto);
     }
 }

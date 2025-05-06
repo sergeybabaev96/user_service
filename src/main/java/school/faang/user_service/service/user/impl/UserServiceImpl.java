@@ -1,11 +1,11 @@
-package school.faang.user_service.service.impl;
+package school.faang.user_service.service.user.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.exception.UserNotFoundException;
+import school.faang.user_service.exception.user.UserNotFoundException;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.UserRepository;
-import school.faang.user_service.service.UserService;
+import school.faang.user_service.service.user.UserService;
 
 @Service
 @RequiredArgsConstructor
