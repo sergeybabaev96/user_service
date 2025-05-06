@@ -2,20 +2,24 @@ package school.faang.user_service.controller.goal;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import school.faang.user_service.dto.GoalDto;
+import school.faang.user_service.dto.goal.GoalDto;
+import school.faang.user_service.dto.goal.GoalFilterDto;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.mapper.GoalMapper;
 import school.faang.user_service.service.goal.GoalService;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 public class GoalController {
     private final GoalService goalService;
-    private final GoalMapper goalMapper;//todo стоит вынести из контроллера кмк, а то логикой обрастает
+    private final GoalMapper goalMapper;
 
-    public Goal createGoal(Long userId, Goal goal) {
+    public GoalDto createGoal(Long userId, Goal goal) {
         if (!goal.getTitle().isBlank()) throw new IllegalArgumentException("Goal has no title");
-        return goalService.createGoal(userId, goal);
+        Goal createdGoal = goalService.createGoal(userId, goal);
+        return goalMapper.goalToGoalDTO(createdGoal);
     }
 
     public GoalDto updateGoal(Long goalId, GoalDto goalDto) {
@@ -25,7 +29,18 @@ public class GoalController {
         return goalMapper.goalToGoalDTO(updatedGoal);
     }
 
-    public Goal deleteGoal(long goalId){
-        return goalService.deleteGoal(goalId);
+    public GoalDto deleteGoal(long goalId) {
+        Goal deletedGoal = goalService.deleteGoal(goalId);
+        return goalMapper.goalToGoalDTO(deletedGoal);
+    }
+
+    public List<GoalDto> findSubtasksByGoalId(long goalId) {
+        List<Goal> subtasksByGoalId = goalService.findSubtasksByGoalId(goalId);
+        return goalMapper.mapGoalsToDTOs(subtasksByGoalId);
+    }
+
+    public List<GoalDto> getGoalsByUser(Long userId, GoalFilterDto filter) {
+        List<Goal> filteredUsersGoals = goalService.getGoalsByUser(userId, filter);
+        return goalMapper.mapGoalsToDTOs(filteredUsersGoals);
     }
 }

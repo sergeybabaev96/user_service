@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import school.faang.user_service.dto.GoalDto;
-import school.faang.user_service.entity.Skill;
+import school.faang.user_service.dto.goal.GoalDto;
+import school.faang.user_service.dto.goal.GoalFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
@@ -16,13 +16,16 @@ import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.util.goal.GoalUtil;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
 public class GoalService {
 
-    public static int MAXIMUM_ALLOWED_ACTIVE_GOALS = 3;//todo вынести в конфигурацию
+    public static int MAXIMUM_ALLOWED_ACTIVE_GOALS = 3;//todo вынести в конфигурацию компонента
 
     private final GoalMapper goalMapper;
 
@@ -30,6 +33,14 @@ public class GoalService {
 
     private final SkillService skillService;
     private final UserService userService;
+
+    public static boolean goalIsActive(@NotNull Goal goal) {
+        return GoalStatus.ACTIVE == goal.getStatus();
+    }
+
+    public static boolean goalIsCompleted(@NotNull Goal goal) {
+        return GoalStatus.COMPLETED == goal.getStatus();
+    }
 
     public Goal createGoal(Long userId, Goal goal) {
         long usersActiveGoals = goalRepository.findGoalsByUserId(userId)
@@ -41,20 +52,24 @@ public class GoalService {
                     + usersActiveGoals);
         }
 
-        List<Skill> skillsOfUser = skillService.findAllByUserId(userId);
-        List<Skill> missingSkills = goal.getSkillsToAchieve().stream()
+        var skillsOfUser = skillService.findAllByUserId(userId);
+        var missingSkills = goal.getSkillsToAchieve().stream()
                 .filter(skillsOfUser::contains)
                 .toList();
 
         if (!missingSkills.isEmpty()) {
             throw new IllegalArgumentException("User hasn't required skills for the goal: " + missingSkills);
         }
-        //todo проверить добавление цели у юзера и все другие связанные проверки
-        return goalRepository.create(
+        Goal createdGoal = goalRepository.create(
                 goal.getTitle(),
                 goal.getDescription(),
                 goal.getParent().getId()
         );
+
+        addGoalToUser(userId, createdGoal);
+        addGoalToSkills(createdGoal);
+
+        return createdGoal;
     }
 
     public Goal updateGoal(Long goalId, GoalDto goalDto) {
@@ -76,12 +91,12 @@ public class GoalService {
         var users = completedGoal.getUsers();
         var skills = completedGoal.getSkillsToAchieve();
         users.forEach(user -> {
-            Set<Skill> merged = new HashSet<>(skills);
+            var merged = new HashSet<>(skills);
             merged.addAll(user.getSkills());
             user.setSkills(new ArrayList<>(merged));
         });
         skills.forEach(skill -> {
-            Set<User> merged = new HashSet<>(users);
+            var merged = new HashSet<>(users);
             merged.addAll(skill.getUsers());
             skill.setUsers(new ArrayList<>(merged));
         });
@@ -107,8 +122,25 @@ public class GoalService {
         skills.forEach(skill -> skill.getGoals().remove(goalToDelete));
         skillService.updateAll(skills);
 
-        var invitations = goalToDelete.getInvitations();
+        //var invitations = goalToDelete.getInvitations();
         //todo on next task with invitations
+    }
+
+    public List<Goal> findSubtasksByGoalId(long goalId) {
+        GoalFilterDto blankFilter = new GoalFilterDto();
+        return findSubtasksByGoalId(goalId, blankFilter);
+    }
+
+    public List<Goal> findSubtasksByGoalId(long goalId, GoalFilterDto filter) {
+        return goalRepository.findByParent(goalId)
+                .filter(filter::doFilter)
+                .toList();
+    }
+
+    public List<Goal> getGoalsByUser(Long userId, GoalFilterDto filter) {
+        return goalRepository.findGoalsByUserId(userId)
+                .filter(filter::doFilter)
+                .toList();
     }
 
     public Goal findById(Long id) {
@@ -117,11 +149,26 @@ public class GoalService {
                 .orElseThrow(() -> new NoSuchElementException("No Goal with id " + id));
     }
 
-    public static boolean goalIsActive(@NotNull Goal goal) {
-        return GoalStatus.ACTIVE == goal.getStatus();
+    private User addGoalToUser(Long userId, Goal createdGoal) {
+        var userById = userService.findById(userId);
+        return addGoalToUser(userById, createdGoal);
     }
 
-    public static boolean goalIsCompleted(@NotNull Goal goal) {
-        return GoalStatus.COMPLETED == goal.getStatus();
+    private User addGoalToUser(User user, Goal createdGoal) {
+        var goals = user.getGoals();
+        goals.add(createdGoal);
+        user.setGoals(goals);
+        return userService.updateUser(user);
     }
+
+    private void addGoalToSkills(Goal createdGoal) {
+        var skillsToUpdateWithNewGoal = createdGoal.getSkillsToAchieve();
+        skillsToUpdateWithNewGoal.forEach(skill -> {
+            List<Goal> skillGoals = skill.getGoals();
+            skillGoals.add(createdGoal);
+            skill.setGoals(skillGoals);
+        });
+        skillService.updateAll(skillsToUpdateWithNewGoal);
+    }
+
 }

@@ -1,7 +1,7 @@
 package school.faang.user_service.mapper;
 
 import org.mapstruct.*;
-import school.faang.user_service.dto.GoalDto;
+import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.service.goal.GoalService;
@@ -21,6 +21,10 @@ public interface GoalMapper {
     @Mapping(source = "parentId", target = "parent", qualifiedByName = "mapParent")
     @Mapping(source = "skillIds", target = "skillsToAchieve", qualifiedByName = "mapSkills")
     Goal goalDtoToGoal(GoalDto goalDto, @Context GoalService goalService, @Context SkillService skillService);
+
+    List<GoalDto> mapGoalsToDTOs(List<Goal> goals);
+
+    List<Goal> mapGoalsDTOsToGoals(List<GoalDto> dtos);
 
     default List<Long> goalSkillsToSkillIDs(Goal goal) {
         return goal.getSkillsToAchieve().stream()
