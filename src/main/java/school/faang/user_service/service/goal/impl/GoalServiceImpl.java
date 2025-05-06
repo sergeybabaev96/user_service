@@ -1,11 +1,13 @@
 package school.faang.user_service.service.goal.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.goal.GoalDto;
+import school.faang.user_service.dto.goal.GoalRequestDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.exception.goal.CountActiveGoalMoreMaxException;
+import school.faang.user_service.exception.goal.GoalNotFoundException;
 import school.faang.user_service.mapper.goal.GoalMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
@@ -20,6 +22,7 @@ import static school.faang.user_service.entity.goal.GoalStatus.ACTIVE;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GoalServiceImpl implements GoalService {
     private static final int MAX_NUM_ACTIVE_GOAL_FOR_USER = 3;
     private final GoalRepository goalRepository;
@@ -29,8 +32,8 @@ public class GoalServiceImpl implements GoalService {
     private final SkillRepository skillRepository;
 
     @Override
-    public void createGoal(Long userId, final GoalDto goalDto) {
-        Goal goalEntity = goalMapper.toGoalEntity(goalDto);
+    public void createGoal(Long userId, final GoalRequestDto goalRequestDto) {
+        Goal goalEntity = goalMapper.toGoalEntity(goalRequestDto);
 
         /*Создайте в классе GoalService метод createGoal для сохранения полученной цели.
         Перед тем, как сохранить цель в базу, нужно проверить,
@@ -48,7 +51,19 @@ public class GoalServiceImpl implements GoalService {
         users.add(userOwner);
         goalEntity.setUsers(users);
 
-        goalRepository.save(goalEntity);
+        Goal savedGoal = goalRepository.save(goalEntity);
+        log.info("Goal with id {} has been saved", savedGoal.getId());
+    }
+
+    @Override
+    public void deleteGoalById(long goalId) {
+        Goal goal = goalRepository.findById(goalId)
+                .orElseThrow(() -> {
+                    log.error("Goal with id {} not found", goalId);
+                    return new GoalNotFoundException(goalId);
+                });
+        goalRepository.delete(goal);
+        log.info("Goal with id {} has been deleted", goalId);
     }
 
     private void checkCountGoalForUser(Long userId) {
@@ -56,7 +71,10 @@ public class GoalServiceImpl implements GoalService {
                 .filter(goal -> Objects.equals(goal.getStatus(), ACTIVE))
                 .count();
 
+        log.debug("count active goal for user with id {} {}", userId, countActiveGoalForUser);
+
         if (countActiveGoalForUser > MAX_NUM_ACTIVE_GOAL_FOR_USER) {
+            log.error("Count active goal more max, max goal {}", MAX_NUM_ACTIVE_GOAL_FOR_USER);
             throw new CountActiveGoalMoreMaxException(MAX_NUM_ACTIVE_GOAL_FOR_USER);
         }
     }
