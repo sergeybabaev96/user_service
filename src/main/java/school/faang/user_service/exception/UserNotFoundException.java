@@ -1,4 +1,4 @@
-package school.faang.user_service;
+package school.faang.user_service.exception;
 
 import java.util.NoSuchElementException;
 
