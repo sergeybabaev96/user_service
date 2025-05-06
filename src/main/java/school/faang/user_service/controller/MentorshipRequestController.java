@@ -1,5 +1,7 @@
 package school.faang.user_service.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +21,8 @@ public class MentorshipRequestController {
     }
 
     @PostMapping("requests")
-    public void requestMentorship(@RequestBody MentorshipRequestDto mentorshipRequestDto){
+    public ResponseEntity<Void> requestMentorship(@RequestBody MentorshipRequestDto mentorshipRequestDto){
         mentorshipRequestService.requestMentorship(mentorshipRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
