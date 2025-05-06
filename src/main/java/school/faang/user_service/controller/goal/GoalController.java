@@ -6,13 +6,11 @@ import school.faang.user_service.dto.GoalDto;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.mapper.GoalMapper;
 import school.faang.user_service.service.goal.GoalService;
-import school.faang.user_service.service.skill.SkillService;
 
 @Controller
 @RequiredArgsConstructor
 public class GoalController {
     private final GoalService goalService;
-    private final SkillService skillService;
     private final GoalMapper goalMapper;//todo стоит вынести из контроллера кмк, а то логикой обрастает
 
     public Goal createGoal(Long userId, Goal goal) {
@@ -25,5 +23,9 @@ public class GoalController {
         Goal updatedGoal = goalService.updateGoal(goalId, goalDto);
 
         return goalMapper.goalToGoalDTO(updatedGoal);
+    }
+
+    public Goal deleteGoal(long goalId){
+        return goalService.deleteGoal(goalId);
     }
 }

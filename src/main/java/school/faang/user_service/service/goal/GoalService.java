@@ -49,6 +49,7 @@ public class GoalService {
         if (!missingSkills.isEmpty()) {
             throw new IllegalArgumentException("User hasn't required skills for the goal: " + missingSkills);
         }
+        //todo проверить добавление цели у юзера и все другие связанные проверки
         return goalRepository.create(
                 goal.getTitle(),
                 goal.getDescription(),
@@ -86,6 +87,28 @@ public class GoalService {
         });
         skillService.updateAll(skills);
         userService.updateAll(users);
+    }
+
+    public Goal deleteGoal(long goalId) {
+        var goalToDelete = goalRepository.findById(goalId)
+                .orElseThrow(NoSuchElementException::new);
+        goalRepository.delete(goalToDelete);
+        deleteGoalRecursive(goalToDelete);
+
+        return goalToDelete;
+    }
+
+    private void deleteGoalRecursive(Goal goalToDelete) {
+        var users = goalToDelete.getUsers();
+        users.forEach(user -> user.getGoals().remove(goalToDelete));
+        userService.updateAll(users);
+
+        var skills = goalToDelete.getSkillsToAchieve();
+        skills.forEach(skill -> skill.getGoals().remove(goalToDelete));
+        skillService.updateAll(skills);
+
+        var invitations = goalToDelete.getInvitations();
+        //todo on next task with invitations
     }
 
     public Goal findById(Long id) {
