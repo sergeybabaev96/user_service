@@ -12,18 +12,19 @@ public class MentorshipRequestService {
     private final MentorshipRequestRepository mentorshipRequestRepository;
     private final MentorshipRequestMapper mentorshipRequestMapper;
 
+
     public MentorshipRequestService(MentorshipRequestRepository mentorshipRequestRepository, MentorshipRequestMapper mentorshipRequestMapper) {
         this.mentorshipRequestRepository = mentorshipRequestRepository;
         this.mentorshipRequestMapper = mentorshipRequestMapper;
     }
 
     public void requestMentorship(MentorshipRequestDto dto) {
-        MentorshipRequest mentorshipRequest = mentorshipRequestMapper.toEntity(dto)
+        MentorshipRequest request = mentorshipRequestMapper.dtoToMentorshipRequest(dto);
         //какая-то валидация
         mentorshipRequestRepository.create(
-                mentorshipRequest.getRequester(),
-                mentorshipRequest.getReceiver(),
-                mentorshipRequest.getDescription()
+                request.getRequester(),
+                request.getReceiver(),
+                request.getDescription()
         );
     }
 }
