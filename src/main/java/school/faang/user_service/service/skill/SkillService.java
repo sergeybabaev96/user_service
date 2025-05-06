@@ -14,6 +14,10 @@ public class SkillService {
 
     private final SkillRepository skillRepository;
 
+    public void updateAll(List<Skill> skills) {
+        skillRepository.saveAllAndFlush(skills);
+    }
+
     public Skill findById(Long id) {
         return skillRepository
                 .findById(id)

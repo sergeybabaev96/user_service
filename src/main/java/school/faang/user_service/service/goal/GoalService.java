@@ -1,23 +1,22 @@
 package school.faang.user_service.service.goal;
 
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.GoalDto;
 import school.faang.user_service.entity.Skill;
+import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.mapper.GoalMapper;
-import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.skill.SkillService;
+import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.util.goal.GoalUtil;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +29,7 @@ public class GoalService {
     private final GoalRepository goalRepository;
 
     private final SkillService skillService;
+    private final UserService userService;
 
     public Goal createGoal(Long userId, Goal goal) {
         long usersActiveGoals = goalRepository.findGoalsByUserId(userId)
@@ -49,7 +49,6 @@ public class GoalService {
         if (!missingSkills.isEmpty()) {
             throw new IllegalArgumentException("User hasn't required skills for the goal: " + missingSkills);
         }
-
         return goalRepository.create(
                 goal.getTitle(),
                 goal.getDescription(),
@@ -58,12 +57,35 @@ public class GoalService {
     }
 
     public Goal updateGoal(Long goalId, GoalDto goalDto) {
-        val foundGoal = goalRepository.findById(goalId)
+        var goalToUpdate = goalRepository.findById(goalId)
                 .orElseThrow(() -> new NoSuchElementException("No goal found by id " + goalId));
-        goalMapper.updateGoalFromDto(goalDto, foundGoal);
-        GoalUtil.updateTime(foundGoal, LocalDateTime.now());
-        goalRepository.save(foundGoal);
-        return foundGoal;
+        goalMapper.updateGoalFromDto(goalDto, goalToUpdate);
+        GoalUtil.updateTime(goalToUpdate, LocalDateTime.now());
+        goalRepository.save(goalToUpdate);
+
+        if (GoalStatus.COMPLETED == goalDto.getStatus()) {
+            updateUsersWithSkills(goalToUpdate);
+        }
+
+        return goalToUpdate;
+    }
+
+    @Transactional
+    void updateUsersWithSkills(Goal completedGoal) {
+        var users = completedGoal.getUsers();
+        var skills = completedGoal.getSkillsToAchieve();
+        users.forEach(user -> {
+            Set<Skill> merged = new HashSet<>(skills);
+            merged.addAll(user.getSkills());
+            user.setSkills(new ArrayList<>(merged));
+        });
+        skills.forEach(skill -> {
+            Set<User> merged = new HashSet<>(users);
+            merged.addAll(skill.getUsers());
+            skill.setUsers(new ArrayList<>(merged));
+        });
+        skillService.updateAll(skills);
+        userService.updateAll(users);
     }
 
     public Goal findById(Long id) {
