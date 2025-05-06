@@ -105,7 +105,7 @@ class SubscriptionServiceTest {
     void getFollowers_filtersByPhoneAndExperience() {
         UserFilterDto filterDto = new UserFilterDto();
         filterDto.setPhonePattern(SAM_PHONE);
-        filterDto.setExperienceMin(ALEX_EXPERIENCE+1);
+        filterDto.setExperienceMin(ALEX_EXPERIENCE + 1);
         filterDto.setExperienceMax(SAM_EXPERIENCE);
 
         List<UserDto> result = subscriptionService.getFollowers(FOLLOWEE_ID, filterDto);
