@@ -13,11 +13,19 @@ public class SubscriptionController {
     void followUser(long followerId, long followeeId) {
 
         if (checkFollowForSelf(followerId, followeeId)) {
-            throw new DataValidationException("You cant subscribe on yourself");
+            throw new DataValidationException("You cant subscribe to yourself");
         }
 
         subscriptionService.followUser(followerId, followeeId);
+    }
 
+    void unfollowUser(long followerId, long followeeId) {
+
+        if (checkFollowForSelf(followerId, followeeId)) {
+            throw new DataValidationException("You cant unsubscribe to yourself");
+        }
+
+        subscriptionService.unfollowUser(followerId, followeeId);
     }
 
     boolean checkFollowForSelf(long followerId, long followeeId) {

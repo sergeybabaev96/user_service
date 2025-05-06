@@ -21,4 +21,15 @@ public class SubscriptionService {
 
         subscriptionRepository.followUser(followerId, followeeId);
     }
+
+    public void unfollowUser(long followerId, long followeeId) {
+
+        boolean existSub = subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
+
+        if (!existSub) {
+            throw new DataValidationException("You cant unsubscribe to user that you are not subscribed");
+        }
+
+        subscriptionRepository.unfollowUser(followerId, followeeId);
+    }
 }
