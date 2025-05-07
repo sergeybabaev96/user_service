@@ -53,12 +53,12 @@ public class SubscriptionController {
         return subscriptionService.getFollowerCount(followerId);
     }
 
-    @GetMapping("/subscription/{id}")
+    @GetMapping("/{id}")
     public List<UserDto> getFollowing(@PathVariable("id") long id, UserDtoFilter userDtoFilter) {
         return subscriptionService.getFollowing(id, userDtoFilter);
     }
 
-    @GetMapping("/subscriptions/{id}/count")
+    @GetMapping("/{id}/count")
     public int getFollowingCount(@PathVariable("id") long id) {
         return subscriptionService.getFollowingCount(id);
     }

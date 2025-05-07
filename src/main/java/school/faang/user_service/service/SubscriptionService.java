@@ -7,6 +7,7 @@ import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserDtoFilter;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.SubscriptionRepository;
+import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.util.DataValidationException;
 
 import java.util.List;
@@ -16,10 +17,14 @@ public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final UserMapper userMapper;
+    private final UserRepository userRepository;
 
-    public SubscriptionService(SubscriptionRepository subscriptionRepository, UserMapper userMapper) {
+    public SubscriptionService(SubscriptionRepository subscriptionRepository,
+                               UserMapper userMapper,
+                               UserRepository userRepository) {
         this.subscriptionRepository = subscriptionRepository;
         this.userMapper = userMapper;
+        this.userRepository = userRepository;
     }
 
     public boolean isAlreadySubscribed(long followerId, long followeeId) {
@@ -59,11 +64,18 @@ public class SubscriptionService {
                                 && user.getPhone().equals(filter.getPhonePattern())
                                 && user.getAboutMe().contains(filter.getNamePattern()))
                 .toList();
+        if (followers.isEmpty()) {
+            throw new DataValidationException("No followers found matching the criteria");
+        }
         return userMapper.mapListOfUsers(followers);
     }
 
     public int getFollowerCount(long followerId) {
         validateUserExistance(followerId);
+        int result = subscriptionRepository.findFollowersAmountByFolloweeId(followerId);
+        if (result == 0) {
+            throw new DataValidationException("Not followed by anyone");
+        }
         return subscriptionRepository.findFollowersAmountByFolloweeId(followerId);
     }
 
@@ -76,12 +88,19 @@ public class SubscriptionService {
                                 && user.getPhone().equals(filter.getPhonePattern())
                                 && user.getAboutMe().contains(filter.getNamePattern()))
                 .toList();
+        if (followers.isEmpty()) {
+            throw new DataValidationException("Not following anyone matching the criteria");
+        }
         return userMapper.mapListOfUsers(followers);
     }
 
     public int getFollowingCount(long followerId) {
         validateUserExistance(followerId);
-        return subscriptionRepository.findFolloweesAmountByFollowerId(followerId);
+        int result = subscriptionRepository.findFolloweesAmountByFollowerId(followerId);
+        if (result == 0) {
+            throw new DataValidationException("Not following anyone");
+        }
+        return result;
     }
 
     @Mapper(componentModel = "spring")
@@ -94,11 +113,7 @@ public class SubscriptionService {
             throw new DataValidationException("Id must not be null or empty");
         }
         for (long id : ids) {
-            try {
-                if (!subscriptionRepository.existsById(id)) {
-                    System.out.println("Diag");
-                }
-            } catch (IllegalArgumentException e) {
+            if (!userRepository.existsById(id)) {
                 throw new DataValidationException("User with ID " + id + " does not exist");
             }
         }
