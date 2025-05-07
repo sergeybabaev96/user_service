@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class SubscriptionErrorResponse {
-    String message;
+    private String message;
     private long timestamp;
 }
