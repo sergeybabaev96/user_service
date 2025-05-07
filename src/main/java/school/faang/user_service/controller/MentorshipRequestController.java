@@ -1,5 +1,6 @@
 package school.faang.user_service.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,14 +12,11 @@ import school.faang.user_service.repository.mentorship.MentorshipRequestReposito
 import school.faang.user_service.service.MentorshipRequestService;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("user_service/mentorship")
 public class MentorshipRequestController {
 
     private final MentorshipRequestService mentorshipRequestService;
-
-    public MentorshipRequestController(MentorshipRequestService mentorshipRequestService) {
-        this.mentorshipRequestService = mentorshipRequestService;
-    }
 
     @PostMapping("requests")
     public ResponseEntity<Void> requestMentorship(@RequestBody MentorshipRequestDto mentorshipRequestDto){
