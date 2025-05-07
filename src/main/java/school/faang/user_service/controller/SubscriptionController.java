@@ -1,5 +1,6 @@
 package school.faang.user_service.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +21,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/subscriptions")
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SubscriptionController {
 
-    SubscriptionService subscriptionService;
-
-    @Autowired
-    public SubscriptionController(SubscriptionService subscriptionService) {
-        this.subscriptionService = subscriptionService;
-    }
+  private final SubscriptionService subscriptionService;
 
     @PostMapping("/{followerId}/follow/{followeeId}")
     public ResponseEntity<Void> followUser(@PathVariable("followerId") long followerId,

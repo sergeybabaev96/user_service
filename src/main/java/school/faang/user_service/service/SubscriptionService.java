@@ -1,7 +1,9 @@
 package school.faang.user_service.service;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.mapstruct.Mapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserDtoFilter;
@@ -13,19 +15,12 @@ import school.faang.user_service.util.DataValidationException;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor (onConstructor_ = @Autowired)
 public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final UserMapper userMapper;
     private final UserRepository userRepository;
-
-    public SubscriptionService(SubscriptionRepository subscriptionRepository,
-                               UserMapper userMapper,
-                               UserRepository userRepository) {
-        this.subscriptionRepository = subscriptionRepository;
-        this.userMapper = userMapper;
-        this.userRepository = userRepository;
-    }
 
     public boolean isAlreadySubscribed(long followerId, long followeeId) {
         validateUserExistance(followerId, followeeId);
