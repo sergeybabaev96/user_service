@@ -1,11 +1,12 @@
 package school.faang.user_service.dto;
 
-import school.faang.user_service.entity.contact.PreferredContact;
+import java.util.Locale;
 
 public record UserDto(
         Long id,
         String username,
         String email,
-        PreferredContact preference
+        PreferredContact preference,
+        Locale locale
 ) {
 }
