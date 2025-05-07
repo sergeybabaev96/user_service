@@ -26,7 +26,7 @@ app:
 
 payment:
   api:
-    url: http://localhost:9080/api/payment
+    url: http://localhost:9081/api/payment
 
 spring:
   datasource:
@@ -112,6 +112,9 @@ services:
     host: localhost
     port: 8082
 
-  payment-service:
-    host: localhost
-    port: 9080
+payment-service:
+  host: localhost
+  port: 9080
+
+redis:
+  mentorship-topic: mentorship_channel

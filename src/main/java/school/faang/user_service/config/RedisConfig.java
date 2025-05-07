@@ -1,5 +1,6 @@
 package school.faang.user_service.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +28,13 @@ public class RedisConfig {
         redisTemplate.setHashValueSerializer(new StringRedisSerializer());
         redisTemplate.afterPropertiesSet();
         return redisTemplate;
+    }
+
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(LettuceConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        return template;
     }
 
     @Bean
@@ -66,6 +74,11 @@ public class RedisConfig {
     @Bean
     CommandLineRunner warmUp(RedisWarmUpService redisWarmUpService) {
         return args -> redisWarmUpService.leaderboardWarmUpCache();
+    }
+
+    @Bean
+    public ChannelTopic mentorshipChannel(@Value("${redis.mentorship-topic}") String topicName) {
+        return new ChannelTopic(topicName);
     }
 }
 
