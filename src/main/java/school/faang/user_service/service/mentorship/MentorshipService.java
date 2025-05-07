@@ -15,4 +15,8 @@ public class MentorshipService {
     public List<User> getMentees(Long userId) {
         return mentorshipRepository.findMenteesByMentorId(userId);
     }
+
+    public List<User> getMentors(Long userId) {
+        return mentorshipRepository.findMentorsByMenteeId(userId);
+    }
 }
