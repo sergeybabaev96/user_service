@@ -1,13 +1,11 @@
 package school.faang.user_service.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.joda.time.LocalDate;
+import lombok.Data;
+import java.time.LocalDate;
 
-@Getter
-@Setter
+@Data
 public class CareerDto {
-    private long id;
+    private Long id;
     private LocalDate from;
     private LocalDate to;
     private String company;
