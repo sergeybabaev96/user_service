@@ -9,7 +9,7 @@ public interface SkillService {
 
     Skill findById(Long id);
 
-    List<Skill> findAllById(List<Long> ids);
+    List<Skill> findAllByIds(List<Long> ids);
 
     List<Skill> findAllByUserId(long userId);
 }

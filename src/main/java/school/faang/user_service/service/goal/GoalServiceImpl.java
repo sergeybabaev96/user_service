@@ -79,7 +79,7 @@ public class GoalServiceImpl implements GoalService {
 
         List<Long> copyOfUpdatesSkillIds = new ArrayList<>(goalDto.getSkillIds());
         copyOfUpdatesSkillIds.removeAll(
-                skillService.findAllById(copyOfUpdatesSkillIds).stream()
+                skillService.findAllByIds(copyOfUpdatesSkillIds).stream()
                         .map(Skill::getId)
                         .toList()
         );
