@@ -6,7 +6,6 @@ import school.faang.user_service.entity.User;
 
 import java.time.temporal.ValueRange;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 @Component
 public class SubscriptionExperienceFilters implements SubscriptionFilter {
