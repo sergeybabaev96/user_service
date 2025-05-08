@@ -31,5 +31,4 @@ public interface MentorshipRequestRepository extends CrudRepository<MentorshipRe
             LIMIT 1
             """)
     Optional<LocalDateTime> findLatestRequestDate(long requesterId, long receiverId);
-
 }

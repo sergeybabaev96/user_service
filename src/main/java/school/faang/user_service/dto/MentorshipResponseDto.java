@@ -16,7 +16,4 @@ public class MentorshipResponseDto {
 
     @JsonProperty("description")
     private String description;
-
-
-
 }

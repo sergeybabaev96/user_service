@@ -8,6 +8,7 @@ import school.faang.user_service.dto.MentorshipRequestDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.repository.mentorship.MentorshipRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -37,9 +38,9 @@ public class MentorshipRequestService {
         }
         LocalDateTime today = LocalDateTime.now();
         Optional<LocalDateTime> dateLastRequest = mentorshipRequestRepository.findLatestRequestDate(requesterId, receiverId);
-        if(dateLastRequest.isPresent()) {
+        if (dateLastRequest.isPresent()) {
             LocalDateTime lastRequest = dateLastRequest.get();
-            if(lastRequest.isAfter(today.minusMonths(TIME_FOR_REQUEST))) {
+            if (lastRequest.isAfter(today.minusMonths(TIME_FOR_REQUEST))) {
                 throw new ResponseStatusException(BAD_REQUEST, "You have already made a request during this period");
             }
         }

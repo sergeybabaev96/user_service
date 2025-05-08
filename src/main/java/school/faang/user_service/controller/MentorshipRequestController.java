@@ -1,5 +1,6 @@
 package school.faang.user_service.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class MentorshipRequestController {
     private final MentorshipRequestService mentorshipRequestService;
 
     @PostMapping("requests")
-    public ResponseEntity<Void> requestMentorship(@RequestBody MentorshipRequestDto mentorshipRequestDto){
+    public ResponseEntity<Void> requestMentorship(@RequestBody @Valid MentorshipRequestDto mentorshipRequestDto) {
         mentorshipRequestService.requestMentorship(mentorshipRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
