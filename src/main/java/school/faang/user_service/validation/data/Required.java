@@ -8,8 +8,9 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = {
         DataRequiredStringValidator.class,
         DataRequiredLongValidator.class,
-        DataRequiredDateValidator.class
+        DataRequiredLocalDateTimeValidator.class,
 })
+
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Required {

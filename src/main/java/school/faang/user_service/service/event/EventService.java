@@ -34,7 +34,7 @@ public class EventService {
     }
 
     @Transactional
-    public EventDto getEvent(long eventId) {
+    public EventDto getEvent(Long eventId) {
         return eventMapper.toDto(eventRepository.findById(eventId).orElseThrow(() ->
                 new DataValidationException("Event not found")));
     }
@@ -57,7 +57,7 @@ public class EventService {
     }
 
     @Transactional
-    public void deleteEvent(long eventId) {
+    public void deleteEvent(Long eventId) {
         eventRepository.deleteById(eventId);
     }
 
@@ -68,7 +68,7 @@ public class EventService {
     }
 
     @Transactional
-    public List<EventDto> getOwnedEvents(long userId) {
+    public List<EventDto> getOwnedEvents(Long userId) {
         return eventRepository.findAllByUserId(userId).stream()
                 .map(eventMapper::toDto)
                 .toList();
