@@ -3,7 +3,10 @@ package school.faang.user_service.service.mentorship;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.dto.MenteeDto;
+import school.faang.user_service.dto.MentorDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.mapper.MentorshipMapper;
 import school.faang.user_service.repository.mentorship.MentorshipRepository;
 
 import java.util.List;
@@ -13,13 +16,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MentorshipService {
     private final MentorshipRepository mentorshipRepository;
+    private final MentorshipMapper mentorshipMapper;
 
-    public List<User> getMentees(Long userId) {
-        return mentorshipRepository.findMenteesByMentorId(userId);
+    public List<MenteeDto> getMentees(Long userId) {
+        List<User> mentees = mentorshipRepository.findMenteesByMentorId(userId);
+        return mentorshipMapper.menteesToMenteesDtos(mentees);
     }
 
-    public List<User> getMentors(Long userId) {
-        return mentorshipRepository.findMentorsByMenteeId(userId);
+    public List<MentorDto> getMentors(Long userId) {
+        List<User> mentors = mentorshipRepository.findMentorsByMenteeId(userId);
+        return mentorshipMapper.mentorsToMentorsDtos(mentors);
     }
 
     public void deleteMentee(Long mentorId, Long menteeId) {
