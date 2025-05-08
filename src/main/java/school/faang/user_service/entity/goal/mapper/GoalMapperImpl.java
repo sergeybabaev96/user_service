@@ -6,19 +6,15 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalDto;
 
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
 public class GoalMapperImpl implements GoalMapper {
 
     @Override
-    public Goal dtoToGoal(GoalDto goalDto, Goal parent, List<Skill> skills) {
+    public Goal dtoToGoal(GoalDto goalDto) {
         Goal goal = new Goal();
         goal.setTitle(goalDto.title());
         goal.setDescription(goalDto.description());
-        goal.setParent(parent);
-        goal.setSkillsToAchieve(skills);
         return goal;
     }
 

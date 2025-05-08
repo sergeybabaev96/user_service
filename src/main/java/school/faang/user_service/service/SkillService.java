@@ -2,8 +2,8 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.exception.goal.AddedSkillNotExistException;
 import school.faang.user_service.repository.SkillRepository;
+import school.faang.user_service.validator.goal.SkillValidator;
 
 import java.util.List;
 
@@ -12,13 +12,10 @@ import java.util.List;
 public class SkillService {
 
     private final SkillRepository skillRepository;
+    private final SkillValidator skillValidator;
 
     public void assignSkillToGoal(long goalId, List<Long> skillsId) {
-        boolean containNotExistingSkill = skillRepository.countExisting(skillsId) != skillsId.size();
-        if(containNotExistingSkill) {
-            throw new AddedSkillNotExistException();
-        }
+        skillValidator.validateExistingSkills(skillRepository.countExisting(skillsId), skillsId.size());
         skillsId.forEach(skillId -> skillRepository.assignSkillToGoal(goalId, skillId));
     }
-
 }
