@@ -1,8 +1,6 @@
 package school.faang.user_service.service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -10,12 +8,14 @@ import lombok.RequiredArgsConstructor;
 import school.faang.user_service.dto.skill.SkillCandidateDto;
 import school.faang.user_service.dto.skill.SkillDto;
 import school.faang.user_service.entity.Skill;
+import school.faang.user_service.entity.UserSkillGuarantee;
 import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.SkillCandidateMapper;
 import school.faang.user_service.mapper.SkillMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
+import school.faang.user_service.repository.UserSkillGuaranteeRepository;;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +23,7 @@ public class SkillService {
     private final static long MIN_SKILL_OFFERS = 3;
     private final SkillRepository skillRepository;
     private final SkillOfferRepository skillOfferRepository;
+    private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
     private final SkillMapper skillMapper;
     private final SkillCandidateMapper skillCandidateMapper;
 
@@ -34,7 +35,7 @@ public class SkillService {
         return skillMapper.skillToSkillDto(savedSkill);
     }
 
-    public List<SkillDto> getUserSkill(long userId) {
+    public List<SkillDto> getUserSkills(long userId) {
         List<Skill> skills = skillRepository.findAllByUserId(userId);
         return skills.stream()
             .map(skillMapper::skillToSkillDto)
@@ -57,10 +58,16 @@ public class SkillService {
         if (skillOffers.size() > MIN_SKILL_OFFERS) {
             skillRepository.assignSkillToUser(skillId, userId);
             for (SkillOffer skillOffer : skillOffers) {
-                // skillOffer.getRecommendation().getAuthor()
+                UserSkillGuarantee userSkillGuarantee = new UserSkillGuarantee();
+                userSkillGuarantee.setSkill(skillOffer.getSkill());
+                userSkillGuarantee.setGuarantor(skillOffer.getRecommendation().getAuthor());
+                userSkillGuarantee.setUser(skillOffer.getRecommendation().getReceiver());
+                userSkillGuaranteeRepository.save(userSkillGuarantee);
             }
         }
 
-        return skillMapper.skillToSkillDto(skillRepository.findById(skillId).get());
+        SkillDto acquredSkill = skillMapper.skillToSkillDto(skillRepository.findById(skillId).get());
+
+        return acquredSkill;
     }
 }

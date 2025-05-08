@@ -29,12 +29,12 @@ public class SkillController {
         return skillService.create(skill);
     }
 
-    @GetMapping("/get")
+    @GetMapping("/getForUser")
     public List<SkillDto> getUserSkills(@RequestParam long userId) {
         if (userId < 0) {
             throw new DataValidationException("Invalid user id.");
         }
-        return skillService.getUserSkill(userId);
+        return skillService.getUserSkills(userId);
     }
 
     @GetMapping("/get/allOfferedToUser")
@@ -42,8 +42,8 @@ public class SkillController {
         return skillService.getOfferedSkills(userId);
     }
 
-    @GetMapping("")
-    public SkillDto acquireSkillFromOffers(long skillId, long userId) {
+    @PostMapping("/acquireSkillFromOffers")
+    public SkillDto acquireSkillFromOffers(@RequestParam long skillId, @RequestParam long userId) {
         return skillService.acquireSkillFromOffers(skillId, userId);
     }
 
