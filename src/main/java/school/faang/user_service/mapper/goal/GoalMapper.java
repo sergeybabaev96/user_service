@@ -4,8 +4,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-import school.faang.user_service.dto.goal.GoalRequestDto;
+import school.faang.user_service.dto.goal.GoalCreateRequestDto;
 import school.faang.user_service.dto.goal.GoalResponseDto;
+import school.faang.user_service.dto.goal.GoalUpdateRequestDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
@@ -20,22 +21,20 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface GoalMapper {
-    @Mapping(target = "status", expression = "java(mapGoalStatus(goalRequestDto.isCompleted()))")
-    Goal toGoalEntity(final GoalRequestDto goalRequestDto);
+    Goal toGoalEntity(final GoalCreateRequestDto goalCreateRequestDto);
 
     @Mapping(source = "parent.id", target = "parentId")
     @Mapping(target = "completed", expression = "java(mapGoalStatus(goal.getStatus()))")
-    @Mapping(source = "deadline", target = "deadline", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
-    @Mapping(source = "createdAt", target = "createdDate", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
-    @Mapping(source = "updatedAt", target = "updatedDate", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
+    @Mapping(source = "createdAt", target = "createdDate")
+    @Mapping(source = "updatedAt", target = "updatedDate")
     @Mapping(source = "mentor.id", target = "mentorId")
     @Mapping(target = "invitationsIds", expression = "java(mapInvitationIds(goal.getInvitations()))")
     @Mapping(target = "usersIds", expression = "java(mapUserIds(goal.getUsers()))")
     @Mapping(target = "skillToAchieveIds", expression = "java(mapSkillIds(goal.getSkillsToAchieve()))")
     GoalResponseDto toGoalResponseDto(final Goal goal);
 
-    @Mapping(target = "status", expression = "java(mapGoalStatus(goalRequestDto.isCompleted()))")
-    void update(@MappingTarget Goal goal, final GoalRequestDto goalRequestDto);
+    @Mapping(target = "status", expression = "java(mapGoalStatus(goalUpdateRequestDto.getCompleted()))")
+    void update(@MappingTarget Goal goal, final GoalUpdateRequestDto goalUpdateRequestDto);
 
     default boolean mapGoalStatus(GoalStatus status) {
         return Objects.equals(status, GoalStatus.COMPLETED);

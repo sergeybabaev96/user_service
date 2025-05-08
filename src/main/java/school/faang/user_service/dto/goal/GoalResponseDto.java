@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -15,9 +16,9 @@ public class GoalResponseDto {
     private String title;
     private String description;
     private boolean completed;
-    private String deadline;
-    private String createdDate;
-    private String updatedDate;
+    private LocalDateTime deadline;
+    private LocalDateTime createdDate;
+    private LocalDateTime updatedDate;
     private Long mentorId;
     private List<Long> invitationsIds;
     private List<Long> usersIds;

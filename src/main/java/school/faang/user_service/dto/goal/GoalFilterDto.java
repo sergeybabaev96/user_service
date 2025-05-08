@@ -14,5 +14,5 @@ public class GoalFilterDto {
     private String title;
 
     @NotNull(message = "Completed is mandatory")
-    private boolean completed;
+    private Boolean completed;
 }

@@ -10,15 +10,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import school.faang.user_service.controller.goal.GoalController;
 import school.faang.user_service.dto.goal.GoalErrorResponseDto;
 import school.faang.user_service.exception.goal.CountActiveGoalMoreMaxException;
-import school.faang.user_service.exception.goal.CreateGoalCompletedException;
 import school.faang.user_service.exception.goal.GoalAlreadyCompletedException;
 import school.faang.user_service.exception.goal.GoalNotFoundException;
 import school.faang.user_service.exception.skill.SkillNotFoundException;
 import school.faang.user_service.exception.user.UserNotFoundException;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 
 @ControllerAdvice(assignableTypes = {GoalController.class})
@@ -37,11 +34,6 @@ public class GoalExceptionHandler {
     @ExceptionHandler(GoalAlreadyCompletedException.class)
     public ResponseEntity<GoalErrorResponseDto> handleGoalAlreadyCompletedException(GoalAlreadyCompletedException ex) {
         return createErrorResponse(ex.getMessage(), HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(CreateGoalCompletedException.class)
-    public ResponseEntity<GoalErrorResponseDto> handleCreateGoalCompletedException(CreateGoalCompletedException ex) {
-        return createErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
@@ -72,10 +64,7 @@ public class GoalExceptionHandler {
 
     private ResponseEntity<GoalErrorResponseDto> createErrorResponse(String errorMsg, HttpStatus status) {
         log.error("Error in GoalController: {}, response status {}", errorMsg, status);
-        GoalErrorResponseDto response = new GoalErrorResponseDto(
-                errorMsg,
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")),
-                status.value());
+        GoalErrorResponseDto response = new GoalErrorResponseDto(errorMsg, LocalDateTime.now(), status.value());
         return new ResponseEntity<>(response, status);
     }
 }

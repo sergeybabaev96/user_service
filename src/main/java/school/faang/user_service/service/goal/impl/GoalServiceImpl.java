@@ -4,15 +4,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.config.context.UserContext;
+import school.faang.user_service.dto.goal.GoalCreateRequestDto;
 import school.faang.user_service.dto.goal.GoalFilterDto;
-import school.faang.user_service.dto.goal.GoalRequestDto;
 import school.faang.user_service.dto.goal.GoalResponseDto;
+import school.faang.user_service.dto.goal.GoalUpdateRequestDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.exception.goal.CountActiveGoalMoreMaxException;
-import school.faang.user_service.exception.goal.CreateGoalCompletedException;
 import school.faang.user_service.exception.goal.GoalAlreadyCompletedException;
 import school.faang.user_service.exception.goal.GoalNotFoundException;
 import school.faang.user_service.mapper.goal.GoalMapper;
@@ -36,20 +37,25 @@ public class GoalServiceImpl implements GoalService {
     private final GoalMapper goalMapper;
     private final UserService userService;
     private final SkillService skillService;
+    private final UserContext userContext;
 
     @Override
-    public GoalResponseDto createGoal(Long userId, final GoalRequestDto goalRequestDto) {
-        checkGoalBeforeInsert(userId, goalRequestDto);
+    public GoalResponseDto createGoal(final GoalCreateRequestDto goalCreateRequestDto) {
+        long userId = userContext.getUserId();
 
-        Goal goalEntity = goalMapper.toGoalEntity(goalRequestDto);
+        checkGoalBeforeInsert(userId, goalCreateRequestDto);
+
+        Goal goalEntity = goalMapper.toGoalEntity(goalCreateRequestDto);
 
         User owner = userService.getUserById(userId);
         List<User> users = new ArrayList<>();
         users.add(owner);
         goalEntity.setUsers(users);
 
-        Goal parentGoal = getGoalById(goalRequestDto.getParentId());
+        Goal parentGoal = getGoalById(goalCreateRequestDto.getParentId());
         goalEntity.setParent(parentGoal);
+
+        goalEntity.setStatus(GoalStatus.ACTIVE);
 
         Goal savedGoal = goalRepository.save(goalEntity);
         log.info("Goal with id {} has been saved", savedGoal.getId());
@@ -58,20 +64,20 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public GoalResponseDto updateGoal(long goalId, final GoalRequestDto goalRequestDto) {
-        Goal goal = getGoalById(goalId);
+    public GoalResponseDto updateGoal(final GoalUpdateRequestDto goalUpdateRequestDto) {
+        Goal goal = getGoalById(goalUpdateRequestDto.getId());
 
-        checkGoalBeforeUpdate(goal, goalRequestDto);
+        checkGoalBeforeUpdate(goal, goalUpdateRequestDto);
 
-        goalMapper.update(goal, goalRequestDto);
+        goalMapper.update(goal, goalUpdateRequestDto);
 
-        List<Skill> skills = goalRequestDto.getSkillIds().stream()
+        List<Skill> skills = goalUpdateRequestDto.getSkillIds().stream()
                 .map(skillService::getSkillById)
                 .collect(Collectors.toList());
         goal.setSkillsToAchieve(skills);
 
         Goal saveGoal = goalRepository.save(goal);
-        log.info("Goal with id {} has been update", goalRequestDto);
+        log.info("Goal with id {} has been update", saveGoal.getId());
 
         assignsSkillsToUser(saveGoal);
 
@@ -86,25 +92,31 @@ public class GoalServiceImpl implements GoalService {
         log.info("Goal with id {} has been deleted", goalId);
     }
 
-    @Override
+
     @Transactional(readOnly = true)
+    @Override
     public List<GoalResponseDto> getSubtasksByParentGoalId(long goalParentId) {
-        try (Stream<Goal> streamGoal = goalRepository.findByParent(goalParentId)) {
-            return streamGoal
+        try (Stream<Goal> goalsStream = goalRepository.findByParent(goalParentId)) {
+            return goalsStream
                     .map(goalMapper::toGoalResponseDto)
                     .toList();
         }
     }
 
-    @Override
-    public List<GoalResponseDto> getGoalsByUser(long userId, GoalFilterDto filter) {
-        GoalStatus statusFilter = filter.isCompleted() ? GoalStatus.COMPLETED : GoalStatus.ACTIVE;
 
-        return goalRepository.findGoalsByUserId(userId)
-                .filter(goal -> Objects.equals(goal.getTitle(), filter.getTitle()))
-                .filter(goal -> Objects.equals(goal.getStatus(), statusFilter))
-                .map(goalMapper::toGoalResponseDto)
-                .toList();
+    @Transactional(readOnly = true)
+    @Override
+    public List<GoalResponseDto> getGoalsByUser(GoalFilterDto filter) {
+        long userId = userContext.getUserId();
+        GoalStatus statusFilter = filter.getCompleted() ? GoalStatus.COMPLETED : GoalStatus.ACTIVE;
+
+        try (Stream<Goal> goalsStream = goalRepository.findGoalsByUserId(userId)) {
+            return goalsStream
+                    .filter(goal -> Objects.equals(goal.getTitle(), filter.getTitle()))
+                    .filter(goal -> Objects.equals(goal.getStatus(), statusFilter))
+                    .map(goalMapper::toGoalResponseDto)
+                    .toList();
+        }
     }
 
     @Override
@@ -121,32 +133,27 @@ public class GoalServiceImpl implements GoalService {
         getGoalById(goalId);
     }
 
-    private void checkGoalBeforeInsert(long userId, GoalRequestDto goalRequestDto) {
-        if (goalRequestDto.isCompleted()) {
-            String errorMsg = "Trying create the completed goal";
-            log.error(errorMsg);
-            throw new CreateGoalCompletedException(errorMsg);
-        }
+    private void checkGoalBeforeInsert(long userId, GoalCreateRequestDto goalCreateRequestDto) {
         checkCountGoalForUser(userId);
 
-        checkSkills(goalRequestDto);
+        checkSkills(goalCreateRequestDto.getSkillIds());
     }
 
-    private void checkGoalBeforeUpdate(Goal goal, GoalRequestDto goalRequestDto) {
+    private void checkGoalBeforeUpdate(Goal goal, GoalUpdateRequestDto goalUpdateRequestDto) {
         if (Objects.equals(goal.getStatus(), GoalStatus.COMPLETED)) {
             String errorMsg = String.format("Trying change the completed goal with id %d", goal.getId());
             log.error(errorMsg);
             throw new GoalAlreadyCompletedException(errorMsg);
         }
 
-        checkSkills(goalRequestDto);
+        checkSkills(goalUpdateRequestDto.getSkillIds());
     }
 
     private void checkGoalBeforeDelete(long goalId) {
         checkGoalById(goalId);
     }
 
-    private void checkCountGoalForUser(Long userId) {
+    private void checkCountGoalForUser(long userId) {
         int countActiveGoalForUser = goalRepository.countActiveGoalsPerUser(userId);
 
         log.debug("Count active goal for user with id {} {}", userId, countActiveGoalForUser);
@@ -169,7 +176,7 @@ public class GoalServiceImpl implements GoalService {
         }
     }
 
-    private void checkSkills(GoalRequestDto goalRequestDto) {
-        goalRequestDto.getSkillIds().forEach(skillService::checkSkillById);
+    private void checkSkills(List<Long> skillIds) {
+        skillIds.forEach(skillService::checkSkillById);
     }
 }

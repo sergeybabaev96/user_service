@@ -12,8 +12,9 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GoalRequestDto {
-    private Long parentId;
+public class GoalUpdateRequestDto {
+    @NotNull(message = "Id is mandatory")
+    private Long id;
 
     @NotBlank(message = "Title is mandatory")
     @Size(max = 64, message = "Max length tittle — 64 char")
@@ -23,7 +24,7 @@ public class GoalRequestDto {
     private String description;
 
     @NotNull(message = "Completed is mandatory")
-    private boolean completed;
+    private Boolean completed;
 
     private List<Long> skillIds;
 }

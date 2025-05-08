@@ -7,61 +7,59 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import school.faang.user_service.dto.goal.GoalCreateRequestDto;
 import school.faang.user_service.dto.goal.GoalFilterDto;
-import school.faang.user_service.dto.goal.GoalRequestDto;
 import school.faang.user_service.dto.goal.GoalResponseDto;
+import school.faang.user_service.dto.goal.GoalUpdateRequestDto;
 import school.faang.user_service.service.goal.GoalService;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/goal")
+@RequestMapping("/api/v1/goals")
 @Slf4j
 public class GoalController {
     private final GoalService goalService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public GoalResponseDto createGoal(@RequestParam Long userId,
-                                      @RequestBody @Valid GoalRequestDto goalRequestDto) {
-        log.debug("Goal controller accepted request create goal {}", goalRequestDto);
-        return goalService.createGoal(userId, goalRequestDto);
+    public GoalResponseDto createGoal(@RequestBody @Valid GoalCreateRequestDto goalCreateRequestDto) {
+        log.info("Goal controller accepted request create goal {}", goalCreateRequestDto);
+        return goalService.createGoal(goalCreateRequestDto);
     }
 
     @PatchMapping
     @ResponseStatus(HttpStatus.OK)
-    public GoalResponseDto updateGoal(@RequestParam long goalId,
-                                      @Valid @RequestBody GoalRequestDto goalRequestDto) {
-        log.debug("Goal controller accepted request update goal with id {}", goalId);
-        return goalService.updateGoal(goalId, goalRequestDto);
+    public GoalResponseDto updateGoal(@RequestBody @Valid GoalUpdateRequestDto goalUpdateRequestDto) {
+        log.info("Goal controller accepted request update goal with id {}", goalUpdateRequestDto.getId());
+        return goalService.updateGoal(goalUpdateRequestDto);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{goalId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteGoal(@RequestParam long goalId) {
-        log.debug("Goal controller accepted request delete goal with id {}", goalId);
+    public void deleteGoal(@PathVariable long goalId) {
+        log.info("Goal controller accepted request delete goal with id {}", goalId);
         goalService.deleteGoalById(goalId);
     }
 
-    @GetMapping("/subtasks")
+    @GetMapping("/subtasks/{goalParentId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<GoalResponseDto> getSubtasksByGoalId(@RequestParam long goalParentId) {
-        log.debug("Goal controller accepted request get subtasks with parent id {}", goalParentId);
+    public List<GoalResponseDto> getSubtasksByGoalId(@PathVariable long goalParentId) {
+        log.info("Goal controller accepted request get subtasks with parent id {}", goalParentId);
         return goalService.getSubtasksByParentGoalId(goalParentId);
     }
 
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     @ResponseStatus(HttpStatus.OK)
-    public List<GoalResponseDto> getGoalsByUser(@RequestParam long userId,
-                                                @Valid @RequestBody GoalFilterDto filterDto) {
-        log.debug("Goal controller accepted request get goats for user with id {} and filter {}", userId, filterDto);
-        return goalService.getGoalsByUser(userId, filterDto);
+    public List<GoalResponseDto> getGoalsByUser(@RequestBody @Valid GoalFilterDto filterDto) {
+        log.info("Goal controller accepted request get goats for user with filter {}", filterDto);
+        return goalService.getGoalsByUser(filterDto);
     }
 }
