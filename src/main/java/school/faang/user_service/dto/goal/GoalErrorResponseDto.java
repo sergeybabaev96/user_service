@@ -9,4 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GoalErrorResponseDto {
     private String errorMsg;
+    private String timestamp;
+    private int codeResponse;
 }

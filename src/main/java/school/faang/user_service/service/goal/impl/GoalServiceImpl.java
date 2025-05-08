@@ -38,17 +38,7 @@ public class GoalServiceImpl implements GoalService {
     private final SkillService skillService;
 
     @Override
-    public void createGoal(Long userId, final GoalRequestDto goalRequestDto) {
-
-        /*Создайте в классе GoalService метод createGoal для сохранения полученной цели.
-        Перед тем, как сохранить цель в базу, нужно проверить,
-        что количество активных целей пользователя не превышает максимального возможного числа активных целей.
-        Сейчас это число - 3.
-        Также нужно проверить, что цель содержит только существующие скиллы.
-        Для этого нужно использовать SkillService и SkillRepository с их методами.
-
-        Обратите внимание, что метод create сохраняет в базу цель без навыков.
-        Чтобы сохранить навыки, нужно использовать отдельный метод.*/
+    public GoalResponseDto createGoal(Long userId, final GoalRequestDto goalRequestDto) {
         checkGoalBeforeInsert(userId, goalRequestDto);
 
         Goal goalEntity = goalMapper.toGoalEntity(goalRequestDto);
@@ -63,6 +53,8 @@ public class GoalServiceImpl implements GoalService {
 
         Goal savedGoal = goalRepository.save(goalEntity);
         log.info("Goal with id {} has been saved", savedGoal.getId());
+
+        return goalMapper.toGoalResponseDto(savedGoal);
     }
 
     @Override
@@ -105,8 +97,12 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public List<GoalResponseDto> getGoalsByUser(Long userId, GoalFilterDto filter) {
+    public List<GoalResponseDto> getGoalsByUser(long userId, GoalFilterDto filter) {
+        GoalStatus statusFilter = filter.isCompleted() ? GoalStatus.COMPLETED : GoalStatus.ACTIVE;
+
         return goalRepository.findGoalsByUserId(userId)
+                .filter(goal -> Objects.equals(goal.getTitle(), filter.getTitle()))
+                .filter(goal -> Objects.equals(goal.getStatus(), statusFilter))
                 .map(goalMapper::toGoalResponseDto)
                 .toList();
     }

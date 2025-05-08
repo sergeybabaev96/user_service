@@ -9,14 +9,14 @@ import school.faang.user_service.entity.goal.Goal;
 import java.util.List;
 
 public interface GoalService {
-    void createGoal(Long userId, final GoalRequestDto goalRequestDto);
+    GoalResponseDto createGoal(Long userId, final GoalRequestDto goalRequestDto);
     GoalResponseDto updateGoal(long goalId, final GoalRequestDto goalRequestDto);
     void deleteGoalById(long goalId);
 
     @Transactional(readOnly = true)
     List<GoalResponseDto> getSubtasksByParentGoalId(long goalParentId);
 
-    List<GoalResponseDto> getGoalsByUser(Long userId, GoalFilterDto filter);
+    List<GoalResponseDto> getGoalsByUser(long userId, GoalFilterDto filter);
 
     Goal getGoalById(long goalId);
 

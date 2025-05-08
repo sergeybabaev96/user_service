@@ -27,17 +27,18 @@ import java.util.List;
 public class GoalController {
     private final GoalService goalService;
 
-    // TODO: возможно стоит возвращать сущность после создания
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createGoal(@RequestParam Long userId, @RequestBody @Valid GoalRequestDto goalRequestDto) {
+    public GoalResponseDto createGoal(@RequestParam Long userId,
+                                      @RequestBody @Valid GoalRequestDto goalRequestDto) {
         log.debug("Goal controller accepted request create goal {}", goalRequestDto);
-        goalService.createGoal(userId, goalRequestDto);
+        return goalService.createGoal(userId, goalRequestDto);
     }
 
     @PatchMapping
     @ResponseStatus(HttpStatus.OK)
-    public GoalResponseDto updateGoal(@RequestParam long goalId, @Valid @RequestBody GoalRequestDto goalRequestDto) {
+    public GoalResponseDto updateGoal(@RequestParam long goalId,
+                                      @Valid @RequestBody GoalRequestDto goalRequestDto) {
         log.debug("Goal controller accepted request update goal with id {}", goalId);
         return goalService.updateGoal(goalId, goalRequestDto);
     }
@@ -56,11 +57,11 @@ public class GoalController {
         return goalService.getSubtasksByParentGoalId(goalParentId);
     }
 
-    // TODO: пока что не понятно что за фильтр
-    @GetMapping("/user")
+    @GetMapping("/filter")
     @ResponseStatus(HttpStatus.OK)
-    public List<GoalResponseDto> getGoalsByUser(@RequestParam long userId) {
-        log.debug("Goal controller accepted request get goats for user with id {}", userId);
-        return goalService.getGoalsByUser(userId, new GoalFilterDto());
+    public List<GoalResponseDto> getGoalsByUser(@RequestParam long userId,
+                                                @Valid @RequestBody GoalFilterDto filterDto) {
+        log.debug("Goal controller accepted request get goats for user with id {} and filter {}", userId, filterDto);
+        return goalService.getGoalsByUser(userId, filterDto);
     }
 }

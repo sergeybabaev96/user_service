@@ -16,6 +16,9 @@ import school.faang.user_service.exception.goal.GoalNotFoundException;
 import school.faang.user_service.exception.skill.SkillNotFoundException;
 import school.faang.user_service.exception.user.UserNotFoundException;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 
 @ControllerAdvice(assignableTypes = {GoalController.class})
@@ -61,10 +64,18 @@ public class GoalExceptionHandler {
         return createErrorResponse(errorMessage, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<GoalErrorResponseDto> handleUnexpectedException(Exception ex) {
+        return createErrorResponse(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 
     private ResponseEntity<GoalErrorResponseDto> createErrorResponse(String errorMsg, HttpStatus status) {
         log.error("Error in GoalController: {}, response status {}", errorMsg, status);
-        GoalErrorResponseDto response = new GoalErrorResponseDto(errorMsg);
+        GoalErrorResponseDto response = new GoalErrorResponseDto(
+                errorMsg,
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")),
+                status.value());
         return new ResponseEntity<>(response, status);
     }
 }
