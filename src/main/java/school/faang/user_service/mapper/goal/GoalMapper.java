@@ -2,6 +2,7 @@ package school.faang.user_service.mapper.goal;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 import school.faang.user_service.dto.goal.GoalRequestDto;
 import school.faang.user_service.dto.goal.GoalResponseDto;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface GoalMapper {
+    @Mapping(target = "status", expression = "java(mapGoalStatus(goalRequestDto.isCompleted()))")
     Goal toGoalEntity(final GoalRequestDto goalRequestDto);
 
     @Mapping(source = "parent.id", target = "parentId")
@@ -29,11 +31,18 @@ public interface GoalMapper {
     @Mapping(source = "mentor.id", target = "mentorId")
     @Mapping(target = "invitationsIds", expression = "java(mapInvitationIds(goal.getInvitations()))")
     @Mapping(target = "usersIds", expression = "java(mapUserIds(goal.getUsers()))")
-    @Mapping(target = "skillsToAchieveIds", expression = "java(mapSkillIds(goal.getSkillsToAchieve()))")
+    @Mapping(target = "skillToAchieveIds", expression = "java(mapSkillIds(goal.getSkillsToAchieve()))")
     GoalResponseDto toGoalResponseDto(final Goal goal);
+
+    @Mapping(target = "status", expression = "java(mapGoalStatus(goalRequestDto.isCompleted()))")
+    void update(@MappingTarget Goal goal, final GoalRequestDto goalRequestDto);
 
     default boolean mapGoalStatus(GoalStatus status) {
         return Objects.equals(status, GoalStatus.COMPLETED);
+    }
+
+    default GoalStatus mapGoalStatus(boolean completed) {
+        return completed ? GoalStatus.COMPLETED : GoalStatus.ACTIVE;
     }
 
     default List<Long> mapInvitationIds(List<GoalInvitation> invitations) {

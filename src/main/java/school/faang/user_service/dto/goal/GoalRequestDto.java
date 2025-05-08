@@ -5,6 +5,10 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import school.faang.user_service.entity.goal.GoalStatus;
+
+import java.util.List;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -18,4 +22,8 @@ public class GoalRequestDto {
 
     @Size(max = 128, message = "Max length description — 128 char")
     private String description;
+
+    private boolean completed;
+
+    private List<Long> skillIds;
 }

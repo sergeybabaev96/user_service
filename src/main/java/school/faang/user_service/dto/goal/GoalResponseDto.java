@@ -21,5 +21,5 @@ public class GoalResponseDto {
     private Long mentorId;
     private List<Long> invitationsIds;
     private List<Long> usersIds;
-    private List<Long> skillsToAchieveIds;
+    private List<Long> skillToAchieveIds;
 }
