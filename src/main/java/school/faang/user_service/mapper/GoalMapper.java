@@ -4,8 +4,8 @@ import org.mapstruct.*;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.goal.Goal;
-import school.faang.user_service.service.goal.GoalService;
-import school.faang.user_service.service.skill.SkillService;
+import school.faang.user_service.service.GoalService;
+import school.faang.user_service.service.SkillService;
 
 import java.util.List;
 

@@ -1,7 +1,6 @@
 package school.faang.user_service.service.goal;
 
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.goal.GoalDto;
@@ -12,16 +11,20 @@ import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.mapper.GoalMapper;
 import school.faang.user_service.repository.goal.GoalRepository;
-import school.faang.user_service.service.skill.SkillService;
-import school.faang.user_service.service.user.UserService;
+import school.faang.user_service.service.GoalService;
+import school.faang.user_service.service.SkillService;
+import school.faang.user_service.service.UserService;
 import school.faang.user_service.util.goal.GoalUtil;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
-public class GoalService {
+public class GoalServiceImpl implements GoalService {
 
     public static int MAXIMUM_ALLOWED_ACTIVE_GOALS = 3;//todo вынести в конфигурацию компонента
 
@@ -32,14 +35,8 @@ public class GoalService {
     private final SkillService skillService;
     private final UserService userService;
 
-    public static boolean goalIsActive(@NotNull Goal goal) {
-        return GoalStatus.ACTIVE == goal.getStatus();
-    }
 
-    public static boolean goalIsCompleted(@NotNull Goal goal) {
-        return GoalStatus.COMPLETED == goal.getStatus();
-    }
-
+    @Override
     public Goal createGoal(Long userId, Goal goal) {
         long usersActiveGoals = goalRepository.findGoalsByUserId(userId)
                 .filter(GoalService::goalIsActive)
@@ -70,6 +67,7 @@ public class GoalService {
         return createdGoal;
     }
 
+    @Override
     public Goal updateGoal(Long goalId, GoalDto goalDto) {
         var goalToUpdate = goalRepository.findById(goalId)
                 .orElseThrow(NoSuchElementException::new);
@@ -117,6 +115,7 @@ public class GoalService {
         userService.updateAll(users);
     }
 
+    @Override
     public Goal deleteGoal(long goalId) {
         var goalToDelete = goalRepository.findById(goalId)
                 .orElseThrow(NoSuchElementException::new);
@@ -139,23 +138,27 @@ public class GoalService {
         //todo on next task with invitations
     }
 
+    @Override
     public List<Goal> findSubtasksByGoalId(long goalId) {
         GoalFilterDto blankFilter = new GoalFilterDto();
         return findSubtasksByGoalId(goalId, blankFilter);
     }
 
+    @Override
     public List<Goal> findSubtasksByGoalId(long goalId, GoalFilterDto filter) {
         return goalRepository.findByParent(goalId)
                 .filter(goal -> GoalUtil.goalFilter(goal, filter))
                 .toList();
     }
 
+    @Override
     public List<Goal> findGoalsByUserId(Long userId, GoalFilterDto filter) {
         return goalRepository.findGoalsByUserId(userId)
                 .filter(goal -> GoalUtil.goalFilter(goal, filter))
                 .toList();
     }
 
+    @Override
     public Goal findById(Long id) {
         return goalRepository
                 .findById(id)
