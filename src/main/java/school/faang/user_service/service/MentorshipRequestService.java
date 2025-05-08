@@ -31,7 +31,7 @@ public class MentorshipRequestService {
 
         if (!mentorshipRepository.existsById(requesterId) || !mentorshipRepository.existsById(receiverId)
         ) {
-            throw new ResponseStatusException(NOT_FOUND, "User not found");
+            throw new ResponseStatusException(NOT_FOUND, "RequesterId or receiverId not found");
         }
         if (requesterId == receiverId) {
             throw new ResponseStatusException(BAD_REQUEST, "Requester and receiver are the same person.");
