@@ -9,14 +9,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
-import school.faang.user_service.controller.event.EventParticipationController;
 
 @SpringBootApplication
 @EnableFeignClients("school.faang.user_service.client")
 @RequiredArgsConstructor
 public class UserServiceApplication implements CommandLineRunner {
-
-    private final EventParticipationController controller;
 
     public static void main(String[] args) {
         SpringApplication.run(UserServiceApplication.class, args);
