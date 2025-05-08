@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 public class EventDto {
-    private long id;
+    private Long id;
     @Required
     private String title;
     @Required
@@ -19,6 +19,6 @@ public class EventDto {
     private String description;
     private List<Long> relatedSkillsIds;
     private String location;
-    private int maxAttendees;
+    private Integer maxAttendees;
     private String eventType;
 }
