@@ -12,7 +12,6 @@ import school.faang.user_service.repository.mentorship.MentorshipRepository;
 import java.util.List;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class MentorshipService {
     private final MentorshipRepository mentorshipRepository;
@@ -28,6 +27,7 @@ public class MentorshipService {
         return mentorshipMapper.mentorsToMentorsDtos(mentors);
     }
 
+    @Transactional
     public void deleteMentee(Long mentorId, Long menteeId) {
         boolean exists = mentorshipRepository.existsByMentorIdAndMenteeId(mentorId, menteeId);
         if (exists) {
@@ -37,6 +37,7 @@ public class MentorshipService {
         }
     }
 
+    @Transactional
     public void deleteMentor(Long menteeId, Long mentorId) {
         boolean exists = mentorshipRepository.existsByMentorIdAndMenteeId(mentorId, menteeId);
         if (exists) {
