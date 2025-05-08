@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.GoalFilterDto;
+import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
@@ -16,10 +17,7 @@ import school.faang.user_service.service.user.UserService;
 import school.faang.user_service.util.goal.GoalUtil;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -74,7 +72,22 @@ public class GoalService {
 
     public Goal updateGoal(Long goalId, GoalDto goalDto) {
         var goalToUpdate = goalRepository.findById(goalId)
-                .orElseThrow(() -> new NoSuchElementException("No goal found by id " + goalId));
+                .orElseThrow(NoSuchElementException::new);
+
+        boolean goalWasCompleted = goalToUpdate.getStatus() == GoalStatus.COMPLETED;
+        boolean goalSetCompleted = goalDto.getStatus() == GoalStatus.COMPLETED;
+        if (goalSetCompleted && goalWasCompleted)
+            throw new IllegalStateException("Goal was already completed");
+
+        List<Long> copyOfUpdatesSkillIds = new ArrayList<>(goalDto.getSkillIds());
+        copyOfUpdatesSkillIds.removeAll(
+                skillService.findAllById(copyOfUpdatesSkillIds).stream()
+                        .map(Skill::getId)
+                        .toList()
+        );
+        if (!copyOfUpdatesSkillIds.isEmpty())
+            throw new IllegalArgumentException("Skill ids not exists: ".formatted(copyOfUpdatesSkillIds.toArray()));
+
         goalMapper.updateGoalFromDto(goalDto, goalToUpdate);
         GoalUtil.updateTime(goalToUpdate, LocalDateTime.now());
         goalRepository.save(goalToUpdate);
@@ -108,12 +121,12 @@ public class GoalService {
         var goalToDelete = goalRepository.findById(goalId)
                 .orElseThrow(NoSuchElementException::new);
         goalRepository.delete(goalToDelete);
-        deleteGoalRecursive(goalToDelete);
+        deleteGoalCascade(goalToDelete);
 
         return goalToDelete;
     }
 
-    private void deleteGoalRecursive(Goal goalToDelete) {
+    private void deleteGoalCascade(Goal goalToDelete) {
         var users = goalToDelete.getUsers();
         users.forEach(user -> user.getGoals().remove(goalToDelete));
         userService.updateAll(users);
@@ -133,20 +146,20 @@ public class GoalService {
 
     public List<Goal> findSubtasksByGoalId(long goalId, GoalFilterDto filter) {
         return goalRepository.findByParent(goalId)
-                .filter(filter::doFilter)
+                .filter(goal -> GoalUtil.goalFilter(goal, filter))
                 .toList();
     }
 
-    public List<Goal> getGoalsByUser(Long userId, GoalFilterDto filter) {
+    public List<Goal> findGoalsByUserId(Long userId, GoalFilterDto filter) {
         return goalRepository.findGoalsByUserId(userId)
-                .filter(filter::doFilter)
+                .filter(goal -> GoalUtil.goalFilter(goal, filter))
                 .toList();
     }
 
     public Goal findById(Long id) {
         return goalRepository
                 .findById(id)
-                .orElseThrow(() -> new NoSuchElementException("No Goal with id " + id));
+                .orElseThrow(NoSuchElementException::new);
     }
 
     private User addGoalToUser(Long userId, Goal createdGoal) {

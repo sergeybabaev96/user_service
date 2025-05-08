@@ -21,7 +21,12 @@ public class SkillService {
     public Skill findById(Long id) {
         return skillRepository
                 .findById(id)
-                .orElseThrow(() -> new NotFoundException("There is no Skill with id " + id));
+                .orElseThrow(() -> new NotFoundException("Skill id " + id));
+    }
+
+    public List<Skill> findAllById(List<Long> ids) {
+        return skillRepository
+                .findAllById(ids);
     }
 
     public List<Skill> findAllByUserId(long userId) {

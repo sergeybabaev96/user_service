@@ -40,7 +40,7 @@ public class GoalController {
     }
 
     public List<GoalDto> getGoalsByUser(Long userId, GoalFilterDto filter) {
-        List<Goal> filteredUsersGoals = goalService.getGoalsByUser(userId, filter);
+        List<Goal> filteredUsersGoals = goalService.findGoalsByUserId(userId, filter);
         return goalMapper.mapGoalsToDTOs(filteredUsersGoals);
     }
 }
