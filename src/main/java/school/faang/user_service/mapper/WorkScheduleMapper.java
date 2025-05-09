@@ -8,6 +8,7 @@ import school.faang.user_service.entity.WorkSchedule;
 @Mapper(componentModel = "spring")
 public interface WorkScheduleMapper {
 
+    @Mapping(target = "user", ignore = true)
     WorkSchedule toWorkSchedule(WorkScheduleDto workScheduleDto);
 
     WorkScheduleDto toWorkScheduleDto(WorkSchedule workSchedule);

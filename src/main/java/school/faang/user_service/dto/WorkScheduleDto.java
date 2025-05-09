@@ -10,7 +10,7 @@ import java.time.LocalTime;
 public class WorkScheduleDto {
     private long id;
     private LocalTime startTime;
-    private LocalTime endTIme;
+    private LocalTime endTime;
     private LocalTime startLunch;
     private LocalTime endLunch;
     private String timezone; // часовой пояс в формате IANA (например, "Europe/Moscow")

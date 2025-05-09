@@ -25,4 +25,25 @@ public class WorkScheduleServiceImpl implements WorkScheduleService {
 
         return workScheduleMapper.toWorkScheduleDto(workSchedule);
     }
+
+    public WorkScheduleDto updateWorkSchedule(long userId, WorkScheduleDto workScheduleDto){
+        WorkSchedule previousWorkSchedule = workScheduleRepository.findById(workScheduleDto.getId()).
+                orElseThrow(IllegalArgumentException::new);
+        if (!(userId == previousWorkSchedule.getUser().getId())){
+            throw new RuntimeException("You can change only your own schedule");
+        }
+        WorkSchedule workSchedule = workScheduleMapper.toWorkSchedule(workScheduleDto);
+        User user = userRepository.findById(userId).orElseThrow(IllegalArgumentException::new);
+        workSchedule.setUser(user);
+        workScheduleRepository.save(workSchedule);
+
+        return workScheduleMapper.toWorkScheduleDto(workSchedule);
+    }
+
+    @Override
+    public WorkScheduleDto getById(long workScheduleId) {
+        WorkSchedule workSchedule = workScheduleRepository.findById(workScheduleId)
+                .orElseThrow(IllegalArgumentException::new);
+        return workScheduleMapper.toWorkScheduleDto(workSchedule);
+    }
 }
