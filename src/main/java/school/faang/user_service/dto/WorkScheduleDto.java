@@ -1,12 +1,10 @@
 package school.faang.user_service.dto;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.time.LocalTime;
 
 @Getter
-@RequiredArgsConstructor
 public class WorkScheduleDto {
     private long id;
     private LocalTime startTime;

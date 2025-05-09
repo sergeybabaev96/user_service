@@ -3,8 +3,8 @@ package school.faang.user_service.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.WorkScheduleDto;
-import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.WorkScheduleService;
+import school.faang.user_service.util.WorkScheduleDTOValidator;
 
 @Controller
 @RequiredArgsConstructor
@@ -13,12 +13,12 @@ public class WorkScheduleController {
     WorkScheduleService workScheduleService;
 
     WorkScheduleDto addWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
-        checkValidTimeLine(workScheduleDto);
+        validateDTO (workScheduleDto);
         return workScheduleService.addWorkSchedule(userId, workScheduleDto);
     }
 
     WorkScheduleDto updateWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
-        checkValidTimeLine(workScheduleDto);
+        validateDTO (workScheduleDto);
         return workScheduleService.updateWorkSchedule(userId, workScheduleDto);
     }
 
@@ -26,13 +26,9 @@ public class WorkScheduleController {
         return workScheduleService.getById(workScheduleId);
     }
 
-    private void checkValidTimeLine(WorkScheduleDto workScheduleDto) {
-        if (workScheduleDto.getStartTime().isBefore(workScheduleDto.getStartLunch())
-                && workScheduleDto.getStartLunch().isBefore(workScheduleDto.getEndLunch())
-                && workScheduleDto.getEndLunch().isBefore(workScheduleDto.getEndTime())) {
-            return;
-        }
-        throw new DataValidationException("startTime should be before startLunch. " +
-                "both of them should be before endLunch. And all of them should be before endTime");
+    private void validateDTO (WorkScheduleDto workScheduleDto){
+        WorkScheduleDTOValidator.checkValidTimeLine(workScheduleDto);
+        WorkScheduleDTOValidator.checkValidFields(workScheduleDto);
     }
+
 }

@@ -17,23 +17,23 @@ public class WorkScheduleServiceImpl implements WorkScheduleService {
     private final WorkScheduleRepository workScheduleRepository;
     private final WorkScheduleMapper workScheduleMapper;
 
-    public WorkScheduleDto addWorkSchedule(long userId, WorkScheduleDto workScheduleDto){
+    public WorkScheduleDto addWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
         WorkSchedule workSchedule = workScheduleMapper.toWorkSchedule(workScheduleDto);
-        User user = userRepository.findById(userId).orElseThrow(IllegalArgumentException::new);
+        User user = userRepository.findById(userId).orElseThrow();
         workSchedule.setUser(user);
         workScheduleRepository.save(workSchedule);
 
         return workScheduleMapper.toWorkScheduleDto(workSchedule);
     }
 
-    public WorkScheduleDto updateWorkSchedule(long userId, WorkScheduleDto workScheduleDto){
+    public WorkScheduleDto updateWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
         WorkSchedule previousWorkSchedule = workScheduleRepository.findById(workScheduleDto.getId()).
                 orElseThrow(IllegalArgumentException::new);
-        if (!(userId == previousWorkSchedule.getUser().getId())){
+        if (!(userId == previousWorkSchedule.getUser().getId())) {
             throw new RuntimeException("You can change only your own schedule");
         }
         WorkSchedule workSchedule = workScheduleMapper.toWorkSchedule(workScheduleDto);
-        User user = userRepository.findById(userId).orElseThrow(IllegalArgumentException::new);
+        User user = userRepository.findById(userId).orElseThrow();
         workSchedule.setUser(user);
         workScheduleRepository.save(workSchedule);
 
