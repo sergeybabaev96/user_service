@@ -1,4 +1,4 @@
-package school.faang.user_service.util;
+package school.faang.user_service.exception.validation;
 
 public class DataValidationException extends RuntimeException {
     public DataValidationException(String message) {
