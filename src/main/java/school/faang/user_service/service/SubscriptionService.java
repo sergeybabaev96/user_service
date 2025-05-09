@@ -24,7 +24,7 @@ public class SubscriptionService {
     private final UserMapper userMapper;
 
     @Transactional
-    public void followUser(long followerId, long followeeId) {
+    public void followUser(Long followerId, Long followeeId) {
         if (subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
             log.warn("User {} attempted to follow a user {} they already follow", followerId, followeeId);
             throw new DataValidationException("You are already followed this account!");
@@ -34,7 +34,7 @@ public class SubscriptionService {
     }
 
     @Transactional
-    public void unfollowUser(long followerId, long followeeId) {
+    public void unfollowUser(Long followerId, Long followeeId) {
         if (!subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
             log.warn("User {} attempted to unfollow a user {} they do not follow", followerId, followeeId);
             throw new DataValidationException("You are not following this user!");
@@ -60,7 +60,7 @@ public class SubscriptionService {
     }
 
     @Transactional
-    public int getFollowersCount(long followeeId) {
+    public int getFollowersCount(Long followeeId) {
         return subscriptionRepository.findFollowersAmountByFolloweeId(followeeId);
     }
 
@@ -81,7 +81,7 @@ public class SubscriptionService {
     }
 
     @Transactional
-    public int getFollowingCount(long followeeId) {
+    public int getFollowingCount(Long followeeId) {
         return subscriptionRepository.findFolloweesAmountByFollowerId(followeeId);
     }
 }

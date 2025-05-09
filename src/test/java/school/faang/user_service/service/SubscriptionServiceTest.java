@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.UserMapperImpl;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.filter.UserFollowersFilter;
@@ -27,8 +28,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SubscriptionServiceTest {
-    private static final long FOLLOWER_ID = 1L;
-    private static final long FOLLOWEE_ID = 2L;
+    private static final Long FOLLOWER_ID = 1L;
+    private static final Long FOLLOWEE_ID = 2L;
     @Mock
     private SubscriptionRepository subscriptionRepository;
     @Mock
@@ -80,8 +81,8 @@ class SubscriptionServiceTest {
                 .existsByFollowerIdAndFolloweeId(FOLLOWER_ID, FOLLOWEE_ID))
                 .thenReturn(true);
         // When + Then
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
+        DataValidationException ex = assertThrows(
+                DataValidationException.class,
                 () -> subscriptionService.followUser(FOLLOWER_ID, FOLLOWEE_ID),
                 "Expected exception when following twice"
         );
@@ -116,8 +117,8 @@ class SubscriptionServiceTest {
                 .thenReturn(false);
 
         // When + Then
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
+        DataValidationException ex = assertThrows(
+                DataValidationException.class,
                 () -> subscriptionService.unfollowUser(FOLLOWER_ID, FOLLOWEE_ID),
                 "Expected exception when following twice"
         );
