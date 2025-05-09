@@ -15,6 +15,8 @@ configurations {
     }
 }
 
+val querydslVersion by extra("5.1.0")
+
 repositories {
     mavenCentral()
 }
@@ -57,6 +59,11 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
 
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.13.0")
+
+    implementation("com.querydsl:querydsl-jpa:$querydslVersion:jakarta")
+    annotationProcessor("com.querydsl:querydsl-apt:$querydslVersion:jakarta")
+    annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+    annotationProcessor("jakarta.annotation:jakarta.annotation-api")
 
     /**
      * Test containers
