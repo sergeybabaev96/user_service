@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import school.faang.user_service.dto.skill.SkillAcquireDTO;
 import school.faang.user_service.dto.skill.SkillCandidateDto;
 import school.faang.user_service.dto.skill.SkillDto;
+import school.faang.user_service.dto.skill.SkillOfferDto;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.SkillService;
 
@@ -23,7 +25,7 @@ public class SkillController {
 
     @PostMapping("/create")
     public SkillDto create(@RequestBody SkillDto skill) {
-        if (!validateSkill(skill)) {
+        if (!isSkillValid(skill)) {
             throw new DataValidationException("Invalid skill title.");
         }
         return skillService.create(skill);
@@ -43,14 +45,16 @@ public class SkillController {
     }
 
     @PostMapping("/acquireSkillFromOffers")
-    public SkillDto acquireSkillFromOffers(@RequestParam long skillId, @RequestParam long userId) {
-        return skillService.acquireSkillFromOffers(skillId, userId);
+    public SkillDto acquireSkillFromOffers(@RequestBody SkillAcquireDTO skillAcquireDTO) {
+        return skillService.acquireSkillFromOffers(skillAcquireDTO.getSkillId(), skillAcquireDTO.getUserId());
     }
 
-    public boolean validateSkill(SkillDto skill) {
-        if (skill == null || skill.getTitle().isEmpty() || skill.getTitle().isBlank()) {
-            throw new IllegalArgumentException("Invalid skill title");
-        }
-        return true;
+    @GetMapping("/get/allOffersOfSkill")
+    public List<SkillOfferDto> findSkillOffers(@RequestParam long skillId, @RequestParam long userId) {
+        return skillService.findAllOffersOfSkill(skillId, userId);
+    }
+
+    public boolean isSkillValid(SkillDto skill) {
+        return !skill.getTitle().isEmpty() || !skill.getTitle().isBlank() || skill != null;
     }
 }
