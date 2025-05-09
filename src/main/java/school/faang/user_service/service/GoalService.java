@@ -98,8 +98,12 @@ public class GoalService {
             throw new UserNotGoalOwnerException(userContext.getUserId(), goalId);
         }
 
-        goalRepository.findByParent(goalId).forEach(goalRepository::delete);
-        goalRepository.delete(goal);
+        goalRepository.removeGoalFromUser(userContext.getUserId(), goalId);
+
+        if (goalRepository.findUsersByGoalId(goalId).isEmpty()) {
+            goalRepository.findByParent(goalId).forEach(goalRepository::delete);
+            goalRepository.delete(goal);
+        }
     }
 
     public Goal getGoalById(long goalId) {

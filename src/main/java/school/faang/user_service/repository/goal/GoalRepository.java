@@ -54,4 +54,11 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
             WHERE ug.goal_id = :goalId
             """)
     List<Long> findUsersByGoalId(long goalId);
+
+    @Modifying
+    @Query(nativeQuery = true, value = """
+            DELETE FROM user_goal ug
+            WHERE ug.user_id = :userId AND ug.goal_id = :goalId
+            """)
+    void removeGoalFromUser(long userId, long goalId);
 }
