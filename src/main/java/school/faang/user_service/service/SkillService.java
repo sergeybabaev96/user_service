@@ -2,6 +2,7 @@ package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import school.faang.user_service.entity.Skill;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.validator.goal.SkillValidator;
 
@@ -15,7 +16,20 @@ public class SkillService {
     private final SkillValidator skillValidator;
 
     public void assignSkillToGoal(long goalId, List<Long> skillsId) {
-        skillValidator.validateExistingSkills(skillRepository.countExisting(skillsId), skillsId.size());
+        skillValidator.validateExistingSkills(skillsId);
         skillsId.forEach(skillId -> skillRepository.assignSkillToGoal(goalId, skillId));
+    }
+
+    public void updateSkillForGoal(long goalId, List<Long> newSkillsId) {
+        skillRepository.removeSkillsFromGoal(goalId);
+        assignSkillToGoal(goalId, newSkillsId);
+    }
+
+    public void assignSkillsToUser(long userId, List<Skill> skills) {
+        List<Skill> ownedSkills = skillRepository.findAllByUserId(userId);
+        skills
+                .stream()
+                .filter(skill -> !ownedSkills.contains(skill))
+                .forEach(skill -> skillRepository.assignSkillToUser(skill.getId(), userId));
     }
 }

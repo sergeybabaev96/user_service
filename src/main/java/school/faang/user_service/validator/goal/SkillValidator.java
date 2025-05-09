@@ -1,15 +1,22 @@
 package school.faang.user_service.validator.goal;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import school.faang.user_service.exception.goal.AddedSkillNotExistException;
+import school.faang.user_service.exception.skill.AddedSkillNotExistException;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class SkillValidator {
 
-    public void validateExistingSkills(int sillsExist, int expectedSkillsExist) {
-        boolean containNotExistingSkill = sillsExist != expectedSkillsExist;
-        if (containNotExistingSkill) {
-            throw new AddedSkillNotExistException();
+    public void validateExistingSkills(List<Long> absentSkillsId) {
+        if (!absentSkillsId.isEmpty()) {
+            String notExistingSkillsId = absentSkillsId.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(", "));
+            throw new AddedSkillNotExistException(notExistingSkillsId);
         }
     }
 }
