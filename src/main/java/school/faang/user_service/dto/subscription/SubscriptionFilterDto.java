@@ -1,4 +1,4 @@
-package school.faang.user_service.dto.user;
+package school.faang.user_service.dto.subscription;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class UserFilterDto {
+public class SubscriptionFilterDto {
     @NotBlank
     private String namePattern;
     @NotBlank

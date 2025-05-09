@@ -1,10 +1,10 @@
 package school.faang.user_service.filters.subscriptions;
 
-import school.faang.user_service.dto.user.UserFilterDto;
+import school.faang.user_service.dto.subscription.SubscriptionFilterDto;
 import school.faang.user_service.entity.User;
 
 public interface SubscriptionFilter {
-    boolean apply(User user, UserFilterDto filters);
+    boolean apply(User user, SubscriptionFilterDto filters);
 
-    boolean isApplicable(UserFilterDto filters);
+    boolean isApplicable(SubscriptionFilterDto filters);
 }
