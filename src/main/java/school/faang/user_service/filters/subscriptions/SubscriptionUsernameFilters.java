@@ -1,7 +1,7 @@
 package school.faang.user_service.filters.subscriptions;
 
 import org.springframework.stereotype.Component;
-import school.faang.user_service.dto.UserFilterDto;
+import school.faang.user_service.dto.user.UserFilterDto;
 import school.faang.user_service.entity.User;
 
 import java.util.Objects;
@@ -16,6 +16,9 @@ public class SubscriptionUsernameFilters implements SubscriptionFilter {
 
     @Override
     public boolean apply(User user, UserFilterDto filterDto) {
+        if (Objects.isNull(user.getUsername())) {
+            return false;
+        }
         return user.getUsername().contains(filterDto.getNamePattern());
     }
 }
