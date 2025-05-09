@@ -14,7 +14,6 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 import school.faang.user_service.repository.recommendation.SkillRequestRepository;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -26,12 +25,6 @@ public class RecommendationRequestService {
     private final UserRepository userRepository;
     private final SkillRepository skillRepository;
     private final SkillRequestRepository skillRequestRepository;
-
-    public RecommendationRequestDto processRequest(RecommendationRequestDto requestDto) {
-        RecommendationRequest entity = recommendationMapper.toEntity(requestDto);
-        RecommendationRequest savedEntity = recommendationRequestRepository.save(entity);
-        return recommendationMapper.toDto(savedEntity);
-    }
 
     public RecommendationRequestDto create(@Valid RecommendationRequestDto recommendationRequest) {
 
@@ -50,19 +43,17 @@ public class RecommendationRequestService {
                 .findLatestPendingRequest(recommendationRequest.getRequesterId(), recommendationRequest.getReceiverId());
 
         if (latestRequest.isPresent() && latestRequest.get().getCreatedAt()
-                .isAfter(LocalDateTime.now().minusMonths(6))) {
+                .isAfter(latestRequest.get().getUpdatedAt().minusMonths(6))) {
             throw new DataValidationException("You can send recommendation request to this user only once per 6 months");
         }
 
         latestRequest.get().getSkills().stream()
-                .peek(skillRequest -> {
+                .forEach(skillRequest -> {
                     if (!skillRepository.existsByTitle(skillRequest.getSkill().getTitle())) {
-                        throw new DataValidationException("This skill no to DB!");
+                        throw new DataValidationException("This skill is not in the database!");
                     }
-                })
-                .peek(skillRequest -> skillRequestRepository.create(skillRequest.getId(), skillRequest.getSkill().getId()));
-
-
+                    skillRequestRepository.create(skillRequest.getId(), skillRequest.getSkill().getId());
+                });
         RecommendationRequest savedRequest = recommendationRequestRepository.save(latestRequest.get());
 
         return recommendationMapper.toDto(latestRequest.get());
