@@ -8,6 +8,7 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.exception.goal.GoalNotExistException;
+import school.faang.user_service.exception.goal.UserNotGoalOwnerException;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.validator.goal.GoalValidator;
@@ -34,9 +35,10 @@ public class GoalService {
         long userId = userContext.getUserId();
         goalValidator.validateMaxActiveGoalLimit(goalRepository.countActiveGoalsPerUser(userId));
 
-        if (parentId != null) {
-            goalRepository.findById(parentId).orElseThrow(() -> new GoalNotExistException(parentId));
+        if (parentId != null && !goalRepository.existsById(parentId)) {
+            throw new GoalNotExistException(parentId);
         }
+
         Goal newGoal = goalRepository.create(newGoalData.getTitle(), newGoalData.getDescription(), parentId);
         goalRepository.assignGoalToUser(userId, newGoal.getId());
 
@@ -48,7 +50,7 @@ public class GoalService {
 
     @Transactional
     public Goal update(long goalId, Goal newGoalData, List<Long> skillsId) {
-        Goal dbGoal = goalRepository.findById(goalId).orElseThrow(() -> new GoalNotExistException(goalId));
+        Goal dbGoal = getGoalById(goalId);
         goalValidator.validateUpdateCompleteGoal(dbGoal);
         skillValidator.validateExistingSkills(
                 skillsId.stream()
@@ -67,7 +69,6 @@ public class GoalService {
                 .equals(skillsId);
 
         if (skillsChanged) {
-
             skillService.updateSkillForGoal(goalId, skillsId);
             dbGoal.setSkillsToAchieve(skillRepository.findSkillsByGoalId(goalId));
         }
@@ -84,5 +85,24 @@ public class GoalService {
         goalRepository.save(dbGoal);
 
         return dbGoal;
+    }
+
+    @Transactional
+    public void delete(long goalId) {
+        Goal goal = getGoalById(goalId);
+
+        boolean userNotOwner = goalRepository.findGoalsByUserId(userContext.getUserId())
+                .noneMatch(userGoal -> userGoal.getId().equals(goalId));
+
+        if(userNotOwner) {
+            throw new UserNotGoalOwnerException(userContext.getUserId(), goalId);
+        }
+
+        goalRepository.findByParent(goalId).forEach(goalRepository::delete);
+        goalRepository.delete(goal);
+    }
+
+    public Goal getGoalById(long goalId) {
+        return goalRepository.findById(goalId).orElseThrow(() -> new GoalNotExistException(goalId));
     }
 }

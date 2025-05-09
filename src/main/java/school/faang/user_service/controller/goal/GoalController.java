@@ -3,18 +3,22 @@ package school.faang.user_service.controller.goal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.dto.CreateGoalDto;
 import school.faang.user_service.entity.goal.dto.UpdateGoalDto;
 import school.faang.user_service.entity.goal.mapper.CreateGoalMapperImpl;
 import school.faang.user_service.entity.goal.mapper.UpdateGoalMapperImpl;
 import school.faang.user_service.service.GoalService;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api/v1/goal")
@@ -32,7 +36,15 @@ public class GoalController {
                 createGoalDto.skillsId(),
                 createGoalDto.parent()
         );
-        return ResponseEntity.ok(createGoalMapper.goalToDto(createdGoal));
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(createdGoal.getId())
+                .toUri();
+
+        return ResponseEntity.created(location)
+                .body(createGoalMapper.goalToDto(createdGoal));
     }
 
     @PutMapping("/update/{goalId}")
@@ -43,5 +55,11 @@ public class GoalController {
                 updateGoalDto.skillsId()
         );
         return ResponseEntity.ok(updateGoalMapper.goalToDto(createdGoal));
+    }
+
+    @DeleteMapping("/delete/{goalId}")
+    public ResponseEntity<UpdateGoalDto> deleteGoal(@PathVariable long goalId) {
+        goalService.delete(goalId);
+        return ResponseEntity.ok().build();
     }
 }
