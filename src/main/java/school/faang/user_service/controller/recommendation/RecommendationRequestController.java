@@ -7,7 +7,9 @@ import school.faang.user_service.dto.recommendation.RejectionDto;
 import school.faang.user_service.dto.recommendation.RequestFilterDto;
 import school.faang.user_service.service.recommendation.RecommendationRequestService;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -15,12 +17,12 @@ public class RecommendationRequestController {
 
     private final RecommendationRequestService recommendationRequestService;
 
-    public RecommendationRequestDto requestRecommendation(RecommendationRequestDto recommendationRequestDto) {
+    public Optional<RecommendationRequestDto> requestRecommendation(RecommendationRequestDto recommendationRequestDto) {
         if (recommendationRequestDto != null && !recommendationRequestDto.getMessage().isEmpty()) {
             return recommendationRequestService.create(recommendationRequestDto);
         }
 
-        return null;
+        return Optional.empty();
     }
 
     public List<RecommendationRequestDto> getRecommendationRequests(RequestFilterDto filter) {
@@ -28,14 +30,14 @@ public class RecommendationRequestController {
             return recommendationRequestService.getRequests(filter);
         }
 
-        return null;
+        return new ArrayList<>();
     }
 
-    public RecommendationRequestDto getRecommendationRequest(long id) {
-        return recommendationRequestService.getRequest(id);
+    public Optional<RecommendationRequestDto> getRecommendationRequest(long id) {
+        return Optional.ofNullable(recommendationRequestService.getRequest(id));
     }
 
-    public RecommendationRequestDto rejectRequest(long id, RejectionDto rejection) {
-        return recommendationRequestService.rejectRequest(id, rejection);
+    public Optional<RecommendationRequestDto> rejectRequest(long id, RejectionDto rejection) {
+        return Optional.ofNullable(recommendationRequestService.rejectRequest(id, rejection));
     }
 }
