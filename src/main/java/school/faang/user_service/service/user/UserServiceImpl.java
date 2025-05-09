@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.UserRepository;
 
+import java.util.Objects;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor

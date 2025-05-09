@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class AppConfigService {
     private final AppConfigRepository appConfigRepository;
-    private final Map<String, String> cachedConfigs = new ConcurrentHashMap<>();
+    private final Map<String, String> cachedAppConfigs = new ConcurrentHashMap<>();
 
     public AppConfigService(AppConfigRepository appConfigRepository) {
         this.appConfigRepository = appConfigRepository;
@@ -24,24 +24,24 @@ public class AppConfigService {
     public void refreshConfig() {
         log.debug("Refreshing app configs");
         appConfigRepository.findAll()
-                .forEach(appConfig -> cachedConfigs.put(appConfig.getKey(), appConfig.getValue()));
+                .forEach(appConfig -> cachedAppConfigs.put(appConfig.getKey(), appConfig.getValue()));
     }
 
     public String getValOrDefault(String key, String defaultValue) {
-        return cachedConfigs.getOrDefault(key, defaultValue);
+        return cachedAppConfigs.getOrDefault(key, defaultValue);
     }
 
     public long getLongOrDefault(String key, long defaultValue) {
         try {
-            return Long.parseLong(cachedConfigs.getOrDefault(key, String.valueOf(defaultValue)));
+            return Long.parseLong(cachedAppConfigs.getOrDefault(key, String.valueOf(defaultValue)));
         } catch (NumberFormatException e) {
-            log.warn("Invalid long value for key {}: {}", key, cachedConfigs.get(key));
+            log.warn("Invalid long value for key {}: {}", key, cachedAppConfigs.get(key));
             return defaultValue;
         }
     }
 
     public boolean getBooleanOrDefault(String key, boolean defaultValue) {
-        String value = cachedConfigs.get(key);
+        String value = cachedAppConfigs.get(key);
         try {
             return value != null ? Boolean.parseBoolean(value) : defaultValue;
         } catch (NumberFormatException e) {
