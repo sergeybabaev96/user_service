@@ -1,7 +1,7 @@
 package school.faang.user_service.validation;
 
 import org.springframework.stereotype.Component;
-import school.faang.user_service.dto.MentorshipRequestDto;
+import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
 
 @Component
 public interface MentorshipValidator {

@@ -1,7 +1,7 @@
 package school.faang.user_service.validation;
 
 import org.springframework.web.server.ResponseStatusException;
-import school.faang.user_service.dto.MentorshipRequestDto;
+import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 

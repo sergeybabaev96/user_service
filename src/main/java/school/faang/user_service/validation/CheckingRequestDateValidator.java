@@ -2,7 +2,7 @@ package school.faang.user_service.validation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.server.ResponseStatusException;
-import school.faang.user_service.dto.MentorshipRequestDto;
+import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.repository.mentorship.MentorshipRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;

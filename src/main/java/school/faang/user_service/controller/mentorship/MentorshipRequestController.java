@@ -1,4 +1,4 @@
-package school.faang.user_service.controller;
+package school.faang.user_service.controller.mentorship;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import school.faang.user_service.dto.MentorshipFilterDto;
-import school.faang.user_service.dto.MentorshipRequestDto;
-import school.faang.user_service.dto.MentorshipResponseDto;
+import school.faang.user_service.dto.mentorship.MentorshipFilterDto;
+import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
+import school.faang.user_service.dto.mentorship.MentorshipResponseDto;
 import school.faang.user_service.service.MentorshipRequestService;
 
 import java.util.List;
