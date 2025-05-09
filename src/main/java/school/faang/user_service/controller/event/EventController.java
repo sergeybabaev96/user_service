@@ -1,6 +1,5 @@
 package school.faang.user_service.controller.event;
 
-import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,10 +10,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import school.faang.user_service.dto.EventDto;
-import school.faang.user_service.dto.EventFilterDto;
+import school.faang.user_service.dto.event.EventDto;
+import school.faang.user_service.dto.event.EventFilterDto;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.service.event.EventService;
 import school.faang.user_service.validation.data.Required;
@@ -35,34 +35,34 @@ public class EventController {
     }
 
     @GetMapping(value = "/get")
-    public EventDto getEvent(@RequestBody @Required Long eventId) {
+    public EventDto getEvent(@RequestParam @Required Long eventId) {
         return eventService.getEvent(eventId);
     }
 
     @GetMapping(value = "/get/filter")
-    public List<EventDto> getEventsByFilter(@RequestBody EventFilterDto filter) {
+    public List<EventDto> getEventsByFilter(@Valid @RequestBody EventFilterDto filter) {
         return eventService.getEventsByFilter(filter);
     }
 
     @DeleteMapping(value = "/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteEvent(@Required Long eventId) {
+    public void deleteEvent(@RequestParam @Required Long eventId) {
         eventService.deleteEvent(eventId);
     }
 
     @PutMapping(value = "/update")
-    public EventDto updateEvent(@RequestBody EventDto eventDto) {
+    public EventDto updateEvent(@Valid @RequestBody EventDto eventDto) {
         isValidDataRange(eventDto);
         return eventService.updateEvent(eventDto);
     }
 
     @GetMapping(value = "/owned")
-    public List<EventDto> getOwnedEvents(@Required Long userId) {
+    public List<EventDto> getOwnedEvents(@RequestParam @Required Long userId) {
         return eventService.getOwnedEvents(userId);
     }
 
     @GetMapping(value = "/participated")
-    public List<EventDto> getParticipatedEvents(@Required Long userId) {
+    public List<EventDto> getParticipatedEvents(@RequestParam @Required Long userId) {
         return eventService.getParticipatedEvents(userId);
     }
 
