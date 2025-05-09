@@ -23,12 +23,4 @@ public interface MentorshipRequestRepository extends CrudRepository<MentorshipRe
             LIMIT 1
             """)
     Optional<MentorshipRequest> findLatestRequest(long requesterId, long receiverId);
-
-    @Query(nativeQuery = true, value = """
-            SELECT updated_at FROM mentorship_request
-            WHERE requester_id = :requesterId AND receiver_id = :receiverId
-            ORDER BY created_at DESC
-            LIMIT 1
-            """)
-    Optional<LocalDateTime> findLatestRequestDate(long requesterId, long receiverId);
 }

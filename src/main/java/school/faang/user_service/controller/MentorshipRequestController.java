@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.MentorshipRequestDto;
+import school.faang.user_service.dto.MentorshipResponseDto;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 import school.faang.user_service.service.MentorshipRequestService;
 
@@ -20,8 +21,8 @@ public class MentorshipRequestController {
     private final MentorshipRequestService mentorshipRequestService;
 
     @PostMapping("requests")
-    public ResponseEntity<Void> requestMentorship(@RequestBody @Valid MentorshipRequestDto mentorshipRequestDto) {
-        mentorshipRequestService.requestMentorship(mentorshipRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<MentorshipResponseDto> requestMentorship(@RequestBody @Valid MentorshipRequestDto mentorshipRequestDto) {
+        MentorshipResponseDto response = mentorshipRequestService.requestMentorship(mentorshipRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
