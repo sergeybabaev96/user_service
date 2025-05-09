@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 @Data
 public class CareerDto {
-    private Long id;
+    private long id;
     private LocalDate from;
     private LocalDate to;
     private String company;
