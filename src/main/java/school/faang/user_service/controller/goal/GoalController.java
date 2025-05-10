@@ -21,7 +21,7 @@ import school.faang.user_service.service.GoalService;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/api/v1/goal")
+@RequestMapping("/api/v1/goals")
 @RequiredArgsConstructor
 public class GoalController {
 
@@ -29,7 +29,7 @@ public class GoalController {
     private final CreateGoalMapperImpl createGoalMapper;
     private final UpdateGoalMapperImpl updateGoalMapper;
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<CreateGoalDto> createGoal(@Valid @RequestBody CreateGoalDto createGoalDto) {
         Goal createdGoal = goalService.createGoal(
                 createGoalMapper.dtoToGoal(createGoalDto),
@@ -47,7 +47,7 @@ public class GoalController {
                 .body(createGoalMapper.goalToDto(createdGoal));
     }
 
-    @PutMapping("/update/{goalId}")
+    @PutMapping("/{goalId}")
     public ResponseEntity<UpdateGoalDto> updateGoal(@PathVariable long goalId, @Valid @RequestBody UpdateGoalDto updateGoalDto) {
         Goal createdGoal = goalService.update(
                 goalId,
@@ -57,7 +57,7 @@ public class GoalController {
         return ResponseEntity.ok(updateGoalMapper.goalToDto(createdGoal));
     }
 
-    @DeleteMapping("/delete/{goalId}")
+    @DeleteMapping("/{goalId}")
     public ResponseEntity<UpdateGoalDto> deleteGoal(@PathVariable long goalId) {
         goalService.delete(goalId);
         return ResponseEntity.ok().build();
