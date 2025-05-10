@@ -1,0 +1,17 @@
+package school.faang.user_service.service;
+
+import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
+import school.faang.user_service.entity.UserSkillGuarantee;
+import school.faang.user_service.repository.UserSkillGuaranteeRepository;
+
+@Service
+@RequiredArgsConstructor
+public class UserSkillGuaranteeService {
+    private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
+
+    public void save(UserSkillGuarantee userSkillGuarantee) {
+        userSkillGuaranteeRepository.save(userSkillGuarantee);
+    }
+}

@@ -55,6 +55,6 @@ public class SkillController {
     }
 
     public boolean isSkillValid(SkillDto skill) {
-        return !skill.getTitle().isEmpty() || !skill.getTitle().isBlank() || skill != null;
+        return skill.getTitle() != null && !skill.getTitle().isEmpty() && !skill.getTitle().isBlank();
     }
 }
