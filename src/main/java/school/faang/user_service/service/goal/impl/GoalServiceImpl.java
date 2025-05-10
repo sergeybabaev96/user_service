@@ -79,7 +79,7 @@ public class GoalServiceImpl implements GoalService {
         Goal saveGoal = goalRepository.save(goal);
         log.info("Goal with id {} has been update", saveGoal.getId());
 
-        assignsSkillsToUser(saveGoal);
+        assignSkillsToAllUsersIfGoalCompleted(saveGoal);
 
         return goalMapper.toGoalResponseDto(saveGoal);
     }
@@ -164,7 +164,7 @@ public class GoalServiceImpl implements GoalService {
         }
     }
 
-    private void assignsSkillsToUser(Goal saveGoal) {
+    private void assignSkillsToAllUsersIfGoalCompleted(Goal saveGoal) {
         if (Objects.equals(saveGoal.getStatus(), GoalStatus.COMPLETED)) {
             List<Long> userIds = saveGoal.getUsers().stream()
                     .map(User::getId)
@@ -172,7 +172,7 @@ public class GoalServiceImpl implements GoalService {
             List<Long> skillIds = saveGoal.getSkillsToAchieve().stream()
                     .map(Skill::getId)
                     .toList();
-            skillService.assignsSkillsToUser(skillIds, userIds);
+            skillService.assignSkillsToUsers(skillIds, userIds);
         }
     }
 

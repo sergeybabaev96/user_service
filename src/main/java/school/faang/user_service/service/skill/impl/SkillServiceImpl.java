@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.entity.Skill;
-import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.skill.SkillNotFoundException;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.service.skill.SkillService;
@@ -32,12 +31,13 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
-    public void assignsSkillsToUser(List<Long> skillIds, List<Long> userIds) {
+    public void assignSkillsToUsers(List<Long> skillIds, List<Long> userIds) {
         skillIds.forEach(skillId ->
                 userIds.forEach(userId ->
                         skillRepository.findUserSkill(skillId, userId)
                                 .ifPresentOrElse(
-                                        skill -> log.debug("User with id {} already has skill with id {}", userId, skillId),
+                                        skill -> log.debug(
+                                                "User with id {} already has skill with id {}", userId, skillId),
                                         () -> {
                                             skillRepository.assignSkillToUser(skillId, userId);
                                             log.info("Assigned skill with id {} to user with id {}", skillId, userId);

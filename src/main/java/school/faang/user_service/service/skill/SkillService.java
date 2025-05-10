@@ -9,5 +9,5 @@ public interface SkillService {
 
     Skill getSkillById(long skillId);
 
-    void assignsSkillsToUser(List<Long> skillIds, List<Long> userIds);
+    void assignSkillsToUsers(List<Long> skillIds, List<Long> userIds);
 }
