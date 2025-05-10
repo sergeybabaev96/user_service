@@ -1,15 +1,15 @@
 package school.faang.user_service.repository.recommendation;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface RecommendationRequestRepository extends JpaRepository<RecommendationRequest, Long> {
-
-    List<RecommendationRequest> findAll();
 
     @Query(nativeQuery = true, value = """
             SELECT * FROM recommendation_request
@@ -27,4 +27,11 @@ public interface RecommendationRequestRepository extends JpaRepository<Recommend
                and rr.created_at + interval '6 MONTH' > now()
             """)
     int countRepeatedRequest(long requesterId, long receiverId);
+
+    @Query("update RecommendationRequest r set r.status = :requestStatus, r.rejectionReason = :reason where r.id = :id")
+    @Modifying
+    @Transactional
+    Integer setStatus(Long id, RequestStatus requestStatus, String reason);
+
+    Optional<RecommendationRequest> findById(Long id);
 }
