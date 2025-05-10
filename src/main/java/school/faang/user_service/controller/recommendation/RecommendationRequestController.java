@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.dto.recommendation.RequestFilterDto;
 import school.faang.user_service.service.recommendation.RecommendationRequestService;
+import school.faang.user_service.validators.DtoChecker;
 import school.faang.user_service.validators.DtoValidator;
 
 import java.util.List;
@@ -16,9 +17,11 @@ import java.util.List;
 public class RecommendationRequestController {
     private final RecommendationRequestService requestService;
     private final List<DtoValidator<RecommendationRequestDto>> validators;
+    private final List<DtoChecker<RecommendationRequestDto>> checkers;
 
     public RecommendationRequestDto requestRecommendation(RecommendationRequestDto recommendationRequest) {
         validators.forEach(validator -> validator.validate(recommendationRequest));
+        checkers.forEach(checker -> checker.check(recommendationRequest));
         return requestService.create(recommendationRequest);
     }
 
