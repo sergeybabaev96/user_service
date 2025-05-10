@@ -19,7 +19,7 @@ public class PremiumService {
 
     @Value("${user-premium.partition-size}")
     @Min(1)
-    private int partitionSize;
+    private Integer partitionSize;
 
     @Async
     public void removeExpiredPremiumAccess() {

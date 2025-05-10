@@ -1,8 +1,8 @@
 package school.faang.user_service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -12,15 +12,11 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
+@EnableConfigurationProperties(RedisChannelProperties.class)
+@RequiredArgsConstructor
 public class RedisConfig {
 
-    @NotNull
-    @Value("${spring.data.redis.channel.skill-channel}")
-    private String skillAcquiredTopic;
-
-    @NotNull
-    @Value("${spring.data.redis.channel.follower-topic}")
-    private String followerTopic;
+    private final RedisChannelProperties redisChannelProperties;
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(
@@ -36,11 +32,11 @@ public class RedisConfig {
 
     @Bean
     ChannelTopic skillChannel() {
-        return new ChannelTopic(skillAcquiredTopic);
+        return new ChannelTopic(redisChannelProperties.getSkillChannel());
     }
 
     @Bean
     ChannelTopic followerChannel() {
-        return new ChannelTopic(followerTopic);
+        return new ChannelTopic(redisChannelProperties.getFollowerTopic());
     }
 }
