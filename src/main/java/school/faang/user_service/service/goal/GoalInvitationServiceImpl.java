@@ -15,7 +15,6 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalInvitation;
 import school.faang.user_service.entity.goal.GoalStatus;
-import school.faang.user_service.entity.goal.QGoalInvitation;
 import school.faang.user_service.mapper.goal.GoalInvitationMapper;
 import school.faang.user_service.repository.goal.GoalInvitationRepository;
 import school.faang.user_service.service.user.UserService;
@@ -35,6 +34,7 @@ public class GoalInvitationServiceImpl implements GoalInvitationService {
     private final UserService userService;
     private final GoalService goalService;
     private final AppConfigService appConfigService;
+    private final BooleanBuilderConstructor booleanBuilderConstructor;
 
     @Override
     @Transactional
@@ -82,7 +82,7 @@ public class GoalInvitationServiceImpl implements GoalInvitationService {
     public List<GoalInvitationDto> getAllInvitations(InvitationFilterDto invitationFilterDto) {
         log.debug("Execution of the method getAllInvitations, parameters: invitationFilterDto={}", invitationFilterDto);
         Objects.requireNonNull(invitationFilterDto, "passed invitationFilterDto cannot be null");
-        BooleanBuilder queryBooleanBuilder = getQueryBooleanBuilder(invitationFilterDto);
+        BooleanBuilder queryBooleanBuilder = booleanBuilderConstructor.getQueryBooleanBuilder(invitationFilterDto);
         PageRequest pageRequest = PageRequest.of(invitationFilterDto.getOffset(), invitationFilterDto.getSize());
 
         List<GoalInvitation> goalInvitations = goalInvitationRepository.findAll(queryBooleanBuilder, pageRequest)
@@ -141,27 +141,6 @@ public class GoalInvitationServiceImpl implements GoalInvitationService {
                     .sorted(Comparator.comparing(GoalInvitation::getStatus))
                     .collect(Collectors.toList());
         };
-    }
-
-    private BooleanBuilder getQueryBooleanBuilder(InvitationFilterDto invitationFilterDto) {
-        QGoalInvitation qGoalInvitation = QGoalInvitation.goalInvitation;
-        BooleanBuilder builder = new BooleanBuilder();
-        if (invitationFilterDto.getInviterId() != null) {
-            builder.and(qGoalInvitation.inviter.id.eq(invitationFilterDto.getInviterId()));
-        }
-        if (invitationFilterDto.getInvitedId() != null) {
-            builder.and(qGoalInvitation.invited.id.eq(invitationFilterDto.getInvitedId()));
-        }
-        if (invitationFilterDto.getStatus() != null) {
-            builder.and(qGoalInvitation.status.eq(invitationFilterDto.getStatus()));
-        }
-        if (invitationFilterDto.getCreatedBefore() != null) {
-            builder.and(qGoalInvitation.createdAt.loe(invitationFilterDto.getCreatedBefore()));
-        }
-        if (invitationFilterDto.getCreatedAfter() != null) {
-            builder.and(qGoalInvitation.createdAt.goe(invitationFilterDto.getCreatedAfter()));
-        }
-        return builder;
     }
 }
 
