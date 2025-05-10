@@ -1,6 +1,7 @@
 package school.faang.user_service.dto.mentorship;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.Getter;
@@ -18,6 +19,6 @@ public class MentorshipRequestDto {
     private Long receiver;
 
     @JsonProperty("description")
-    @NotNull(message = "description must not be null")
+    @NotBlank(message = "description must not be empty")
     private String description;
 }

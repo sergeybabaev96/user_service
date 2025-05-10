@@ -1,15 +1,18 @@
 package school.faang.user_service.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import school.faang.user_service.dto.mentorship.MentorshipFilterDto;
 import school.faang.user_service.dto.mentorship.MentorshipRequestDto;
 import school.faang.user_service.dto.mentorship.MentorshipResponseDto;
+import school.faang.user_service.dto.mentorship.RejectionDto;
 import school.faang.user_service.entity.MentorshipRequest;
+import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.filter.mentorship.MentorshipFilter;
 import school.faang.user_service.mapper.mentorship.MentorshipResponseMapper;
-import school.faang.user_service.repository.mentorship.MentorshipRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
 import school.faang.user_service.validation.MentorshipValidator;
 
@@ -45,8 +48,28 @@ public class MentorshipRequestService {
             }
         }
 
-        return filteredRequests
-                .map(mentorshipResponseMapper::toResponseDto)
-                .toList();
+        return filteredRequests.map(mentorshipResponseMapper::toResponseDto).toList();
+    }
+
+    @Transactional
+    public void acceptRequest(Long id) {
+        MentorshipRequest request = mentorshipRequestRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id not found"));
+        if (request.getStatus().equals(RequestStatus.ACCEPTED)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The user is already a mentor of the requester.");
+        }
+        request.setStatus(RequestStatus.ACCEPTED);
+        mentorshipRequestRepository.save(request);
+    }
+
+    @Transactional
+    public void rejectRequest(Long id, RejectionDto dto) {
+        MentorshipRequest request = mentorshipRequestRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id not found"));
+        if (request.getStatus().equals(RequestStatus.REJECTED)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request is already rejected.");
+        }
+        request.setStatus(RequestStatus.REJECTED);
+        System.out.println("📌 Rejection reason: " + dto.getReason());
+        request.setRejectionReason(dto.getReason());
+        mentorshipRequestRepository.save(request);
     }
 }
