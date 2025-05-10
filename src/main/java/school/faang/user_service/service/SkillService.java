@@ -60,16 +60,19 @@ public class SkillService {
         List<SkillOffer> skillOffers = skillOfferService.findAllOffersOfSkill(skillId, userId);
         if (skillOffers.size() >= MIN_SKILL_OFFERS) {
             skillRepository.assignSkillToUser(skillId, userId);
-            for (SkillOffer skillOffer : skillOffers) {
-                UserSkillGuarantee userSkillGuarantee = new UserSkillGuarantee();
-                userSkillGuarantee.setSkill(skillOffer.getSkill());
-                userSkillGuarantee.setGuarantor(skillOffer.getRecommendation().getAuthor());
-                userSkillGuarantee.setUser(skillOffer.getRecommendation().getReceiver());
-                userSkillGuaranteeService.save(userSkillGuarantee);
-            }
+            List<UserSkillGuarantee> userSkillGuarantees = skillOffers.stream()
+                .map(offer -> UserSkillGuarantee.builder()
+                    .skill(offer.getSkill())
+                    .guarantor(offer.getRecommendation().getAuthor())
+                    .user(offer.getRecommendation().getReceiver())
+                    .build()
+                )
+                .toList();
+            userSkillGuaranteeService.saveAll(userSkillGuarantees);
         }
 
-        SkillDto acquredSkill = skillMapper.skillToSkillDto(skillRepository.findById(skillId).get());
+        SkillDto acquredSkill = skillMapper.skillToSkillDto(skillRepository.findById(skillId)
+                .orElseThrow(() -> new DataValidationException("Skill not foud.")));
 
         return acquredSkill;
     }

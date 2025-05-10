@@ -3,10 +3,10 @@ package school.faang.user_service.controller;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -23,38 +23,38 @@ import school.faang.user_service.service.SkillService;
 public class SkillController {
     private final SkillService skillService;
 
-    @PostMapping("/create")
+    @PostMapping()
     public SkillDto create(@RequestBody SkillDto skill) {
-        if (!isSkillValid(skill)) {
-            throw new DataValidationException("Invalid skill title.");
-        }
+        validateSkill(skill);
         return skillService.create(skill);
     }
 
-    @GetMapping("/getForUser")
-    public List<SkillDto> getUserSkills(@RequestParam long userId) {
+    @GetMapping("/forUser/{userId}")
+    public List<SkillDto> getUserSkills(@PathVariable long userId) {
         if (userId < 0) {
             throw new DataValidationException("Invalid user id.");
         }
         return skillService.getUserSkills(userId);
     }
 
-    @GetMapping("/get/allOfferedToUser")
-    public List<SkillCandidateDto> getOfferedSkills(@RequestParam long userId) {
+    @GetMapping("/allOfferedToUser/{userId}")
+    public List<SkillCandidateDto> getOfferedSkills(@PathVariable long userId) {
         return skillService.getOfferedSkills(userId);
     }
 
-    @PostMapping("/acquireSkillFromOffers")
+    @PostMapping("/acquireFromOffers")
     public SkillDto acquireSkillFromOffers(@RequestBody SkillAcquireDTO skillAcquireDTO) {
         return skillService.acquireSkillFromOffers(skillAcquireDTO.getSkillId(), skillAcquireDTO.getUserId());
     }
 
-    @GetMapping("/get/allOffersOfSkill")
-    public List<SkillOfferDto> findSkillOffers(@RequestParam long skillId, @RequestParam long userId) {
+    @GetMapping("/offersOfSkill/{skillId}/forUser/{userId}")
+    public List<SkillOfferDto> findSkillOffers(@PathVariable long skillId, @PathVariable long userId) {
         return skillService.findAllOffersOfSkill(skillId, userId);
     }
 
-    public boolean isSkillValid(SkillDto skill) {
-        return skill.getTitle() != null && !skill.getTitle().isEmpty() && !skill.getTitle().isBlank();
+    private void validateSkill(SkillDto skill) {
+        if (skill == null || skill.getTitle() == null || skill.getTitle().isBlank() || skill.getTitle().isEmpty()) {
+            throw new DataValidationException("The skill is not valid.");
+        }
     }
 }
