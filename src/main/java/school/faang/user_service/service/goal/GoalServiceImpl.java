@@ -1,6 +1,7 @@
 package school.faang.user_service.service.goal;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.goal.GoalDto;
@@ -9,6 +10,7 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.GoalMapper;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.GoalService;
@@ -26,7 +28,8 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class GoalServiceImpl implements GoalService {
 
-    public static int MAXIMUM_ALLOWED_ACTIVE_GOALS = 3;//todo вынести в конфигурацию компонента
+    @Value("${logic.constants.max_active_goals}")
+    private final int MAX_ACTIVE_GOALS;
 
     private final GoalMapper goalMapper;
 
@@ -42,8 +45,8 @@ public class GoalServiceImpl implements GoalService {
                 .filter(GoalService::goalIsActive)
                 .count();
 
-        if (usersActiveGoals >= MAXIMUM_ALLOWED_ACTIVE_GOALS) {
-            throw new IllegalArgumentException("User exceeded maximum allowed number or active goals "
+        if (usersActiveGoals >= MAX_ACTIVE_GOALS) {
+            throw new DataValidationException("User exceeded maximum allowed number or active goals "
                     + usersActiveGoals);
         }
 
