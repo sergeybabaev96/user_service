@@ -10,10 +10,6 @@ import school.faang.user_service.exception.validation.DataValidationException;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.SubscriptionService;
-import school.faang.user_service.serviceImpl.subscription_filters.ExpMaxFilter;
-import school.faang.user_service.serviceImpl.subscription_filters.ExpMinFilter;
-import school.faang.user_service.serviceImpl.subscription_filters.NameFilter;
-import school.faang.user_service.serviceImpl.subscription_filters.PhoneNumberFilter;
 import school.faang.user_service.serviceImpl.subscription_filters.UserFilterCombination;
 import school.faang.user_service.serviceImpl.subscription_filters.UserFilterStrategy;
 
@@ -27,10 +23,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final List<UserFilterStrategy> filterStrategies = List.of(
-            new ExpMaxFilter(),
-            new ExpMinFilter(),
-            new PhoneNumberFilter(),
-            new NameFilter()
+            (user, userDtoFilter) -> user.getExperience() <= userDtoFilter.getExperienceMax(),
+            (user, userDtoFilter) -> user.getExperience() >= userDtoFilter.getExperienceMin(),
+            (user, userDtoFilter) -> user.getAboutMe().contains(userDtoFilter.getNamePattern()),
+            (user, userDtoFilter) -> user.getPhone().equals(userDtoFilter.getPhonePattern())
     );
     private final UserFilterCombination filters = new UserFilterCombination(filterStrategies);
 
