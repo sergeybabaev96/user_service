@@ -1,6 +1,11 @@
 package school.faang.user_service.dto.mentorship;
 
+import lombok.Data;
 import school.faang.user_service.entity.RequestStatus;
-
-public record MentorshipFilterDto(String description, Long requester, Long receiver, RequestStatus status) {
+@Data
+public class MentorshipFilterDto{
+    private String description;
+    private Long requester;
+    private Long receiver;
+    private RequestStatus status;
 }

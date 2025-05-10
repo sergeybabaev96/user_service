@@ -21,7 +21,6 @@ import java.util.stream.Stream;
 public class MentorshipRequestService {
 
     private final MentorshipRequestRepository mentorshipRequestRepository;
-    private final MentorshipRepository mentorshipRepository;
     private final MentorshipResponseMapper mentorshipResponseMapper;
     private final List<MentorshipValidator> validators;
     private final List<MentorshipFilter> filters;
