@@ -97,7 +97,7 @@ public class GoalInvitationServiceImpl implements GoalInvitationService {
     private GoalInvitation getGoalInvitationById(long id) {
         log.debug("Execution of the method getGoalInvitationById, parameters: id={}", id);
         return goalInvitationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException(String.format("No goal invitation found with с id=%d ", id)));
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No goal invitation found with с id=%d ", id)));
     }
 
     private void compareIfDifferentUsers(User user1, User user2) {

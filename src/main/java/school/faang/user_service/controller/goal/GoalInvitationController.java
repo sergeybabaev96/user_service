@@ -48,12 +48,11 @@ public class GoalInvitationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<GoalInvitationDto>> getAllInvitations(@RequestParam(name = "inviter_id",
-                                                                                 required = false)
-                                                    @Min(value = 0, message = "invitedId value cannot be lower than 0")
+    public ResponseEntity<List<GoalInvitationDto>> getAllInvitations(@RequestParam(name = "inviter_id", required = false)
+                                                    @Min(value = 1, message = "invitedId value cannot be lower than 1")
                                                     Long inviterId,
                                                     @RequestParam(name = "invited_id", required = false)
-                                                    @Min(value = 0, message = "invitedId value cannot be lower than 0")
+                                                    @Min(value = 1, message = "invitedId value cannot be lower than 1")
                                                     Long invitedId,
                                                     @RequestParam(name = "status", required = false)
                                                     RequestStatus status,
