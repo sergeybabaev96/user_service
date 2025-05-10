@@ -42,6 +42,7 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<RecommendationRequestDto> getRequests(RequestFilterDto filterDto) {
         Stream<RecommendationRequest> requests = requestRepository.findAll().stream();
         for (var filter : filters) {
@@ -55,6 +56,7 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public RecommendationRequestDto getRequest(Long id) {
         RecommendationRequest entity = requestRepository.findById(id)
                 .orElseThrow(() -> requestException(id, REQUEST_BY_ID_NOT_FOUND));
