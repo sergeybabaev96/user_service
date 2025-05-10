@@ -1,11 +1,13 @@
 package school.faang.user_service.validators.recommendation;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
-import school.faang.user_service.validators.DtoValidator;
+import school.faang.user_service.validators.Validator;
 
 @Slf4j
-public class MessageValidator implements DtoValidator<RecommendationRequestDto> {
+@Component
+public class MessageValidator implements Validator<RecommendationRequestDto> {
     public static final String MESSAGE_IS_EMPTY = "recommendation message is empty";
 
     @Override

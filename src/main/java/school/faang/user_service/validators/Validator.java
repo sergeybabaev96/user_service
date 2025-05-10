@@ -1,5 +1,5 @@
 package school.faang.user_service.validators;
 
-public interface DtoValidator<T> {
+public interface Validator<T> {
     void validate(T t);
 }

@@ -8,5 +8,7 @@ import java.util.List;
 public interface RecommendationRequestService {
     RecommendationRequestDto create(RecommendationRequestDto requestDto);
 
-    List<RecommendationRequestDto> getRequests(RequestFilterDto filter);
+    List<RecommendationRequestDto> getRequests(RequestFilterDto filterDto);
+
+    RecommendationRequestDto getRequest(Long id);
 }

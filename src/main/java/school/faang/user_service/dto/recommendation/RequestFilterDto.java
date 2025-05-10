@@ -4,10 +4,8 @@ import lombok.Data;
 
 @Data
 public class RequestFilterDto {
-    private Long id;
     private Long requesterId;
     private Long receiverId;
-    private String message;
+    private String messagePattern;
     private String status;
-    private Long skillId;
 }
