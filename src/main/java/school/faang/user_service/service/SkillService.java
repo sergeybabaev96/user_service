@@ -16,7 +16,10 @@ public class SkillService {
     private final SkillValidator skillValidator;
 
     public void assignSkillToGoal(long goalId, List<Long> skillsId) {
-        skillValidator.validateExistingSkills(skillsId);
+        List<Long> absentSkillsId = skillsId.stream()
+                .filter(this::isSkillNotExists)
+                .toList();
+        skillValidator.validateExistingSkills(absentSkillsId);
         skillsId.forEach(skillId -> skillRepository.assignSkillToGoal(goalId, skillId));
     }
 
@@ -31,5 +34,13 @@ public class SkillService {
                 .stream()
                 .filter(skill -> !ownedSkills.contains(skill))
                 .forEach(skill -> skillRepository.assignSkillToUser(skill.getId(), userId));
+    }
+
+    public boolean isSkillNotExists(long skillId) {
+        return !skillRepository.existsById(skillId);
+    }
+
+    public List<Skill> findSkillsByGoalId(long goalId) {
+        return skillRepository.findSkillsByGoalId(goalId);
     }
 }
