@@ -1,4 +1,4 @@
-package school.faang.user_service.mapper;
+package school.faang.user_service.mapper.recommendation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,11 +41,12 @@ public class RecommendationRequestBaseMapper {
         entity.setRequester(getUser(dto.getRequesterId(), REQUESTER_NOT_FOUND));
         //RECEIVER. Если нет в БД, то ошибка
         entity.setReceiver(getUser(dto.getReceiverId(), RECEIVER_NOT_FOUND));
-        if (dto.getStatus() == null || dto.getStatus().isBlank()) {
-            entity.setStatus(RequestStatus.PENDING);
-        } else {
-            entity.setStatus(RequestStatus.valueOf(dto.getStatus()));
-        }
+        setStatus(dto, entity);
+        setSkills(dto, entity);
+        return entity;
+    }
+
+    private void setSkills(RecommendationRequestDto dto, RecommendationRequest entity) {
         List<Skill> skills = skillService.getSkillsByIds(dto.getSkills());
         if (skills.size() != dto.getSkills().size()) {
             throw new RecommendationRequestException(SKILLS_MISSING_FROM_DATABASE);
@@ -57,7 +58,14 @@ public class RecommendationRequestBaseMapper {
             skillRequest.setSkill(skill);
             entity.addSkillRequest(skillRequest);
         });
-        return entity;
+    }
+
+    private void setStatus(RecommendationRequestDto dto, RecommendationRequest entity) {
+        if (dto.getStatus() == null || dto.getStatus().isBlank()) {
+            entity.setStatus(RequestStatus.PENDING);
+        } else {
+            entity.setStatus(RequestStatus.valueOf(dto.getStatus()));
+        }
     }
 
     private User getUser(Long userId, String errorMessage) {

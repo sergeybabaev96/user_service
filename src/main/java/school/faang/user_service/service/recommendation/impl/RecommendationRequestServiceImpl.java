@@ -7,7 +7,7 @@ import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.dto.recommendation.RequestFilterDto;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.exceptions.RecommendationRequestException;
-import school.faang.user_service.mapper.RecommendationRequestBaseMapper;
+import school.faang.user_service.mapper.recommendation.RecommendationRequestBaseMapper;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 import school.faang.user_service.service.recommendation.RecommendationRequestService;
 
