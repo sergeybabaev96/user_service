@@ -28,7 +28,7 @@ public interface SubscriptionRepository extends CrudRepository<User, Long> {
     Stream<User> findByFolloweeId(long followeeId);
 
     @Query(nativeQuery = true, value = "select count(id) from subscription where followee_id = :followeeId")
-    int findFollowersAmountByFolloweeId(long followeeId);
+    long findFollowersAmountByFolloweeId(long followeeId);
 
     @Query(nativeQuery = true, value = """
             select u.* from users as u

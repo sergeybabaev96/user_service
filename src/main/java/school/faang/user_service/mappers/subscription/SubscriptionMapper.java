@@ -1,5 +1,6 @@
 package school.faang.user_service.mappers.subscription;
 
+import lombok.Builder;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.subscription.SubscriptionDto;
 import school.faang.user_service.entity.User;
@@ -14,11 +15,12 @@ public class SubscriptionMapper {
                 user.getEmail());
     }
 
+    @Builder
     public User SubscriptionDtoToUser(SubscriptionDto dto) {
-        User user = new User();
-        user.setId(dto.getId());
-        user.setUsername(dto.getUsername());
-        user.setEmail(dto.getEmail());
-        return user;
+        return User.builder()
+                .id(dto.getUserId())
+                .username(dto.getUsername())
+                .email(dto.getEmail())
+                .build();
     }
 }

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SubscriptionDto {
     @NotNull
-    private Long id;
+    private Long userId;
     @NotBlank
     private String username;
     @NotBlank

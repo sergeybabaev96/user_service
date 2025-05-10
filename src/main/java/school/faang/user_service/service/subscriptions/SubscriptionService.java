@@ -46,7 +46,7 @@ public class SubscriptionService {
 
     @Transactional(readOnly = true)
     public Long getFollowersCount(long followeeId) {
-        return (long) subscriptionRepository.findFollowersAmountByFolloweeId(followeeId);
+        return subscriptionRepository.findFollowersAmountByFolloweeId(followeeId);
     }
 
     @Transactional(readOnly = true)
@@ -78,6 +78,4 @@ public class SubscriptionService {
                 .filter((user) -> applyFilters(user, filterDto))
                 .toList();
     }
-
-
 }
