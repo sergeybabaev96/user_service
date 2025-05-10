@@ -5,16 +5,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.entity.Skill;
+import school.faang.user_service.entity.filter.GoalFilterDto;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.entity.goal.mapper.GoalMapper;
 import school.faang.user_service.exception.goal.GoalNotExistException;
 import school.faang.user_service.exception.goal.UserNotGoalOwnerException;
+import school.faang.user_service.filter.goal.GoalFilter;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.validator.goal.GoalValidator;
 import school.faang.user_service.validator.goal.SkillValidator;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +31,8 @@ public class GoalService {
 
     private final SkillService skillService;
     private final SkillValidator skillValidator;
+
+    private final List<GoalFilter> filters;
 
     @Transactional
     public Goal createGoal(Goal newGoalData, List<Long> skillsId, Long parentId) {
@@ -103,7 +108,26 @@ public class GoalService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Goal getGoalById(long goalId) {
         return goalRepository.findById(goalId).orElseThrow(() -> new GoalNotExistException(goalId));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Goal> getGoalsByFilter(GoalFilterDto goalFilterDto) {
+        return filterGoals(goalRepository.findAll().stream(), goalFilterDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Goal> getSubGoalsByFilter(long parentId, GoalFilterDto goalFilterDto) {
+        return filterGoals(goalRepository.findByParent(parentId), goalFilterDto).toList();
+    }
+
+    private Stream<Goal> filterGoals(Stream<Goal> goalStream, GoalFilterDto goalFilterDto) {
+        return filters.stream()
+                .filter(filter -> filter.isApplicable(goalFilterDto))
+                .reduce(goalStream,
+                        (currentStream, filter) -> filter.apply(currentStream, goalFilterDto),
+                        Stream::concat);
     }
 }

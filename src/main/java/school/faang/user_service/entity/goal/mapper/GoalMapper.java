@@ -39,4 +39,8 @@ public interface GoalMapper {
                 .map(Skill::getId)
                 .toList();
     }
+
+    List<GoalDto> toGoalDtoList(List<Goal> goals);
+
+    List<Goal> toGoalList(List<GoalDto> goalsDto);
 }

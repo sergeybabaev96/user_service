@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -11,12 +12,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import school.faang.user_service.entity.filter.GoalFilterDto;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.dto.GoalDto;
 import school.faang.user_service.entity.goal.mapper.GoalMapper;
 import school.faang.user_service.service.GoalService;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/goals")
@@ -24,8 +27,25 @@ import java.net.URI;
 public class GoalController {
 
     private final GoalService goalService;
-    private final CreateGoalMapperImpl createGoalMapper;
-    private final UpdateGoalMapperImpl updateGoalMapper;
+    private final GoalMapper goalMapper;
+
+    @GetMapping("/{goalId}")
+    public ResponseEntity<GoalDto> getGoal(@PathVariable long goalId) {
+        Goal goal = goalService.getGoalById(goalId);
+        return ResponseEntity.ok(goalMapper.toGoalDto(goal));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<GoalDto>> getGoals(@RequestBody GoalFilterDto goalFilterDto) {
+        List<Goal> filteredGoals = goalService.getGoalsByFilter(goalFilterDto);
+        return ResponseEntity.ok(goalMapper.toGoalDtoList(filteredGoals));
+    }
+
+    @GetMapping("/{parentId}/subGoals")
+    public ResponseEntity<List<GoalDto>> getSubGoals(@PathVariable long parentId, @RequestBody GoalFilterDto goalFilterDto) {
+        List<Goal> filteredSubGoals = goalService.getSubGoalsByFilter(parentId, goalFilterDto);
+        return ResponseEntity.ok(goalMapper.toGoalDtoList(filteredSubGoals));
+    }
 
     @PostMapping
     public ResponseEntity<GoalDto> createGoal(@RequestBody @Valid GoalDto goalDto) {
