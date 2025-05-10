@@ -29,7 +29,7 @@ public class RecommendationRequestBaseMapper {
 
     public RecommendationRequestDto toDto(RecommendationRequest entity) {
         RecommendationRequestDto dto = recommendationRequestMapper.toDto(entity);
-        entity.getSkills().forEach(skillRequest -> dto.addSkill(skillRequest.getId()));
+        setDtoSkills(entity, dto);
         dto.setRequesterId(entity.getRequester().getId());
         dto.setReceiverId(entity.getReceiver().getId());
         return dto;
@@ -42,11 +42,15 @@ public class RecommendationRequestBaseMapper {
         //RECEIVER. Если нет в БД, то ошибка
         entity.setReceiver(getUser(dto.getReceiverId(), RECEIVER_NOT_FOUND));
         setStatus(dto, entity);
-        setSkills(dto, entity);
+        setEntitySkills(dto, entity);
         return entity;
     }
 
-    private void setSkills(RecommendationRequestDto dto, RecommendationRequest entity) {
+    private void setDtoSkills(RecommendationRequest entity, RecommendationRequestDto dto) {
+        entity.getSkills().forEach(skillRequest -> dto.addSkill(skillRequest.getId()));
+    }
+
+    private void setEntitySkills(RecommendationRequestDto dto, RecommendationRequest entity) {
         List<Skill> skills = skillService.getSkillsByIds(dto.getSkills());
         if (skills.size() != dto.getSkills().size()) {
             throw new RecommendationRequestException(SKILLS_MISSING_FROM_DATABASE);
