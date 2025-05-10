@@ -4,11 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
+import school.faang.user_service.dto.recommendation.RequestFilterDto;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.exceptions.RecommendationRequestException;
 import school.faang.user_service.mapper.RecommendationRequestBaseMapper;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 import school.faang.user_service.service.recommendation.RecommendationRequestService;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -26,6 +29,11 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
         RecommendationRequest entity = mapper.toEntity(dto);
         RecommendationRequest resultEntity = requestRepository.save(entity);
         return mapper.toDto(resultEntity);
+    }
+
+    @Override
+    public List<RecommendationRequestDto> getRequests(RequestFilterDto filter) {
+        return List.of();
     }
 
     /**
