@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.RecommendationRequestDto;
 import school.faang.user_service.dto.RejectionDto;
 import school.faang.user_service.dto.RequestFilterDto;
+import school.faang.user_service.entity.RequestStatus;
+import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.RecommendationMapper;
@@ -31,14 +33,12 @@ public class RecommendationRequestService {
     private final SkillRequestRepository skillRequestRepository;
 
     public RecommendationRequestDto create(RecommendationRequestDto recommendationRequest) {
-
         Long requesterId = recommendationRequest.getRequesterId();
         Long receiverId = recommendationRequest.getReceiverId();
 
         if (!userRepository.existsById(requesterId)) {
             throw new EntityNotFoundException("Requester not found with id: " + requesterId);
         }
-
         if (!userRepository.existsById(receiverId)) {
             throw new EntityNotFoundException("Receiver not found with id: " + receiverId);
         }
@@ -46,21 +46,32 @@ public class RecommendationRequestService {
         Optional<RecommendationRequest> latestRequest = recommendationRequestRepository
                 .findLatestPendingRequest(requesterId, receiverId);
 
-        if (latestRequest.isPresent() && latestRequest.get().getCreatedAt()
-                .isAfter(latestRequest.get().getUpdatedAt().minusMonths(6))) {
-            throw new DataValidationException("You can send recommendation request to this user only once per 6 months");
+        if (latestRequest.isPresent()) {
+            LocalDateTime sixMonthsAgo = LocalDateTime.now().minusMonths(6);
+            if (latestRequest.get().getCreatedAt().isAfter(sixMonthsAgo)) {
+                throw new DataValidationException("You can send a recommendation request to this user only once per 6 months");
+            }
         }
 
-        latestRequest.get().getSkills().stream()
-                .forEach(skillRequest -> {
-                    if (!skillRepository.existsByTitle(skillRequest.getSkill().getTitle())) {
-                        throw new DataValidationException("This skill is not in the database!");
-                    }
-                    skillRequestRepository.create(skillRequest.getId(), skillRequest.getSkill().getId());
-                });
+        if (recommendationRequest.getSkills() == null || recommendationRequest.getSkills().isEmpty()) {
+            throw new DataValidationException("Skills list must not be empty!");
+        }
 
-        RecommendationRequest newRequest = new RecommendationRequest();
+        recommendationRequest.getSkills().forEach(skillTitle -> {
+            if (!skillRepository.existsByTitle(skillTitle)) {
+                throw new DataValidationException("Skill not found: " + skillTitle);
+            }
+        });
+        RecommendationRequest newRequest = recommendationMapper.toEntity(recommendationRequest);
         RecommendationRequest savedRequest = recommendationRequestRepository.save(newRequest);
+
+        recommendationRequest.getSkills().forEach(skillTitle -> {
+            Skill skill = skillRepository.findAll().stream()
+                    .filter(s -> s.getTitle().equals(skillTitle))
+                    .findFirst()
+                    .orElseThrow(() -> new EntityNotFoundException("Skill not found: " + skillTitle));
+            skillRequestRepository.create(savedRequest.getId(), skill.getId());
+        });
 
         return recommendationMapper.toDto(savedRequest);
     }
@@ -117,7 +128,12 @@ public class RecommendationRequestService {
         RecommendationRequest request = recommendationRequestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Recommendation request not found with id: " + id));
 
+        if (request.getStatus() != RequestStatus.PENDING) {
+            throw new IllegalStateException("Cannot reject request: current status is " + request.getStatus());
+        }
+
         request.setRejectionReason(rejection.getReason());
+        request.setStatus(RequestStatus.REJECTED);
         RecommendationRequest updatedRequest = recommendationRequestRepository.save(request);
 
         return recommendationMapper.toDto(updatedRequest);
