@@ -43,6 +43,6 @@ public class SubscriptionController {
     }
 
     public int getFollowingCount(long followeeId) {
-        return subscriptionService.getFollowersCount(followeeId);
+        return subscriptionService.getFollowingCount(followeeId);
     }
 }
