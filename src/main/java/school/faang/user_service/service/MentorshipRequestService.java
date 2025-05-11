@@ -39,6 +39,7 @@ public class MentorshipRequestService {
         return mentorshipResponseMapper.toResponseDto(savedRequest);
     }
 
+    @Transactional
     public List<MentorshipResponseDto> getRequests(MentorshipFilterDto filterDto) {
         Stream<MentorshipRequest> filteredRequests = mentorshipRequestRepository.findAll().stream();
 
@@ -68,7 +69,6 @@ public class MentorshipRequestService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request is already rejected.");
         }
         request.setStatus(RequestStatus.REJECTED);
-        System.out.println("📌 Rejection reason: " + dto.getReason());
         request.setRejectionReason(dto.getReason());
         mentorshipRequestRepository.save(request);
     }
