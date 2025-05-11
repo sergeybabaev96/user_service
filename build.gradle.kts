@@ -34,6 +34,7 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.springframework.boot:spring-boot-starter-aop")
     implementation("org.springframework.retry:spring-retry:1.3.4")
+    implementation("org.springframework.retry:spring-retry:2.0.11")
 
     /**
      * Database

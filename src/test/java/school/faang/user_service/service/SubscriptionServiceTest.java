@@ -1,5 +1,6 @@
 package school.faang.user_service.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,15 +13,14 @@ import org.springframework.data.redis.core.RedisTemplate;
 import school.faang.user_service.config.redis.RedisProperties;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
-import school.faang.user_service.dto.event.SubscriptionEventDto;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.filter.subscriber.MockUsers;
 import school.faang.user_service.filter.subscriber.SubscriberFilter;
 import school.faang.user_service.filter.subscriber.SubscriberNameFilter;
 import school.faang.user_service.mapper.UserMapper;
-import school.faang.user_service.publisher.subscription.SubscriptionPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.outbox.OutboxService;
 import school.faang.user_service.service.subscription.SubscriptionService;
 
 import java.util.List;
@@ -29,7 +29,11 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class SubscriptionServiceTest {
@@ -48,6 +52,12 @@ public class SubscriptionServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private OutboxService outboxService;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @Mock
     private FollowerEventPublisher followerEventPublisher;
@@ -80,7 +90,7 @@ public class SubscriptionServiceTest {
         filters = new UserFilterDto();
 
         subscriptionService = new SubscriptionService(subscriptionRepository, userRepository,
-                subscriberFilters, userMapper, redisTemplate, redisProperties);
+                subscriberFilters, userMapper, outboxService, objectMapper);
     }
 
     @Nested
@@ -131,8 +141,6 @@ public class SubscriptionServiceTest {
             subscriptionService.followUser(followerId, followeeId);
 
             verify(subscriptionRepository, times(1)).followUser(followerId, followeeId);
-            verify(redisTemplate, times(1)).convertAndSend(eq(redisProperties.getChannel().getFollower()), any());
-            verify(followerEventPublisher, times(1)).publish(any(FollowerEvent.class));
         }
     }
 
@@ -185,7 +193,6 @@ public class SubscriptionServiceTest {
             subscriptionService.unfollowUser(followerId, followeeId);
 
             verify(subscriptionRepository, times(1)).unfollowUser(followerId, followeeId);
-            verify(redisTemplate, times(1)).convertAndSend(eq(redisProperties.getChannel().getUnfollower()), any());
         }
     }
 

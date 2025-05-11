@@ -25,12 +25,30 @@ spring:
     redis:
       port: 6379
       host: localhost
+      timeout: 10000
+      auto-reconnect: true
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: 5000
+        io-thread-pool-size: 4
+        computation-thread-pool-size: 4
+      retry:
+        max-attempts: 3
+        initial-delay: 1000
+        max-delay: 5000
+        multiplier: 1.5
       channel:
         follower: follower_channel
         unfollower: unfollower_channel
         achievement: achievement_channel
         follower-topic: follower_event_topic
         skill-channel: skill_channel
+
+outbox:
+  publishing:
+    interval: 5000
 
 server:
   port: 8080

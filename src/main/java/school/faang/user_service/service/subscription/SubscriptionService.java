@@ -1,12 +1,12 @@
 package school.faang.user_service.service.subscription;
 
-import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import school.faang.user_service.config.redis.RedisProperties;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.dto.event.SubscriptionEventDto;
@@ -15,9 +15,9 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.ErrorMessage;
 import school.faang.user_service.filter.subscriber.SubscriberFilter;
 import school.faang.user_service.mapper.UserMapper;
-import school.faang.user_service.publisher.subscription.SubscriptionPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.outbox.OutboxService;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -33,8 +33,14 @@ public class SubscriptionService {
     private final UserRepository userRepository;
     private final List<SubscriberFilter> subscriberFilters;
     private final UserMapper userMapper;
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final RedisProperties redisProperties;
+    private final OutboxService outboxService;
+    private final ObjectMapper objectMapper;
+
+    @Value("${spring.data.redis.channel.follower}")
+    private String followerChannel;
+
+    @Value("${spring.data.redis.channel.unfollower}")
+    private String unfollowerChannel;
 
     @Transactional
     public void followUser(long followerId, long followeeId) {
@@ -42,13 +48,15 @@ public class SubscriptionService {
         validateUserExists(followeeId);
         validateSubscriptionOnYourself(followerId, followeeId, true);
         validateSubscription(followerId, followeeId, true);
+
         subscriptionRepository.followUser(followerId, followeeId);
-        SubscriptionEventDto event = SubscriptionEventDto.builder()
-                .followerId(followerId)
-                .followeeId(followeeId)
-                .eventTime(LocalDateTime.now())
-                .build();
-        redisTemplate.convertAndSend(redisProperties.getChannel().getFollower(), event);
+        SubscriptionEventDto event = createEvent(followerId, followeeId, LocalDateTime.now());
+        try {
+            String payload = objectMapper.writeValueAsString(event);
+            outboxService.saveEvent(followerChannel, payload);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize event", e);
+        }
     }
 
     @Transactional
@@ -57,13 +65,15 @@ public class SubscriptionService {
         validateUserExists(followeeId);
         validateSubscriptionOnYourself(followerId, followeeId, false);
         validateSubscription(followerId, followeeId, false);
+
         subscriptionRepository.unfollowUser(followerId, followeeId);
-        SubscriptionEventDto event = SubscriptionEventDto.builder()
-                .followerId(followerId)
-                .followeeId(followeeId)
-                .eventTime(LocalDateTime.now())
-                .build();
-        redisTemplate.convertAndSend(redisProperties.getChannel().getUnfollower(), event);
+        SubscriptionEventDto event = createEvent(followerId, followeeId, LocalDateTime.now());
+        try {
+            String payload = objectMapper.writeValueAsString(event);
+            outboxService.saveEvent(unfollowerChannel, payload);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize event", e);
+        }
     }
 
     @Transactional(readOnly = true)
