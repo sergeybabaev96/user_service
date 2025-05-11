@@ -30,8 +30,8 @@ public class EventController {
         return eventService.create(event);
     }
 
-    @GetMapping(value={"/{id}", "/{id}/"})
-    public EventDto getEvent(@PathVariable("id") long eventId) {
+    @GetMapping(value={"/{eventId}", "/{eventId}/"})
+    public EventDto getEvent(@PathVariable("eventId") long eventId) {
         return eventService.getEvent(eventId);
     }
 
@@ -40,25 +40,25 @@ public class EventController {
         return eventService.getEventsByFilter(eventFilterDto);
     }
 
-    @DeleteMapping(value={"/{id}", "/{id}/"})
-    public void deleteEvent(@PathVariable("id") long eventId) {
+    @DeleteMapping(value={"/{eventId}", "/{eventId}/"})
+    public void deleteEvent(@PathVariable("eventId") long eventId) {
         eventService.deleteEvent(eventId);
     }
 
-    @PatchMapping(value={"/{id}", "/{id}/"})
+    @PatchMapping(value={"/{eventId}", "/{eventId}/"})
     public EventDto updateEvent(@RequestBody EventDto event) {
         validateEventDto(event);
 
         return eventService.updateEvent(event);
     }
 
-    @GetMapping(value={"/owner/{id}", "/owner/{id}/"})
-    public List<EventDto> getOwnedEvents(@PathVariable("id") long userId) {
+    @GetMapping(value={"/owner/{userId}", "/owner/{userId}/"})
+    public List<EventDto> getOwnedEvents(@PathVariable("userId") long userId) {
         return eventService.getOwnedEvents(userId);
     }
 
-    @GetMapping(value={"/participant/{id}", "/participant/{id}/"})
-    public List<EventDto> getParticipatedEvents(@PathVariable("id") long userId) {
+    @GetMapping(value={"/participant/{userId}", "/participant/{userId}/"})
+    public List<EventDto> getParticipatedEvents(@PathVariable("userId") long userId) {
         return eventService.getParticipatedEvents(userId);
     }
 
