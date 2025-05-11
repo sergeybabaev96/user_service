@@ -39,6 +39,7 @@ public class GoalServiceImpl implements GoalService {
     private final SkillService skillService;
     private final UserContext userContext;
 
+    @Transactional
     @Override
     public GoalResponseDto createGoal(final GoalCreateRequestDto goalCreateRequestDto) {
         long userId = userContext.getUserId();
@@ -63,6 +64,7 @@ public class GoalServiceImpl implements GoalService {
         return goalMapper.toGoalResponseDto(savedGoal);
     }
 
+    @Transactional
     @Override
     public GoalResponseDto updateGoal(final GoalUpdateRequestDto goalUpdateRequestDto) {
         Goal goal = getGoalById(goalUpdateRequestDto.getId());
@@ -84,6 +86,7 @@ public class GoalServiceImpl implements GoalService {
         return goalMapper.toGoalResponseDto(saveGoal);
     }
 
+    @Transactional
     @Override
     public void deleteGoalById(long goalId) {
         checkGoalBeforeDelete(goalId);

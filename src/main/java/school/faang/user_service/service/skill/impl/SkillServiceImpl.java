@@ -3,6 +3,7 @@ package school.faang.user_service.service.skill.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.exception.skill.SkillNotFoundException;
 import school.faang.user_service.repository.SkillRepository;
@@ -30,6 +31,7 @@ public class SkillServiceImpl implements SkillService {
                 });
     }
 
+    @Transactional
     @Override
     public void assignSkillsToUsers(List<Long> skillIds, List<Long> userIds) {
         skillIds.forEach(skillId ->
