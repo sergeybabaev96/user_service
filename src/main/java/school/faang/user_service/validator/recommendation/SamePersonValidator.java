@@ -1,9 +1,9 @@
-package school.faang.user_service.validators.recommendation;
+package school.faang.user_service.validator.recommendation;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
-import school.faang.user_service.validators.Validator;
+import school.faang.user_service.validator.Validator;
 
 @Slf4j
 @Component

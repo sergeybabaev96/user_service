@@ -9,7 +9,7 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.entity.recommendation.SkillRequest;
-import school.faang.user_service.exceptions.RecommendationRequestException;
+import school.faang.user_service.exception.RecommendationRequestException;
 import school.faang.user_service.service.SkillService;
 import school.faang.user_service.service.UserService;
 

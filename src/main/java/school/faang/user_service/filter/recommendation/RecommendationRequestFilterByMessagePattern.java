@@ -1,18 +1,17 @@
-package school.faang.user_service.filters.recommendation;
+package school.faang.user_service.filter.recommendation;
 
 import org.springframework.stereotype.Component;
 import school.faang.user_service.dto.recommendation.RequestFilterDto;
-import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
-import school.faang.user_service.filters.Filter;
+import school.faang.user_service.filter.Filter;
 
 import java.util.stream.Stream;
 
 @Component
-public class RecommendationRequestFilterByStatus implements Filter<RequestFilterDto, RecommendationRequest> {
+public class RecommendationRequestFilterByMessagePattern implements Filter<RequestFilterDto, RecommendationRequest> {
     @Override
     public boolean isApplicable(RequestFilterDto filterDto) {
-        return filterDto.getStatus() != null;
+        return filterDto.getMessagePattern() != null;
     }
 
     @Override
@@ -20,6 +19,7 @@ public class RecommendationRequestFilterByStatus implements Filter<RequestFilter
             RequestFilterDto filterDto
     ) {
         return recommendationRequest
-                .filter(request -> request.getStatus().equals(RequestStatus.valueOf(filterDto.getStatus())));
+                .filter(request ->
+                        request.getMessage().toLowerCase().contains(filterDto.getMessagePattern().toLowerCase()));
     }
 }

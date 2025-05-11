@@ -10,11 +10,12 @@ import school.faang.user_service.dto.recommendation.RejectionDto;
 import school.faang.user_service.dto.recommendation.RequestFilterDto;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
-import school.faang.user_service.exceptions.RecommendationRequestException;
-import school.faang.user_service.filters.Filter;
+import school.faang.user_service.exception.RecommendationRequestException;
+import school.faang.user_service.filter.Filter;
 import school.faang.user_service.mapper.recommendation.RecommendationRequestBaseMapper;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 import school.faang.user_service.service.recommendation.RecommendationRequestService;
+import school.faang.user_service.validator.Validator;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -32,10 +33,19 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
     private final RecommendationRequestRepository requestRepository;
     private final RecommendationRequestBaseMapper mapper;
     private final List<Filter<RequestFilterDto, RecommendationRequest>> filters;
+    //todo: Validator сделать возможность сортировки, задать порядок валидирования.
+    private final List<Validator<RecommendationRequestDto>> requestValidators;
+    private final List<Validator<RejectionDto>> rejectValidators;
+
 
     @Override
     @Transactional
     public RecommendationRequestDto create(RecommendationRequestDto dto) {
+        log.info("validators count: {}", requestValidators.size());
+        requestValidators.forEach(validator -> {
+            log.info("run validator: {}", validator.getClass().getName());
+            validator.validate(dto);
+        });
         validateTimePeriod(dto);
         RecommendationRequest entity = mapper.toEntity(dto);
         RecommendationRequest resultEntity = requestRepository.save(entity);
@@ -46,11 +56,12 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
     @Transactional(readOnly = true)
     public List<RecommendationRequestDto> getRequests(RequestFilterDto filterDto) {
         Stream<RecommendationRequest> requests = requestRepository.findAll().stream();
-        for (var filter : filters) {
+        filters.forEach(filter -> {
+            log.info("run filter {}", filter.getClass().getName());
             if (filter.isApplicable(filterDto)) {
                 filter.apply(requests, filterDto);
             }
-        }
+        });
         return requests
                 .map(mapper::toDto)
                 .toList();
@@ -67,6 +78,7 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
     @Override
     @Transactional
     public RecommendationRequestDto rejectRequest(Long id, RejectionDto rejection) {
+        rejectValidators.forEach(validator -> validator.validate(rejection));
         RecommendationRequest entity = requestRepository.findById(id)
                 .orElseThrow(() -> requestException(id, REQUEST_BY_ID_NOT_FOUND));
         log.info("before {}", entity);

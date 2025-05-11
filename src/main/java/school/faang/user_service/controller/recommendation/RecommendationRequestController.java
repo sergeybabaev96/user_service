@@ -7,7 +7,7 @@ import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.dto.recommendation.RejectionDto;
 import school.faang.user_service.dto.recommendation.RequestFilterDto;
 import school.faang.user_service.service.recommendation.RecommendationRequestService;
-import school.faang.user_service.validators.Validator;
+import school.faang.user_service.validator.Validator;
 
 import java.util.List;
 
@@ -16,13 +16,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RecommendationRequestController {
     private final RecommendationRequestService requestService;
-    //todo: Validator сделать возможность сортировки, задать порядок валидирования.
-    private final List<Validator<RecommendationRequestDto>> requestValidators;
-    private final List<Validator<RejectionDto>> rejectValidators;
 
     public RecommendationRequestDto requestRecommendation(RecommendationRequestDto recommendationRequest) {
-        log.info("validatorsLevelFirst.size: {}", requestValidators.size());
-        requestValidators.forEach(validator -> validator.validate(recommendationRequest));
         return requestService.create(recommendationRequest);
     }
 
@@ -35,7 +30,6 @@ public class RecommendationRequestController {
     }
 
     public RecommendationRequestDto rejectRequest(Long id, RejectionDto rejection) {
-        rejectValidators.forEach(validator -> validator.validate(rejection));
         return requestService.rejectRequest(id, rejection);
     }
 }

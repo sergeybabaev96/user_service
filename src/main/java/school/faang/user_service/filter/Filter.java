@@ -1,4 +1,4 @@
-package school.faang.user_service.filters;
+package school.faang.user_service.filter;
 
 import java.util.stream.Stream;
 
