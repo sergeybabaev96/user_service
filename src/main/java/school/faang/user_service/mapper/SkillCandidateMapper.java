@@ -2,15 +2,11 @@ package school.faang.user_service.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.mapstruct.ReportingPolicy;
 
 import school.faang.user_service.dto.skill.SkillCandidateDto;
-import school.faang.user_service.entity.Skill;
+import school.faang.user_service.dto.skill.SkillDto;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, 
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING) 
 public interface SkillCandidateMapper {
-    SkillCandidateDto skillToSkillCandidateDto(Skill skill);
+    SkillCandidateDto skillMapToSkillCandidateDto(SkillDto skill, Long offersAmount);
 }

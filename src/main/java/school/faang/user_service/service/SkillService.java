@@ -1,6 +1,7 @@
 package school.faang.user_service.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -46,9 +47,16 @@ public class SkillService {
 
     public List<SkillCandidateDto> getOfferedSkills(long userId) {
         List<Skill> skills = skillRepository.findSkillsOfferedToUser(userId);
-        return skills.stream()
-            .map(skillCandidateMapper::skillToSkillCandidateDto)
+        List<SkillCandidateDto> skillsMap = skills.stream()
+            .collect(Collectors.groupingBy(
+                skill -> skillMapper.skillToSkillDto(skill),
+                Collectors.counting()
+            ))
+            .entrySet()
+            .stream()
+            .map(entry -> skillCandidateMapper.skillMapToSkillCandidateDto(entry.getKey(), entry.getValue()))
             .toList();
+        return skillsMap; 
     }
 
     @Transactional

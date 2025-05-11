@@ -53,7 +53,7 @@ public class SkillController {
     }
 
     private void validateSkill(SkillDto skill) {
-        if (skill == null || skill.getTitle() == null || skill.getTitle().isBlank() || skill.getTitle().isEmpty()) {
+        if (skill == null || skill.getTitle() == null || skill.getTitle().isBlank()) {
             throw new DataValidationException("The skill is not valid.");
         }
     }
