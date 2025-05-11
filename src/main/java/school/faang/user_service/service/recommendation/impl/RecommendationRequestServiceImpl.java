@@ -18,6 +18,7 @@ import school.faang.user_service.service.recommendation.RecommendationRequestSer
 
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -27,7 +28,6 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
     public static final String SIX_MONTHS_PERIOD_ERROR = "A recommendation request from the same user " +
             "to another can be sent no more than once every 6 months.";
     public static final String REQUEST_BY_ID_NOT_FOUND = "The recommendation request by id={0} was not found.";
-    public static final String STATUS_CANNOT_BE_CHANGED = "The recommendation request status cannot be changed. id={0}";
 
     private final RecommendationRequestRepository requestRepository;
     private final RecommendationRequestBaseMapper mapper;
@@ -70,18 +70,22 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
         RecommendationRequest entity = requestRepository.findById(id)
                 .orElseThrow(() -> requestException(id, REQUEST_BY_ID_NOT_FOUND));
         log.info("before {}", entity);
-        if (entity.getStatus().equals(RequestStatus.PENDING)) {
-            Integer rowCount = requestRepository.setStatus(id, RequestStatus.REJECTED, rejection.getReason());
-            if (rowCount != 1) {
-                throw requestException(id, STATUS_CANNOT_BE_CHANGED);
-            }
-            RecommendationRequest result = requestRepository.findById(id)
-                    .orElseThrow(() -> requestException(id, REQUEST_BY_ID_NOT_FOUND));
-            log.info("after update {}", result);
-            return mapper.toDto(result);
-        } else {
-            throw requestException(id, STATUS_CANNOT_BE_CHANGED);
+        Set<RequestStatus> checkStatusForReject = Set.of(RequestStatus.REJECTED, RequestStatus.ACCEPTED);
+        if (checkStatusForReject.contains(entity.getStatus())) {
+            //todo: сделать универсальным поднятие ошибок
+            throw requestException(MessageFormat.format(
+                    "The recommendation request status cannot be changed. Entity (id={0}) have one of the next status {1}",
+                    id, checkStatusForReject));
         }
+        Integer rowCount = requestRepository.setStatus(id, RequestStatus.REJECTED, rejection.getReason());
+        if (rowCount != 1) {
+            throw requestException(MessageFormat.format(
+                    "The status of the recommendation request has not been changed (id={0})", id));
+        }
+        RecommendationRequest result = requestRepository.findById(id)
+                .orElseThrow(() -> requestException(id, REQUEST_BY_ID_NOT_FOUND));
+        log.info("after update {}", result);
+        return mapper.toDto(result);
     }
 
     /**
