@@ -6,11 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.event.EventDto;
@@ -34,8 +34,8 @@ public class EventController {
         return eventService.create(event);
     }
 
-    @GetMapping(value = "/get")
-    public EventDto getEvent(@RequestParam @Required Long eventId) {
+    @GetMapping(value = "/get/{id}")
+    public EventDto getEvent(@PathVariable  @Required Long eventId) {
         return eventService.getEvent(eventId);
     }
 
@@ -46,7 +46,7 @@ public class EventController {
 
     @DeleteMapping(value = "/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteEvent(@RequestParam @Required Long eventId) {
+    public void deleteEvent(@PathVariable @Required Long eventId) {
         eventService.deleteEvent(eventId);
     }
 
@@ -56,13 +56,13 @@ public class EventController {
         return eventService.updateEvent(eventDto);
     }
 
-    @GetMapping(value = "/owned")
-    public List<EventDto> getOwnedEvents(@RequestParam @Required Long userId) {
+    @GetMapping(value = "/owned//{id}")
+    public List<EventDto> getOwnedEvents(@PathVariable @Required Long userId) {
         return eventService.getOwnedEvents(userId);
     }
 
-    @GetMapping(value = "/participated")
-    public List<EventDto> getParticipatedEvents(@RequestParam @Required Long userId) {
+    @GetMapping(value = "/participated//{id}")
+    public List<EventDto> getParticipatedEvents(@PathVariable@Required Long userId) {
         return eventService.getParticipatedEvents(userId);
     }
 
