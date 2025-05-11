@@ -4,7 +4,13 @@ import school.faang.user_service.dto.WorkScheduleDto;
 import school.faang.user_service.exception.DataValidationException;
 
 public class WorkScheduleDTOValidator {
-    public static void checkValidTimeLine(WorkScheduleDto workScheduleDto) {
+
+    public static void validateDTO(WorkScheduleDto workScheduleDto) {
+        checkValidTimeLine(workScheduleDto);
+        checkValidFields(workScheduleDto);
+    }
+
+    private static void checkValidTimeLine(WorkScheduleDto workScheduleDto) {
         if (workScheduleDto.getStartTime().isBefore(workScheduleDto.getStartLunch())
                 && workScheduleDto.getStartLunch().isBefore(workScheduleDto.getEndLunch())
                 && workScheduleDto.getEndLunch().isBefore(workScheduleDto.getEndTime())) {
@@ -14,11 +20,13 @@ public class WorkScheduleDTOValidator {
                 "both of them should be before endLunch. And all of them should be before endTime");
     }
 
-    public static void checkValidFields(WorkScheduleDto workScheduleDto) {
-        if (
-                workScheduleDto.getId() == 0 || workScheduleDto.getTimezone() == null
-                        || workScheduleDto.getStartTime() == null || workScheduleDto.getStartLunch() == null
-                        || workScheduleDto.getEndLunch() == null || workScheduleDto.getEndTime() == null) {
+    private static void checkValidFields(WorkScheduleDto workScheduleDto) {
+        if (workScheduleDto.getId() == 0
+                || workScheduleDto.getTimezone() == null
+                || workScheduleDto.getStartTime() == null
+                || workScheduleDto.getStartLunch() == null
+                || workScheduleDto.getEndLunch() == null
+                || workScheduleDto.getEndTime() == null) {
             throw new DataValidationException("All fields should be filled");
         }
     }

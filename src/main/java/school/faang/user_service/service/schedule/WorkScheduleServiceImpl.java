@@ -1,5 +1,6 @@
-package school.faang.user_service.service.workSchedule;
+package school.faang.user_service.service.schedule;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.WorkScheduleDto;
@@ -17,10 +18,11 @@ public class WorkScheduleServiceImpl implements WorkScheduleService {
     private final WorkScheduleRepository workScheduleRepository;
     private final WorkScheduleMapper workScheduleMapper;
 
+    @Override
     public WorkScheduleDto addWorkSchedule(Long userId, WorkScheduleDto workScheduleDto) {
-        WorkSchedule workSchedule = workScheduleMapper.toWorkSchedule(workScheduleDto);
+        WorkSchedule workSchedule = workScheduleMapper.toWorkScheduleEntity(workScheduleDto);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException(String
+                .orElseThrow(() -> new EntityNotFoundException(String
                         .format("User with id %d was not found", userId)));
         workSchedule.setUser(user);
         workScheduleRepository.save(workSchedule);
@@ -28,15 +30,16 @@ public class WorkScheduleServiceImpl implements WorkScheduleService {
         return workScheduleMapper.toWorkScheduleDto(workSchedule);
     }
 
+    @Override
     public WorkScheduleDto updateWorkSchedule(Long userId, WorkScheduleDto workScheduleDto) {
-        WorkSchedule previousWorkSchedule = workScheduleRepository.findById(workScheduleDto.getId()).
-                orElseThrow(IllegalArgumentException::new);
+        WorkSchedule previousWorkSchedule = workScheduleRepository.findById(workScheduleDto.getId())
+                        .orElseThrow(EntityNotFoundException::new);
         if (!(userId == previousWorkSchedule.getUser().getId())) {
             throw new RuntimeException("You can change only your own schedule");
         }
-        WorkSchedule workSchedule = workScheduleMapper.toWorkSchedule(workScheduleDto);
+        WorkSchedule workSchedule = workScheduleMapper.toWorkScheduleEntity(workScheduleDto);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException(String
+                .orElseThrow(() -> new EntityNotFoundException(String
                         .format("User with id %d was not found", userId)));
         workSchedule.setUser(user);
         workScheduleRepository.save(workSchedule);
@@ -46,8 +49,8 @@ public class WorkScheduleServiceImpl implements WorkScheduleService {
 
     @Override
     public WorkScheduleDto getById(Long workScheduleId) {
-        WorkSchedule workSchedule = workScheduleRepository.findById(workScheduleId)
-                .orElseThrow(IllegalArgumentException::new);
-        return workScheduleMapper.toWorkScheduleDto(workSchedule);
+        return workScheduleRepository.findById(workScheduleId)
+                .map(workScheduleMapper::toWorkScheduleDto)
+                .orElseThrow(EntityNotFoundException::new);
     }
 }

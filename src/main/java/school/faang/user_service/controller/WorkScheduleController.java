@@ -13,22 +13,17 @@ public class WorkScheduleController {
     private final WorkScheduleService workScheduleService;
 
     public WorkScheduleDto addWorkSchedule(Long userId, WorkScheduleDto workScheduleDto) {
-        validateDTO (workScheduleDto);
+        WorkScheduleDTOValidator.validateDTO(workScheduleDto);
         return workScheduleService.addWorkSchedule(userId, workScheduleDto);
     }
 
     public WorkScheduleDto updateWorkSchedule(Long userId, WorkScheduleDto workScheduleDto) {
-        validateDTO (workScheduleDto);
+        WorkScheduleDTOValidator.validateDTO(workScheduleDto);
         return workScheduleService.updateWorkSchedule(userId, workScheduleDto);
     }
 
-    public WorkScheduleDto getById(Long workScheduleId){
+    public WorkScheduleDto getById(Long workScheduleId) {
         return workScheduleService.getById(workScheduleId);
-    }
-
-    private void validateDTO (WorkScheduleDto workScheduleDto){
-        WorkScheduleDTOValidator.checkValidTimeLine(workScheduleDto);
-        WorkScheduleDTOValidator.checkValidFields(workScheduleDto);
     }
 
 }

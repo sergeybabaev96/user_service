@@ -9,7 +9,7 @@ import school.faang.user_service.entity.WorkSchedule;
 public interface WorkScheduleMapper {
 
     @Mapping(target = "user", ignore = true)
-    WorkSchedule toWorkSchedule(WorkScheduleDto workScheduleDto);
+    WorkSchedule toWorkScheduleEntity(WorkScheduleDto workScheduleDto);
 
     WorkScheduleDto toWorkScheduleDto(WorkSchedule workSchedule);
 }
