@@ -91,7 +91,7 @@ public class RecommendationRequest {
                 ", status=" + String.valueOf(this.getStatus()) +
                 ", rejectionReason=" + this.getRejectionReason() +
                 //", recommendation=" + String.valueOf(this.getRecommendation()) +
-                ", skills=" + String.valueOf(this.getSkills()) +
+                //", skills=" + String.valueOf(this.getSkills()) +
                 ", createdAt=" + String.valueOf(this.getCreatedAt()) +
                 ", updatedAt=" + String.valueOf(this.getUpdatedAt()) +
                 ")";

@@ -34,6 +34,7 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
     private final List<Filter<RequestFilterDto, RecommendationRequest>> filters;
 
     @Override
+    @Transactional
     public RecommendationRequestDto create(RecommendationRequestDto dto) {
         validateTimePeriod(dto);
         RecommendationRequest entity = mapper.toEntity(dto);
@@ -64,6 +65,7 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
     }
 
     @Override
+    @Transactional
     public RecommendationRequestDto rejectRequest(Long id, RejectionDto rejection) {
         RecommendationRequest entity = requestRepository.findById(id)
                 .orElseThrow(() -> requestException(id, REQUEST_BY_ID_NOT_FOUND));

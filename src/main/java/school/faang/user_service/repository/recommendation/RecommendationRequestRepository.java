@@ -30,8 +30,5 @@ public interface RecommendationRequestRepository extends JpaRepository<Recommend
 
     @Query("update RecommendationRequest r set r.status = :requestStatus, r.rejectionReason = :reason where r.id = :id")
     @Modifying
-    @Transactional
     Integer setStatus(Long id, RequestStatus requestStatus, String reason);
-
-    Optional<RecommendationRequest> findById(Long id);
 }
