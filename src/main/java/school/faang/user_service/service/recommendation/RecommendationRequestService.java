@@ -5,11 +5,10 @@ import school.faang.user_service.dto.recommendation.RejectionDto;
 import school.faang.user_service.dto.recommendation.RequestFilterDto;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface RecommendationRequestService {
 
-    Optional<RecommendationRequestDto> create(RecommendationRequestDto recommendationRequestDto);
+    RecommendationRequestDto create(RecommendationRequestDto recommendationRequestDto);
 
     List<RecommendationRequestDto> getRequests(RequestFilterDto filter);
 
