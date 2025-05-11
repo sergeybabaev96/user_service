@@ -1,5 +1,6 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.subscription;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserDto;
@@ -8,33 +9,27 @@ import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.repository.SubscriptionRepository;
+import school.faang.user_service.service.subscription.filter.UserFilter;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final UserMapper userMapper;
+    private final List<UserFilter> filters;
 
     public void followUser(long followerId, long followeeId) {
-        if (followerId == followeeId) {
-            throw new DataValidationException("You can't subscribe to yourself");
-        }
-        if(subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
-            throw new IllegalArgumentException("Subscription already exists");
-        }
+        followValidation(followerId, followeeId);
         subscriptionRepository.followUser(followerId, followeeId);
     }
 
     public void unfollowUser(long followerId, long followeeId) {
-        if (followerId == followeeId) {
-            throw new DataValidationException("You can't unsubscribe to yourself");
-        }
-        if(!subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
-            throw new IllegalArgumentException("Subscription does not exist");
-        }
+        followValidation(followerId, followeeId);
         subscriptionRepository.unfollowUser(followerId, followeeId);
     }
 
@@ -45,12 +40,14 @@ public class SubscriptionService {
                 .collect(Collectors.toList());
     }
 
-    public List<User> filterUser(List<User> users, UserFilterDto filter) {
-        return users.stream()
-                .filter(user -> user.getUsername().contains(filter.getNamePattern()))
-                .filter(user -> user.getPhone().contains(filter.getPhonePattern()))
-                .filter(user -> user.getExperience() < filter.getExperienceMax() && user.getExperience() > filter.getExperienceMin())
-                .toList();
+    public List<User> filterUser(List<User> users, UserFilterDto userFilterDto) {
+        Stream<User> usersStream = users.stream();
+        for (UserFilter filter : filters) {
+            if (filter.isApplicable(userFilterDto)) {
+                usersStream = filter.apply(usersStream, userFilterDto);
+            }
+        }
+        return usersStream.toList();
     }
 
     public int getFollowersCount(long followeeId) {
@@ -66,5 +63,14 @@ public class SubscriptionService {
 
     public int getFollowingCount(long followeeId) {
         return subscriptionRepository.findFolloweesAmountByFollowerId(followeeId);
+    }
+
+    private void followValidation(long followerId, long followeeId) {
+        if (followerId == followeeId) {
+            throw new DataValidationException("You can't subscribe or unsubscribe to yourself");
+        }
+        if(!subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
+            throw new IllegalArgumentException("Subscription does not exist");
+        }
     }
 }

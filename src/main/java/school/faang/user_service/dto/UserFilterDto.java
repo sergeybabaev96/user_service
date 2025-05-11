@@ -1,13 +1,9 @@
 package school.faang.user_service.dto;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Builder;
 
-@Data
-@NoArgsConstructor
-public class UserFilterDto {
-    private String namePattern;
-    private String phonePattern;
-    private Integer experienceMin;
-    private Integer experienceMax;
-}
+@Builder
+public record UserFilterDto (String namePattern,
+                             String phonePattern,
+                             Integer experienceMin,
+                             Integer experienceMax) {}
