@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import school.faang.user_service.dto.skill.SkillAcquireDTO;
+import school.faang.user_service.dto.skill.SkillAcquireDto;
 import school.faang.user_service.dto.skill.SkillCandidateDto;
 import school.faang.user_service.dto.skill.SkillDto;
 import school.faang.user_service.dto.skill.SkillOfferDto;
@@ -23,7 +23,7 @@ import school.faang.user_service.service.SkillService;
 public class SkillController {
     private final SkillService skillService;
 
-    @PostMapping()
+    @PostMapping
     public SkillDto create(@RequestBody SkillDto skill) {
         validateSkill(skill);
         return skillService.create(skill);
@@ -43,7 +43,7 @@ public class SkillController {
     }
 
     @PostMapping("/acquireFromOffers")
-    public SkillDto acquireSkillFromOffers(@RequestBody SkillAcquireDTO skillAcquireDTO) {
+    public SkillDto acquireSkillFromOffers(@RequestBody SkillAcquireDto skillAcquireDTO) {
         return skillService.acquireSkillFromOffers(skillAcquireDTO.getSkillId(), skillAcquireDTO.getUserId());
     }
 

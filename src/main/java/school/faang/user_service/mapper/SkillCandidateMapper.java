@@ -8,5 +8,5 @@ import school.faang.user_service.dto.skill.SkillDto;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING) 
 public interface SkillCandidateMapper {
-    SkillCandidateDto skillMapToSkillCandidateDto(SkillDto skill, Long offersAmount);
+    SkillCandidateDto toDto(SkillDto skill, Long offersAmount);
 }

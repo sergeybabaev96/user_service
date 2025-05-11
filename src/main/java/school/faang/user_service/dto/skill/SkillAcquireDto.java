@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class SkillAcquireDTO {
+public class SkillAcquireDto {
     private Long skillId;
     private Long userId;
 }

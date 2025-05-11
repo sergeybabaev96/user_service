@@ -12,6 +12,6 @@ import org.mapstruct.ReportingPolicy;
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface SkillMapper {
-    SkillDto skillToSkillDto(Skill skill);
-    Skill skillDtoToSkill(SkillDto skillDto);
+    SkillDto toDto(Skill skill);
+    Skill toEntity(SkillDto skillDto);
 }
