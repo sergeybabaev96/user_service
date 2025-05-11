@@ -16,7 +16,6 @@ public class UserNamePatternFilter implements UserFilter {
 
     @Override
     public Stream<User> apply(Stream<User> users, UserFilterDto userFilterDto) {
-        return users
-                .filter(user -> userFilterDto.getNamePattern().equalsIgnoreCase(user.getUsername()));
+        return users.filter(user -> userFilterDto.getNamePattern().equalsIgnoreCase(user.getUsername()));
     }
 }

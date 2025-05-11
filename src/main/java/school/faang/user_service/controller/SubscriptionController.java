@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -41,8 +41,8 @@ public class SubscriptionController {
         subscriptionService.unfollowUser(followerId, followeeId);
     }
 
-    @PostMapping("/followers")
-    public List<UserDto> getFollowers(@RequestParam long followeeId, @RequestBody UserFilterDto filter) {
+    @GetMapping("/followers")
+    public List<UserDto> getFollowers(@RequestParam long followeeId, @ModelAttribute UserFilterDto filter) {
         return subscriptionService.getFollowers(followeeId, filter);
     }
 
@@ -51,8 +51,8 @@ public class SubscriptionController {
         return subscriptionService.getFollowersCount(followeeId);
     }
 
-    @PostMapping("/following")
-    public List<UserDto> getFollowing(@RequestParam long followerId, @RequestBody UserFilterDto filter) {
+    @GetMapping("/following")
+    public List<UserDto> getFollowing(@RequestParam long followerId, @ModelAttribute UserFilterDto filter) {
         return subscriptionService.getFollowing(followerId, filter);
     }
 
