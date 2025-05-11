@@ -1,15 +1,15 @@
 package school.faang.user_service.dto;
 
-import lombok.Getter;
+import lombok.Data;
 
 import java.time.LocalTime;
 
-@Getter
+@Data
 public class WorkScheduleDto {
-    private Long id;
-    private LocalTime startTime;
-    private LocalTime endTime;
-    private LocalTime startLunch;
-    private LocalTime endLunch;
-    private String timezone; // часовой пояс в формате IANA (например, "Europe/Moscow")
+    public final Long id;
+    public final LocalTime startTime;
+    public final LocalTime endTime;
+    public final LocalTime startLunch;
+    public final LocalTime endLunch;
+    public final String timezone; // часовой пояс в формате IANA (например, "Europe/Moscow")
 }
