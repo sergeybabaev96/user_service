@@ -24,41 +24,41 @@ public class EventController {
     private final EventService eventService;
     private final List<EventValidator> eventValidators;
 
-    @PostMapping("/")
+    @PostMapping(value={"", "/"})
     public EventDto create(@RequestBody EventDto event) {
         validateEventDto(event);
         return eventService.create(event);
     }
 
-    @GetMapping("/{id}/")
-    public EventDto getEvent(@PathVariable(name = "id") long id) {
-        return eventService.getEvent(id);
+    @GetMapping(value={"/{id}", "/{id}/"})
+    public EventDto getEvent(@PathVariable("id") long eventId) {
+        return eventService.getEvent(eventId);
     }
 
-    @PostMapping("/partial/")
+    @PostMapping(value={"/partial", "/partial/"})
     public List<EventDto> getEventsByFilter(@RequestBody EventFilterDto eventFilterDto) {
         return eventService.getEventsByFilter(eventFilterDto);
     }
 
-    @DeleteMapping("/{id}/")
-    public void deleteEvent(@PathVariable(name = "id") long eventId) {
+    @DeleteMapping(value={"/{id}", "/{id}/"})
+    public void deleteEvent(@PathVariable("id") long eventId) {
         eventService.deleteEvent(eventId);
     }
 
-    @PatchMapping("/{id}/")
+    @PatchMapping(value={"/{id}", "/{id}/"})
     public EventDto updateEvent(@RequestBody EventDto event) {
         validateEventDto(event);
 
         return eventService.updateEvent(event);
     }
 
-    @GetMapping("/owner/{id}/")
-    public List<EventDto> getOwnedEvents(@PathVariable(name = "id") long userId) {
+    @GetMapping(value={"/owner/{id}", "/owner/{id}/"})
+    public List<EventDto> getOwnedEvents(@PathVariable("id") long userId) {
         return eventService.getOwnedEvents(userId);
     }
 
-    @GetMapping("/participant/{id}/")
-    public List<EventDto> getParticipatedEvents(@PathVariable(name = "id") long userId) {
+    @GetMapping(value={"/participant/{id}", "/participant/{id}/"})
+    public List<EventDto> getParticipatedEvents(@PathVariable("id") long userId) {
         return eventService.getParticipatedEvents(userId);
     }
 
