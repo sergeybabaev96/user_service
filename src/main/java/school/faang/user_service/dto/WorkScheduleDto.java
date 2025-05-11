@@ -6,7 +6,7 @@ import java.time.LocalTime;
 
 @Getter
 public class WorkScheduleDto {
-    private long id;
+    private Long id;
     private LocalTime startTime;
     private LocalTime endTime;
     private LocalTime startLunch;

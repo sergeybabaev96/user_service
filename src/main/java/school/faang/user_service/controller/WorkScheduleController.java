@@ -10,19 +10,19 @@ import school.faang.user_service.util.WorkScheduleDTOValidator;
 @RequiredArgsConstructor
 public class WorkScheduleController {
 
-    WorkScheduleService workScheduleService;
+    private final WorkScheduleService workScheduleService;
 
-    WorkScheduleDto addWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
+    WorkScheduleDto addWorkSchedule(Long userId, WorkScheduleDto workScheduleDto) {
         validateDTO (workScheduleDto);
         return workScheduleService.addWorkSchedule(userId, workScheduleDto);
     }
 
-    WorkScheduleDto updateWorkSchedule(long userId, WorkScheduleDto workScheduleDto) {
+    WorkScheduleDto updateWorkSchedule(Long userId, WorkScheduleDto workScheduleDto) {
         validateDTO (workScheduleDto);
         return workScheduleService.updateWorkSchedule(userId, workScheduleDto);
     }
 
-    WorkScheduleDto getById(long workScheduleId){
+    WorkScheduleDto getById(Long workScheduleId){
         return workScheduleService.getById(workScheduleId);
     }
 
