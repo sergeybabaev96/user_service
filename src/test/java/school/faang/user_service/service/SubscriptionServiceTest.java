@@ -8,9 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import school.faang.user_service.dto.FollowerEvent;
 import org.springframework.data.redis.core.RedisTemplate;
-import school.faang.user_service.config.redis.RedisProperties;
+import school.faang.user_service.config.redis.SubscriptionRedisProperties;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.exception.DataValidationException;
@@ -18,6 +17,7 @@ import school.faang.user_service.filter.subscriber.MockUsers;
 import school.faang.user_service.filter.subscriber.SubscriberFilter;
 import school.faang.user_service.filter.subscriber.SubscriberNameFilter;
 import school.faang.user_service.mapper.UserMapper;
+import school.faang.user_service.publisher.FollowerEventPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.outbox.OutboxService;
@@ -67,7 +67,7 @@ public class SubscriptionServiceTest {
 
     private Long followerId = 1L;
     private Long followeeId = 2L;
-    private RedisProperties redisProperties;
+    private SubscriptionRedisProperties subscriptionRedisProperties;
     private UserFilterDto filters;
     private MockUsers mockUsers = new MockUsers();
 
@@ -81,11 +81,11 @@ public class SubscriptionServiceTest {
 
     @BeforeEach
     void setUp() {
-        RedisProperties redisProperties = new RedisProperties();
-        RedisProperties.Channel channel = new RedisProperties.Channel();
+        SubscriptionRedisProperties subscriptionRedisProperties = new SubscriptionRedisProperties();
+        SubscriptionRedisProperties.Channel channel = new SubscriptionRedisProperties.Channel();
         channel.setFollower("someFollowerChannel");
         channel.setUnfollower("someUnfollowerChannel");
-        redisProperties.setChannel(channel);
+        subscriptionRedisProperties.setChannel(channel);
 
         filters = new UserFilterDto();
 

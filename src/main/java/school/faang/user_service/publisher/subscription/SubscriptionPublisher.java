@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
-import school.faang.user_service.config.redis.RedisProperties;
+import school.faang.user_service.config.redis.SubscriptionRedisProperties;
 import school.faang.user_service.dto.event.SubscriptionEventDto;
 
 @Component
@@ -13,20 +13,20 @@ import school.faang.user_service.dto.event.SubscriptionEventDto;
 @RequiredArgsConstructor
 public class SubscriptionPublisher {
 
-    private final RedisProperties redisProperties;
+    private final SubscriptionRedisProperties subscriptionRedisProperties;
     private final RedisTemplate<String, Object> redisTemplate;
     private final RetryTemplate redisRetryTemplate;
 
     public void publishFollowEvent(SubscriptionEventDto event) {
         redisRetryTemplate.execute(context -> {
-            publishEvent(redisProperties.getChannel().getFollower(), event);
+            publishEvent(subscriptionRedisProperties.getChannel().getFollower(), event);
             return null;
         });
     }
 
     public void publishUnfollowEvent(SubscriptionEventDto event) {
         redisRetryTemplate.execute(context -> {
-            publishEvent(redisProperties.getChannel().getUnfollower(), event);
+            publishEvent(subscriptionRedisProperties.getChannel().getUnfollower(), event);
             return null;
         });
     }

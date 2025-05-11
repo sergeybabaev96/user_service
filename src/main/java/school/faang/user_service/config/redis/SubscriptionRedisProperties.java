@@ -15,7 +15,7 @@ import org.springframework.validation.annotation.Validated;
 @Component
 @Validated
 @ConfigurationProperties(prefix = "spring.data.redis")
-public class RedisProperties {
+public class SubscriptionRedisProperties {
 
     @NotBlank(message = "Redis host must not be blank")
     private String host;

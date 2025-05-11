@@ -25,32 +25,32 @@ import java.util.Collections;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class RedisConfig {
+public class SubscriptionRedisConfig {
 
-    private final RedisProperties redisProperties;
+    private final SubscriptionRedisProperties subscriptionRedisProperties;
     private final ObjectMapper objectMapper;
 
     @Bean
     public LettuceConnectionFactory lettuceConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(
-                redisProperties.getHost(),
-                redisProperties.getPort()
+                subscriptionRedisProperties.getHost(),
+                subscriptionRedisProperties.getPort()
         );
 
         GenericObjectPoolConfig<Object> poolConfig = new GenericObjectPoolConfig<>();
-        poolConfig.setMaxTotal(redisProperties.getPool().getMaxActive());
-        poolConfig.setMaxIdle(redisProperties.getPool().getMaxIdle());
-        poolConfig.setMinIdle(redisProperties.getPool().getMinIdle());
-        poolConfig.setMaxWait(Duration.ofMillis(redisProperties.getPool().getMaxWait()));
+        poolConfig.setMaxTotal(subscriptionRedisProperties.getPool().getMaxActive());
+        poolConfig.setMaxIdle(subscriptionRedisProperties.getPool().getMaxIdle());
+        poolConfig.setMinIdle(subscriptionRedisProperties.getPool().getMinIdle());
+        poolConfig.setMaxWait(Duration.ofMillis(subscriptionRedisProperties.getPool().getMaxWait()));
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                .commandTimeout(Duration.ofMillis(redisProperties.getTimeout()))
+                .commandTimeout(Duration.ofMillis(subscriptionRedisProperties.getTimeout()))
                 .clientOptions(ClientOptions.builder()
-                        .autoReconnect(redisProperties.getAutoReconnect())
+                        .autoReconnect(subscriptionRedisProperties.getAutoReconnect())
                         .build())
                 .clientResources(ClientResources.builder()
-                        .ioThreadPoolSize(redisProperties.getPool().getIoThreadPoolSize())
-                        .computationThreadPoolSize(redisProperties.getPool().getComputationThreadPoolSize())
+                        .ioThreadPoolSize(subscriptionRedisProperties.getPool().getIoThreadPoolSize())
+                        .computationThreadPoolSize(subscriptionRedisProperties.getPool().getComputationThreadPoolSize())
                         .build())
                 .build();
 
@@ -60,12 +60,12 @@ public class RedisConfig {
     @Bean
     public RetryTemplate redisRetryTemplate() {
         ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-        backOffPolicy.setInitialInterval(redisProperties.getRetry().getInitialDelay());
-        backOffPolicy.setMaxInterval(redisProperties.getRetry().getMaxDelay());
-        backOffPolicy.setMultiplier(redisProperties.getRetry().getMultiplier());
+        backOffPolicy.setInitialInterval(subscriptionRedisProperties.getRetry().getInitialDelay());
+        backOffPolicy.setMaxInterval(subscriptionRedisProperties.getRetry().getMaxDelay());
+        backOffPolicy.setMultiplier(subscriptionRedisProperties.getRetry().getMultiplier());
 
         SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(
-                redisProperties.getRetry().getMaxAttempts(),
+                subscriptionRedisProperties.getRetry().getMaxAttempts(),
                 Collections.singletonMap(RedisConnectionFailureException.class, true)
         );
 
@@ -77,7 +77,7 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, Object> redisTemplate() {
+    public RedisTemplate<String, Object> subscriptionRedisTemplate() {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(lettuceConnectionFactory());
         redisTemplate.setKeySerializer(new StringRedisSerializer());
