@@ -4,11 +4,17 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import school.faang.user_service.controller.filter.MessagePatternFilter;
+import school.faang.user_service.controller.filter.ReceiverIdFilter;
+import school.faang.user_service.controller.filter.RecommendationFilter;
+import school.faang.user_service.controller.filter.RequesterIdFilter;
+import school.faang.user_service.dto.RecommendationRejectDto;
 import school.faang.user_service.dto.RecommendationRequestDto;
-import school.faang.user_service.dto.RejectionDto;
+import school.faang.user_service.dto.RecommendationResponseDto;
 import school.faang.user_service.dto.RequestFilterDto;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.Skill;
+import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.RecommendationMapper;
@@ -20,7 +26,7 @@ import school.faang.user_service.repository.recommendation.SkillRequestRepositor
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -32,16 +38,14 @@ public class RecommendationRequestService {
     private final SkillRepository skillRepository;
     private final SkillRequestRepository skillRequestRepository;
 
-    public RecommendationRequestDto create(RecommendationRequestDto recommendationRequest) {
-        Long requesterId = recommendationRequest.getRequesterId();
-        Long receiverId = recommendationRequest.getReceiverId();
+    public RecommendationResponseDto create(RecommendationRequestDto recommendationRequest) {
+        Long requesterId = recommendationRequest.requesterId();
+        Long receiverId = recommendationRequest.receiverId();
 
-        if (!userRepository.existsById(requesterId)) {
-            throw new EntityNotFoundException("Requester not found with id: " + requesterId);
-        }
-        if (!userRepository.existsById(receiverId)) {
-            throw new EntityNotFoundException("Receiver not found with id: " + receiverId);
-        }
+        User requester = userRepository.findById(requesterId)
+                .orElseThrow(() -> new EntityNotFoundException("Requester not found with id: " + requesterId));
+        User receiver = userRepository.findById(receiverId)
+                .orElseThrow(() -> new EntityNotFoundException("Receiver not found with id: " + receiverId));
 
         Optional<RecommendationRequest> latestRequest = recommendationRequestRepository
                 .findLatestPendingRequest(requesterId, receiverId);
@@ -53,19 +57,24 @@ public class RecommendationRequestService {
             }
         }
 
-        if (recommendationRequest.getSkills() == null || recommendationRequest.getSkills().isEmpty()) {
+        if (recommendationRequest.skills() == null || recommendationRequest.skills().isEmpty()) {
             throw new DataValidationException("Skills list must not be empty!");
         }
 
-        recommendationRequest.getSkills().forEach(skillTitle -> {
+        recommendationRequest.skills().forEach(skillTitle -> {
             if (!skillRepository.existsByTitle(skillTitle)) {
                 throw new DataValidationException("Skill not found: " + skillTitle);
             }
         });
+
         RecommendationRequest newRequest = recommendationMapper.toEntity(recommendationRequest);
+
+        newRequest.setRequester(requester);
+        newRequest.setReceiver(receiver);
+
         RecommendationRequest savedRequest = recommendationRequestRepository.save(newRequest);
 
-        recommendationRequest.getSkills().forEach(skillTitle -> {
+        recommendationRequest.skills().forEach(skillTitle -> {
             Skill skill = skillRepository.findAll().stream()
                     .filter(s -> s.getTitle().equals(skillTitle))
                     .findFirst()
@@ -76,20 +85,46 @@ public class RecommendationRequestService {
         return recommendationMapper.toDto(savedRequest);
     }
 
-    public List<RecommendationRequestDto> getRequests(RequestFilterDto filter) {
+    public List<RecommendationResponseDto> getRequests(RequestFilterDto filter) {
         List<RecommendationRequest> allRequests = recommendationRequestRepository.findAll();
+        List<RecommendationFilter> filters = List.of(
+                new RequesterIdFilter(),
+                new ReceiverIdFilter(),
+                new MessagePatternFilter()
+        );
 
-        return allRequests.stream()
-                .filter(request -> filterByRequesterId(request, filter.getRequesterId()))
-                .filter(request -> filterByReceiverId(request, filter.getReceiverId()))
-                .filter(request -> filterByRecommendationId(request, filter.getRecommendationId()))
-                .filter(request -> filterByMessagePattern(request, filter.getMessagePattern()))
-                .filter(request -> filterByCreatedAfter(request, filter.getCreatedAfter()))
-                .filter(request -> filterByCreatedBefore(request, filter.getCreatedBefore()))
+        Stream<RecommendationRequest> requestStream = allRequests.stream();
+        for (RecommendationFilter recommendationFilter : filters) {
+            if (recommendationFilter.isApplicable(filter)) {
+                requestStream = recommendationFilter.apply(requestStream, filter);
+            }
+        }
+
+        return requestStream
                 .map(recommendationMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
+    public RecommendationResponseDto getRequest(long id) {
+        RecommendationRequest request = recommendationRequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Recommendation request not found with id: " + id));
+        return recommendationMapper.toDto(request);
+    }
+
+    public RecommendationResponseDto rejectRequest(long id, RecommendationRejectDto rejection) {
+        RecommendationRequest request = recommendationRequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Recommendation request not found with id: " + id));
+
+        if (request.getStatus() != RequestStatus.PENDING) {
+            throw new IllegalStateException("Cannot reject request: current status is " + request.getStatus());
+        }
+
+        request.setRejectionReason(rejection.reason());
+        request.setStatus(RequestStatus.REJECTED);
+        RecommendationRequest updatedRequest = recommendationRequestRepository.save(request);
+
+        return recommendationMapper.toDto(updatedRequest);
+    }
     private boolean filterByRequesterId(RecommendationRequest request, Long requesterId) {
         return requesterId == null || request.getRequester().getId().equals(requesterId);
     }
@@ -116,26 +151,5 @@ public class RecommendationRequestService {
 
     private boolean filterByCreatedBefore(RecommendationRequest request, LocalDateTime createdBefore) {
         return createdBefore == null || request.getCreatedAt().isBefore(createdBefore);
-    }
-
-    public RecommendationRequestDto getRequest(long id) {
-        RecommendationRequest request = recommendationRequestRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Recommendation request not found with id: " + id));
-        return recommendationMapper.toDto(request);
-    }
-
-    public RecommendationRequestDto rejectRequest(long id, RejectionDto rejection) {
-        RecommendationRequest request = recommendationRequestRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Recommendation request not found with id: " + id));
-
-        if (request.getStatus() != RequestStatus.PENDING) {
-            throw new IllegalStateException("Cannot reject request: current status is " + request.getStatus());
-        }
-
-        request.setRejectionReason(rejection.getReason());
-        request.setStatus(RequestStatus.REJECTED);
-        RecommendationRequest updatedRequest = recommendationRequestRepository.save(request);
-
-        return recommendationMapper.toDto(updatedRequest);
     }
 }
