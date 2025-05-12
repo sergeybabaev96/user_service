@@ -28,48 +28,47 @@ import java.util.List;
 public class EventController {
     private final EventService eventService;
 
-    @PostMapping(value = "/create")
+    @PostMapping()
     public EventDto create(@Valid @RequestBody EventDto event) {
         isValidDataRange(event);
         return eventService.create(event);
     }
 
-    @GetMapping(value = "/get/{id}")
-    public EventDto getEvent(@PathVariable  @Required Long eventId) {
-        return eventService.getEvent(eventId);
+    @GetMapping(value = "/{id}")
+    public EventDto getEvent(@PathVariable  @Required Long id) {
+        return eventService.getEvent(id);
     }
 
-    @GetMapping(value = "/get/filter")
+    @PostMapping(value = "/filter")
     public List<EventDto> getEventsByFilter(@Valid @RequestBody EventFilterDto filter) {
         return eventService.getEventsByFilter(filter);
     }
 
-    @DeleteMapping(value = "/delete/{id}")
+    @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteEvent(@PathVariable @Required Long eventId) {
-        eventService.deleteEvent(eventId);
+    public void deleteEvent(@PathVariable @Required Long id) {
+        eventService.deleteEvent(id);
     }
 
-    @PutMapping(value = "/update")
+    @PutMapping()
     public EventDto updateEvent(@Valid @RequestBody EventDto eventDto) {
         isValidDataRange(eventDto);
         return eventService.updateEvent(eventDto);
     }
 
-    @GetMapping(value = "/owned//{id}")
-    public List<EventDto> getOwnedEvents(@PathVariable @Required Long userId) {
+    @GetMapping(value = "/owned/{id}")
+    public List<EventDto> getOwnedEvents(@PathVariable("id") @Required Long userId) {
         return eventService.getOwnedEvents(userId);
     }
 
-    @GetMapping(value = "/participated//{id}")
-    public List<EventDto> getParticipatedEvents(@PathVariable@Required Long userId) {
+    @GetMapping(value = "/participated/{id}")
+    public List<EventDto> getParticipatedEvents(@PathVariable("id") @Required Long userId) {
         return eventService.getParticipatedEvents(userId);
     }
 
     private void isValidDataRange(EventDto event) {
         if (event.getEndDate() != null) {
             if (event.getStartDate().isBefore(event.getEndDate())) {
-            } else {
                 throw new DataValidationException("The end date must be after the start date");
             }
         }
