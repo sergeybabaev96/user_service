@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 public class RecommendationRequestDto {
-    private final Long id;
+    private Long id;
     private Long requesterId;
     private Long receiverId;
     private String message;
