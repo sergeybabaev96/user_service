@@ -3,17 +3,18 @@ package school.faang.user_service.service.event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.event.EventDto;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.event.EventFilterDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.event.Event;
-import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.mapper.EventMapper;
+import school.faang.user_service.exception.event.EventValidationException;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.event.EventRepository;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -21,88 +22,82 @@ import java.util.Objects;
 public class EventService {
     private final EventRepository eventRepository;
     private final SkillRepository skillRepository;
-    private final EventMapper eventMapper;
 
-    public EventDto create(EventDto event) {
-        List<Long> userSkills = skillRepository.findAllByUserId(event.getOwnerId())
-                .stream().map(Skill::getId)
-                .toList();
+    @Transactional
+    public Event create(Event event) {
+        validateOwnerHasSkills(event.getOwner().getId(), event.getRelatedSkills());
 
-        boolean hasAllSkills = userSkills.containsAll(event.getRelatedSkills());
-        if (!hasAllSkills) {
-            log.warn("");
-            throw new DataValidationException("Пользователь не обладает всеми требуемыми навыками");
-        }
-
-        Event saved = eventRepository.save(eventMapper.toEntity(event));
-        return eventMapper.toDto(saved);
+        return eventRepository.save(event);
     }
 
-    public EventDto getEvent(long eventId) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> {
-                    log.warn("Событие с id={} не найдено", eventId);
-                    return new DataValidationException("Событие с id=" + eventId + " не найдено");
-                });
-
-        return eventMapper.toDto(event);
+    @Transactional(readOnly=true)
+    public Event getEvent(long eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventValidationException("Событие с id=" + eventId + " не найдено"));
     }
 
+    @Transactional
     public void deleteEvent(long eventId) {
         if (!eventRepository.existsById(eventId)) {
-            log.warn("Попытка удалить несуществующее событие с id={}", eventId);
-            throw new DataValidationException("Событие с id=" + eventId + " не найдено и не может быть удалено");
+            throw new EventValidationException("Событие с id=" + eventId + " не найдено и не может быть удалено");
         }
 
         eventRepository.deleteById(eventId);
         log.info("Событие с id={} успешно удалено", eventId);
     }
 
-    public EventDto updateEvent(EventDto eventDto) {
-        Event existingEvent = eventRepository.findById(eventDto.getId())
-                .orElseThrow(() -> new DataValidationException("Событие с id=" + eventDto.getId() + " не найдено"));
+    @Transactional
+    public Event updateEvent(Event event) {
+        Event existingEvent = eventRepository.findById(event.getId())
+                .orElseThrow(() -> new EventValidationException("Событие с id=" + event.getId() + " не найдено"));
 
-        if (!Objects.equals(existingEvent.getOwner(), eventDto.getOwnerId())) {
+        if (!Objects.equals(existingEvent.getOwner().getId(), event.getOwner().getId())) {
             log.warn("Попытка обновить событие пользователем, не являющимся автором");
-            throw new DataValidationException("Обновление разрешено только автору события");
+            throw new EventValidationException("Обновление разрешено только автору события");
         }
 
-        List<Long> userSkills = skillRepository.findAllByUserId(eventDto.getOwnerId())
-                .stream().map(Skill::getId)
-                .toList();
+        validateOwnerHasSkills(event.getOwner().getId(), event.getRelatedSkills());
 
-        if (!userSkills.containsAll(eventDto.getRelatedSkills())) {
-            throw new DataValidationException("Пользователь не обладает всеми навыками, указанными в обновлении");
-        }
-
-        Event updatedEvent = eventRepository.save(eventMapper.toEntity(eventDto));
+        Event updatedEvent = eventRepository.save(event);
         log.info("Событие с id={} успешно обновлено", updatedEvent.getId());
-        return eventMapper.toDto(updatedEvent);
+        return updatedEvent;
     }
 
-    public List<EventDto> getOwnedEvents(long userId) {
+    @Transactional(readOnly=true)
+    public List<Event> getOwnedEvents(long userId) {
         return eventRepository.findAllByUserId(userId)
                 .stream()
-                .map(eventMapper::toDto)
                 .toList();
     }
 
-    public List<EventDto> getParticipatedEvents(long userId) {
+    @Transactional(readOnly=true)
+    public List<Event> getParticipatedEvents(long userId) {
         return eventRepository.findParticipatedEventsByUserId(userId)
                 .stream()
-                .map(eventMapper::toDto)
                 .toList();
     }
 
-    public List<EventDto> getEventsByFilter(EventFilterDto filter) {
+    @Transactional(readOnly=true)
+    public List<Event> getEventsByFilter(EventFilterDto filter) {
         return eventRepository.findAll().stream()
                 .filter(event -> filter.getTitle() == null || event.getTitle().toLowerCase().contains(filter.getTitle().toLowerCase()))
-                .filter(event -> filter.getOwnerId() == null || Objects.equals(event.getOwner(), filter.getOwnerId()))
+                .filter(event -> filter.getOwnerId() == null || Objects.equals(event.getOwner().getId(), filter.getOwnerId()))
                 .filter(event -> filter.getEventType() == null || event.getType() == filter.getEventType())
                 .filter(event -> filter.getEventStatus() == null || event.getStatus() == filter.getEventStatus())
                 .filter(event -> filter.getStartFrom() == null || (event.getStartDate() != null && !event.getStartDate().isBefore(filter.getStartFrom())))
                 .filter(event -> filter.getStartTo() == null || (event.getStartDate() != null && !event.getStartDate().isAfter(filter.getStartTo())))
-                .map(eventMapper::toDto)
                 .toList();
+    }
+
+    private void validateOwnerHasSkills(long userId, List<Skill> skills) {
+        Set<Long> userSkillIds = skillRepository.findAllByUserId(userId)
+                .stream().map(Skill::getId).collect(Collectors.toSet());
+
+        Set<Long> requiredSkillIds = skills.stream()
+                .map(Skill::getId).collect(Collectors.toSet());
+
+        if (!userSkillIds.containsAll(requiredSkillIds)) {
+            throw new EventValidationException("Пользователь не обладает всеми навыками, указанными в обновлении");
+        }
     }
 }

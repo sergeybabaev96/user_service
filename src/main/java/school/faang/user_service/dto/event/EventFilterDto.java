@@ -1,17 +1,24 @@
 package school.faang.user_service.dto.event;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import school.faang.user_service.entity.event.EventStatus;
 import school.faang.user_service.entity.event.EventType;
 
 import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
 public class EventFilterDto {
     private String title;
+
     private Long ownerId;
+
     private EventType eventType;
+
     private EventStatus eventStatus;
+
     private LocalDateTime startFrom;
+
     private LocalDateTime startTo;
 }
