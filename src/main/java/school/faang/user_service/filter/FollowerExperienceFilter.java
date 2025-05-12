@@ -10,11 +10,19 @@ import school.faang.user_service.entity.User;
 public class FollowerExperienceFilter implements UserFollowersFilter {
     @Override
     public boolean isApplicable(User follower, UserFilterDto filter) {
-        return follower.getExperience() != null;
+        return filter.getExperienceMax() != null || filter.getExperienceMin() != null;
     }
 
     @Override
     public boolean test(User follower, UserFilterDto filter) {
+        if (follower.getExperience() == null) {
+            return false;
+        }
+        if (filter.getExperienceMax() == null) {
+            return follower.getExperience() >= filter.getExperienceMin();
+        } else if (filter.getExperienceMin() == null) {
+            return follower.getExperience() <= filter.getExperienceMax();
+        }
         return follower.getExperience() <= filter.getExperienceMax()
                 && follower.getExperience() >= filter.getExperienceMin();
     }
