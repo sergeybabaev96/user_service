@@ -9,6 +9,7 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
+import school.faang.user_service.filter.goal.GoalFilter;
 import school.faang.user_service.mapper.GoalMapper;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.service.GoalService;
@@ -21,19 +22,18 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class GoalServiceImpl implements GoalService {
 
     public static int MAXIMUM_ALLOWED_ACTIVE_GOALS = 3;//todo вынести в конфигурацию компонента
-
     private final GoalMapper goalMapper;
-
     private final GoalRepository goalRepository;
-
     private final SkillService skillService;
     private final UserService userService;
+    private final List<GoalFilter> goalFilters;
 
 
     @Override
@@ -146,15 +146,26 @@ public class GoalServiceImpl implements GoalService {
 
     @Override
     public List<Goal> findSubtasksByGoalId(long goalId, GoalFilterDto filter) {
-        return goalRepository.findByParent(goalId)
-                .filter(goal -> GoalUtil.goalFilter(goal, filter))
-                .toList();
+        Stream<Goal> goalsByParent = goalRepository.findByParent(goalId);
+        return filterGoals(goalsByParent, filter);
     }
 
     @Override
     public List<Goal> findGoalsByUserId(Long userId, GoalFilterDto filter) {
-        return goalRepository.findGoalsByUserId(userId)
-                .filter(goal -> GoalUtil.goalFilter(goal, filter))
+        Stream<Goal> goalsByUserId = goalRepository.findGoalsByUserId(userId);
+        return filterGoals(goalsByUserId, filter);
+    }
+
+    private List<Goal> filterGoals(Stream<Goal> goalStream, GoalFilterDto filterDto) {
+        goalFilters.forEach(goalFilter -> goalFilter.setCriteria(filterDto));
+        List<GoalFilter> applicableFilters = this.goalFilters.stream()
+                .filter(GoalFilter::isApplicable)
+                .toList();
+        return goalStream
+                .filter(goal ->
+                        applicableFilters.stream()
+                                .allMatch(goalFilter -> goalFilter.doFilter(goal))
+                )
                 .toList();
     }
 
