@@ -33,13 +33,13 @@ public class EventService {
     @Transactional(readOnly=true)
     public Event getEvent(long eventId) {
         return eventRepository.findById(eventId)
-                .orElseThrow(() -> new EventValidationException("Событие с id=" + eventId + " не найдено"));
+                .orElseThrow(() -> new EventValidationException(String.format("Событие с id=%d не найдено", eventId)));
     }
 
     @Transactional
     public void deleteEvent(long eventId) {
         if (!eventRepository.existsById(eventId)) {
-            throw new EventValidationException("Событие с id=" + eventId + " не найдено и не может быть удалено");
+            throw new EventValidationException(String.format("Событие с id=%d не найдено и не может быть удалено", eventId));
         }
 
         eventRepository.deleteById(eventId);
@@ -49,7 +49,7 @@ public class EventService {
     @Transactional
     public Event updateEvent(Event event) {
         Event existingEvent = eventRepository.findById(event.getId())
-                .orElseThrow(() -> new EventValidationException("Событие с id=" + event.getId() + " не найдено"));
+                .orElseThrow(() -> new EventValidationException(String.format("Событие с id=%d не найдено", event.getId())));
 
         if (!Objects.equals(existingEvent.getOwner().getId(), event.getOwner().getId())) {
             log.warn("Попытка обновить событие пользователем, не являющимся автором");
@@ -97,7 +97,7 @@ public class EventService {
                 .map(Skill::getId).collect(Collectors.toSet());
 
         if (!userSkillIds.containsAll(requiredSkillIds)) {
-            throw new EventValidationException("Пользователь не обладает всеми навыками, указанными в обновлении");
+            throw new EventValidationException("Пользователь не обладает всеми необходимыми навыками");
         }
     }
 }
