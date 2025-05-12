@@ -38,14 +38,17 @@ class SubscriptionServiceTest {
     private UserMapperImpl userMapper;
     @InjectMocks
     private SubscriptionService subscriptionService;
-    private final UserFilterDto userFilterDto = new UserFilterDto();
-    private final User userA = new User();
-    private final User userB = new User();
+    private UserFilterDto userFilterDto;
+    private User userA;
+    private User userB;
     private UserDto userDtoA;
     private UserDto userDtoB;
 
     @BeforeEach
     void setup() {
+        userFilterDto = new UserFilterDto();
+        userA = new User();
+        userB = new User();
         subscriptionService = new SubscriptionService(
                 subscriptionRepository,
                 List.of(filter1),
