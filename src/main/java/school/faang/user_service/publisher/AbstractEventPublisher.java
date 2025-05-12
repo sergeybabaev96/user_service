@@ -1,5 +1,6 @@
 package school.faang.user_service.publisher;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -14,7 +15,7 @@ public class AbstractEventPublisher implements EventPublisher {
     protected ChannelTopic channelTopic;
 
     @Override
-    public void publish(EventMessage message) {
+    public void publish(@Valid EventMessage message) {
         try {
             redisTemplate.convertAndSend(channelTopic.getTopic(), message);
         } catch (Exception e) {
