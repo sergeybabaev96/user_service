@@ -1,8 +1,8 @@
 package school.faang.user_service.controller;
 
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,12 +36,12 @@ public class MentorshipRequestController {
     }
 
     @PutMapping(value = "/accept/{id}")
-    public void acceptRequest(@PathParam(value = "id") long id) {
+    public void acceptRequest(@PathVariable("id") Long id) {
         service.acceptRequest(id);
     }
 
     @PutMapping(value = "/reject/{id}")
-    public void rejectRequest(@PathParam(value = "id") Long id, @RequestBody RejectionDto rejection) {
+    public void rejectRequest(@PathVariable("id") Long id, @RequestBody RejectionDto rejection) {
         service.rejectRequest(id, rejection);
     }
 }

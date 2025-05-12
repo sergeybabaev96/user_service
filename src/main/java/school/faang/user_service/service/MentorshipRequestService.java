@@ -30,6 +30,7 @@ public class MentorshipRequestService {
     private final UserRepository userRepo;
     private final List<RequestFilter> filters;
 
+    @Transactional
     public MentorshipRequestDto requestMentorship(MentorshipRequestDto request) {
         if (Objects.equals(request.getRequesterId(), request.getReceiverId())) {
             throw new IllegalArgumentException("The user cannot send a request to himself");
