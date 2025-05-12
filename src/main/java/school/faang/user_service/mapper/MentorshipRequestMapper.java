@@ -7,6 +7,7 @@ import school.faang.user_service.entity.MentorshipRequest;
 
 @Mapper(componentModel = "spring")
 public interface MentorshipRequestMapper {
+
     @Mapping(target = "requester.id", ignore = true)
     @Mapping(target = "receiver.id", ignore = true)
     @Mapping(target = "rejectionReason", ignore = true)

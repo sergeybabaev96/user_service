@@ -1,12 +1,13 @@
 package school.faang.user_service.controller;
 
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import school.faang.user_service.dto.MentorshipRequestDto;
 import school.faang.user_service.dto.RejectionDto;
 import school.faang.user_service.dto.RequestFilterDto;
@@ -14,9 +15,9 @@ import school.faang.user_service.service.MentorshipRequestService;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
-@RequestMapping("/mentor")
+@RequestMapping("/mentorshiprequest")
 public class MentorshipRequestController {
     private final MentorshipRequestService service;
 
@@ -31,16 +32,16 @@ public class MentorshipRequestController {
 
     @GetMapping
     public List<MentorshipRequestDto> getRequests(@RequestBody RequestFilterDto filter) {
-        return service.getRequest(filter);
+        return service.getRequests(filter);
     }
 
     @PutMapping(value = "/accept/{id}")
-    public void acceptRequest(@RequestBody long id) {
+    public void acceptRequest(@PathParam(value = "id") long id) {
         service.acceptRequest(id);
     }
 
     @PutMapping(value = "/reject/{id}")
-    public void rejectRequest(@RequestBody Long id, @RequestBody RejectionDto rejection) {
+    public void rejectRequest(@PathParam(value = "id") Long id, @RequestBody RejectionDto rejection) {
         service.rejectRequest(id, rejection);
     }
 }
