@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,37 +30,35 @@ public class GoalController {
     private final GoalService goalService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public GoalResponseDto createGoal(@RequestBody @Valid GoalCreateRequestDto goalCreateRequestDto) {
+    public ResponseEntity<GoalResponseDto> createGoal(@RequestBody @Valid GoalCreateRequestDto goalCreateRequestDto) {
         log.info("Goal controller accepted request create goal {}", goalCreateRequestDto);
-        return goalService.createGoal(goalCreateRequestDto);
+        return new ResponseEntity<>(goalService.createGoal(goalCreateRequestDto), HttpStatus.CREATED) ;
     }
 
     @PatchMapping
-    @ResponseStatus(HttpStatus.OK)
-    public GoalResponseDto updateGoal(@RequestBody @Valid GoalUpdateRequestDto goalUpdateRequestDto) {
+    public ResponseEntity<GoalResponseDto> updateGoal(@RequestBody @Valid GoalUpdateRequestDto goalUpdateRequestDto) {
         log.info("Goal controller accepted request update goal with id {}", goalUpdateRequestDto.getId());
-        return goalService.updateGoal(goalUpdateRequestDto);
+        return ResponseEntity.ok(goalService.updateGoal(goalUpdateRequestDto));
     }
 
     @DeleteMapping("/{goalId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteGoal(@PathVariable long goalId) {
+    public ResponseEntity<Void> deleteGoal(@PathVariable long goalId) {
         log.info("Goal controller accepted request delete goal with id {}", goalId);
         goalService.deleteGoalById(goalId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/subtasks/{goalParentId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<GoalResponseDto> getSubtasksByGoalId(@PathVariable long goalParentId) {
+    public ResponseEntity<List<GoalResponseDto>> getSubtasksByGoalId(@PathVariable long goalParentId) {
         log.info("Goal controller accepted request get subtasks with parent id {}", goalParentId);
-        return goalService.getSubtasksByParentGoalId(goalParentId);
+        return ResponseEntity.ok(goalService.getSubtasksByParentGoalId(goalParentId));
     }
 
     @PostMapping("/filter")
     @ResponseStatus(HttpStatus.OK)
-    public List<GoalResponseDto> getGoalsByUser(@RequestBody @Valid GoalFilterDto filterDto) {
+    public ResponseEntity<List<GoalResponseDto>> getGoalsByUser(@RequestBody @Valid GoalFilterDto filterDto) {
         log.info("Goal controller accepted request get goats for user with filter {}", filterDto);
-        return goalService.getGoalsByUser(filterDto);
+        return ResponseEntity.ok(goalService.getGoalsByUser(filterDto));
     }
 }

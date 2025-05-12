@@ -11,11 +11,9 @@ import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalInvitation;
-import school.faang.user_service.entity.goal.GoalStatus;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring",
@@ -24,7 +22,6 @@ public interface GoalMapper {
     Goal toGoalEntity(final GoalCreateRequestDto goalCreateRequestDto);
 
     @Mapping(source = "parent.id", target = "parentId")
-    @Mapping(target = "completed", expression = "java(mapGoalStatus(goal.getStatus()))")
     @Mapping(source = "createdAt", target = "createdDate")
     @Mapping(source = "updatedAt", target = "updatedDate")
     @Mapping(source = "mentor.id", target = "mentorId")
@@ -33,16 +30,7 @@ public interface GoalMapper {
     @Mapping(target = "skillToAchieveIds", expression = "java(mapSkillIds(goal.getSkillsToAchieve()))")
     GoalResponseDto toGoalResponseDto(final Goal goal);
 
-    @Mapping(target = "status", expression = "java(mapGoalStatus(goalUpdateRequestDto.getCompleted()))")
     void update(@MappingTarget Goal goal, final GoalUpdateRequestDto goalUpdateRequestDto);
-
-    default boolean mapGoalStatus(GoalStatus status) {
-        return Objects.equals(status, GoalStatus.COMPLETED);
-    }
-
-    default GoalStatus mapGoalStatus(boolean completed) {
-        return completed ? GoalStatus.COMPLETED : GoalStatus.ACTIVE;
-    }
 
     default List<Long> mapInvitationIds(List<GoalInvitation> invitations) {
         if (invitations == null) {

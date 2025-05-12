@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import school.faang.user_service.entity.goal.GoalStatus;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class GoalUpdateRequestDto {
     private String description;
 
     @NotNull(message = "Completed is mandatory")
-    private Boolean completed;
+    private GoalStatus status;
 
     private List<Long> skillIds;
 }
