@@ -85,7 +85,7 @@ public class EventService {
     }
 
     @Transactional
-    public List<EventDto> getParticipatedEvents(long userId) {
+    public List<EventDto> getParticipatedEvents(Long userId) {
         return eventRepository.findParticipatedEventsByUserId(userId).stream()
                 .map(eventMapper::toDto)
                 .toList();
