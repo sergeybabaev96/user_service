@@ -2,7 +2,6 @@ package school.faang.user_service.service.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.UserServiceApplication;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.UserService;
