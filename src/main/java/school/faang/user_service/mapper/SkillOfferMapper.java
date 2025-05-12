@@ -1,0 +1,14 @@
+package school.faang.user_service.mapper;
+
+
+import org.mapstruct.Mapper;
+import school.faang.user_service.dto.recommendation.SkillOfferDto;
+import school.faang.user_service.entity.recommendation.SkillOffer;
+
+@Mapper
+public interface SkillOfferMapper {
+
+    SkillOffer toEntity(SkillOfferDto skillOfferDto);
+
+    SkillOfferDto toDto(SkillOffer skillOffer);
+}
