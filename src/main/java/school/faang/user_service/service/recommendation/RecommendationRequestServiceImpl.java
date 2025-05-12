@@ -8,7 +8,6 @@ import school.faang.user_service.dto.recommendation.RequestFilterDto;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
-import school.faang.user_service.filter.recommendation.RecommendationRequestFilterBuilder;
 import school.faang.user_service.filter.recommendation.RecommendationRequestFilterStrategy;
 import school.faang.user_service.mapper.recommendation.RecommendationRequestMapper;
 import school.faang.user_service.repository.SkillRepository;
@@ -21,6 +20,7 @@ import java.time.Period;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +30,7 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
     private final SkillRepository skillRepository;
     private final SkillRequestRepository skillRequestRepository;
     private final RecommendationRequestRepository recommendationRequestRepository;
+    private final List<RecommendationRequestFilterStrategy> recommendationRequestFilters;
 
     private final RecommendationRequestMapper recommendationRequestMapper;
 
@@ -72,16 +73,15 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
     }
 
     public List<RecommendationRequestDto> getRequests(RequestFilterDto filter) {
-        List<RecommendationRequest> recommendations = recommendationRequestRepository.findAll();
-        List<RecommendationRequestFilterStrategy> filterStrategies = RecommendationRequestFilterBuilder.buildStrategies(filter);
+        Stream<RecommendationRequest> recommendations = recommendationRequestRepository.findAll().stream();
 
-        List<RecommendationRequest> filteredRecommendations = recommendations.stream()
-                .filter(recommendationRequest ->
-                        filterStrategies.stream()
-                                .allMatch(strategy -> strategy.filter(recommendationRequest)))
-                .toList();
+        for (RecommendationRequestFilterStrategy recommendationRequestFilter : recommendationRequestFilters) {
+            if (recommendationRequestFilter.isApplicable(filter)) {
+                recommendations = recommendationRequestFilter.apply(recommendations, filter);
+            }
+        }
 
-        return filteredRecommendations.stream()
+        return recommendations
                 .map(recommendationRequestMapper::toDto)
                 .toList();
     }

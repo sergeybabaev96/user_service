@@ -1,19 +1,27 @@
 package school.faang.user_service.filter.recommendation.filters;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import school.faang.user_service.dto.recommendation.RequestFilterDto;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.filter.recommendation.RecommendationRequestFilterStrategy;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.stream.Stream;
 
+@Component
 @RequiredArgsConstructor
 public class CreatedAtFilter implements RecommendationRequestFilterStrategy {
 
-    private final LocalDateTime createdAt;
+    @Override
+    public boolean isApplicable(RequestFilterDto requestFilterDto) {
+        return requestFilterDto.getCreatedAt() != null;
+    }
 
     @Override
-    public boolean filter(RecommendationRequest request) {
-        return Objects.equals(request.getCreatedAt(), createdAt);
+    public Stream<RecommendationRequest> apply(Stream<RecommendationRequest> recommendationRequests, RequestFilterDto requestFilterDto) {
+        return recommendationRequests
+                .filter(recommendationRequest ->
+                        Objects.equals(recommendationRequest.getCreatedAt(), requestFilterDto.getCreatedAt()));
     }
 }
