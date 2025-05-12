@@ -100,6 +100,10 @@ public class MentorshipRequestService {
             receiver.getMentees().add(requester);
             requester.getMentors().add(receiver);
 
+            if (!request.getStatus().equals(RequestStatus.PENDING)) {
+                throw new IllegalArgumentException("The request has already been rejected");
+            }
+
             request.setStatus(RequestStatus.ACCEPTED);
             mentorshipRequestRepository.save(request);
         } else {
@@ -112,7 +116,7 @@ public class MentorshipRequestService {
         MentorshipRequest request = mentorshipRequestRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("there is no such id"));
 
-        if (request.getStatus().equals(RequestStatus.REJECTED)) {
+        if (!request.getStatus().equals(RequestStatus.PENDING)) {
             throw new IllegalArgumentException("The request has already been rejected");
         }
         request.setStatus(RequestStatus.REJECTED);
