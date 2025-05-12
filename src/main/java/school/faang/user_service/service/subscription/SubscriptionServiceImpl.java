@@ -1,17 +1,17 @@
-package school.faang.user_service.serviceImpl;
+package school.faang.user_service.service.subscription;
 
 import lombok.RequiredArgsConstructor;
-import org.mapstruct.Mapper;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserDtoFilter;
+import school.faang.user_service.dto.mapper.UserMapper;
 import school.faang.user_service.entity.User;
-import school.faang.user_service.exception.validation.DataValidationException;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.SubscriptionService;
-import school.faang.user_service.serviceImpl.subscription_filters.UserFilterCombination;
-import school.faang.user_service.serviceImpl.subscription_filters.UserFilterStrategy;
+import school.faang.user_service.service.filter.UserFilterCombination;
+import school.faang.user_service.service.filter.UserFilterStrategy;
 
 import java.util.List;
 
@@ -22,19 +22,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final UserMapper userMapper;
     private final UserRepository userRepository;
-    private final List<UserFilterStrategy> filterStrategies = List.of(
-            (user, userDtoFilter) -> user.getExperience() <= userDtoFilter.getExperienceMax(),
-            (user, userDtoFilter) -> user.getExperience() >= userDtoFilter.getExperienceMin(),
-            (user, userDtoFilter) -> user.getAboutMe().contains(userDtoFilter.getNamePattern()),
-            (user, userDtoFilter) -> user.getPhone().equals(userDtoFilter.getPhonePattern())
-    );
-    private final UserFilterCombination filters = new UserFilterCombination(filterStrategies);
+    private final UserFilterCombination filters;
 
     private boolean isAlreadySubscribed(long followerId, long followeeId) {
         validateUserExistance(followerId, followeeId);
         return subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
     }
 
+    @Override
     public void followUser(long followerId, long followeeId) {
         validateUserExistance(followerId, followeeId);
         if (followerId == followeeId) {
@@ -47,6 +42,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
     }
 
+    @Override
     public void unfollowUser(long followerId, long followeeId) {
         validateUserExistance(followerId, followeeId);
         if (followerId == followeeId) {
@@ -56,6 +52,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
     }
 
+    @Override
     public List<UserDto> getFollowers(long followeeId, UserDtoFilter userDtoFilter) {
         validateUserExistance(followeeId);
         List<User> followers = subscriptionRepository.findByFolloweeId(followeeId)
@@ -67,11 +64,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return userMapper.mapListOfUsers(followers);
     }
 
+    @Override
     public int getFollowerCount(long followerId) {
         validateUserExistance(followerId);
         return subscriptionRepository.findFollowersAmountByFolloweeId(followerId);
     }
 
+    @Override
     public List<UserDto> getFollowing(long followerId, UserDtoFilter userDtoFilter) {
         validateUserExistance(followerId);
         List<User> followers = subscriptionRepository.findByFollowerId(followerId)
@@ -83,15 +82,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return userMapper.mapListOfUsers(followers);
     }
 
+    @Override
     public int getFollowingCount(long followerId) {
         validateUserExistance(followerId);
         return subscriptionRepository.findFolloweesAmountByFollowerId(followerId);
     }
 
-    @Mapper(componentModel = "spring")
-    public interface UserMapper {
-        List<UserDto> mapListOfUsers(List<User> subscriptions);
-    }
+
 
     private void validateUserExistance(long... ids) {
         if (ids == null || ids.length == 0) {

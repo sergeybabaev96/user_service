@@ -1,20 +1,15 @@
 package school.faang.user_service.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import school.faang.user_service.controller.error_resopnses.SubscriptionErrorResponse;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserDtoFilter;
-import school.faang.user_service.serviceImpl.SubscriptionServiceImpl;
-import school.faang.user_service.exception.validation.DataValidationException;
+import school.faang.user_service.service.SubscriptionService;
 
 import java.util.List;
 
@@ -23,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SubscriptionController {
 
-  private final SubscriptionServiceImpl subscriptionService;
+  private final SubscriptionService subscriptionService;
 
     @PostMapping("/{followerId}/follow/{followeeId}")
     public void followUser(@PathVariable("followerId") long followerId,
@@ -55,12 +50,5 @@ public class SubscriptionController {
     @GetMapping("/{followerId}/count")
     public int getFollowingCount(@PathVariable("followerId") long followerId) {
         return subscriptionService.getFollowingCount(followerId);
-    }
-
-    @ExceptionHandler
-    private ResponseEntity<SubscriptionErrorResponse> handleException(DataValidationException e) {
-        SubscriptionErrorResponse response = new SubscriptionErrorResponse(e.getMessage(),
-                System.currentTimeMillis());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }

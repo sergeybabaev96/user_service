@@ -1,4 +1,4 @@
-package school.faang.user_service.controller.error_resopnses;
+package school.faang.user_service.controller.error_responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
