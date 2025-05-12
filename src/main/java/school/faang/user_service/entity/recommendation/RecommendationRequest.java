@@ -82,20 +82,16 @@ public class RecommendationRequest {
         skills.add(skillRequest);
     }
 
+    @Override
     public String toString() {
-        Long var10000 = this.getId();
-        return "RecommendationRequest(id=" + var10000 +
-                //", requester=" + String.valueOf(this.getRequester()) +
-                //", receiver=" + String.valueOf(this.getReceiver()) +
-                ", message=" + this.getMessage() +
-                ", status=" + String.valueOf(this.getStatus()) +
-                ", rejectionReason=" + this.getRejectionReason() +
-                //", recommendation=" + String.valueOf(this.getRecommendation()) +
-                //", skills=" + String.valueOf(this.getSkills()) +
-                ", createdAt=" + String.valueOf(this.getCreatedAt()) +
-                ", updatedAt=" + String.valueOf(this.getUpdatedAt()) +
-                ")";
+        final StringBuilder sb = new StringBuilder("RecommendationRequest{");
+        sb.append("id=").append(id);
+        sb.append(", message='").append(message).append('\'');
+        sb.append(", status=").append(status.toString());
+        sb.append(", rejectionReason='").append(rejectionReason).append('\'');
+        sb.append(", createdAt=").append(createdAt);
+        sb.append(", updatedAt=").append(updatedAt);
+        sb.append('}');
+        return sb.toString();
     }
-
-
 }
