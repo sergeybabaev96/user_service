@@ -24,12 +24,12 @@ public class SubscriptionService {
     private final List<UserFilter> filters;
 
     public void followUser(long followerId, long followeeId) {
-        followValidation(followerId, followeeId);
+        followValidation(followerId, followeeId, false);
         subscriptionRepository.followUser(followerId, followeeId);
     }
 
     public void unfollowUser(long followerId, long followeeId) {
-        followValidation(followerId, followeeId);
+        followValidation(followerId, followeeId, true);
         subscriptionRepository.unfollowUser(followerId, followeeId);
     }
 
@@ -65,12 +65,18 @@ public class SubscriptionService {
         return subscriptionRepository.findFolloweesAmountByFollowerId(followeeId);
     }
 
-    private void followValidation(long followerId, long followeeId) {
+    private void followValidation(long followerId, long followeeId, boolean shouldExist) {
         if (followerId == followeeId) {
             throw new DataValidationException("You can't subscribe or unsubscribe to yourself");
         }
-        if(!subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
-            throw new IllegalArgumentException("Subscription does not exist");
+
+        boolean exists = subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
+
+        if (shouldExist && !exists) {
+            throw new DataValidationException("Subscription does not exist");
+        }
+        if (!shouldExist && exists) {
+            throw new DataValidationException("Subscription already exists");
         }
     }
 }

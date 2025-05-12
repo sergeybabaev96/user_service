@@ -3,6 +3,7 @@ package school.faang.user_service.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import school.faang.user_service.dto.FollowRequest;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.exception.DataValidationException;
@@ -18,17 +19,13 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
     @PostMapping("/follow")
-    public void followUser(@RequestParam long followerId, @RequestParam long followeeId) {
-        subscriptionService.followUser(followerId, followeeId);
+    public void followUser(@RequestBody FollowRequest followRequest) {
+        subscriptionService.followUser(followRequest.followerId(), followRequest.followeeId());
     }
 
     @PostMapping("/unfollow")
-    public void unfollowUser(@RequestParam long followerId, @RequestParam long followeeId) {
-        try {
-            subscriptionService.unfollowUser(followerId, followeeId);
-        } catch (IllegalArgumentException error) {
-            throw new DataValidationException("You can't unsubscribe to yourself");
-        }
+    public void unfollowUser(@RequestBody FollowRequest followRequest) {
+        subscriptionService.unfollowUser(followRequest.followerId(), followRequest.followeeId());
     }
 
     @GetMapping("/followers/{followeeId}")
@@ -50,7 +47,7 @@ public class SubscriptionController {
         return subscriptionService.getFollowing(followeeId, filter);
     }
 
-    @GetMapping("/following/count/{followeeId}")
+    @GetMapping("/following/{followeeId}/count")
     public int getFollowingCount(@PathVariable long followeeId) {
         return subscriptionService.getFollowingCount(followeeId);
     }
