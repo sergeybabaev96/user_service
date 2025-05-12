@@ -4,6 +4,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.0"
     id("org.jsonschema2pojo") version "1.2.1"
     kotlin("jvm")
+    jacoco
 }
 
 group = "faang.school"
@@ -93,3 +94,56 @@ tasks.bootJar {
 kotlin {
     jvmToolchain(17)
 }
+
+/**
+ * Jacoco
+ */
+jacoco {
+    toolVersion = "0.8.13"
+}
+
+tasks.test {
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+        reports {
+            xml.required.set(false)
+            csv.required.set(false)
+            html.required.set(true)
+        }
+        classDirectories.setFrom(
+                files(classDirectories.files.map {
+                  fileTree(it) {
+                    exclude(
+                      "**/mapper/**",
+                      "**/*Mapper.class/**",
+                      "**/*MapperImpl.class/**"
+                   )
+                  }
+                }
+                )
+        )
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = "CLASS"
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+            limit {
+                counter = "BRANCH"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+
+    }
+}
+
