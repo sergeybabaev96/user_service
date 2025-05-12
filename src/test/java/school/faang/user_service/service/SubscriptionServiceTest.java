@@ -1,5 +1,6 @@
 package school.faang.user_service.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -7,7 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import school.faang.user_service.dto.FollowerEvent;
+import org.springframework.data.redis.core.RedisTemplate;
+import school.faang.user_service.config.redis.SubscriptionRedisProperties;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.exception.DataValidationException;
@@ -18,6 +20,7 @@ import school.faang.user_service.mapper.UserMapper;
 import school.faang.user_service.publisher.FollowerEventPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.outbox.OutboxService;
 import school.faang.user_service.service.subscription.SubscriptionService;
 
 import java.util.List;
@@ -26,7 +29,11 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class SubscriptionServiceTest {
@@ -47,10 +54,20 @@ public class SubscriptionServiceTest {
     private UserRepository userRepository;
 
     @Mock
+    private OutboxService outboxService;
+
+    @Mock
+    private ObjectMapper objectMapper;
+
+    @Mock
     private FollowerEventPublisher followerEventPublisher;
 
-    private final Long followerId = 1L;
-    private final Long followeeId = 2L;
+    @Mock
+    private RedisTemplate<String, Object> redisTemplate;
+
+    private Long followerId = 1L;
+    private Long followeeId = 2L;
+    private SubscriptionRedisProperties subscriptionRedisProperties;
     private UserFilterDto filters;
     private MockUsers mockUsers = new MockUsers();
 
@@ -64,7 +81,16 @@ public class SubscriptionServiceTest {
 
     @BeforeEach
     void setUp() {
+        SubscriptionRedisProperties subscriptionRedisProperties = new SubscriptionRedisProperties();
+        SubscriptionRedisProperties.Channel channel = new SubscriptionRedisProperties.Channel();
+        channel.setFollower("someFollowerChannel");
+        channel.setUnfollower("someUnfollowerChannel");
+        subscriptionRedisProperties.setChannel(channel);
+
         filters = new UserFilterDto();
+
+        subscriptionService = new SubscriptionService(subscriptionRepository, userRepository,
+                subscriberFilters, userMapper, outboxService, objectMapper);
     }
 
     @Nested
@@ -113,8 +139,8 @@ public class SubscriptionServiceTest {
             when(subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).thenReturn(false);
 
             subscriptionService.followUser(followerId, followeeId);
+
             verify(subscriptionRepository, times(1)).followUser(followerId, followeeId);
-            verify(followerEventPublisher, times(1)).publish(any(FollowerEvent.class));
         }
     }
 
@@ -165,6 +191,7 @@ public class SubscriptionServiceTest {
             when(subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)).thenReturn(true);
 
             subscriptionService.unfollowUser(followerId, followeeId);
+
             verify(subscriptionRepository, times(1)).unfollowUser(followerId, followeeId);
         }
     }

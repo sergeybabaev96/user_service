@@ -1,21 +1,25 @@
 package school.faang.user_service.service.subscription;
 
-import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import school.faang.user_service.dto.FollowerEvent;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
+import school.faang.user_service.dto.event.SubscriptionEventDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.ErrorMessage;
 import school.faang.user_service.filter.subscriber.SubscriberFilter;
 import school.faang.user_service.mapper.UserMapper;
-import school.faang.user_service.publisher.FollowerEventPublisher;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.outbox.OutboxService;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -29,7 +33,14 @@ public class SubscriptionService {
     private final UserRepository userRepository;
     private final List<SubscriberFilter> subscriberFilters;
     private final UserMapper userMapper;
-    private  final FollowerEventPublisher followerEventPublisher;
+    private final OutboxService outboxService;
+    private final ObjectMapper objectMapper;
+
+    @Value("${spring.data.redis.channel.follower}")
+    private String followerChannel;
+
+    @Value("${spring.data.redis.channel.unfollower}")
+    private String unfollowerChannel;
 
     @Transactional
     public void followUser(long followerId, long followeeId) {
@@ -37,8 +48,15 @@ public class SubscriptionService {
         validateUserExists(followeeId);
         validateSubscriptionOnYourself(followerId, followeeId, true);
         validateSubscription(followerId, followeeId, true);
+
         subscriptionRepository.followUser(followerId, followeeId);
-        followerEventPublisher.publish(new FollowerEvent(followerId, followeeId));
+        SubscriptionEventDto event = createEvent(followerId, followeeId, LocalDateTime.now());
+        try {
+            String payload = objectMapper.writeValueAsString(event);
+            outboxService.saveEvent(followerChannel, payload);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize event", e);
+        }
     }
 
     @Transactional
@@ -47,7 +65,15 @@ public class SubscriptionService {
         validateUserExists(followeeId);
         validateSubscriptionOnYourself(followerId, followeeId, false);
         validateSubscription(followerId, followeeId, false);
+
         subscriptionRepository.unfollowUser(followerId, followeeId);
+        SubscriptionEventDto event = createEvent(followerId, followeeId, LocalDateTime.now());
+        try {
+            String payload = objectMapper.writeValueAsString(event);
+            outboxService.saveEvent(unfollowerChannel, payload);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize event", e);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -103,6 +129,14 @@ public class SubscriptionService {
             log.error(ErrorMessage.USER_DOES_NOT_EXIST_BY_ID_ERROR_MSG.getMessage(), userId);
             throw new DataValidationException(ErrorMessage.USER_DOES_NOT_EXIST.getMessage());
         }
+    }
+
+    private SubscriptionEventDto createEvent(long followerId, long followeeId, LocalDateTime eventTime) {
+        return SubscriptionEventDto.builder()
+                .followerId(followerId)
+                .followeeId(followeeId)
+                .eventTime(eventTime)
+                .build();
     }
 
     private List<UserDto> filterUsers(UserFilterDto filters, Stream<User> users) {
