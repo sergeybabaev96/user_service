@@ -19,14 +19,14 @@ import school.faang.user_service.service.SubscriptionService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/users/{userId}")
 @RequiredArgsConstructor
 @Slf4j
 public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
-    @PostMapping("/{followerId}/following/{followeeId}")
-    public void follow(@PathVariable
+    @PostMapping("/following/{followeeId}")
+    public void follow(@PathVariable(name = "userId")
                        @NotNull(message = "Follower ID must be provided")
                        @Positive(message = "Follower ID must be positive number")
                        Long followerId,
@@ -38,8 +38,8 @@ public class SubscriptionController {
         subscriptionService.followUser(followerId, followeeId);
     }
 
-    @DeleteMapping("/{followerId}/following/{followeeId}")
-    public void unfollowUser(@PathVariable
+    @DeleteMapping("/following/{followeeId}")
+    public void unfollowUser(@PathVariable(name = "userId")
                              @NotNull(message = "Follower ID must be provided")
                              @Positive(message = "Follower ID must be positive number")
                              Long followerId,
@@ -51,8 +51,8 @@ public class SubscriptionController {
         subscriptionService.unfollowUser(followerId, followeeId);
     }
 
-    @GetMapping("/{followeeId}/followers")
-    public List<UserDto> getFollowers(@PathVariable
+    @GetMapping("/followers")
+    public List<UserDto> getFollowers(@PathVariable(name = "userId")
                                       @NotNull(message = "Followee ID must be provided")
                                       @Positive(message = "Followee ID must be positive number")
                                       Long followeeId,
@@ -61,8 +61,8 @@ public class SubscriptionController {
         return subscriptionService.getFollowers(followeeId, filter);
     }
 
-    @GetMapping("/{followeeId}/followers/count")
-    public int getFollowersCount(@PathVariable
+    @GetMapping("/followers/count")
+    public int getFollowersCount(@PathVariable(name = "userId")
                                  @NotNull(message = "Followee ID must be provided")
                                  @Positive(message = "Followee ID must be positive number")
                                  Long followeeId) {
@@ -70,8 +70,8 @@ public class SubscriptionController {
         return subscriptionService.getFollowersCount(followeeId);
     }
 
-    @GetMapping("/{followeeId}/following")
-    public List<UserDto> getFollowing(@PathVariable
+    @GetMapping("/following")
+    public List<UserDto> getFollowing(@PathVariable(name = "userId")
                                       @NotNull(message = "Followee ID must be provided")
                                       @Positive(message = "Followee ID must be positive number")
                                       Long followeeId,
@@ -80,8 +80,8 @@ public class SubscriptionController {
         return subscriptionService.getFollowing(followeeId, filter);
     }
 
-    @GetMapping("/{followeeId}/following/count")
-    public int getFollowingCount(@PathVariable
+    @GetMapping("/following/count")
+    public int getFollowingCount(@PathVariable(name = "userId")
                                  @NotNull(message = "Followee ID must be provided")
                                  @Positive(message = "Followee ID must be positive number")
                                  Long followeeId) {
