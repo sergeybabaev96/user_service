@@ -10,8 +10,7 @@ import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.SubscriptionRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.service.SubscriptionService;
-import school.faang.user_service.service.filter.UserFilterCombination;
-import school.faang.user_service.service.filter.UserFilterStrategy;
+import school.faang.user_service.filter.UserFilterCombination;
 
 import java.util.List;
 
@@ -24,10 +23,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final UserRepository userRepository;
     private final UserFilterCombination filters;
 
-    private boolean isAlreadySubscribed(long followerId, long followeeId) {
-        validateUserExistance(followerId, followeeId);
-        return subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
-    }
 
     @Override
     public void followUser(long followerId, long followeeId) {
@@ -56,7 +51,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public List<UserDto> getFollowers(long followeeId, UserDtoFilter userDtoFilter) {
         validateUserExistance(followeeId);
         List<User> followers = subscriptionRepository.findByFolloweeId(followeeId)
-                .filter(user -> filters.filterUser(user, userDtoFilter))
+                .filter(user -> filterUser(user, userDtoFilter))
                 .toList();
         if (followers.isEmpty()) {
             throw new DataValidationException("No followers found matching the criteria");
@@ -74,7 +69,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public List<UserDto> getFollowing(long followerId, UserDtoFilter userDtoFilter) {
         validateUserExistance(followerId);
         List<User> followers = subscriptionRepository.findByFollowerId(followerId)
-                .filter(user -> filters.filterUser(user, userDtoFilter))
+                .filter(user -> filterUser(user, userDtoFilter))
                 .toList();
         if (followers.isEmpty()) {
             throw new DataValidationException("Not following anyone matching the criteria");
@@ -88,8 +83,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return subscriptionRepository.findFolloweesAmountByFollowerId(followerId);
     }
 
-
-
     private void validateUserExistance(long... ids) {
         if (ids == null || ids.length == 0) {
             throw new DataValidationException("Id must not be null or empty");
@@ -99,5 +92,16 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 throw new DataValidationException("User with ID " + id + " does not exist");
             }
         }
+    }
+
+    private boolean isAlreadySubscribed(long followerId, long followeeId) {
+        validateUserExistance(followerId, followeeId);
+        return subscriptionRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
+    }
+
+    private boolean filterUser(User user, UserDtoFilter userDtoFilter) {
+        return filters.getUserFilterStrategies().stream()
+                .filter(strategy -> strategy.isApplicable(userDtoFilter))
+                .allMatch(strat -> strat.filterUsers(user, userDtoFilter));
     }
 }
