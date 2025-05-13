@@ -3,9 +3,9 @@ package school.faang.user_service.util;
 import school.faang.user_service.dto.WorkScheduleDto;
 import school.faang.user_service.exception.DataValidationException;
 
-public class WorkScheduleDTOValidator {
+public class WorkScheduleDtoValidator {
 
-    public static void validateDTO(WorkScheduleDto workScheduleDto) {
+    public static void validateDto(WorkScheduleDto workScheduleDto) {
         checkValidTimeLine(workScheduleDto);
         checkValidFields(workScheduleDto);
     }
