@@ -1,9 +1,9 @@
 package school.faang.user_service.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.UserDto;
 import school.faang.user_service.dto.UserFilterDto;
 import school.faang.user_service.entity.User;
@@ -43,7 +43,7 @@ public class SubscriptionService {
         log.info("User {} successfully unfollowed user {}", followerId, followeeId);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<UserDto> getFollowers(Long followeeId, UserFilterDto filter) {
         Stream<User> userStream = subscriptionRepository.findByFolloweeId(followeeId);
         if (filter == null) {
@@ -59,12 +59,11 @@ public class SubscriptionService {
                 .toList();
     }
 
-    @Transactional
     public int getFollowersCount(Long followeeId) {
         return subscriptionRepository.findFollowersAmountByFolloweeId(followeeId);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<UserDto> getFollowing(Long followeeId, UserFilterDto filter) {
         Stream<User> userStream = subscriptionRepository.findByFollowerId(followeeId);
         if (filter == null) {
@@ -80,7 +79,6 @@ public class SubscriptionService {
                 .toList();
     }
 
-    @Transactional
     public int getFollowingCount(Long followeeId) {
         return subscriptionRepository.findFolloweesAmountByFollowerId(followeeId);
     }
