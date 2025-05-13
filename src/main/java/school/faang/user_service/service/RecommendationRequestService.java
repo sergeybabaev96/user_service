@@ -4,10 +4,10 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import school.faang.user_service.controller.filter.MessagePatternFilter;
-import school.faang.user_service.controller.filter.ReceiverIdFilter;
-import school.faang.user_service.controller.filter.RecommendationFilter;
-import school.faang.user_service.controller.filter.RequesterIdFilter;
+import school.faang.user_service.filter.recommendation.MessagePatternFilter;
+import school.faang.user_service.filter.recommendation.ReceiverIdFilter;
+import school.faang.user_service.filter.recommendation.RecommendationFilter;
+import school.faang.user_service.filter.recommendation.RequesterIdFilter;
 import school.faang.user_service.dto.RecommendationRejectDto;
 import school.faang.user_service.dto.RecommendationRequestDto;
 import school.faang.user_service.dto.RecommendationResponseDto;
@@ -37,6 +37,7 @@ public class RecommendationRequestService {
     private final UserRepository userRepository;
     private final SkillRepository skillRepository;
     private final SkillRequestRepository skillRequestRepository;
+    private final List<RecommendationFilter> filters;
 
     public RecommendationResponseDto create(RecommendationRequestDto recommendationRequest) {
         Long requesterId = recommendationRequest.requesterId();
