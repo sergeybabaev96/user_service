@@ -28,14 +28,14 @@ import java.util.List;
 public class EventController {
     private final EventService eventService;
 
-    @PostMapping()
+    @PostMapping
     public EventDto create(@Valid @RequestBody EventDto event) {
         isValidDataRange(event);
         return eventService.create(event);
     }
 
     @GetMapping(value = "/{id}")
-    public EventDto getEvent(@PathVariable  @Required Long id) {
+    public EventDto getEvent(@PathVariable @Required Long id) {
         return eventService.getEvent(id);
     }
 
@@ -50,14 +50,14 @@ public class EventController {
         eventService.deleteEvent(id);
     }
 
-    @PutMapping()
+    @PutMapping
     public EventDto updateEvent(@Valid @RequestBody EventDto eventDto) {
         isValidDataRange(eventDto);
         return eventService.updateEvent(eventDto);
     }
 
     @GetMapping(value = "/owned/{id}")
-    public List<EventDto> getOwnedEvents(@PathVariable("id") @Required Long userId) {
+    public List<EventDto> getOwnedEvents(@PathVariable(value = "id", required = true) Long userId) {
         return eventService.getOwnedEvents(userId);
     }
 
