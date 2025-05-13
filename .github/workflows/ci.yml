@@ -1,8 +1,8 @@
 name: CI
 
 on:
-  push:
-    branches: [ "feature-BJS2-77187-UserService-pipeline" ]
+#  push:
+#    branches: [ "feature-BJS2-77187-UserService-pipeline" ]
   pull_request:
     branches: [ "feature-BJS2-77187-UserService-pipeline" ]
 
